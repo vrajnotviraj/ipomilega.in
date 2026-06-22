@@ -18,8 +18,8 @@ import { useSearchParams } from "next/navigation"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Blog } from "../models/ipo";
 import { useSession } from "@/lib/auth-client";
-import { IpoAnalysisEditModal } from "@/components/Admin/IpoAnalysisEditModal";
 import { IpoAiParserModal } from "@/components/Admin/IpoAiParserModal";
+import { IpoAnalysisModal } from "@/components/Admin/IpoAnalysisModal";
 
 const getInitials = (name?: string) => {
   if (!name) return "IP";
@@ -32,7 +32,6 @@ function AdminContent() {
   const [ipoList, setIpoList] = useState<HomePageIpoProps[]>([])
   const [isAdmin, setIsAdmin] = useState(false)
   const [isAuthChecking, setIsAuthChecking] = useState(true)
-  const [editingIpoId, setEditingIpoId] = useState<string | null>(null)
   const [upcomingIpoList, setUpcomingIpoList] = useState<HomePageIpoProps[]>([])
   const [liveIpoList, setLiveIpoList] = useState<HomePageIpoProps[]>([])
   const [pastIpoList, setPastIpoList] = useState<HomePageIpoProps[]>([])
@@ -345,19 +344,6 @@ function AdminContent() {
                       <tr
                         key={ipoItem._id}
                         className="group hover:bg-gray-50/80 border-b border-gray-100 cursor-pointer select-none"
-                        onDoubleClick={(e) => {
-                          const target = e.target as HTMLElement;
-                          if (
-                            target.closest("button") ||
-                            target.closest("a") ||
-                            target.closest("input") ||
-                            target.closest("label") ||
-                            target.closest(".actions-cell")
-                          ) {
-                            return;
-                          }
-                          setEditingIpoId(ipoItem.ipo._id || null);
-                        }}
                       >
                         <td className="p-4">
                           <div className="flex items-center gap-3">
@@ -422,34 +408,9 @@ function AdminContent() {
                         </td>
                         <td className="p-4 actions-cell">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <IpoAnalysisEditModal
-                              ipoItem={ipoItem}
-                              onAnalysisAdded={refreshData}
-                              externalOpen={editingIpoId === ipoItem.ipo._id}
-                              onExternalOpenChange={(open) => {
-                                if (open) {
-                                  setEditingIpoId(ipoItem.ipo._id || null);
-                                } else {
-                                  setEditingIpoId(null);
-                                }
-                              }}
-                            />
+                            <IpoAnalysisModal ipoItem={ipoItem} onAnalysisAdded={refreshData} />
                             <IpoAiParserModal ipoItem={ipoItem} onAnalysisSaved={refreshData} />
-                            {hasAnalysis(ipoItem) && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-9 px-3 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 font-bold"
-                                onClick={() => handleDeleteAnalysis(ipoItem.ipo._id!)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-1.5" />
-                                Delete
-                              </Button>
-                            )}
-                            <Button variant="outline" size="sm" className="h-9 px-3 font-semibold" onClick={() => copyToClipboard(ipoItem.ipo._id!)}><Copy className="h-4 w-4 mr-1.5 text-primary" />ID</Button>
-                            {ipoItem.ipo.detail_url && <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => window.open(ipoItem.ipo.detail_url!, '_blank')}><Eye className="h-4 w-4 mr-1.5 text-primary" />View</Button>}
-                            {ipoItem.ipo.ipo_details?.rhp_draft_prospectus_links?.[0]?.href && <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => window.open(ipoItem.ipo.ipo_details.rhp_draft_prospectus_links[0].href!, '_blank')}><ExternalLink className="h-4 w-4 mr-1.5 text-green-600" />RHP</Button>}
-                            {ipoItem.ipo.ipo_details?.drhp_draft_prospectus_links?.[0]?.href && <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => window.open(ipoItem.ipo.ipo_details.drhp_draft_prospectus_links[0].href!, '_blank')}><ExternalLink className="h-4 w-4 mr-1.5 text-green-600" />DRHP</Button>}
+                            <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => router.push(`/analysis/${ipoItem.ipo.slug}`)}><LineChart className="h-4 w-4 mr-1.5 text-red-600" />Analysis</Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-9 px-3"><PenTool className="h-4 w-4 mr-1.5 text-primary" />Blog</Button></DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
@@ -457,7 +418,41 @@ function AdminContent() {
                                 {getBlogsForIpo(ipoItem.ipo._id!).map(blog => <DropdownMenuItem key={blog._id} onClick={() => handleEditBlog(blog._id!)}><Edit className="h-4 w-4 mr-2" />Edit: {blog.title?.substring(0, 20)}...</DropdownMenuItem>)}
                               </DropdownMenuContent>
                             </DropdownMenu>
-                            <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => router.push(`/analysis/${ipoItem.ipo.slug}`)}><LineChart className="h-4 w-4 mr-1.5 text-red-600" />Analysis</Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-9 px-3">
+                                  More
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => copyToClipboard(ipoItem.ipo._id!)}>
+                                  <Copy className="h-4 w-4 mr-2 text-primary" /> Copy ID
+                                </DropdownMenuItem>
+                                {ipoItem.ipo.detail_url && (
+                                  <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.detail_url!, '_blank')}>
+                                    <Eye className="h-4 w-4 mr-2 text-primary" /> View Details
+                                  </DropdownMenuItem>
+                                )}
+                                {ipoItem.ipo.ipo_details?.rhp_draft_prospectus_links?.[0]?.href && (
+                                  <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.ipo_details.rhp_draft_prospectus_links[0].href!, '_blank')}>
+                                    <ExternalLink className="h-4 w-4 mr-2 text-green-600" /> RHP Link
+                                  </DropdownMenuItem>
+                                )}
+                                {ipoItem.ipo.ipo_details?.drhp_draft_prospectus_links?.[0]?.href && (
+                                  <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.ipo_details.drhp_draft_prospectus_links[0].href!, '_blank')}>
+                                    <ExternalLink className="h-4 w-4 mr-2 text-green-600" /> DRHP Link
+                                  </DropdownMenuItem>
+                                )}
+                                {hasAnalysis(ipoItem) && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleDeleteAnalysis(ipoItem.ipo._id!)}
+                                    className="text-red-650 focus:text-red-750 font-bold"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete Analysis
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </td>
                       </tr>

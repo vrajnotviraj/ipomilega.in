@@ -1117,7 +1117,7 @@ import React, { useState, useEffect } from 'react';
                         ) : (
                             <Plus className="h-4 w-4 mr-1.5" />
                         )}
-                        {ipoItem.analysis ? "Edit Analysis" : "Add Analysis"}
+                        {ipoItem.analysis ? "Edit (JSON)" : "Add (JSON)"}
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="h-[95vh] flex flex-col font-ibm-plex lg:max-w-[calc(100%-6rem)]">
