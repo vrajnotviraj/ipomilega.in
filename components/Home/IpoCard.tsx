@@ -48,9 +48,11 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const getDaysUntilClosing = () => {
     if (!ipo?.closing_date) return 0;
     const closingDate = new Date(ipo.closing_date);
+    closingDate.setHours(0, 0, 0, 0);
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const diffTime = closingDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
     return Math.max(0, diffDays);
   };
 
@@ -74,6 +76,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
               {ipo?.ipo_type || 'N/A'}
             </Badge>
             <Badge variant="secondary"
+              suppressHydrationWarning
               className="bg-white/95 backdrop-blur-sm text-red-600 text-xs font-medium animate-pulse border border-red-200 w-fit">
               🔴 LIVE - {daysUntilClosing == 0 ? "Closing Today" : daysUntilClosing + "d" + " left"}
             </Badge>
@@ -169,9 +172,11 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
   const getDaysUntilOpening = () => {
     if (!ipo?.open_date) return 0;
     const openingDate = new Date(ipo.open_date);
+    openingDate.setHours(0, 0, 0, 0);
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const diffTime = openingDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
     return Math.max(0, diffDays);
   };
 
@@ -189,6 +194,7 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
               {ipo?.ipo_type || 'N/A'}
             </Badge>
             <Badge variant="secondary"
+              suppressHydrationWarning
               className="bg-white/95 backdrop-blur-sm text-blue-600 text-xs font-medium border border-blue-200 w-fit">
               📅 {daysUntilOpening}d to go
             </Badge>
