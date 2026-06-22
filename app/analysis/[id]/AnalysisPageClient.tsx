@@ -184,6 +184,8 @@ const EditableText = ({
     }
   };
 
+
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && type !== "textarea") {
       e.preventDefault();
