@@ -38,6 +38,31 @@ const getRiskTextColor = (riskScore: number) => {
   return 'text-[#00914D]';
 };
 
+// Utility function to parse date strings safely in a browser/node environment
+const parseCardDate = (dateString: string | undefined): Date | null => {
+  if (!dateString) return null;
+  const cleanDate = dateString.trim();
+  if (cleanDate.toLowerCase() === 'tba' || cleanDate === '-' || cleanDate === '') {
+    return null;
+  }
+
+  // Try parsing directly first (handles formats with years like "June 18, 2026")
+  const directDate = new Date(cleanDate);
+  if (!isNaN(directDate.getTime())) {
+    return directDate;
+  }
+
+  // Try parsing with current year (handles formats like "18 June" or "June 18")
+  const currentYear = new Date().getFullYear();
+  const dateWithYear = `${cleanDate} ${currentYear}`;
+  const parsedDate = new Date(dateWithYear);
+  if (!isNaN(parsedDate.getTime())) {
+    return parsedDate;
+  }
+
+  return null;
+};
+
 // Live IPO Card Component
 export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const router = useProgressRouter();
@@ -46,14 +71,16 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
     router.push(`/analysis/${ipo?.slug}`);
   };
   const getDaysUntilClosing = () => {
-    if (!ipo?.closing_date) return 0;
-    const closingDate = new Date(ipo.closing_date);
+    const dateStr = ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date;
+    const closingDate = parseCardDate(dateStr);
+    if (!closingDate) return -1;
+
     closingDate.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const diffTime = closingDate.getTime() - today.getTime();
     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-    return Math.max(0, diffDays);
+    return diffDays;
   };
 
   const getRiskTextColorForElements = (riskScore: number) => {
@@ -78,7 +105,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
             <Badge variant="secondary"
               suppressHydrationWarning
               className="bg-white/95 backdrop-blur-sm text-red-600 text-xs font-medium animate-pulse border border-red-200 w-fit">
-              🔴 LIVE - {daysUntilClosing == 0 ? "Closing Today" : daysUntilClosing + "d" + " left"}
+              🔴 LIVE - {daysUntilClosing < 0 ? "TBA" : daysUntilClosing == 0 ? "Closing Today" : daysUntilClosing + "d" + " left"}
             </Badge>
           </div>
         </div>
@@ -170,14 +197,16 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
     router.push(`/analysis/${ipo?.slug}`);
   };
   const getDaysUntilOpening = () => {
-    if (!ipo?.open_date) return 0;
-    const openingDate = new Date(ipo.open_date);
+    const dateStr = ipo?.ipo_dates?.ipo_open_date || ipo?.open_date;
+    const openingDate = parseCardDate(dateStr);
+    if (!openingDate) return -1;
+
     openingDate.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const diffTime = openingDate.getTime() - today.getTime();
     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-    return Math.max(0, diffDays);
+    return diffDays;
   };
 
   const daysUntilOpening = getDaysUntilOpening();
@@ -196,7 +225,7 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
             <Badge variant="secondary"
               suppressHydrationWarning
               className="bg-white/95 backdrop-blur-sm text-blue-600 text-xs font-medium border border-blue-200 w-fit">
-              📅 {daysUntilOpening}d to go
+              📅 {daysUntilOpening < 0 ? "TBA" : daysUntilOpening + "d to go"}
             </Badge>
           </div>
         </div>
