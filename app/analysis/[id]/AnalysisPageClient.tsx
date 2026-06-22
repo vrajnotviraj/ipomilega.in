@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeftCircle, Share2, Loader2, Save, Pencil } from "lucide-react";
+import { ArrowLeftCircle, Share2, Loader2, Pencil } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis";
 import { Ipo } from "@/app/models/ipo";
@@ -265,7 +265,6 @@ export default function AnalysisPageClient({
 }: AnalysisPageClientProps) {
   const [editedAnalysis, setEditedAnalysis] = useState<IpoComprehensiveAnalysis>(analysis);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isEditingTimeline, setIsEditingTimeline] = useState(false);
 
   const session = useSession();
@@ -275,17 +274,17 @@ export default function AnalysisPageClient({
 
   console.log("RENDER AnalysisPageClient - isAdmin:", isAdmin, "sessionPending:", session?.isPending, "email:", session?.data?.user?.email);
 
-  const handleInlineSave = (path: string, newValue: any) => {
+  const handleInlineSave = (path: string, newValue: unknown) => {
     setEditedAnalysis((prev) => {
       const copy = { ...prev };
       const parts = path.split(".");
-      let current: any = copy;
+      let current = copy as unknown as Record<string, unknown>;
       for (let i = 0; i < parts.length - 1; i++) {
         if (!current[parts[i]]) {
           current[parts[i]] = {};
         }
-        current[parts[i]] = { ...current[parts[i]] };
-        current = current[parts[i]];
+        current[parts[i]] = { ...(current[parts[i]] as Record<string, unknown>) };
+        current = current[parts[i]] as Record<string, unknown>;
       }
       current[parts[parts.length - 1]] = newValue;
       saveAnalysis(copy);
@@ -350,7 +349,6 @@ export default function AnalysisPageClient({
       if (!response.ok) throw new Error(result.message || "Failed to save analysis");
 
       toast.success("Analysis saved successfully!", { id: toastId });
-      setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Save error:", error);
       toast.error(error instanceof Error ? error.message : "Error saving updates", { id: toastId });
@@ -678,7 +676,7 @@ export default function AnalysisPageClient({
                     </div>
                   ) : (
                     <EditableText
-                      value={metric.path ? (metric.path.split('.').reduce((obj: any, key) => obj?.[key], editedAnalysis) || "") : ""}
+                      value={metric.path ? ((metric.path.split('.').reduce<unknown>((obj, key) => (obj as Record<string, unknown>)?.[key], editedAnalysis) as string | number | undefined) || "") : ""}
                       onSave={(val) => metric.path && handleInlineSave(metric.path, val)}
                       isAdmin={isAdmin}
                       inputClassName="w-full text-center border-b border-dashed border-gray-300 focus:border-blue-500 outline-none bg-transparent font-ibm-plex text-xl font-bold py-1"
