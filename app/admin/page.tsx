@@ -18,7 +18,6 @@ import { useSearchParams } from "next/navigation"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Blog } from "../models/ipo";
 import { useSession } from "@/lib/auth-client";
-import { IpoAiParserModal } from "@/components/Admin/IpoAiParserModal";
 import { IpoAnalysisModal } from "@/components/Admin/IpoAnalysisModal";
 
 const getInitials = (name?: string) => {
@@ -408,9 +407,8 @@ function AdminContent() {
                         </td>
                         <td className="p-4 actions-cell">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <IpoAnalysisModal ipoItem={ipoItem} onAnalysisAdded={refreshData} />
-                            <IpoAiParserModal ipoItem={ipoItem} onAnalysisSaved={refreshData} />
-                            <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => router.push(`/analysis/${ipoItem.ipo.slug}`)}><LineChart className="h-4 w-4 mr-1.5 text-red-600" />Analysis</Button>
+                            <IpoAnalysisModal ipoItem={ipoItem} onAnalysisSaved={refreshData} />
+                            <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => router.push(`/analysis/${ipoItem.ipo.slug || ipoItem.analysis?.slug || ipoItem.ipo._id}`)}><LineChart className="h-4 w-4 mr-1.5 text-red-600" />Analysis</Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-9 px-3"><PenTool className="h-4 w-4 mr-1.5 text-primary" />Blog</Button></DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
