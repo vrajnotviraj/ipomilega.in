@@ -10,10 +10,10 @@ interface AnimatedSectionProps {
   threshold?: number; // Add threshold prop for more control
 }
 
-export function AnimatedSection({ 
-  children, 
-  animation = 'slideUp', 
-  delay = 0, 
+export function AnimatedSection({
+  children,
+  animation = 'slideUp',
+  delay = 0,
   className = '',
   threshold = 0.1
 }: AnimatedSectionProps) {
@@ -39,7 +39,7 @@ export function AnimatedSection({
           setIsVisible(false);
         }
       },
-      { 
+      {
         threshold,
         // Add some margin to trigger slightly before/after element is visible
         rootMargin: '50px 0px -50px 0px'
