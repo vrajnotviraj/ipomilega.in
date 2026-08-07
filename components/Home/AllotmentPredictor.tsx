@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, TrendingUp, Info, AlertTriangle } from 'lucide-react';
+import { X, TrendingUp, Info, AlertTriangle, Sparkles, ShieldCheck } from 'lucide-react';
 import { HomePageIpoProps } from '@/app/types/homepage';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -309,10 +309,10 @@ const IpoAllotmentModal: React.FC<IpoAllotmentModalProps> = ({
   };
 
   const getMeterColor = (percentage: number) => {
-    if (percentage >= 70) return 'text-green-600';
-    if (percentage >= 50) return 'text-yellow-600';
+    if (percentage >= 70) return 'text-emerald-600';
+    if (percentage >= 50) return 'text-amber-600';
     if (percentage >= 30) return 'text-orange-600';
-    return 'text-red-600';
+    return 'text-rose-600';
   };
 
   const getMeterMessage = (percentage: number) => {
@@ -326,91 +326,100 @@ const IpoAllotmentModal: React.FC<IpoAllotmentModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-sm font-ibm-plex flex items-center justify-center z-50 p-2 sm:p-4">
-      <Card className="w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl font-ibm-plex" style={{background: `
-              linear-gradient(135deg, 
-                rgba(240, 248, 255, 1) 0%,
-                rgba(230, 245, 255, 1) 30%,
-                rgba(220, 240, 255, 1) 60%,
-                rgba(235, 247, 255, 1) 100%
-              )
-            `}}>
+    <div className="fixed inset-0 bg-black/60 font-ibm-plex flex items-center justify-center z-50 p-3 sm:p-6 transition-opacity duration-200">
+      <Card className="w-full max-w-3xl max-h-[92vh] sm:max-h-[88vh] overflow-y-auto bg-white border border-gray-200 rounded-2xl shadow-xl p-0 font-ibm-plex">
+        
+        {/* Top Gradient Accent Bar */}
+        <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 w-full" />
+
         {/* Header */}
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-4 sm:pb-6 border-b border-gray-100 font-ibm-plex">
-          <div className="flex-1 pr-4 sm:pr-0">
-            <CardTitle className="text-xl sm:text-2xl font-black text-gray-900 font-ibm-plex">
-              IPO Allotment Prediction
+        <CardHeader className="flex flex-row items-start justify-between space-y-0 p-5 sm:p-7 pb-4 sm:pb-5 border-b border-gray-200 font-ibm-plex bg-gray-50">
+          <div className="flex-1 pr-4">
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                <Sparkles className="w-3 h-3 text-blue-700" /> SEBI Quota Engine
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-200 text-gray-700 border border-gray-300">
+                <ShieldCheck className="w-3 h-3 text-gray-600" /> High Precision
+              </span>
+            </div>
+            <CardTitle className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight font-ibm-plex">
+              IPO Allotment Predictor
             </CardTitle>
-            <p className="text-gray-600 text-xs sm:text-sm font-medium font-ibm-plex mt-1">
-              Advanced algorithm based on market data and SEBI allocation rules
+            <p className="text-gray-600 text-xs sm:text-sm font-medium mt-1 leading-relaxed">
+              Calculates allocation probability based on market data, demand multiplier, and subscription quotas.
             </p>
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 self-end sm:self-auto"
+            className="w-9 h-9 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 hover:text-gray-900 transition-colors flex-shrink-0"
+            aria-label="Close modal"
           >
-            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            <X className="w-4 h-4" />
           </Button>
         </CardHeader>
 
-        {/* Form */}
-        <CardContent className="space-y-6 pt-6">
+        {/* Form Content */}
+        <CardContent className="space-y-6 p-5 sm:p-7 pt-6">
           {/* IPO Selection */}
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2 font-ibm-plex">
-              Select IPO
+          <div className="space-y-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 font-ibm-plex">
+              Select Target IPO
             </label>
             <Select value={selectedIpo} onValueChange={setSelectedIpo}>
-              <SelectTrigger className="w-full border-gray-300 focus:border-[#0073E6] focus:ring-[#0073E6] font-ibm-plex">
-                <SelectValue placeholder="All IPOs (General Analysis)" />
+              <SelectTrigger className="w-full h-11 sm:h-12 bg-white hover:bg-gray-50 border border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-gray-900 font-semibold font-ibm-plex transition-all">
+                <SelectValue placeholder="All IPOs (General Market Analysis)" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value=" ">All IPOs (General Analysis)</SelectItem>
+              <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-lg">
+                <SelectItem value=" " className="font-semibold text-gray-800 cursor-pointer">
+                  All IPOs (General Market Analysis)
+                </SelectItem>
                 {ipos.map((ipo) => (
-                  <SelectItem key={ipo._id} value={ipo._id}>
-                    {ipo.ipo.upcoming_ipo_2025} (₹{ipo.ipo.price_band})
+                  <SelectItem key={ipo._id} value={ipo._id} className="cursor-pointer font-medium">
+                    {ipo.ipo.upcoming_ipo_2025} <span className="text-gray-500 font-normal">(₹{ipo.ipo.price_band})</span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Investment Category and Amount */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Investment Category */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 font-ibm-plex">
-                Investment Category
+          {/* Category & Amount Inputs */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            {/* Category */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 font-ibm-plex">
+                Investor Category
               </label>
               <Select value={investmentCategory} onValueChange={(value: keyof typeof CATEGORY_LIMITS) => {
                 setInvestmentCategory(value);
                 setValidationError('');
               }}>
-                <SelectTrigger className="w-full border-gray-300 focus:border-[#0073E6] focus:ring-[#0073E6] font-ibm-plex">
+                <SelectTrigger className="w-full h-11 sm:h-12 bg-white hover:bg-gray-50 border border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-gray-900 font-semibold font-ibm-plex transition-all">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="retail">
-                    Retail (₹10K - ₹2L)
+                <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-lg">
+                  <SelectItem value="retail" className="font-medium cursor-pointer">
+                    Retail Individual (₹10K - ₹2L)
                   </SelectItem>
-                  <SelectItem value="hni">
-                    HNI (₹2L - ₹1Cr)
+                  <SelectItem value="hni" className="font-medium cursor-pointer">
+                    HNI Investor (₹2L - ₹1Cr)
                   </SelectItem>
-                  <SelectItem value="qib">
-                    QIB (₹1Cr+)
+                  <SelectItem value="qib" className="font-medium cursor-pointer">
+                    QIB Institutional (₹1Cr+)
                   </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Amount */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 font-ibm-plex">
-                Investment Amount <span className="text-gray-500 font-normal">(Optional)</span>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 font-ibm-plex">
+                Investment Amount <span className="text-gray-500 font-normal lowercase">(optional)</span>
               </label>
               <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">₹</span>
                 <Input
                   type="number"
                   value={amount}
@@ -419,13 +428,12 @@ const IpoAllotmentModal: React.FC<IpoAllotmentModalProps> = ({
                     setValidationError('');
                   }}
                   placeholder={`Max: ₹${CATEGORY_LIMITS[investmentCategory].max === Infinity ? '1Cr+' : CATEGORY_LIMITS[investmentCategory].max.toLocaleString()}`}
-                  className="pl-8 border-gray-300 focus:border-[#0073E6] focus:ring-[#0073E6] font-ibm-plex"
+                  className="pl-8 h-11 sm:h-12 bg-white hover:bg-gray-50 border border-gray-300 rounded-xl focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 text-gray-900 font-semibold font-ibm-plex placeholder:text-gray-400"
                 />
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₹</span>
               </div>
               {!amount && (
-                <p className="text-xs text-gray-500 mt-1 font-ibm-plex">
-                  If not specified, maximum allowed amount will be used
+                <p className="text-[11px] text-gray-500 font-medium">
+                  Defaults to maximum limit for {CATEGORY_LIMITS[investmentCategory].name}
                 </p>
               )}
             </div>
@@ -433,149 +441,148 @@ const IpoAllotmentModal: React.FC<IpoAllotmentModalProps> = ({
 
           {/* Validation Error */}
           {validationError && (
-            <Card className="bg-red-50 border-red-200 font-ibm-plex">
-              <CardContent className="p-3 flex items-center space-x-2">
-                <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
-                <p className="text-sm text-red-700 font-medium font-ibm-plex">{validationError}</p>
-              </CardContent>
-            </Card>
+            <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2.5 text-red-700 text-sm font-medium">
+              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <span>{validationError}</span>
+            </div>
           )}
 
           {/* Predict Button */}
           <Button
             onClick={handlePredict}
             disabled={!selectedIpo || isLoading || !!validationError}
-            className="w-full bg-[#0073E6] hover:bg-[#0073E6]/90 text-white font-bold font-ibm-plex shadow-lg hover:shadow-xl transition-all duration-300 text-sm sm:text-base"
-            size="lg"
+            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm sm:text-base rounded-xl shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                <span>Calculating Probability...</span>
-              </>
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                <span>Analyzing Market Data...</span>
+              </div>
             ) : (
-              <>
-                <TrendingUp className="w-5 h-5 mr-2 text-white" />
+              <div className="flex items-center justify-center gap-2">
+                <TrendingUp className="w-5 h-5" />
                 <span>Calculate Allotment Probability</span>
-              </>
+              </div>
             )}
           </Button>
 
-          {/* Results */}
+          {/* Results Section */}
           {showResult && prediction !== null && calculationDetails && (
-            <div className="space-y-3 sm:space-y-4">
-              <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 font-ibm-plex">
-                <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-                  {/* Meter Visualization */}
-                  <div className="flex flex-col items-center">
-                    <div className="relative w-64 h-36 sm:w-80 sm:h-48 mb-4">
-                      <svg viewBox="0 0 300 180" className="w-full h-full">
-                        <defs>
-                          <linearGradient id="redToYellow" x1="0%" y1="0%" x2="50%" y2="0%">
-                            <stop offset="0%" stopColor="#B4292E" />
-                            <stop offset="100%" stopColor="#D59527" />
-                          </linearGradient>
-                          <linearGradient id="yellowToGreen" x1="50%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#D59527" />
-                            <stop offset="100%" stopColor="#00914D" />
-                          </linearGradient>
-                        </defs>
+            <div className="space-y-5 pt-2">
+              {/* Meter Card */}
+              <div className="p-6 bg-gray-50 border border-gray-200 rounded-2xl flex flex-col items-center text-center shadow-sm">
+                
+                {/* SVG Meter Gauge */}
+                <div className="relative w-64 h-36 sm:w-72 sm:h-40 mb-2">
+                  <svg viewBox="0 0 300 180" className="w-full h-full">
+                    <defs>
+                      <linearGradient id="redToYellow" x1="0%" y1="0%" x2="50%" y2="0%">
+                        <stop offset="0%" stopColor="#EF4444" />
+                        <stop offset="100%" stopColor="#F59E0B" />
+                      </linearGradient>
+                      <linearGradient id="yellowToGreen" x1="50%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#F59E0B" />
+                        <stop offset="100%" stopColor="#10B981" />
+                      </linearGradient>
+                    </defs>
 
-                        <path
-                          d="M 50 150 A 100 100 0 0 1 250 150"
-                          fill="none"
-                          stroke="#E5E7EB"
-                          strokeWidth="20"
-                          strokeLinecap="round"
-                        />
+                    {/* Base Track */}
+                    <path
+                      d="M 50 150 A 100 100 0 0 1 250 150"
+                      fill="none"
+                      stroke="#E5E7EB"
+                      strokeWidth="18"
+                      strokeLinecap="round"
+                    />
 
-                        <path
-                          d="M 50 150 A 100 100 0 0 1 150 50"
-                          fill="none"
-                          stroke="url(#redToYellow)"
-                          strokeWidth="20"
-                          strokeLinecap="round"
-                        />
+                    {/* Gradient Arc 1 */}
+                    <path
+                      d="M 50 150 A 100 100 0 0 1 150 50"
+                      fill="none"
+                      stroke="url(#redToYellow)"
+                      strokeWidth="18"
+                      strokeLinecap="round"
+                    />
 
-                        <path
-                          d="M 150 50 A 100 100 0 0 1 250 150"
-                          fill="none"
-                          stroke="url(#yellowToGreen)"
-                          strokeWidth="20"
-                          strokeLinecap="round"
-                        />
+                    {/* Gradient Arc 2 */}
+                    <path
+                      d="M 150 50 A 100 100 0 0 1 250 150"
+                      fill="none"
+                      stroke="url(#yellowToGreen)"
+                      strokeWidth="18"
+                      strokeLinecap="round"
+                    />
 
-                        <g transform={`rotate(${(-90 + (prediction / 100) * 180)} 150 150)`}>
-                          <line
-                            x1="150"
-                            y1="150"
-                            x2="150"
-                            y2="60"
-                            stroke="#1F2937"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                          />
-                          <circle cx="150" cy="150" r="6" fill="#1F2937" />
-                        </g>
-                      </svg>
-                    </div>
+                    {/* Needle */}
+                    <g transform={`rotate(${(-90 + (prediction / 100) * 180)} 150 150)`} className="transition-transform duration-700 ease-out">
+                      <line
+                        x1="150"
+                        y1="150"
+                        x2="150"
+                        y2="62"
+                        stroke="#111827"
+                        strokeWidth="3.5"
+                        strokeLinecap="round"
+                      />
+                      <circle cx="150" cy="150" r="7" fill="#111827" stroke="#FFFFFF" strokeWidth="2" />
+                    </g>
+                  </svg>
+                </div>
 
-                    <div className="text-center">
-                      <h3 className="text-lg sm:text-xl font-black text-gray-900 font-ibm-plex mb-2">
-                        Allotment Probability
-                      </h3>
-                      <div className={`text-3xl sm:text-5xl font-black ${getMeterColor(prediction)} mb-2 font-ibm-plex`}>
-                        {prediction}%
-                      </div>
-                      <p className="text-gray-600 font-medium font-ibm-plex mb-4 text-sm sm:text-base px-2">
-                        {getMeterMessage(prediction)}
-                      </p>
-                    </div>
+                <div className="space-y-1">
+                  <div className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                    Estimated Chance
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Calculation Details */}
-              <Card className="bg-white border-gray-200 font-ibm-plex">
-                <CardHeader className="pb-3 sm:pb-4">
-                  <CardTitle className="text-base sm:text-lg font-bold text-gray-900 font-ibm-plex">
-                    Calculation Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 pt-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
-                    <div className="text-center sm:text-left">
-                      <p className="text-xs sm:text-sm font-bold text-gray-700 font-ibm-plex">Category Allocation</p>
-                      <p className="text-lg font-black text-[#0073E6] font-ibm-plex">{calculationDetails.categoryAllocation}%</p>
-                    </div>
-                    <div className="text-center sm:text-left">
-                      <p className="text-xs sm:text-sm font-bold text-gray-700 font-ibm-plex">Expected Subscription</p>
-                      <p className="text-lg font-black text-orange-600 font-ibm-plex">{calculationDetails.expectedSubscription}x</p>
-                    </div>
+                  <div className={`text-4xl sm:text-5xl font-extrabold tracking-tight ${getMeterColor(prediction)}`}>
+                    {prediction}%
                   </div>
-                  
-                  <div className="space-y-2">
-                    <p className="text-xs sm:text-sm font-bold text-gray-700 mb-2 font-ibm-plex">Factors Considered:</p>
+                  <p className="text-gray-700 font-semibold text-sm sm:text-base max-w-md pt-1">
+                    {getMeterMessage(prediction)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Breakdown Grid */}
+              <div className="p-5 bg-white border border-gray-200 rounded-2xl space-y-4 shadow-sm">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-gray-800 border-b border-gray-100 pb-2">
+                  Calculation Breakdown
+                </h4>
+                
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  <div className="p-3.5 bg-gray-50 border border-gray-200 rounded-xl">
+                    <p className="text-xs font-medium text-gray-500">Category Allocation</p>
+                    <p className="text-lg sm:text-xl font-black text-blue-600 mt-0.5">
+                      {calculationDetails.categoryAllocation}%
+                    </p>
+                  </div>
+                  <div className="p-3.5 bg-gray-50 border border-gray-200 rounded-xl">
+                    <p className="text-xs font-medium text-gray-500">Est. Oversubscription</p>
+                    <p className="text-lg sm:text-xl font-black text-amber-600 mt-0.5">
+                      {calculationDetails.expectedSubscription}x
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-1">
+                  <p className="text-xs font-bold text-gray-700 uppercase tracking-wider">Factors Applied:</p>
+                  <div className="space-y-1.5">
                     {calculationDetails.factors.map((factor: string, index: number) => (
-                      <div key={index} className="flex items-start text-xs sm:text-sm text-gray-600 font-ibm-plex">
-                        <div className="w-2 h-2 bg-[#0073E6] rounded-full mr-2 mt-1 flex-shrink-0"></div>
-                        <span className="leading-relaxed">{factor}</span>
+                      <div key={index} className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 font-medium">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-600 flex-shrink-0"></div>
+                        <span>{factor}</span>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              {/* Disclaimer */}
-              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 shadow-sm">
-                <CardContent className="p-4 flex items-start space-x-3">
-                  <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-800 font-ibm-plex">
-                    <p className="font-bold">Methodology</p>
-                    <p className="font-medium">This prediction uses SEBI allocation rules, historical subscription patterns, IPO quality metrics, and market conditions. Based on deterministic algorithms without random factors. Use as guidance alongside your research.</p>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Info Methodology */}
+              <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex items-start gap-3 text-xs sm:text-sm text-gray-600">
+                <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="leading-relaxed font-medium">
+                  <strong className="text-gray-800">Methodology:</strong> Predictions combine SEBI quota reservation rules, investor category tiers, demand multipliers, and quality factors. Designed as analytical guidance.
+                </p>
+              </div>
             </div>
           )}
         </CardContent>
