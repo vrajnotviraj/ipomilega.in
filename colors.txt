@@ -5,6 +5,9 @@
 - text-foreground: Main text color
 - text-muted-foreground: Subdued text for descriptions and secondary labels
 
+
+
+
 ## 🎨 Muted Backgrounds
 - bg-muted: Soft gray background for neutral sections
 - bg-muted/50: Slightly transparent muted section
