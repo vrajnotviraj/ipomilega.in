@@ -5,10 +5,10 @@ export async function getHomePageData(): Promise<HomePageData> {
     // Use Promise.allSettled instead of Promise.all for better error handling
     const [ipoResult, blogResult] = await Promise.allSettled([
       fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/ipo`, {
-        next: { revalidate: 300 }, // Cache for 5 minutes instead of no-store
+        next: { revalidate: 300, tags: ['ipos', 'homepage'] }, // Cache for 5 minutes with tags
       }),
       fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/blogs/featured`, {
-        next: { revalidate: 600 }, // Cache blogs for 10 minutes
+        next: { revalidate: 600, tags: ['blogs', 'homepage'] }, // Cache blogs for 10 minutes with tags
       }),
     ]);
 

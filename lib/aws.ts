@@ -43,7 +43,7 @@ const getS3Config = (): S3Config => {
 // Initialize S3 client
 const initializeS3Client = (): S3Client => {
   const config = getS3Config();
-  
+
   return new S3Client({
     region: config.region,
     credentials: {
@@ -59,18 +59,19 @@ const initializeS3Client = (): S3Client => {
  * @param folder - Folder in the bucket (e.g., 'logos', 'charts')
  * @returns Promise<string> - The public URL of the uploaded file
  */
-export const uploadToS3 = async (file: MulterFile, folder: string = '',documentId:string,collection:string,access = 'public-read'): Promise<string> => {
+export const uploadToS3 = async (file: MulterFile, folder: string = '', documentId: string, collection: string, access = 'public-read'): Promise<string> => {
   try {
     const s3 = initializeS3Client();
     const config = getS3Config();
-    const {db} = await connectToDatabase();
+    const { db } = await connectToDatabase();
     const extension = path.extname(file.originalname);
-    const fileName = `${documentId}${extension}`; 
+    const timestamp = Date.now();
+    const fileName = `${documentId}_${timestamp}${extension}`;
     const key = folder ? `${folder}/${fileName}` : fileName;
-    
+
     // Use file.buffer directly instead of reading from disk
     const fileContent = file.buffer;
-    
+
     const command = new PutObjectCommand({
       Bucket: config.bucket,
       Key: key,
@@ -78,10 +79,20 @@ export const uploadToS3 = async (file: MulterFile, folder: string = '',documentI
       ContentType: file.mimetype,
       ACL: access as ObjectCannedACL
     });
-    
+
     await s3.send(command);
-    await db.collection(collection).updateOne({ _id: new ObjectId(documentId) }, { $set: {image_url: `https://${config.bucket}.s3.${config.region}.amazonaws.com/${key}` } });
-    return `https://${config.bucket}.s3.${config.region}.amazonaws.com/${key}`;
+    const imageUrl = `https://${config.bucket}.s3.${config.region}.amazonaws.com/${key}`;
+
+    if (collection === 'ipos') {
+      await db.collection('ipos').updateOne({ _id: new ObjectId(documentId) }, { $set: { image_url: imageUrl } });
+      await db.collection('ipo_comprehensive_analysis').updateMany({ ipo_table_id: documentId }, { $set: { image_url: imageUrl } });
+    } else if (collection === 'blogs') {
+      await db.collection('blogs').updateOne({ _id: new ObjectId(documentId) }, { $set: { image_url: imageUrl } });
+    } else if (collection) {
+      await db.collection(collection).updateOne({ _id: new ObjectId(documentId) }, { $set: { image_url: imageUrl } });
+    }
+
+    return imageUrl;
   } catch (error) {
     console.error('Error uploading file to S3:', error);
     throw new Error(`Failed to upload file to S3: ${error instanceof Error ? error.message : 'Unknown error'}`);

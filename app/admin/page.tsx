@@ -111,7 +111,11 @@ function AdminContent() {
       const response = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await response.json()
       if (data.success) {
-        const updateIpoList = (list: HomePageIpoProps[]) => list.map(ipo => ipo.ipo._id === ipoId ? { ...ipo, ipo: { ...ipo.ipo, image_url: data.url } } : ipo)
+        const updateIpoList = (list: HomePageIpoProps[]) => list.map(item =>
+          (String(item.ipo?._id) === String(ipoId) || String(item._id) === String(ipoId))
+            ? { ...item, ipo: { ...item.ipo, image_url: data.url } }
+            : item
+        )
         setFilteredIpos(prev => updateIpoList(prev))
         setIpoList(prev => updateIpoList(prev))
         setUpcomingIpoList(prev => updateIpoList(prev))
