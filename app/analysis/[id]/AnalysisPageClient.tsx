@@ -1,12 +1,12 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeftCircle, Share2, Loader2, Pencil } from "lucide-react";
+import { ArrowLeftCircle, Share2, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis";
 import { Ipo } from "@/app/models/ipo";
 import "@/app/styles/analysis.css";
-import { InvestorSplitPieChart } from "@/components/charts/InvestorSplitPieChart"; // Adjust path if needed
+import { InvestorSplitPieChart } from "@/components/charts/InvestorSplitPieChart";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-// Props for the main component
 interface AnalysisPageClientProps {
   analysis: IpoComprehensiveAnalysis;
   ipo: Ipo;
@@ -32,6 +31,113 @@ interface IPOInvestorSplit {
   shares: string;
   amount: string;
 }
+
+// Inline Editable Field Component (Clean & Seamless)
+interface EditableTextProps {
+  value: string | number;
+  onSave: (val: string) => void;
+  isAdmin?: boolean;
+  type?: "text" | "textarea" | "number" | "date";
+  className?: string;
+  textClassName?: string;
+  inputClassName?: string;
+  renderText?: (val: string) => React.ReactNode;
+  placeholder?: string;
+}
+
+const EditableText = ({
+  value,
+  onSave,
+  isAdmin = false,
+  type = "text",
+  className = "",
+  textClassName = "",
+  inputClassName = "",
+  renderText,
+  placeholder = "Double-click to edit...",
+}: EditableTextProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [localVal, setLocalVal] = useState(String(value ?? ""));
+
+  useEffect(() => {
+    setLocalVal(String(value ?? ""));
+  }, [value]);
+
+  const handleBlur = () => {
+    setIsEditing(false);
+    if (localVal !== String(value ?? "")) {
+      onSave(localVal);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && type !== "textarea") {
+      e.preventDefault();
+      handleBlur();
+    }
+    if (e.key === "Escape") {
+      setLocalVal(String(value ?? ""));
+      setIsEditing(false);
+    }
+  };
+
+  if (isAdmin && isEditing) {
+    if (type === "textarea") {
+      return (
+        <textarea
+          value={localVal}
+          onChange={(e) => setLocalVal(e.target.value)}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          autoFocus
+          className={cn(
+            "w-full p-2 border-2 border-blue-500 rounded-md text-sm bg-white font-ibm-plex text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md min-h-[70px]",
+            inputClassName
+          )}
+        />
+      );
+    }
+    return (
+      <input
+        type={type}
+        value={localVal}
+        onChange={(e) => setLocalVal(e.target.value)}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        autoFocus
+        className={cn(
+          "px-2 py-1 border-2 border-blue-500 rounded-md text-sm bg-white font-ibm-plex text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-sm w-full",
+          inputClassName
+        )}
+      />
+    );
+  }
+
+  const displayContent = renderText
+    ? renderText(localVal)
+    : (localVal || <span className="text-gray-400 italic">{placeholder}</span>);
+
+  return (
+    <span
+      onDoubleClick={(e) => {
+        if (isAdmin) {
+          e.stopPropagation();
+          setIsEditing(true);
+        }
+      }}
+      className={cn(
+        isAdmin
+          ? "cursor-pointer hover:bg-blue-50/70 hover:outline-blue-300 hover:outline hover:outline-1 hover:outline-dashed rounded transition-colors duration-150 inline-block px-1"
+          : "",
+        className
+      )}
+      title={isAdmin ? "Double-click to edit field" : undefined}
+    >
+      <span className={textClassName}>{displayContent}</span>
+    </span>
+  );
+};
+
 // Helper component for timeline markers
 const TimelineMarker = ({
   label,
@@ -75,10 +181,16 @@ const ProgressCircle = ({
   label,
   value,
   description,
+  onSaveScore,
+  onSaveDescription,
+  isAdmin = false,
 }: {
   label: string;
   value: number;
   description?: string;
+  onSaveScore?: (val: string) => void;
+  onSaveDescription?: (val: string) => void;
+  isAdmin?: boolean;
 }) => {
   const cappedValue = Math.min(value, 100);
   const strokeWidth = 4;
@@ -117,23 +229,51 @@ const ProgressCircle = ({
               transition: "stroke-dashoffset 0.5s ease-in-out"
             }}
           />
-          <text
-            x="18"
-            y="21"
-            textAnchor="middle"
-            fill="white"
-            fontSize="8"
-            fontWeight="bold"
-            fontFamily="IBM Plex Sans, sans-serif"
-          >
-            {cappedValue.toFixed(0)}
-          </text>
+          {!isAdmin && (
+            <text
+              x="18"
+              y="21"
+              textAnchor="middle"
+              fill="white"
+              fontSize="8"
+              fontWeight="bold"
+              fontFamily="IBM Plex Sans, sans-serif"
+            >
+              {cappedValue.toFixed(0)}
+            </text>
+          )}
         </svg>
+        {isAdmin && onSaveScore && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <EditableText
+              value={cappedValue}
+              onSave={onSaveScore}
+              type="number"
+              isAdmin={isAdmin}
+              inputClassName="w-10 text-center font-bold text-xs p-0.5 rounded border border-blue-500 bg-white"
+              textClassName="text-white text-base font-bold cursor-pointer"
+              renderText={(val) => <span>{val}</span>}
+            />
+          </div>
+        )}
       </div>
-      {description && (
-        <p className="text-sm mt-2 sm:mt-4 max-w-[290px] sm:max-w-[200px] font-ibm-plex text-body-sm">
-          {description}
-        </p>
+      {description !== undefined && (
+        <div className="mt-2 sm:mt-4 max-w-[290px] sm:max-w-[200px]">
+          {isAdmin && onSaveDescription ? (
+            <EditableText
+              value={description}
+              onSave={onSaveDescription}
+              type="textarea"
+              isAdmin={isAdmin}
+              textClassName="text-sm font-ibm-plex text-body-sm block"
+              inputClassName="w-full text-xs text-gray-800 bg-white"
+            />
+          ) : (
+            <p className="text-sm font-ibm-plex text-body-sm">
+              {description}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );
@@ -150,118 +290,6 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
-import { useEffect as reactUseEffect } from "react";
-
-interface EditableTextProps {
-  value: string | number;
-  onSave: (val: string) => void;
-  isAdmin?: boolean;
-  type?: "text" | "textarea" | "number";
-  className?: string;
-  textClassName?: string;
-  inputClassName?: string;
-  renderText?: (val: string) => React.ReactNode;
-}
-
-const EditableText = ({
-  value,
-  onSave,
-  isAdmin = false,
-  type = "text",
-  className = "",
-  textClassName = "",
-  inputClassName = "",
-  renderText,
-}: EditableTextProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [localVal, setLocalVal] = useState(String(value));
-
-  reactUseEffect(() => {
-    setLocalVal(String(value));
-  }, [value]);
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    if (localVal !== String(value)) {
-      onSave(localVal);
-    }
-  };
-
-
-
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && type !== "textarea") {
-      e.preventDefault();
-      handleBlur();
-    }
-    if (e.key === "Escape") {
-      setLocalVal(String(value));
-      setIsEditing(false);
-    }
-  };
-
-  if (isAdmin && isEditing) {
-    if (type === "textarea") {
-      return (
-        <textarea
-          value={localVal}
-          onChange={(e) => setLocalVal(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          autoFocus
-          className={cn("w-full p-2 border border-blue-500 rounded-md text-sm bg-white font-ibm-plex text-gray-900 focus:ring-1 focus:ring-blue-500 outline-none min-h-[80px]", inputClassName)}
-        />
-      );
-    }
-    return (
-      <input
-        type={type}
-        value={localVal}
-        onChange={(e) => setLocalVal(e.target.value)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        autoFocus
-        className={cn("px-2 py-1 border border-blue-500 rounded text-sm bg-white font-ibm-plex text-gray-900 focus:ring-1 focus:ring-blue-500 outline-none w-full", inputClassName)}
-      />
-    );
-  }
-
-  const displayContent = renderText ? renderText(localVal) : (localVal || <span className="text-gray-400 italic">Double-click or click edit icon to edit</span>);
-
-  return (
-    <div
-      onDoubleClick={() => {
-        if (isAdmin) {
-          setIsEditing(true);
-        }
-      }}
-      className={cn(
-        isAdmin ? "group relative cursor-pointer hover:bg-yellow-50/50 hover:border-yellow-200 border border-dashed border-transparent rounded transition-colors duration-150 p-1 pr-6" : "",
-        className
-      )}
-      title={isAdmin ? "Double-click or click edit icon to edit" : undefined}
-    >
-      <div className={textClassName}>
-        {displayContent}
-      </div>
-      {isAdmin && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsEditing(true);
-          }}
-          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-60 md:opacity-0 md:group-hover:opacity-100 p-1 rounded hover:bg-gray-200/80 text-gray-400 hover:text-gray-600 transition-all flex-shrink-0"
-          title="Edit this field"
-        >
-          <Pencil className="h-3 w-3" />
-        </button>
-      )}
-    </div>
-  );
-};
-
-// Main component for the analysis page
 export default function AnalysisPageClient({
   analysis,
   ipo,
@@ -274,8 +302,6 @@ export default function AnalysisPageClient({
   const isAdmin = ["admin@gmail.com", "snehshah7634@gmail.com", "shahvraj114@gmail.com", "devanshisoni2004@gmail.com", "devanshisoni2311@gmail.com"].includes(
     session?.data?.user?.email || ""
   );
-
-  console.log("RENDER AnalysisPageClient - isAdmin:", isAdmin, "sessionPending:", session?.isPending, "email:", session?.data?.user?.email);
 
   const handleInlineSave = (path: string, newValue: unknown) => {
     setEditedAnalysis((prev) => {
@@ -351,7 +377,7 @@ export default function AnalysisPageClient({
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Failed to save analysis");
 
-      toast.success("Analysis saved successfully!", { id: toastId });
+      toast.success("Saved successfully!", { id: toastId });
     } catch (error) {
       console.error("Save error:", error);
       toast.error(error instanceof Error ? error.message : "Error saving updates", { id: toastId });
@@ -370,7 +396,6 @@ export default function AnalysisPageClient({
   ]);
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // Helper function to determine score color
   const getScoreColor = (score: number) => {
     if (score >= 8) return "text-green-600 dark:text-green-400";
     if (score >= 6) return "text-yellow-600 dark:text-yellow-400";
@@ -390,7 +415,6 @@ export default function AnalysisPageClient({
       (editedAnalysis.performance?.score ?? 0)) /
     2;
 
-  // Helper function to get the upper price from the price band
   const getDisplayPrice = () => {
     const priceBand = editedAnalysis.ipo_details?.price_band;
     if (
@@ -405,7 +429,6 @@ export default function AnalysisPageClient({
     return "N/A";
   };
 
-  // --- DYNAMIC Timeline Calculation ---
   const timelineData = {
     opening: editedAnalysis.time?.issue_dates?.opening || "",
     closing: editedAnalysis.time?.issue_dates?.closing || "",
@@ -414,7 +437,6 @@ export default function AnalysisPageClient({
     listing: editedAnalysis.time?.listing_details?.expected_date || "",
   };
 
-  // Helper to safely parse dates and check validity
   const parseDate = (dateString: string) => {
     if (!dateString) return null;
     const date = new Date(dateString);
@@ -477,14 +499,12 @@ export default function AnalysisPageClient({
   const showPriceBox = displayPrice !== "N/A";
   const priceBoxPosition = `${(positions.opening + positions.closing) / 2}%`;
 
-  // Helper to parse percentages
   const parsePercentage = (value: string): number => {
     if (!value) return 0;
     const match = value.match(/(\d+(?:\.\d+)?)/);
     return match ? parseFloat(match[1]) : 0;
   };
 
-  // Data for investor allocation split
   const investorData = [
     {
       label: "Retail Investor",
@@ -504,7 +524,6 @@ export default function AnalysisPageClient({
     },
   ];
 
-  // Prepare data for the pie chart
   const pieChartData = investorData
     .filter((d) => d.label !== "Total")
     .map((item) => ({
@@ -512,12 +531,10 @@ export default function AnalysisPageClient({
       value: item.value,
     }));
 
-  // Prepare data for the table, pulling from the analysis object
   const investorTableData = editedAnalysis.investorSplit?.filter(
     (row) => row.application.toLowerCase() !== "application"
   ) || [];
 
-  // Share functionality
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -536,7 +553,6 @@ export default function AnalysisPageClient({
     }
   };
 
-  // Handle tab clicks for smooth scrolling
   const handleTabClick = (value: string) => {
     setActiveTab(value);
     setSectionOrder((prev) => [value, ...prev.filter((tab) => tab !== value)]);
@@ -577,7 +593,12 @@ export default function AnalysisPageClient({
               </div>
               <div className="min-w-0 flex-1">
                 <h1 className="heading-main text-lg md:text-xl lg:text-2xl text-primary truncate">
-                  {editedAnalysis.company_name} IPO Analysis
+                  <EditableText
+                    value={editedAnalysis.company_name || ""}
+                    onSave={(val) => handleInlineSave("company_name", val)}
+                    isAdmin={isAdmin}
+                    textClassName="heading-main text-lg md:text-xl lg:text-2xl text-primary truncate"
+                  /> IPO Analysis
                 </h1>
                 <p className="text-sm text-muted-foreground font-ibm-plex">
                   Comprehensive Investment Review
@@ -586,8 +607,8 @@ export default function AnalysisPageClient({
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
               {isAdmin && (
-                <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-50 border border-green-200 text-green-750 flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-50 border border-green-200 text-green-750 flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                   Admin Mode Active
                 </div>
               )}
@@ -630,17 +651,20 @@ export default function AnalysisPageClient({
                 },
                 {
                   label: "Price Band",
-                  value: editedAnalysis.ipo_details?.price_band.includes("₹") ? editedAnalysis.ipo_details?.price_band : "₹" + editedAnalysis.ipo_details?.price_band || "N/A",
+                  value: editedAnalysis.ipo_details?.price_band
+                    ? editedAnalysis.ipo_details.price_band.includes("₹")
+                      ? editedAnalysis.ipo_details.price_band
+                      : "₹" + editedAnalysis.ipo_details.price_band
+                    : "N/A",
                   color: "text-foreground",
                   description: "Price per share",
                   path: "ipo_details.price_band",
                 },
                 {
                   label: "Potential Gains",
-                  value: `${editedAnalysis.ipo_details?.gains_rationale.includes("₹") ? editedAnalysis.ipo_details?.gains_rationale : "₹" + editedAnalysis.ipo_details?.gains_rationale}`,
+                  value: editedAnalysis.ipo_details?.gains_rationale || "N/A",
                   color: "text-green-600 dark:text-green-400",
                   description: "Expected listing gains",
-                  path: "ipo_details.gains_rationale",
                   isGains: true,
                 },
               ].map((metric) => (
@@ -652,7 +676,7 @@ export default function AnalysisPageClient({
                     {metric.label}
                   </p>
                   {metric.isScore ? (
-                    <p className={`metric-card-value ${metric.color} text-xl font-ibm-plex`}>
+                    <p className={`metric-card-value ${metric.color} text-xl font-ibm-plex font-bold`}>
                       {metric.value}
                     </p>
                   ) : metric.isGains ? (
@@ -661,7 +685,6 @@ export default function AnalysisPageClient({
                         value={editedAnalysis.ipo_details?.gains_rationale || ""}
                         onSave={(val) => handleInlineSave("ipo_details.gains_rationale", val)}
                         isAdmin={isAdmin}
-                        inputClassName="w-full text-center border-b border-dashed border-gray-300 focus:border-blue-500 outline-none bg-transparent font-ibm-plex text-xl font-bold py-1 text-green-600"
                         textClassName="metric-card-value text-green-600 dark:text-green-400 text-xl font-ibm-plex font-bold"
                       />
                       <div className="flex items-center gap-1 text-xs justify-center">
@@ -671,10 +694,10 @@ export default function AnalysisPageClient({
                           onSave={(val) => handleInlineSave("ipo_details.approximate_gains_potential", parseFloat(val) || 0)}
                           type="number"
                           isAdmin={isAdmin}
-                          inputClassName="w-12 text-center border-b border-dashed border-gray-300 focus:border-blue-500 outline-none bg-transparent font-ibm-plex text-xs font-bold text-green-600"
+                          inputClassName="w-16 text-center font-bold text-xs p-0.5 rounded border border-blue-500 bg-white"
                           textClassName="text-green-600 font-bold"
+                          renderText={(val) => <span>{val}%</span>}
                         />
-                        <span className="text-green-600 font-bold">%</span>
                       </div>
                     </div>
                   ) : (
@@ -682,11 +705,10 @@ export default function AnalysisPageClient({
                       value={metric.path ? ((metric.path.split('.').reduce<unknown>((obj, key) => (obj as Record<string, unknown>)?.[key], editedAnalysis) as string | number | undefined) || "") : ""}
                       onSave={(val) => metric.path && handleInlineSave(metric.path, val)}
                       isAdmin={isAdmin}
-                      inputClassName="w-full text-center border-b border-dashed border-gray-300 focus:border-blue-500 outline-none bg-transparent font-ibm-plex text-xl font-bold py-1"
-                      textClassName={`metric-card-value ${metric.color} text-xl font-ibm-plex`}
+                      textClassName={`metric-card-value ${metric.color} text-xl font-ibm-plex font-bold`}
                     />
                   )}
-                  <p className="metric-card-description mt-1 text-sm font-ibm-plex">
+                  <p className="metric-card-description mt-1 text-sm font-ibm-plex text-gray-500">
                     {metric.description}
                   </p>
                 </div>
@@ -696,13 +718,13 @@ export default function AnalysisPageClient({
 
           {/* Timeline & Investor Split */}
           <section
-            className="p-4 sm:p-6"
+            className="p-4 sm:p-6 bg-white/50 backdrop-blur-sm border rounded-xl"
             onDoubleClick={(e) => {
               if (isAdmin && !isEditingTimeline) {
                 const target = e.target as HTMLElement;
                 if (target.closest("button") || target.closest("a") || target.closest("input")) return;
                 setIsEditingTimeline(true);
-                toast.info("Timeline Editor Active. Change dates below.", {
+                toast.info("Timeline Editor Active", {
                   description: "Move mouse away from the editor panel to close.",
                 });
               }
@@ -714,7 +736,7 @@ export default function AnalysisPageClient({
             <div className="w-full mb-16">
               {isAdmin && isEditingTimeline && (
                 <div
-                  className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl mb-6 grid grid-cols-2 md:grid-cols-5 gap-4 animate-in fade-in duration-200"
+                  className="bg-blue-50/50 border border-blue-200 p-4 rounded-xl mb-6 grid grid-cols-2 md:grid-cols-5 gap-4 animate-in fade-in duration-200"
                   onMouseLeave={() => setIsEditingTimeline(false)}
                 >
                   <div className="flex flex-col gap-1">
@@ -824,6 +846,8 @@ export default function AnalysisPageClient({
           </section>
         </div>
       </section>
+
+      {/* Financial Performance Trend Chart */}
       <section className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Card className="backdrop-blur-sm border shadow-lg">
@@ -905,8 +929,7 @@ export default function AnalysisPageClient({
                   onSave={(val) => handleInlineSave("ipo_details.profitability_of_allotment.score", parseInt(val) || 0)}
                   type="number"
                   isAdmin={isAdmin}
-                  inputClassName="w-16 text-center border rounded p-1 font-bold text-lg bg-white mx-auto"
-                  textClassName={`summary-score-value mt-4 text-lg font-ibm-plex ${getScoreColor(editedAnalysis.ipo_details.profitability_of_allotment.score)}`}
+                  textClassName={`summary-score-value text-xl font-bold font-ibm-plex ${getScoreColor(editedAnalysis.ipo_details?.profitability_of_allotment?.score ?? 0)}`}
                   renderText={(val) => <span>{val}/10</span>}
                 />
               </div>
@@ -919,8 +942,7 @@ export default function AnalysisPageClient({
                   onSave={(val) => handleInlineSave("ipo_details.profitability_of_allotment.assessment", val)}
                   type="textarea"
                   isAdmin={isAdmin}
-                  inputClassName="w-full border rounded p-2 text-sm text-gray-800 bg-white"
-                  textClassName={`summary-assessment-text mt-4 text-sm font-ibm-plex ${getScoreColor(editedAnalysis.ipo_details.profitability_of_allotment.score)} block min-h-[40px]`}
+                  textClassName={`summary-assessment-text text-sm font-ibm-plex ${getScoreColor(editedAnalysis.ipo_details?.profitability_of_allotment?.score ?? 0)} block`}
                 />
               </div>
             </CardContent>
@@ -930,12 +952,10 @@ export default function AnalysisPageClient({
 
       {/* Section 2: Analysis Sections */}
       <section className="main-background">
-        <div className="max-w-7xl  mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Sticky Navigation */}
-          <div className="sticky  top-[89px] z-40 py-6">
-            <div
-              className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1 p-1 bg-[#E6F4FE] backdrop-blur-sm rounded-full border border-gray-200"
-            >
+          <div className="sticky top-[89px] z-40 py-6">
+            <div className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1 p-1 bg-[#E6F4FE] backdrop-blur-sm rounded-full border border-gray-200">
               {[
                 "performance",
                 "fundamentals",
@@ -973,25 +993,25 @@ export default function AnalysisPageClient({
                   className="scroll-mt-[300px] sm:scroll-mt-[150px] mb-8"
                 >
                   {tab === "performance" && editedAnalysis.performance && (
-                    <div className="p-4 sm:p-6">
+                    <div className="p-4 sm:p-6 bg-white/70 backdrop-blur-sm border rounded-xl">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="heading-section text-blue-600">
-                          Performance
-                        </h3>
-                        {isAdmin && (
-                          <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 animate-in fade-in duration-200">
-                            <span className="text-sm font-bold text-blue-700">Section Score:</span>
+                        <div className="flex items-center gap-3">
+                          <h3 className="heading-section text-blue-600">
+                            Performance
+                          </h3>
+                          <span className="text-sm font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 flex items-center gap-1">
+                            Score:{" "}
                             <EditableText
                               value={editedAnalysis.performance?.score ?? 0}
                               onSave={(val) => handleInlineSave("performance.score", parseInt(val) || 0)}
                               type="number"
                               isAdmin={isAdmin}
-                              inputClassName="w-12 text-center font-bold border rounded p-0.5 text-sm bg-white"
-                              textClassName="text-sm font-bold text-blue-700 underline decoration-dashed cursor-pointer"
+                              inputClassName="w-10 text-center font-bold text-xs p-0.5 rounded border border-blue-500 bg-white"
+                              textClassName="text-sm font-bold text-blue-700 cursor-pointer"
+                              renderText={(val) => <span>{val}/10</span>}
                             />
-                            <span className="text-sm font-bold text-blue-700">/10</span>
-                          </div>
-                        )}
+                          </span>
+                        </div>
                       </div>
                       <ul className="space-y-6 list-disc list-outside pl-5">
                         <li>
@@ -1003,8 +1023,7 @@ export default function AnalysisPageClient({
                             onSave={(val) => handleInlineSave("performance.summary", val)}
                             type="textarea"
                             isAdmin={isAdmin}
-                            className="w-full"
-                            textClassName="text-body block whitespace-pre-wrap min-h-[40px]"
+                            textClassName="text-body whitespace-pre-wrap block"
                           />
                         </li>
                         {editedAnalysis.performance.management_quality && (
@@ -1014,25 +1033,12 @@ export default function AnalysisPageClient({
                             </h4>
                             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full">
                               <div className="flex-shrink-0">
-                                {isAdmin ? (
-                                  <div className="flex flex-col items-center justify-center p-3 bg-gray-50/50 rounded-lg border border-dashed border-gray-300 min-w-[100px]">
-                                    <span className="text-xs font-bold text-gray-500 mb-1">Mgmt Score</span>
-                                    <EditableText
-                                      value={editedAnalysis.performance.management_quality.score ?? 0}
-                                      onSave={(val) => handleInlineSave("performance.management_quality.score", parseInt(val) || 0)}
-                                      type="number"
-                                      isAdmin={isAdmin}
-                                      inputClassName="w-12 text-center font-bold border rounded p-0.5 text-sm bg-white"
-                                      textClassName="text-lg font-bold text-blue-600 cursor-pointer"
-                                    />
-                                    <span className="text-[10px] text-gray-400">out of 10</span>
-                                  </div>
-                                ) : (
-                                  <ProgressCircle
-                                    label="Mgmt Score"
-                                    value={editedAnalysis.performance.management_quality.score}
-                                  />
-                                )}
+                                <ProgressCircle
+                                  label="Mgmt Score"
+                                  value={editedAnalysis.performance.management_quality.score || 0}
+                                  onSaveScore={(val) => handleInlineSave("performance.management_quality.score", parseInt(val) || 0)}
+                                  isAdmin={isAdmin}
+                                />
                               </div>
                               <div className="flex-1 space-y-2 text-body-sm w-full">
                                 <div>
@@ -1042,7 +1048,6 @@ export default function AnalysisPageClient({
                                     onSave={(val) => handleInlineSave("performance.management_quality.experience", val)}
                                     type="textarea"
                                     isAdmin={isAdmin}
-                                    className="inline-block w-full mt-1"
                                     textClassName="text-gray-800"
                                   />
                                 </div>
@@ -1053,7 +1058,6 @@ export default function AnalysisPageClient({
                                     onSave={(val) => handleInlineSave("performance.management_quality.track_record", val)}
                                     type="textarea"
                                     isAdmin={isAdmin}
-                                    className="inline-block w-full mt-1"
                                     textClassName="text-gray-800"
                                   />
                                 </div>
@@ -1071,11 +1075,10 @@ export default function AnalysisPageClient({
                               onSave={(val) => handleInlineArraySave("performance.key_achievements", val)}
                               type="textarea"
                               isAdmin={isAdmin}
-                              className="w-full"
                               renderText={(val) => (
-                                <div className="space-y-2 text-body-sm">
+                                <div className="space-y-1 text-body-sm">
                                   {val.split("\n").filter(a => a.trim() !== "").map((achievement, index) => (
-                                    <p key={index}>{achievement}</p>
+                                    <p key={index} className="text-gray-800">• {achievement}</p>
                                   ))}
                                 </div>
                               )}
@@ -1092,8 +1095,7 @@ export default function AnalysisPageClient({
                               onSave={(val) => handleInlineSave("performance.market_comparison", val)}
                               type="textarea"
                               isAdmin={isAdmin}
-                              className="w-full"
-                              textClassName="text-body block whitespace-pre-wrap min-h-[40px]"
+                              textClassName="text-body whitespace-pre-wrap block"
                             />
                           </li>
                         )}
@@ -1102,25 +1104,25 @@ export default function AnalysisPageClient({
                   )}
 
                   {tab === "fundamentals" && editedAnalysis.fundamentals && (
-                    <div className="p-4 sm:p-6">
+                    <div className="p-4 sm:p-6 bg-white/70 backdrop-blur-sm border rounded-xl">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="heading-section text-blue-600">
-                          Fundamentals
-                        </h3>
-                        {isAdmin && (
-                          <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 animate-in fade-in duration-200">
-                            <span className="text-sm font-bold text-blue-700">Section Score:</span>
+                        <div className="flex items-center gap-3">
+                          <h3 className="heading-section text-blue-600">
+                            Fundamentals
+                          </h3>
+                          <span className="text-sm font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 flex items-center gap-1">
+                            Score:{" "}
                             <EditableText
                               value={editedAnalysis.fundamentals?.score ?? 0}
                               onSave={(val) => handleInlineSave("fundamentals.score", parseInt(val) || 0)}
                               type="number"
                               isAdmin={isAdmin}
-                              inputClassName="w-12 text-center font-bold border rounded p-0.5 text-sm bg-white"
-                              textClassName="text-sm font-bold text-blue-700 underline decoration-dashed cursor-pointer"
+                              inputClassName="w-10 text-center font-bold text-xs p-0.5 rounded border border-blue-500 bg-white"
+                              textClassName="text-sm font-bold text-blue-700 cursor-pointer"
+                              renderText={(val) => <span>{val}/10</span>}
                             />
-                            <span className="text-sm font-bold text-blue-700">/10</span>
-                          </div>
-                        )}
+                          </span>
+                        </div>
                       </div>
                       <ul className="space-y-6 list-disc list-outside pl-5">
                         <li>
@@ -1132,8 +1134,7 @@ export default function AnalysisPageClient({
                             onSave={(val) => handleInlineSave("fundamentals.summary", val)}
                             type="textarea"
                             isAdmin={isAdmin}
-                            className="w-full"
-                            textClassName="text-body block whitespace-pre-wrap min-h-[40px]"
+                            textClassName="text-body whitespace-pre-wrap block"
                           />
                         </li>
                       </ul>
@@ -1141,33 +1142,33 @@ export default function AnalysisPageClient({
                   )}
 
                   {tab === "risk" && editedAnalysis.risk_meter && (
-                    <div className="p-4 sm:p-6">
+                    <div className="p-4 sm:p-6 bg-white/70 backdrop-blur-sm border rounded-xl">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="heading-section text-blue-600">
-                          Risk Assessment
-                        </h3>
-                        {isAdmin && (
-                          <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 animate-in fade-in duration-200">
-                            <span className="text-sm font-bold text-blue-700">Section Score:</span>
+                        <div className="flex items-center gap-3">
+                          <h3 className="heading-section text-blue-600">
+                            Risk Assessment
+                          </h3>
+                          <span className="text-sm font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 flex items-center gap-1">
+                            Score:{" "}
                             <EditableText
                               value={editedAnalysis.risk_meter?.score ?? 0}
                               onSave={(val) => handleInlineSave("risk_meter.score", parseInt(val) || 0)}
                               type="number"
                               isAdmin={isAdmin}
-                              inputClassName="w-12 text-center font-bold border rounded p-0.5 text-sm bg-white"
-                              textClassName="text-sm font-bold text-blue-700 underline decoration-dashed cursor-pointer"
+                              inputClassName="w-10 text-center font-bold text-xs p-0.5 rounded border border-blue-500 bg-white"
+                              textClassName="text-sm font-bold text-blue-700 cursor-pointer"
+                              renderText={(val) => <span>{val}/10</span>}
                             />
-                            <span className="text-sm font-bold text-blue-700">/10</span>
-                          </div>
-                        )}
+                          </span>
+                        </div>
                       </div>
                       <EditableText
                         value={editedAnalysis.risk_meter.summary}
                         onSave={(val) => handleInlineSave("risk_meter.summary", val)}
                         type="textarea"
                         isAdmin={isAdmin}
-                        className="w-full mb-8"
-                        textClassName="text-body block whitespace-pre-wrap min-h-[40px]"
+                        className="mb-8 block"
+                        textClassName="text-body whitespace-pre-wrap block"
                       />
                       {editedAnalysis.risk_meter.risk_categories && (
                         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
@@ -1188,8 +1189,6 @@ export default function AnalysisPageClient({
                                     onSave={(val) => handleInlineArraySave(`risk_meter.risk_categories.${category}`, val)}
                                     type="textarea"
                                     isAdmin={isAdmin}
-                                    className="w-full"
-                                    inputClassName="min-h-[120px]"
                                     renderText={(val) => (
                                       <ul className="list-disc list-outside space-y-2 pl-5 text-body-sm">
                                         {val.split("\n").filter(a => a.trim() !== "").map((risk, i) => (
@@ -1210,25 +1209,25 @@ export default function AnalysisPageClient({
                   )}
 
                   {tab === "flexibility" && editedAnalysis.flexibility && (
-                    <div className="p-4 sm:p-6">
+                    <div className="p-4 sm:p-6 bg-white/70 backdrop-blur-sm border rounded-xl">
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="heading-section text-blue-600">
-                          Business Flexibility & Adaptability
-                        </h3>
-                        {isAdmin && (
-                          <div className="flex items-center gap-2 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 animate-in fade-in duration-200">
-                            <span className="text-sm font-bold text-blue-700">Section Score:</span>
+                        <div className="flex items-center gap-3">
+                          <h3 className="heading-section text-blue-600">
+                            Business Flexibility & Adaptability
+                          </h3>
+                          <span className="text-sm font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100 flex items-center gap-1">
+                            Score:{" "}
                             <EditableText
                               value={editedAnalysis.flexibility?.score ?? 0}
                               onSave={(val) => handleInlineSave("flexibility.score", parseInt(val) || 0)}
                               type="number"
                               isAdmin={isAdmin}
-                              inputClassName="w-12 text-center font-bold border rounded p-0.5 text-sm bg-white"
-                              textClassName="text-sm font-bold text-blue-700 underline decoration-dashed cursor-pointer"
+                              inputClassName="w-10 text-center font-bold text-xs p-0.5 rounded border border-blue-500 bg-white"
+                              textClassName="text-sm font-bold text-blue-700 cursor-pointer"
+                              renderText={(val) => <span>{val}/10</span>}
                             />
-                            <span className="text-sm font-bold text-blue-700">/10</span>
-                          </div>
-                        )}
+                          </span>
+                        </div>
                       </div>
                       <div className="mb-12">
                         <ul className="space-y-6 list-disc list-outside pl-5">
@@ -1241,8 +1240,7 @@ export default function AnalysisPageClient({
                               onSave={(val) => handleInlineSave("flexibility.summary", val)}
                               type="textarea"
                               isAdmin={isAdmin}
-                              className="w-full"
-                              textClassName="text-body block whitespace-pre-wrap min-h-[40px]"
+                              textClassName="text-body whitespace-pre-wrap block"
                             />
                           </li>
                         </ul>
@@ -1252,91 +1250,30 @@ export default function AnalysisPageClient({
                           {
                             label: "Market Adaptability",
                             metric: editedAnalysis.flexibility.market_adaptability,
-                            path: "flexibility.market_adaptability"
+                            path: "flexibility.market_adaptability",
                           },
                           {
                             label: "Financial Stability",
                             metric: editedAnalysis.flexibility.financial_stability,
-                            path: "flexibility.financial_stability"
+                            path: "flexibility.financial_stability",
                           },
                           {
                             label: "Operational Agility",
                             metric: editedAnalysis.flexibility.operational_agility,
-                            path: "flexibility.operational_agility"
+                            path: "flexibility.operational_agility",
                           },
                         ].map(({ label, metric, path }) => {
                           if (!metric) return null;
-                          const cappedValue = Math.min(metric.score || 0, 10);
-                          const strokeWidth = 4;
-                          const progressRadius = 16;
-                          const circumference = 2 * Math.PI * progressRadius;
-                          const strokeDashoffset = circumference - (cappedValue / 10) * circumference;
-
                           return (
-                            <div key={label} className="flex flex-col items-center text-center">
-                              <h4 className="progress-circle-label mb-2 sm:mb-4 text-base font-semibold font-ibm-plex">
-                                {label}
-                              </h4>
-                              <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center">
-                                {isAdmin ? (
-                                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                                    <EditableText
-                                      value={metric.score || 0}
-                                      onSave={(val) => handleInlineSave(`${path}.score`, parseInt(val) || 0)}
-                                      type="number"
-                                      isAdmin={isAdmin}
-                                      inputClassName="w-12 text-center border rounded p-1 font-bold text-sm bg-white"
-                                      textClassName="text-white text-lg font-bold cursor-pointer"
-                                      renderText={(val) => <span>{val}</span>}
-                                    />
-                                  </div>
-                                ) : null}
-                                <svg
-                                  width="100%"
-                                  height="100%"
-                                  viewBox="0 0 36 36"
-                                  className="w-full h-full"
-                                >
-                                  <circle cx="18" cy="18" r={14} fill="#2563eb" />
-                                  <circle
-                                    cx="18"
-                                    cy="18"
-                                    r={progressRadius}
-                                    fill="none"
-                                    stroke="#93c5fd"
-                                    strokeWidth={strokeWidth}
-                                    strokeLinecap="round"
-                                    strokeDasharray={circumference}
-                                    strokeDashoffset={strokeDashoffset}
-                                    transform="rotate(-90 18 18)"
-                                    style={{ transition: "stroke-dashoffset 0.5s ease-in-out" }}
-                                  />
-                                  {!isAdmin && (
-                                    <text
-                                      x="18"
-                                      y="21"
-                                      textAnchor="middle"
-                                      fill="white"
-                                      fontSize="8"
-                                      fontWeight="bold"
-                                      fontFamily="IBM Plex Sans, sans-serif"
-                                    >
-                                      {metric.score || 0}
-                                    </text>
-                                  )}
-                                </svg>
-                              </div>
-                              <div className="mt-2 sm:mt-4 max-w-[290px] sm:max-w-[200px]">
-                                <EditableText
-                                  value={metric.description || ""}
-                                  onSave={(val) => handleInlineSave(`${path}.description`, val)}
-                                  type="textarea"
-                                  isAdmin={isAdmin}
-                                  textClassName="text-sm font-ibm-plex text-body-sm"
-                                  inputClassName="w-full border rounded p-1 text-xs text-gray-800 bg-white"
-                                />
-                              </div>
-                            </div>
+                            <ProgressCircle
+                              key={label}
+                              label={label}
+                              value={metric.score || 0}
+                              description={metric.description || ""}
+                              onSaveScore={(val) => handleInlineSave(`${path}.score`, parseInt(val) || 0)}
+                              onSaveDescription={(val) => handleInlineSave(`${path}.description`, val)}
+                              isAdmin={isAdmin}
+                            />
                           );
                         })}
                       </div>
@@ -1344,10 +1281,12 @@ export default function AnalysisPageClient({
                   )}
 
                   {tab === "investor_split" && (
-                    <div className="p-4 sm:p-6">
-                      <h3 className="heading-section text-blue-600 mb-6">
-                        Investor Split & Application Details
-                      </h3>
+                    <div className="p-4 sm:p-6 bg-white/70 backdrop-blur-sm border rounded-xl">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="heading-section text-blue-600">
+                          Investor Split & Application Details
+                        </h3>
+                      </div>
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                         <div className="w-full h-full">
                           <h4 className="heading-subsection text-center mb-4">
@@ -1395,6 +1334,7 @@ export default function AnalysisPageClient({
         </div>
       </section>
 
+      {/* Floating Admin Status Bar */}
       {isAdmin && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4 bg-white/95 backdrop-blur-md border border-blue-200 p-4 rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className="flex items-center gap-3">
@@ -1410,10 +1350,10 @@ export default function AnalysisPageClient({
             <div className="flex flex-col">
               <span className="text-xs font-bold text-gray-500">Administrative Dashboard</span>
               <span className="text-sm font-semibold text-gray-800">
-                {isSaving ? "Saving changes..." : "Direct Inline Editing Active"}
+                {isSaving ? "Saving changes..." : "Direct Inline Field Editing Active"}
               </span>
               <span className="text-[10px] text-gray-400 font-medium mt-0.5">
-                Double-click any field to edit • Click outside to auto-save
+                Double-click any text or score to edit then & there
               </span>
             </div>
           </div>

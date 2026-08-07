@@ -407,7 +407,7 @@ function AdminContent() {
                         </td>
                         <td className="p-4 actions-cell">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <IpoAnalysisModal ipoItem={ipoItem} onAnalysisSaved={refreshData} />
+                            <IpoAnalysisModal ipoItem={ipoItem} onAnalysisAdded={refreshData} />
                             <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => router.push(`/analysis/${ipoItem.ipo.slug || ipoItem.analysis?.slug || ipoItem.ipo._id}`)}><LineChart className="h-4 w-4 mr-1.5 text-red-600" />Analysis</Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-9 px-3"><PenTool className="h-4 w-4 mr-1.5 text-primary" />Blog</Button></DropdownMenuTrigger>
