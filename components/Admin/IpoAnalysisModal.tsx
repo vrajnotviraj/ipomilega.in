@@ -21,7 +21,8 @@ import React, { useState, useEffect } from 'react';
         ExternalLink,
         Link as LinkIcon,
         ArrowLeftCircle,
-        Edit
+        Edit,
+        Sparkles
     } from 'lucide-react';
     import { toast } from 'sonner';
     import { cn } from '@/lib/utils';
@@ -169,6 +170,126 @@ import React, { useState, useEffect } from 'react';
 
     // Updated prompts to include summary
     const analysisPrompts = {
+        all: `**CRITICAL: Do not mention page numbers. Keep all summaries and descriptions under 30 words.** Analyze all factors for this IPO in one shot.
+
+Return a single JSON object with this exact structure:
+{
+  "risk_factors": {
+    "score": number (1-10, lower is better),
+    "summary": "string (Max 30 words)",
+    "key_risks": ["array of 5-7 risk strings"],
+    "risk_categories": {
+      "financial_risks": ["array of strings"],
+      "market_risks": ["array of strings"],
+      "operational_risks": ["array of strings"],
+      "regulatory_risks": ["array of strings"]
+    },
+    "risk_mitigation": "string (Max 30 words)"
+  },
+  "performance": {
+    "score": number (1-10),
+    "summary": "string (Max 30 words)",
+    "historical_growth": {
+      "pattern": "string",
+      "rate": "string",
+      "consistency": "string"
+    },
+    "key_achievements": ["array of strings"],
+    "management_quality": {
+      "experience": "string (Max 30 words)",
+      "track_record": "string (Max 30 words)",
+      "score": number (1-10)
+    },
+    "market_comparison": "string (Max 30 words)",
+    "future_potential": {
+      "growth_forecast": "string (Max 30 words)",
+      "upcoming_projects": ["array of strings"]
+    },
+    "consistency_analysis": {
+      "operational_years": number,
+      "revenue_stability": "string",
+      "rationale": "string (Max 30 words)"
+    }
+  },
+  "flexibility": {
+    "score": number (1-10),
+    "summary": "string (Max 30 words)",
+    "market_adaptability": {
+      "score": number (1-10),
+      "description": "string (Max 30 words)"
+    },
+    "financial_stability": {
+      "score": number,
+      "description": "string (Max 30 words)"
+    },
+    "operational_agility": {
+      "score": number (1-10),
+      "description": "string (Max 30 words)"
+    },
+    "product_diversification": "string (Max 30 words)",
+    "pivoting_history": ["array of strings"],
+    "future_adaptability_potential": "string (Max 30 words)"
+  },
+  "financial_fundamentals": {
+    "score": number (1-10),
+    "summary": "string (Max 30 words)",
+    "market_position": "string (Max 30 words)",
+    "business_model": "string (Max 30 words)",
+    "revenue_details": {
+      "total_revenue": number,
+      "revenue_cagr": number,
+      "revenue_trend": "string"
+    },
+    "profit_analysis": {
+      "net_profit": number,
+      "profit_margin": number,
+      "ebitda": number | null,
+      "profit_trend": "string"
+    },
+    "assets_and_liabilities": {
+      "total_assets": number,
+      "total_liabilities": number | null,
+      "debt_to_equity_ratio": number | null
+    },
+    "financial_ratios": {
+      "current_ratio": "string",
+      "quick_ratio": "string",
+      "return_on_equity": "string"
+    }
+  },
+  "timing": {
+    "score": number (1-10),
+    "summary": "string (Max 30 words)",
+    "issue_dates": {
+      "opening": "YYYY-MM-DD",
+      "closing": "YYYY-MM-DD"
+    },
+    "listing_details": {
+      "expected_date": "YYYY-MM-DD",
+      "exchanges": ["array of exchange strings"]
+    },
+    "allotment_timeline": {
+      "date": "YYYY-MM-DD",
+      "process": "string"
+    },
+    "key_milestones": [
+      { "date": "YYYY-MM-DD", "event": "string" }
+    ],
+    "market_timing_assessment": "string (Max 30 words)",
+    "time_to_market": {
+      "score": number (1-10),
+      "rationale": "string (Max 30 words)"
+    }
+  },
+  "final_summary": {
+    "approximate_gains_potential": number,
+    "gains_rationale": "string (Max 30 words)",
+    "profitability_of_allotment": {
+      "score": number (1-10),
+      "assessment": "string (Max 30 words)"
+    }
+  }
+}`,
         risk_meter: `**CRITICAL: Do not mention page numbers. Keep all summaries and descriptions under 20 words.** Analyze risk factors for this IPO.
 
     RISK FACTORS TEXT (RHP): READ THE REFERENCE FROM THE PDF
@@ -350,6 +471,7 @@ import React, { useState, useEffect } from 'react';
 
     // Analysis steps
     const analysisSteps: AnalysisStep[] = [
+        { id: 'all', title: 'All Factors (One Shot)', description: 'Paste all 6 analysis factors in a single JSON object.', icon: Sparkles, color: 'text-amber-500', required: false },
         { id: 'risk_meter', title: 'Risk Analysis', description: 'Evaluate potential risks and mitigation strategies.', icon: Shield, color: 'text-red-600', required: true },
         { id: 'performance', title: 'Performance', description: 'Analyze historical growth and achievements.', icon: TrendingUp, color: 'text-green-600', required: true },
         { id: 'flexibility', title: 'Flexibility', description: 'Assess market adaptability and agility.', icon: Activity, color: 'text-blue-600', required: true },
@@ -497,7 +619,50 @@ import React, { useState, useEffect } from 'react';
         const parsePercentage = (value: string): number => {
             if (!value) return 0;
             const match = value.match(/(\d+(?:\.\d+)?)/);
-            return match ? parseFloat(match[1]) : 0;
+        const isCombinedJsonObj = (obj: any): boolean => {
+            if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+            return (
+                'risk_factors' in obj ||
+                'risk_meter' in obj ||
+                'performance' in obj ||
+                'flexibility' in obj ||
+                'financial_fundamentals' in obj ||
+                'fundamentals' in obj ||
+                'timing' in obj ||
+                'time' in obj ||
+                'final_summary' in obj ||
+                'summary' in obj
+            );
+        };
+
+        const extractCombinedSections = (obj: any) => {
+            const risk_meter = obj.risk_factors || obj.risk_meter;
+            const performance = obj.performance;
+            const flexibility = obj.flexibility;
+            const fundamentals = obj.financial_fundamentals || obj.fundamentals;
+            const time = obj.timing || obj.time;
+            const summary = obj.final_summary || obj.summary;
+
+            return {
+                ...(risk_meter ? { risk_meter } : {}),
+                ...(performance ? { performance } : {}),
+                ...(flexibility ? { flexibility } : {}),
+                ...(fundamentals ? { fundamentals } : {}),
+                ...(time ? { time } : {}),
+                ...(summary ? { summary } : {}),
+            };
+        };
+
+        const buildCombinedJsonString = (data: AnalysisData) => {
+            const combined = {
+                risk_factors: data.risk_meter || null,
+                performance: data.performance || null,
+                flexibility: data.flexibility || null,
+                financial_fundamentals: data.fundamentals || null,
+                timing: data.time || null,
+                final_summary: data.summary || null,
+            };
+            return JSON.stringify(combined, null, 2);
         };
 
         useEffect(() => {
@@ -529,10 +694,13 @@ import React, { useState, useEffect } from 'react';
                     if (existing.fundamentals) completed.add('fundamentals');
                     if (existing.time) completed.add('time');
                     completed.add('summary');
+                    if (existing.risk_meter && existing.performance && existing.flexibility && existing.fundamentals && existing.time) {
+                        completed.add('all');
+                    }
                     setCompletedSteps(completed);
                     
-                    // Pre-fill the JSON textarea for the first step
-                    setJsonInput(JSON.stringify(existing.risk_meter, null, 2));
+                    // Pre-fill the JSON textarea for 'all' step
+                    setJsonInput(buildCombinedJsonString(mapped));
                 } else {
                     setAnalysisData({});
                     setCompletedSteps(new Set());
@@ -544,22 +712,35 @@ import React, { useState, useEffect } from 'react';
         // Auto-load data when step changes
         useEffect(() => {
             const stepId = analysisSteps[currentStep].id;
-            const stepData = analysisData[stepId as keyof AnalysisData];
-            if (stepData) {
-                setJsonInput(JSON.stringify(stepData, null, 2));
+            if (stepId === 'all') {
+                const hasAnyData = Object.keys(analysisData).some(key => Boolean(analysisData[key as keyof AnalysisData]));
+                if (hasAnyData) {
+                    setJsonInput(buildCombinedJsonString(analysisData));
+                } else {
+                    setJsonInput('');
+                }
             } else {
-                setJsonInput('');
+                const stepData = analysisData[stepId as keyof AnalysisData];
+                if (stepData) {
+                    setJsonInput(JSON.stringify(stepData, null, 2));
+                } else {
+                    setJsonInput('');
+                }
             }
             setJsonError(null);
         }, [currentStep, analysisData]);
 
-        const validateJson = (jsonString: string): { isValid: boolean; data?: AnalysisDataType; error?: string } => {
+        const validateJson = (jsonString: string): { isValid: boolean; isCombined?: boolean; combinedData?: Partial<AnalysisData>; data?: any; error?: string } => {
             if (!jsonString.trim()) {
                 return { isValid: false, error: 'JSON data cannot be empty.' };
             }
             try {
-                const data = JSON.parse(jsonString) as AnalysisDataType;
-                return { isValid: true, data };
+                const parsed = JSON.parse(jsonString);
+                if (isCombinedJsonObj(parsed)) {
+                    const combinedSections = extractCombinedSections(parsed);
+                    return { isValid: true, isCombined: true, combinedData: combinedSections };
+                }
+                return { isValid: true, isCombined: false, data: parsed };
             } catch (error) {
                 return { isValid: false, error: `Invalid JSON format: ${error instanceof Error ? error.message : 'Unknown error'}` };
             }
@@ -577,16 +758,37 @@ import React, { useState, useEffect } from 'react';
 
         const saveCurrentStep = (input: string) => {
             const validation = validateJson(input);
-            if (validation.isValid && validation.data) {
-                const stepId = currentStepData.id;
-                setAnalysisData(prev => ({ ...prev, [stepId as keyof AnalysisData]: validation.data }));
-                setCompletedSteps(prev => new Set(prev).add(stepId));
-                setJsonError(null);
-                return true;
-            } else {
-                setJsonError(validation.error || 'Invalid JSON');
-                return false;
+            if (validation.isValid) {
+                if (validation.isCombined && validation.combinedData) {
+                    const sections = validation.combinedData;
+                    setAnalysisData(prev => ({ ...prev, ...sections }));
+                    setCompletedSteps(prev => {
+                        const newSet = new Set(prev);
+                        if (sections.risk_meter) newSet.add('risk_meter');
+                        if (sections.performance) newSet.add('performance');
+                        if (sections.flexibility) newSet.add('flexibility');
+                        if (sections.fundamentals) newSet.add('fundamentals');
+                        if (sections.time) newSet.add('time');
+                        if (sections.summary) newSet.add('summary');
+                        newSet.add('all');
+                        return newSet;
+                    });
+                    setJsonError(null);
+                    return true;
+                } else if (validation.data) {
+                    const stepId = currentStepData.id;
+                    if (stepId === 'all') {
+                        setJsonError('Expected combined JSON object with keys like risk_factors, performance, etc.');
+                        return false;
+                    }
+                    setAnalysisData(prev => ({ ...prev, [stepId as keyof AnalysisData]: validation.data }));
+                    setCompletedSteps(prev => new Set(prev).add(stepId));
+                    setJsonError(null);
+                    return true;
+                }
             }
+            setJsonError(validation.error || 'Invalid JSON');
+            return false;
         };
 
         const navigateStep = (direction: 'next' | 'prev' | 'skip') => {
@@ -717,9 +919,17 @@ import React, { useState, useEffect } from 'react';
             }
 
             // Get final analysis data with current step if there's input
-            const finalAnalysisData = jsonInput.trim() ?
-                { ...analysisData, [currentStepData.id]: JSON.parse(jsonInput) } :
-                analysisData;
+            let finalAnalysisData = analysisData;
+            if (jsonInput.trim()) {
+                const validation = validateJson(jsonInput);
+                if (validation.isValid) {
+                    if (validation.isCombined && validation.combinedData) {
+                        finalAnalysisData = { ...analysisData, ...validation.combinedData };
+                    } else if (validation.data && currentStepData.id !== 'all') {
+                        finalAnalysisData = { ...analysisData, [currentStepData.id]: validation.data };
+                    }
+                }
+            }
 
             const requiredSteps = analysisSteps.filter(step => step.required);
             const firstMissingStep = requiredSteps.find(step => !finalAnalysisData[step.id as keyof AnalysisData]);
@@ -1264,7 +1474,10 @@ import React, { useState, useEffect } from 'react';
                                     <div className="flex-1 p-6 flex flex-col overflow-hidden">
                                         <div className="relative flex-1 flex flex-col">
                                             <Textarea
-                                                placeholder={`Paste your ${currentStepData.title.toLowerCase()} JSON data here...`}
+                                                placeholder={currentStepData.id === 'all' 
+                                                    ? "Paste your all-in-one JSON data here (containing risk_factors, performance, flexibility, financial_fundamentals, timing, final_summary)..."
+                                                    : `Paste your ${currentStepData.title.toLowerCase()} JSON data here...`
+                                                }
                                                 value={jsonInput}
                                                 onChange={(e) => handleJsonChange(e.target.value)}
                                                 className="flex-1 w-full font-mono text-sm resize-none min-h-0 border-2 focus:border-blue-500 rounded-lg"
@@ -1279,7 +1492,9 @@ import React, { useState, useEffect } from 'react';
                                         {jsonInput.trim() && !jsonError && (
                                             <div className="flex items-center gap-2 text-green-600 text-sm mt-3 p-2 bg-green-50 rounded-md">
                                                 <CheckCircle className="h-4 w-4" />
-                                                Valid JSON format - Ready to save
+                                                {validateJson(jsonInput).isCombined
+                                                    ? "Valid Combined JSON - All 6 factors detected and ready!"
+                                                    : "Valid JSON format - Ready to save"}
                                             </div>
                                         )}
                                     </div>
