@@ -393,7 +393,6 @@ export default function AnalysisPageClient({
     "fundamentals",
     "risk",
     "flexibility",
-    "investor_split",
   ]);
   const sectionRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -634,7 +633,7 @@ export default function AnalysisPageClient({
             <h2 id="key-metrics-heading" className="sr-only">
               Key Investment Metrics
             </h2>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 {
                   label: "Overall Score",
@@ -660,9 +659,9 @@ export default function AnalysisPageClient({
                   color: "text-foreground",
                   description: "Price per share",
                   path: "ipo_details.price_band",
-                 },
+                },
                 {
-                  label: "GMP",
+                  label: "GMP (Potential Gain)",
                   value: editedAnalysis.gmp_price_gain
                     ? `₹${editedAnalysis.gmp_price_gain}`
                     : ipo.gmp_price_gain
@@ -671,13 +670,6 @@ export default function AnalysisPageClient({
                   color: "text-emerald-600 dark:text-emerald-400",
                   description: "Grey Market Premium",
                   path: "gmp_price_gain",
-                },
-                {
-                   label: "Potential Gains",
-                  value: editedAnalysis.ipo_details?.gains_rationale || "N/A",
-                  color: "text-green-600 dark:text-green-400",
-                  description: "Expected listing gains",
-                  isGains: true,
                 },
               ].map((metric) => (
                 <div
@@ -691,27 +683,6 @@ export default function AnalysisPageClient({
                     <p className={`metric-card-value ${metric.color} text-xl font-ibm-plex font-bold`}>
                       {metric.value}
                     </p>
-                  ) : metric.isGains ? (
-                    <div className="flex flex-col gap-1 items-center justify-center">
-                      <EditableText
-                        value={editedAnalysis.ipo_details?.gains_rationale || ""}
-                        onSave={(val) => handleInlineSave("ipo_details.gains_rationale", val)}
-                        isAdmin={isAdmin}
-                        textClassName="metric-card-value text-green-600 dark:text-green-400 text-xl font-ibm-plex font-bold"
-                      />
-                      <div className="flex items-center gap-1 text-xs justify-center">
-                        <span className="text-gray-500 font-semibold">Gains %:</span>
-                        <EditableText
-                          value={editedAnalysis.ipo_details?.approximate_gains_potential ?? 0}
-                          onSave={(val) => handleInlineSave("ipo_details.approximate_gains_potential", parseFloat(val) || 0)}
-                          type="number"
-                          isAdmin={isAdmin}
-                          inputClassName="w-16 text-center font-bold text-xs p-0.5 rounded border border-blue-500 bg-white"
-                          textClassName="text-green-600 font-bold"
-                          renderText={(val) => <span>{val}%</span>}
-                        />
-                      </div>
-                    </div>
                   ) : (
                     <EditableText
                       value={metric.path ? ((metric.path.split('.').reduce<unknown>((obj, key) => (obj as Record<string, unknown>)?.[key], editedAnalysis) as string | number | undefined) || "") : ""}
@@ -728,7 +699,7 @@ export default function AnalysisPageClient({
             </div>
           </section>
 
-          {/* Timeline & Investor Split */}
+          {/* Timeline */}
           <section
             className="p-4 sm:p-6 bg-white/50 backdrop-blur-sm border rounded-xl"
             onDoubleClick={(e) => {
@@ -743,7 +714,7 @@ export default function AnalysisPageClient({
             }}
           >
             <h2 className="heading-section text-gray-800 mb-12 text-center sm:text-left select-none">
-              Timeline & Split {isAdmin && <span className="text-xs font-normal text-blue-500 ml-2">(Double-click here to edit dates)</span>}
+              Timeline {isAdmin && <span className="text-xs font-normal text-blue-500 ml-2">(Double-click here to edit dates)</span>}
             </h2>
             <div className="w-full mb-16">
               {isAdmin && isEditingTimeline && (
@@ -854,6 +825,53 @@ export default function AnalysisPageClient({
                   IPO timeline will be displayed once opening and listing dates are available.
                 </div>
               )}
+            </div>
+          </section>
+
+          {/* Investor Split & Application Details */}
+          <section className="p-4 sm:p-6 bg-white/70 backdrop-blur-sm border rounded-xl shadow-sm">
+            <h2 className="heading-section text-blue-600 mb-6 text-center sm:text-left">
+              Investor Split & Application Details
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div className="w-full h-full">
+                <h4 className="heading-subsection text-center mb-4">
+                  Allocation Quota
+                </h4>
+                <InvestorSplitPieChart data={pieChartData} />
+              </div>
+
+              <div className="w-full">
+                <h4 className="heading-subsection text-center mb-4">
+                  Application Size
+                </h4>
+                {investorTableData.length > 0 ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Application</TableHead>
+                        <TableHead>Lot Size</TableHead>
+                        <TableHead>Shares</TableHead>
+                        <TableHead>Amount</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {investorTableData.map((row: IPOInvestorSplit, index: number) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">{row.application || "-"}</TableCell>
+                          <TableCell>{row.lot_size || "-"}</TableCell>
+                          <TableCell>{row.shares || "-"}</TableCell>
+                          <TableCell>{row.amount || "-"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <p className="text-center text-muted-foreground mt-8">
+                    Application details are not available.
+                  </p>
+                )}
+              </div>
             </div>
           </section>
         </div>
@@ -967,13 +985,12 @@ export default function AnalysisPageClient({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Sticky Navigation */}
           <div className="sticky top-[89px] z-40 py-6">
-            <div className="grid w-full grid-cols-2 sm:grid-cols-5 gap-1 p-1 bg-[#E6F4FE] backdrop-blur-sm rounded-full border border-gray-200">
+            <div className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-[#E6F4FE] backdrop-blur-sm rounded-full border border-gray-200">
               {[
                 "performance",
                 "fundamentals",
                 "risk",
                 "flexibility",
-                "investor_split",
               ].map((tab) => (
                 <button
                   key={tab}
@@ -1288,56 +1305,6 @@ export default function AnalysisPageClient({
                             />
                           );
                         })}
-                      </div>
-                    </div>
-                  )}
-
-                  {tab === "investor_split" && (
-                    <div className="p-4 sm:p-6 bg-white/70 backdrop-blur-sm border rounded-xl">
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="heading-section text-blue-600">
-                          Investor Split & Application Details
-                        </h3>
-                      </div>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                        <div className="w-full h-full">
-                          <h4 className="heading-subsection text-center mb-4">
-                            Allocation Quota
-                          </h4>
-                          <InvestorSplitPieChart data={pieChartData} />
-                        </div>
-
-                        <div className="w-full">
-                          <h4 className="heading-subsection text-center mb-4">
-                            Application Size
-                          </h4>
-                          {investorTableData.length > 0 ? (
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Application</TableHead>
-                                  <TableHead>Lot Size</TableHead>
-                                  <TableHead>Shares</TableHead>
-                                  <TableHead>Amount</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {investorTableData.map((row: IPOInvestorSplit, index: number) => (
-                                  <TableRow key={index}>
-                                    <TableCell className="font-medium">{row.application || "-"}</TableCell>
-                                    <TableCell>{row.lot_size || "-"}</TableCell>
-                                    <TableCell>{row.shares || "-"}</TableCell>
-                                    <TableCell>{row.amount || "-"}</TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          ) : (
-                            <p className="text-center text-muted-foreground mt-8">
-                              Application details are not available.
-                            </p>
-                          )}
-                        </div>
                       </div>
                     </div>
                   )}
