@@ -291,6 +291,7 @@ export function IpoAnalysisEditModal({
         image_url: ipoItem.ipo.image_url || "",
         investorSplit: ipoItem.ipo.ipo_market_lot || [],
         slug: ipoItem.ipo.slug || "",
+        gmp_price_gain: ipoItem.ipo.gmp_price_gain || "",
         financialReport: ipoItem.ipo.financial_report || [],
         fundamentals: {
           score: fundamentals.score,
@@ -395,6 +396,7 @@ export function IpoAnalysisEditModal({
           issue_size: ipoItem.ipo.ipo_size || "",
           price_band: ipoItem.ipo.price_band || "",
           lot_size: parseInt(ipoItem.ipo.ipo_market_lot?.[0]?.lot_size || "0") || 0,
+          shares: parseInt(ipoItem.ipo.ipo_market_lot?.[0]?.shares || "0") || 0,
           allocation_details: {
             retail: parseFloat(ipoItem.ipo.ipo_details?.retail_quota || "35") || 35,
             qib: parseFloat(ipoItem.ipo.ipo_details?.qib_quota || "50") || 50,

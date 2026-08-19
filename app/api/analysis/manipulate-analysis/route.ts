@@ -130,6 +130,7 @@ interface IpoDetailsData {
   issue_size: string;
   price_band: string;
   lot_size: number;
+  shares: number;
   allocation_details: {
     retail: number;
     qib: number;
@@ -163,6 +164,7 @@ interface RequestBody {
   slug:string;
   investorSplit: IPOInvestorSplit[];
   financialReport: FinancialReportData[];
+  gmp_price_gain: string;
   risk_meter: RiskMeterData;
   performance: PerformanceData;
   flexibility: FlexibilityData;
@@ -197,7 +199,9 @@ interface IpoRecord {
   };
   ipo_market_lot?: Array<{
     lot_size?: string;
+    shares?: string;
   }>;
+  gmp_price_gain?: string;
 }
 
 interface FinancialReportData {
@@ -218,6 +222,7 @@ export async function POST(req: NextRequest) {
       image_url,
       investorSplit,
       financialReport,
+      gmp_price_gain,
       risk_meter,
       performance,
       flexibility,
@@ -281,6 +286,7 @@ export async function POST(req: NextRequest) {
       company_name: company_name,
       slug: slug,
       image_url: image_url || ipoRecord.image_url || '',
+      gmp_price_gain: gmp_price_gain || ipoRecord.gmp_price_gain || '',
       
       // Fundamentals section - directly use the data from modal
       fundamentals: {
@@ -405,6 +411,7 @@ export async function POST(req: NextRequest) {
         issue_size: ipo_details?.issue_size || ipoRecord.ipo_details?.issue_size || ipoRecord.ipo_size || '',
         price_band: ipo_details?.price_band || ipoRecord.ipo_details?.ipo_price_band || ipoRecord.price_band || '',
         lot_size: ipo_details?.lot_size || (ipoRecord.ipo_market_lot?.[0]?.lot_size ? parseInt(ipoRecord.ipo_market_lot[0].lot_size) : 0),
+        shares: ipo_details?.shares || (ipoRecord.ipo_market_lot?.[0]?.shares ? parseInt(ipoRecord.ipo_market_lot[0].shares) : 0),
         allocation_details: ipo_details?.allocation_details || {
           retail: ipoRecord.ipo_details?.retail_quota ? parseFloat(ipoRecord.ipo_details.retail_quota) : 35,
           qib: ipoRecord.ipo_details?.qib_quota ? parseFloat(ipoRecord.ipo_details.qib_quota) : 50,

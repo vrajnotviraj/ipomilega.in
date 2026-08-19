@@ -11,6 +11,7 @@ export interface IpoComprehensiveAnalysis {
     performance: IpoPerformance;
     ipo_details: IpoDetailsComprehensive;
     summary_metrics: IpoSummaryMetrics;
+    gmp_price_gain: string;
     investorSplit: IPOInvestorSplit[];
     financialReport: FinancialReport[];
     created_at?: Date;
@@ -135,6 +136,7 @@ interface IpoDetailsComprehensive {
     issue_size: string; // Maps from ipo_details.issue_size or ipo_size
     price_band: string; // Maps from ipo_details.ipo_price_band or price_band
     lot_size: number; // Maps from ipo_market_lot[0].lot_size (parsed as number)
+    shares: number; // Number of shares per lot
     allocation_details: {
         retail: number; // Maps from ipo_details.retail_quota (parsed as percentage)
         qib: number; // Maps from ipo_details.qib_quota (parsed as percentage)

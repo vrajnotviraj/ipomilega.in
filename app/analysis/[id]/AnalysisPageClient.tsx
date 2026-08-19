@@ -346,6 +346,7 @@ export default function AnalysisPageClient({
       image_url: newAnalysis.image_url || ipo.image_url || "",
       investorSplit: newAnalysis.investorSplit || [],
       financialReport: newAnalysis.financialReport || [],
+      gmp_price_gain: newAnalysis.gmp_price_gain || ipo.gmp_price_gain || "",
       fundamentals: newAnalysis.fundamentals,
       risk_meter: newAnalysis.risk_meter,
       flexibility: newAnalysis.flexibility,
@@ -633,7 +634,7 @@ export default function AnalysisPageClient({
             <h2 id="key-metrics-heading" className="sr-only">
               Key Investment Metrics
             </h2>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
               {[
                 {
                   label: "Overall Score",
@@ -659,9 +660,20 @@ export default function AnalysisPageClient({
                   color: "text-foreground",
                   description: "Price per share",
                   path: "ipo_details.price_band",
+                 },
+                {
+                  label: "GMP",
+                  value: editedAnalysis.gmp_price_gain
+                    ? `₹${editedAnalysis.gmp_price_gain}`
+                    : ipo.gmp_price_gain
+                      ? `₹${ipo.gmp_price_gain}`
+                      : "N/A",
+                  color: "text-emerald-600 dark:text-emerald-400",
+                  description: "Grey Market Premium",
+                  path: "gmp_price_gain",
                 },
                 {
-                  label: "Potential Gains",
+                   label: "Potential Gains",
                   value: editedAnalysis.ipo_details?.gains_rationale || "N/A",
                   color: "text-green-600 dark:text-green-400",
                   description: "Expected listing gains",
@@ -1305,6 +1317,7 @@ export default function AnalysisPageClient({
                                 <TableRow>
                                   <TableHead>Application</TableHead>
                                   <TableHead>Lot Size</TableHead>
+                                  <TableHead>Shares</TableHead>
                                   <TableHead>Amount</TableHead>
                                 </TableRow>
                               </TableHeader>
@@ -1313,6 +1326,7 @@ export default function AnalysisPageClient({
                                   <TableRow key={index}>
                                     <TableCell className="font-medium">{row.application || "-"}</TableCell>
                                     <TableCell>{row.lot_size || "-"}</TableCell>
+                                    <TableCell>{row.shares || "-"}</TableCell>
                                     <TableCell>{row.amount || "-"}</TableCell>
                                   </TableRow>
                                 ))}

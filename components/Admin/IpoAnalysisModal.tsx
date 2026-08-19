@@ -825,11 +825,13 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
         const niiQuota = ipo.ipo_details?.nii_quota || '15';
 
         const lotSize = parseInt(ipo.ipo_market_lot?.[0]?.lot_size || '0');
+        const shares = parseInt(ipo.ipo_market_lot?.[0]?.shares || '0');
 
         return {
             issue_size: ipo.ipo_size || '',
             price_band: ipo.price_band || '',
             lot_size: lotSize,
+            shares: shares,
             allocation_details: {
                 retail: parsePercentage(retailQuota),
                 qib: parsePercentage(qibQuota),
@@ -979,6 +981,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                 image_url: ipoItem.ipo.image_url || '',
                 investorSplit: marketLot,
                 slug: ipoItem.ipo.slug,
+                gmp_price_gain: ipoItem.ipo.gmp_price_gain || '',
                 financialReport: ipoItem.ipo.financial_report || {},
                 fundamentals: finalAnalysisData.fundamentals || {},
                 risk_meter: finalAnalysisData.risk_meter || {},
