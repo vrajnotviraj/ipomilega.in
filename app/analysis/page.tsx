@@ -303,8 +303,8 @@ export default function AllIPOsPage() {
   ];
 
   const formatGmpDisplay = (ipo: IpoComprehensiveAnalysis) => {
-    const val = ipo.gmp_price_gain || ipo.ipo_details?.gains_rationale || "";
-    if (!val || val === "N/A") return "N/A";
+    const val = ipo.gmp_price_gain || "";
+    if (!val || val === "N/A" || val === "TBD" || val === "TBA") return "N/A";
     return val.includes("₹") ? val : `₹${val}`;
   };
 
