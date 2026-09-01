@@ -1,596 +1,313 @@
 "use client";
-import { useEffect, useState, Suspense } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import {
-  Search,
-  Building2,
-  Calendar,
-  TrendingUp,
-  Shield,
-  ChevronRight,
-  LineChart,
-  PieChart,
-  ChevronLeft,
-  RefreshCw,
-  Clock,
-  XCircle,
-  Activity,
-  Loader2
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { HomePageIpoProps } from "../types/homepage"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useProgressRouter } from "@/components/Progressbar/useProgressRouter"
-import { useSearchParams } from "next/navigation"
+import { useEffect, useState, Suspense, useMemo } from "react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, ChevronLeft, ChevronRight, Building2, Loader2 } from "lucide-react";
+import { HomePageIpoProps } from "../types/homepage";
+import { useProgressRouter } from "@/components/Progressbar/useProgressRouter";
+import { useSearchParams } from "next/navigation";
+import { getIpoType, getPriceBand, getRiskTextColor, formatShortDate } from "@/components/Home/ipoFormat";
 
-type FilterType = 'all' | 'live' | 'upcoming' | 'past'
+type Status = "Upcoming" | "Open" | "Listed";
+type Row = HomePageIpoProps & { status: Status };
+
+const STATUS_STYLES: Record<Status, string> = {
+  Upcoming: "bg-secondary text-foreground/70",
+  Open: "bg-score-mid/15 text-score-mid",
+  Listed: "bg-muted text-muted-foreground",
+};
+
+function StatusBadge({ status }: { status: Status }) {
+  return (
+    <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium ${STATUS_STYLES[status]}`}>
+      {status}
+    </span>
+  );
+}
 
 function IPOsContent() {
-  const [ipoList, setIpoList] = useState<HomePageIpoProps[]>([])
-  const [upcomingIpoList, setUpcomingIpoList] = useState<HomePageIpoProps[]>([])
-  const [liveIpoList, setLiveIpoList] = useState<HomePageIpoProps[]>([])
-  const [pastIpoList, setPastIpoList] = useState<HomePageIpoProps[]>([])
-  const router = useProgressRouter()
-  const searchParams = useSearchParams()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filteredIpos, setFilteredIpos] = useState<HomePageIpoProps[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [activeFilter, setActiveFilter] = useState<FilterType>('all')
-  const itemsPerPage = 10
+  const router = useProgressRouter();
+  const searchParams = useSearchParams();
 
-  // Get filter from URL parameter
+  const [upcoming, setUpcoming] = useState<HomePageIpoProps[]>([]);
+  const [live, setLive] = useState<HomePageIpoProps[]>([]);
+  const [past, setPast] = useState<HomePageIpoProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "Mainboard" | "SME">("all");
+  const [sortBy, setSortBy] = useState<"score-desc" | "score-asc" | "closing" | "name">("score-desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   useEffect(() => {
-    const filterParam = searchParams.get('filter') as FilterType
-    if (filterParam && ['all', 'live', 'upcoming', 'past'].includes(filterParam)) {
-      setActiveFilter(filterParam)
-    }
-  }, [searchParams])
-
-  const refreshData = () => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 1000)
-  }
-
-  // Get current IPO list based on active filter
-  const getCurrentIpoList = () => {
-    switch (activeFilter) {
-      case 'live':
-        return liveIpoList
-      case 'upcoming':
-        return upcomingIpoList
-      case 'past':
-        return pastIpoList
-      default:
-        return ipoList
-    }
-  }
-
-  // Filter and search logic
-  useEffect(() => {
-    const currentList = getCurrentIpoList()
-    const filtered = currentList.filter(ipoItem =>
-      ipoItem.ipo.upcoming_ipo_2025?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ipoItem.ipo.ipo_type?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    setFilteredIpos(filtered)
-    setCurrentPage(1)
-  }, [searchQuery, ipoList, liveIpoList, upcomingIpoList, pastIpoList, activeFilter])
-
-  // Handle filter change
-  const handleFilterChange = (filter: FilterType) => {
-    setActiveFilter(filter)
-    const url = new URL(window.location.href)
-    if (filter === 'all') {
-      url.searchParams.delete('filter')
-    } else {
-      url.searchParams.set('filter', filter)
-    }
-    window.history.pushState({}, '', url.toString())
-  }
+    const filterParam = searchParams.get("filter");
+    if (filterParam === "live") setStatusFilter("Open");
+    else if (filterParam === "upcoming") setStatusFilter("Upcoming");
+    else if (filterParam === "past") setStatusFilter("Listed");
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchIpos = async () => {
       try {
-        setIsLoading(true)
-        const response = await fetch('/api/ipo/upcoming')
-        if (!response.ok) {
-          throw new Error('Failed to fetch IPO data')
-        }
-        const data = await response.json()
-        setIpoList(data.data.all || [])
-        setUpcomingIpoList(data.data.upcoming || [])
-        setLiveIpoList(data.data.live || [])
-        setPastIpoList(data.data.past || [])
-      } catch (error) {
-        console.error('Error fetching IPO data:', error)
-        setError('Failed to load IPO data')
+        setIsLoading(true);
+        const response = await fetch("/api/ipo/upcoming");
+        if (!response.ok) throw new Error("Failed to fetch IPO data");
+        const data = await response.json();
+        setUpcoming(data.data.upcoming || []);
+        setLive(data.data.live || []);
+        setPast(data.data.past || []);
+      } catch (err) {
+        console.error("Error fetching IPO data:", err);
+        setError("Failed to load IPO data");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
+    };
+    fetchIpos();
+  }, []);
+
+  const allRows: Row[] = useMemo(() => [
+    ...live.map((item) => ({ ...item, status: "Open" as const })),
+    ...upcoming.map((item) => ({ ...item, status: "Upcoming" as const })),
+    ...past.map((item) => ({ ...item, status: "Listed" as const })),
+  ], [live, upcoming, past]);
+
+  const filteredRows = useMemo(() => {
+    let rows = allRows;
+
+    if (statusFilter !== "all") {
+      rows = rows.filter((r) => r.status === statusFilter);
     }
-    fetchIpos()
-  }, [])
-
-  // Stats based on current filter
-  const getFilteredStats = () => {
-    const currentList = getCurrentIpoList()
-    const totalIpos = currentList.length
-    const mainboardCount = currentList.filter(ipoItem => ipoItem.ipo.ipo_type === 'Mainboard').length
-    const smeCount = currentList.filter(ipoItem => ipoItem.ipo.ipo_type === 'SME').length
-    const totalSize = currentList.length > 0 ? `${currentList.length * 1500}+ Cr` : '0 Cr'
-
-    return { totalIpos, mainboardCount, smeCount, totalSize }
-  }
-
-  const { totalIpos, mainboardCount, smeCount, totalSize } = getFilteredStats()
-
-  const dashboardStats = [
-    {
-      label: "Total IPOs",
-      value: totalIpos.toString(),
-      change: "+12%",
-      description: "Active listings managed",
-      icon: Building2,
-      color: "text-[#0073E6]"
-    },
-    {
-      label: "Mainboard IPOs",
-      value: mainboardCount.toString(),
-      change: "+8%",
-      description: "Large cap offerings",
-      icon: TrendingUp,
-      color: "text-[#00914D]"
-    },
-    {
-      label: "SME IPOs",
-      value: smeCount.toString(),
-      change: "+15%",
-      description: "Small & medium enterprises",
-      icon: Activity,
-      color: "text-[#B4292E]"
-    },
-    {
-      label: "Total Market Cap",
-      value: totalSize,
-      change: "+23%",
-      description: "Combined issue size",
-      icon: PieChart,
-      color: "text-[#D59527]"
+    if (typeFilter !== "all") {
+      rows = rows.filter((r) => getIpoType(r.ipo) === typeFilter);
     }
-  ]
-
-  const filterOptions = [
-    { value: 'all', label: 'All IPOs', count: ipoList.length, icon: Building2 },
-    { value: 'live', label: 'Live IPOs', count: liveIpoList.length, icon: Activity },
-    { value: 'upcoming', label: 'Upcoming IPOs', count: upcomingIpoList.length, icon: Calendar },
-    { value: 'past', label: 'Past IPOs', count: pastIpoList.length, icon: Clock }
-  ]
-
-  const totalPages = Math.ceil(filteredIpos.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentIpos = filteredIpos.slice(startIndex, endIndex)
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      rows = rows.filter((r) => r.ipo?.upcoming_ipo_2025?.toLowerCase().includes(q));
     }
-  }
 
-  const handleGoToPage = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const pageNum = parseInt(e.currentTarget.value)
-      if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
-        handlePageChange(pageNum)
-      } else {
-        e.currentTarget.value = currentPage.toString()
-      }
+    const sorted = [...rows];
+    switch (sortBy) {
+      case "score-desc":
+        sorted.sort((a, b) => (b.analysis?.risk_meter?.score || 0) - (a.analysis?.risk_meter?.score || 0));
+        break;
+      case "score-asc":
+        sorted.sort((a, b) => (a.analysis?.risk_meter?.score || 0) - (b.analysis?.risk_meter?.score || 0));
+        break;
+      case "name":
+        sorted.sort((a, b) => (a.ipo?.upcoming_ipo_2025 || "").localeCompare(b.ipo?.upcoming_ipo_2025 || ""));
+        break;
+      case "closing":
+        sorted.sort((a, b) => {
+          const dateA = a.ipo?.ipo_dates?.ipo_close_date ? new Date(a.ipo.ipo_dates.ipo_close_date).getTime() : Infinity;
+          const dateB = b.ipo?.ipo_dates?.ipo_close_date ? new Date(b.ipo.ipo_dates.ipo_close_date).getTime() : Infinity;
+          return dateA - dateB;
+        });
+        break;
     }
-  }
+    return sorted;
+  }, [allRows, statusFilter, typeFilter, searchQuery, sortBy]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, typeFilter, searchQuery, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const pageRows = filteredRows.slice(startIndex, startIndex + itemsPerPage);
+
+  const dateCell = (row: Row) => {
+    if (row.status === "Upcoming") {
+      return { label: "Opens", value: formatShortDate(row.ipo?.ipo_dates?.ipo_open_date) };
+    }
+    if (row.status === "Open") {
+      return { label: "Closes", value: formatShortDate(row.ipo?.ipo_dates?.ipo_close_date) };
+    }
+    return { label: "Listed", value: formatShortDate(row.ipo?.ipo_dates?.ipo_listing_date) };
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-4 h-4 rounded-full bg-[#0073E6] animate-pulse"></div>
-              <div className="w-4 h-4 rounded-full bg-[#B4292E] animate-pulse delay-150"></div>
-              <div className="w-4 h-4 rounded-full bg-[#00914D] animate-pulse delay-300"></div>
-            </div>
-            <div className="text-xl font-black text-gray-900 font-ibm-plex">Loading IPO Dashboard...</div>
-            <div className="text-sm text-gray-600 font-medium font-ibm-plex">Fetching latest market data</div>
-          </div>
+      <div className="min-h-screen app-container pt-24 pb-16 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground font-sans">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          Loading IPOs…
         </div>
       </div>
-    )
+    );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-        <div className="flex items-center justify-center min-h-screen p-4">
-          <Card className="border-[#B4292E] max-w-md w-full bg-white/90 backdrop-blur-sm shadow-xl">
-            <CardHeader className="text-center">
-              <CardTitle className="text-[#B4292E] flex items-center justify-center gap-2 font-black font-ibm-plex">
-                <Shield className="h-5 w-5" />
-                Connection Error
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-gray-600 font-medium font-ibm-plex">{error}</p>
-              <Button onClick={() => window.location.reload()} className="w-full bg-[#0073E6] hover:bg-[#0073E6]/90 font-bold">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Try Again
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen app-container pt-24 pb-16 flex items-center justify-center">
+        <p className="text-destructive font-sans">{error}</p>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 px-4 py-15 app-container">
-      <div className="container mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
-        {/* Filter Tabs */}
-        <div className="flex flex-wrap gap-2 sm:gap-4 justify-center lg:justify-start">
-          {filterOptions.map((filter) => (
-            <button
-              key={filter.value}
-              onClick={() => handleFilterChange(filter.value as FilterType)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all duration-200 shadow-md border font-ibm-plex text-sm sm:text-base",
-                activeFilter === filter.value
-                  ? "bg-[#0073E6] text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-50 border-gray-200 hover:shadow-lg"
-              )}
-            >
-              <filter.icon className="h-4 w-4" />
-              <span>{filter.label}</span>
-              <Badge
-                variant="secondary"
-                className={cn(
-                  "ml-1 text-xs font-bold",
-                  activeFilter === filter.value
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-100 text-gray-600"
-                )}
-              >
-                {filter.count}
-              </Badge>
-            </button>
-          ))}
+    <div className="min-h-screen app-container pt-24 pb-16 font-sans">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
+          <div className="text-xs italic text-muted-foreground font-sans mb-1">§ Register</div>
+          <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground mb-1">All IPOs</h1>
+          <p className="text-sm text-muted-foreground">{filteredRows.length} of {allRows.length} IPOs</p>
         </div>
 
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {dashboardStats.map((stat, index) => (
-            <Card key={index} className="group hover:shadow-xl transition-all duration-300 sm:hover:scale-105 border-0 bg-white/80 backdrop-blur-sm shadow-lg">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <stat.icon className={cn("h-6 w-6 sm:h-8 sm:w-8", stat.color, "group-hover:scale-110 transition-transform")} />
-                  <Badge variant="secondary" className="text-xs font-bold bg-[#00914D]/10 text-[#00914D] border-[#00914D]/20">
-                    {stat.change}
-                  </Badge>
-                </div>
-                <div className="space-y-1 sm:space-y-2">
-                  <div className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 font-ibm-plex">{stat.value}</div>
-                  <div className="text-xs sm:text-sm font-bold text-gray-900 font-ibm-plex">{stat.label}</div>
-                  <div className="text-xs text-gray-600 hidden sm:block font-medium font-ibm-plex">{stat.description}</div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search company name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-card border-border text-sm"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as "all" | Status)}>
+            <SelectTrigger className="bg-card border-border text-sm w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="Upcoming">Upcoming</SelectItem>
+              <SelectItem value="Open">Open</SelectItem>
+              <SelectItem value="Listed">Listed</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as "all" | "Mainboard" | "SME")}>
+            <SelectTrigger className="bg-card border-border text-sm w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Mainboard + SME</SelectItem>
+              <SelectItem value="Mainboard">Mainboard</SelectItem>
+              <SelectItem value="SME">SME</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value="all" disabled>
+            <SelectTrigger className="bg-card border-border text-sm w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All sectors</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+            <SelectTrigger className="bg-card border-border text-sm w-full sm:w-[200px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="score-desc">Sort: score, high to low</SelectItem>
+              <SelectItem value="score-asc">Sort: score, low to high</SelectItem>
+              <SelectItem value="closing">Sort: closing soonest</SelectItem>
+              <SelectItem value="name">Sort: name, A–Z</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Search Bar */}
-        <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
-          <CardContent className="p-4 sm:p-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <Input
-                placeholder="Search IPOs by company name or type..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10 bg-white/50 text-sm sm:text-base h-10 sm:h-12 border-gray-200 font-medium font-ibm-plex focus:border-[#0073E6] focus:ring-[#0073E6]"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400 hover:text-gray-600"
-                >
-                  <XCircle className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* IPO Table */}
-        <Card className="border-0 bg-white/80 backdrop-blur-sm overflow-hidden shadow-lg">
-          {filteredIpos.length === 0 ? (
-            <CardContent className="py-10 sm:py-16 text-center p-4 sm:p-6">
-              <div className="space-y-4">
-                <div className="p-4 rounded-full bg-gray-100 w-12 h-12 sm:w-16 sm:h-16 mx-auto flex items-center justify-center">
-                  <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
-                </div>
-                <div>
-                  <p className="text-base sm:text-lg font-black text-gray-900 mb-2 font-ibm-plex">
-                    {searchQuery ? 'No IPOs found' : `No ${activeFilter} IPOs available`}
-                  </p>
-                  <p className="text-gray-600 text-sm font-medium font-ibm-plex">
-                    {searchQuery
-                      ? `No results found for "${searchQuery}". Try different keywords.`
-                      : `No ${activeFilter} IPOs in the system right now.`
-                    }
-                  </p>
-                </div>
-                {searchQuery && (
-                  <Button variant="outline" onClick={() => setSearchQuery('')} className="border-[#0073E6]/20 hover:bg-[#0073E6]/10 text-[#0073E6] font-bold">
-                    Clear Search
-                  </Button>
-                )}
-              </div>
-            </CardContent>
-          ) : (
-            <>
-              {/* Mobile Card View */}
-              <div className="block lg:hidden">
-                <div className="divide-y divide-gray-100">
-                  {currentIpos.map((ipoItem, index) => (
-                    <div key={ipoItem._id || index} className="p-4 sm:p-5 space-y-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3 min-w-0 flex-1">
-                          {ipoItem.ipo.image_url ? (
-                            <Avatar className="border-2 border-gray-100">
-                              <AvatarImage src={ipoItem.ipo.image_url} alt={`${ipoItem.ipo.upcoming_ipo_2025} logo`} />
-                              <AvatarFallback className="bg-[#0073E6]/10 text-[#0073E6] font-bold">IP</AvatarFallback>
-                            </Avatar>
+        {filteredRows.length === 0 ? (
+          <div className="border border-border rounded-lg bg-card py-16 text-center">
+            <Building2 className="h-8 w-8 text-muted-foreground/50 mx-auto mb-3" />
+            <p className="text-foreground font-medium">No IPOs found</p>
+            <p className="text-muted-foreground text-sm mt-1">Try a different search or filter.</p>
+          </div>
+        ) : (
+          <div className="border border-border rounded-lg bg-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px]">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Company</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Sector</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Type</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Price band</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Issue size</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Dates</th>
+                    <th className="text-right text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageRows.map((row) => {
+                    const riskScore = row.analysis?.risk_meter?.score || 0;
+                    const priceBand = getPriceBand(row.ipo);
+                    const date = dateCell(row);
+                    const canOpen = riskScore > 0 && !!row.ipo?.slug;
+                    return (
+                      <tr
+                        key={row._id}
+                        onClick={() => canOpen && router.push(`/analysis/${row.ipo!.slug}`)}
+                        className={`border-b border-border last:border-b-0 transition-colors ${canOpen ? "hover:bg-accent/40 cursor-pointer" : ""}`}
+                      >
+                        <td className="px-4 py-4">
+                          <div className="font-serif font-semibold text-foreground">{row.ipo?.upcoming_ipo_2025 || "Unnamed IPO"}</div>
+                          <StatusBadge status={row.status} />
+                        </td>
+                        <td className="px-4 py-4 text-sm text-muted-foreground">—</td>
+                        <td className="px-4 py-4 text-sm font-semibold text-foreground">{getIpoType(row.ipo)}</td>
+                        <td className="px-4 py-4 font-mono text-sm text-foreground">{priceBand ? `₹${priceBand}` : "N/A"}</td>
+                        <td className="px-4 py-4 font-mono text-sm text-foreground">{row.ipo?.ipo_size ? `₹${row.ipo.ipo_size}` : "N/A"}</td>
+                        <td className="px-4 py-4">
+                          <div className="text-xs text-muted-foreground">{date.label}</div>
+                          <div className="font-mono text-sm font-semibold text-foreground">{date.value}</div>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          {riskScore > 0 ? (
+                            <span>
+                              <span className={`font-serif font-semibold text-lg ${getRiskTextColor(riskScore)}`}>{riskScore}</span>
+                              <span className="text-muted-foreground text-xs">/10</span>
+                            </span>
                           ) : (
-                            <div className="p-2 rounded-lg bg-[#0073E6]/10 flex-shrink-0">
-                              <Building2 className="h-4 w-4 text-[#0073E6]" />
-                            </div>
+                            <span className="text-muted-foreground/40 text-sm">–/10</span>
                           )}
-                          <div className="min-w-0 flex-1">
-                            <div className="font-black text-gray-900 truncate font-ibm-plex">{ipoItem.ipo.upcoming_ipo_2025 || 'Unnamed IPO'}</div>
-                          </div>
-                        </div>
-                        <Badge variant={ipoItem.ipo.ipo_type === 'Mainboard' ? 'default' : 'secondary'} className="text-xs font-bold flex-shrink-0 bg-[#0073E6] text-white">
-                          {ipoItem.ipo.ipo_type || 'N/A'}
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="text-gray-500 mb-1 text-xs font-medium font-ibm-plex">Open Date</div>
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                            <span className="text-xs font-medium font-ibm-plex text-gray-900">
-                              {ipoItem.ipo.open_date || 'TBA'}
-                            </span>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500 mb-1 text-xs font-medium font-ibm-plex">Close Date</div>
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                            <span className="text-xs font-medium font-ibm-plex text-gray-900">
-                              {ipoItem.ipo.closing_date || 'TBA'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="text-gray-500 mb-1 text-xs font-medium font-ibm-plex">Price Band</div>
-                          <div className="font-black text-gray-900 text-xs font-ibm-plex">₹{ipoItem.ipo.price_band || 'TBA'}</div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500 mb-1 text-xs font-medium font-ibm-plex">Issue Size</div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="h-3 w-3 text-gray-400 flex-shrink-0">₹</span>
-                            <span className="font-black text-gray-900 text-xs font-ibm-plex">{ipoItem.ipo.ipo_size || 'TBA'}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-3 flex-wrap">
-                        {ipoItem.ipo.slug && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 px-2 text-xs border-[#B4292E]/20 hover:bg-[#B4292E]/10 text-[#B4292E] font-bold"
-                            onClick={() => router.push(`/analysis/${ipoItem.ipo.slug}`)}
-                          >
-                            <LineChart className="h-3 w-3 mr-1" />
-                            Analysis
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Desktop Table View */}
-              <div className="hidden lg:block">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1000px]">
-                    <thead className="bg-gray-50/80">
-                      <tr className="border-b border-gray-200">
-                        <th className="font-black text-left p-4 min-w-[200px] text-gray-900 font-ibm-plex">Company</th>
-                        <th className="font-black text-left p-4 min-w-[100px] text-gray-900 font-ibm-plex">Type</th>
-                        <th className="font-black text-left p-4 min-w-[120px] text-gray-900 font-ibm-plex">Open Date</th>
-                        <th className="font-black text-left p-4 min-w-[120px] text-gray-900 font-ibm-plex">Close Date</th>
-                        <th className="font-black text-left p-4 min-w-[120px] text-gray-900 font-ibm-plex">Price Band</th>
-                        <th className="font-black text-left p-4 min-w-[120px] text-gray-900 font-ibm-plex">Issue Size</th>
-                        <th className="font-black text-left p-4 min-w-[300px] text-gray-900 font-ibm-plex">Actions</th>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {currentIpos.map((ipoItem, index) => (
-                        <tr key={ipoItem._id || index} className="group hover:bg-gray-50/80 transition-colors border-b border-gray-100">
-                          <td className="font-medium p-4">
-                            <div className="flex items-center gap-3">
-                              {ipoItem.ipo.image_url ? (
-                                <Avatar className="border-2 border-gray-100">
-                                  <AvatarImage src={ipoItem.ipo.image_url} alt={`${ipoItem.ipo.upcoming_ipo_2025} logo`} />
-                                  <AvatarFallback className="bg-[#0073E6]/10 text-[#0073E6] font-bold">IP</AvatarFallback>
-                                </Avatar>
-                              ) : (
-                                <div className="p-2 rounded-lg bg-[#0073E6]/10 group-hover:bg-[#0073E6]/20 transition-colors flex-shrink-0">
-                                  <Building2 className="h-5 w-5 text-[#0073E6]" />
-                                </div>
-                              )}
-                              <div className="min-w-0">
-                                <div className="font-black truncate text-gray-900 font-ibm-plex">{ipoItem.ipo.upcoming_ipo_2025 || 'Unnamed IPO'}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <Badge variant={ipoItem.ipo.ipo_type === 'Mainboard' ? 'default' : 'secondary'} className="font-bold bg-[#0073E6] text-white">
-                              {ipoItem.ipo.ipo_type || 'N/A'}
-                            </Badge>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                              <span className="text-sm text-gray-900 font-medium font-ibm-plex">
-                                {ipoItem.ipo.ipo_dates.ipo_open_date || 'TBA'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                              <span className="text-sm text-gray-900 font-medium font-ibm-plex">
-                                {ipoItem.ipo.ipo_dates.ipo_close_date || 'TBA'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="font-black text-gray-900 font-ibm-plex">₹{ipoItem.ipo.price_band || 'TBA'}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <span className="font-black text-gray-900 font-ibm-plex">₹{ipoItem.ipo.ipo_size || 'TBA'}</span>
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              {ipoItem.ipo.slug && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="h-9 px-3 text-sm border-[#B4292E]/20 hover:bg-[#B4292E]/10 text-[#B4292E] font-bold"
-                                  onClick={() => router.push(`/analysis/${ipoItem.ipo.slug}`)}
-                                >
-                                  <LineChart className="h-4 w-4 mr-1.5" />
-                                  Analysis
-                                </Button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-border">
+              <div className="text-sm text-muted-foreground">
+                Showing {startIndex + 1}–{Math.min(startIndex + itemsPerPage, filteredRows.length)} of {filteredRows.length}
               </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-md border border-border text-sm text-foreground/80 hover:bg-accent disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" /> Prev
+                </button>
+                <span className="text-sm text-muted-foreground font-mono">{currentPage} / {totalPages}</span>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-md border border-border text-sm text-foreground/80 hover:bg-accent disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                >
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-              {/* Pagination */}
-              <CardContent className="p-4 sm:p-6 border-t border-gray-100">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-sm text-gray-600 font-medium font-ibm-plex">
-                    Showing {startIndex + 1} to {Math.min(endIndex, filteredIpos.length)} of {filteredIpos.length} IPOs
-                  </div>
-                  <div className="flex items-center gap-2 sm:gap-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="h-8 sm:h-9 px-3 border-gray-200 hover:bg-gray-50 font-bold font-ibm-plex"
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Previous
-                    </Button>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="1"
-                        max={totalPages}
-                        defaultValue={currentPage}
-                        onKeyDown={handleGoToPage}
-                        className="w-16 h-8 sm:h-9 text-center border-gray-200 font-medium font-ibm-plex"
-                      />
-                      <span className="text-sm text-gray-600 font-medium font-ibm-plex">of {totalPages}</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="h-8 sm:h-9 px-3 border-gray-200 hover:bg-gray-50 font-bold font-ibm-plex"
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </>
-          )}
-        </Card>
-
-        {/* Refresh Button */}
-        <div className="flex justify-end">
-          <Button
-            variant="outline"
-            onClick={refreshData}
-            disabled={isLoading}
-            className="h-9 px-4 border-[#0073E6]/20 hover:bg-[#0073E6]/10 text-[#0073E6] font-bold font-ibm-plex"
-          >
-            <RefreshCw className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")} />
-            {isLoading ? "Refreshing..." : "Refresh Data"}
-          </Button>
-        </div>
+        <p className="text-xs text-muted-foreground/70 mt-6">
+          This analysis is generated automatically by AI from each company&apos;s RHP/DRHP filing. It is not investment advice, and IPO Milega accepts no responsibility for losses arising from any investment decision.
+        </p>
       </div>
     </div>
-  )
+  );
 }
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <div className="flex items-center justify-center space-x-2">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="text-lg font-medium font-ibm-plex">Loading...</span>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen app-container pt-24 pb-16 flex items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
     </div>
-  )
-} 
+  );
+}
 
 export default function IPOs() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <IPOsContent />
     </Suspense>
-  )
+  );
 }

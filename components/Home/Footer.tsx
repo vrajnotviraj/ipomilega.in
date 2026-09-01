@@ -4,15 +4,15 @@
 export function Footer() {
     return (
         <section>
-            <hr className="border-gray-300 w-full mx-auto" />
+            <hr className="border-border w-full mx-auto" />
             <footer className="py-6">
                 <div className="max-w-7xl mx-auto text-center">
-                    <h2 className="text-2xl font-dm-serif text-gray-900 mb-2 font-bold">
+                    <h2 className="text-2xl font-serif text-foreground mb-2 font-semibold">
                         IPO Milega
                     </h2>
                     <div className="w-full overflow-hidden">
-                        <p className="text-gray-600 font-ibm-plex text-sm">
-                            © {new Date().getFullYear()} IPO Milega. All rights reserved.
+                        <p className="text-muted-foreground font-sans text-sm">
+                            © <span className="font-mono">{new Date().getFullYear()}</span> IPO Milega. All rights reserved.
                         </p>
                     </div>
                 </div>

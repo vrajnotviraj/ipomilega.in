@@ -24,14 +24,6 @@ export interface BlogSectionProps {
   blogs: Blog[];
 }
 
-export interface HeroSectionProps {
-  counts: {
-    upcoming: number;
-    live: number;
-    past: number;
-  };
-}
-
 
 
 export interface HomePageIpoProps {

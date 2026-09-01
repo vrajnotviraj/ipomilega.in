@@ -3,12 +3,17 @@
 
 import { useState } from "react";
 import { Blog } from "@/app/models/ipo";
-import { BlogCard } from "./BlogCard";
-import { MailOpen, PenBox } from "lucide-react";
+import { MailOpen, PenBox, ArrowRight } from "lucide-react";
 import { ProgressLink } from "@/components/Progressbar/ProgressLink";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
+
+// Rough reading time estimate from word count (200 wpm)
+const estimateReadTime = (content: string): number => {
+  const words = content?.trim().split(/\s+/).filter(Boolean).length || 0;
+  return Math.max(1, Math.round(words / 200));
+};
 
 export function BlogSection({ blogs }: { blogs: Blog[] }) {
   const [email, setEmail] = useState('');
@@ -44,46 +49,49 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
   return (
     <div className="py-15">
       {/* Section for displaying blog posts */}
-      <section className="py-10">
+      <section>
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-            <div className="text-center sm:text-left">
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2 font-ibm-plex flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:gap-3">
-                <PenBox className="w-8 h-8 text-gray-600" />
-                <div>
-                  <div>Blogs</div>
-                  <div className="text-gray-600 mt-1 text-sm sm:text-base font-medium font-ibm-plex">IPO Recap: What&apos;s Closed, What&apos;s Gained</div>
-                </div>
-              </h2>
-            </div>
+          <div className="flex justify-between items-center gap-4 mb-6">
+            <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground">From the blog</h2>
             <ProgressLink
               href="/blogs"
-              className="text-green-600 hover:text-green-700 font-bold flex items-center justify-center sm:justify-start space-x-2 group text-sm sm:text-base bg-green-50 hover:bg-green-100 px-4 py-2 rounded-lg transition-all duration-200 self-center sm:self-auto"
+              className="text-primary hover:text-primary/80 font-medium flex items-center space-x-1.5 group text-sm sm:text-base transition-colors duration-200 flex-shrink-0"
             >
-              <span>View All</span>
-              <span className="text-sm group-hover:translate-x-1 transition-transform">&gt;</span>
+              <span>All posts</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </ProgressLink>
           </div>
 
           {blogs.length === 0 ? (
             <div className="flex items-center justify-center py-8">
-              <div className="text-center py-6 bg-white rounded-xl shadow-sm border border-gray-100 max-w-sm w-full mx-4">
-                <PenBox className="w-10 h-10 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-base font-medium">No blogs available at the moment</p>
-                <p className="text-gray-400 text-sm mt-2">Check back soon for new insights!</p>
+              <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
+                <PenBox className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-muted-foreground text-base font-medium">No blogs available at the moment</p>
+                <p className="text-muted-foreground/70 text-sm mt-2">Check back soon for new insights!</p>
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center py-5">
-              {blogs.map((blog: Blog) => (
-                <div key={blog._id} className="transition-all duration-300 hover:scale-105 w-full max-w-sm motion-safe:hover:shadow-xl">
-                  <div className="h-full rounded-lg overflow-hidden bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <BlogCard blog={blog} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+              {blogs.slice(0, 3).map((blog: Blog) => (
+                <ProgressLink key={blog._id} href={`/blogs/${blog.slug}`} className="group block">
+                  <div className="text-xs text-muted-foreground font-sans mb-1.5">
+                    {blog.category || 'IPO Analysis'} · {estimateReadTime(blog.content)} min read
                   </div>
-                </div>
+                  <h3 className="font-serif font-semibold text-foreground text-lg leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                    {blog.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {blog.excerpt || blog.content.trim().split(' ').slice(0, 25).join(' ') + '...'}
+                  </p>
+                </ProgressLink>
               ))}
             </div>
           )}
+
+          <hr className="border-border mt-8 mb-4" />
+          <p className="text-xs text-muted-foreground/80 font-sans">
+            IPO Milega generates this analysis automatically from each company&apos;s public RHP/DRHP filing using AI. It is not investment advice, and IPO Milega accepts no responsibility for losses arising from any investment decision. Always read the full prospectus before applying.
+          </p>
         </div>
       </section>
 
@@ -92,11 +100,11 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-center sm:text-left">
-              <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2 font-ibm-plex flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:gap-3">
-                <MailOpen className="w-8 h-8 text-gray-600" />
+              <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground mb-2 flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:gap-3">
+                <MailOpen className="w-7 h-7 text-muted-foreground" />
                 <div>
                   <div>Stay Updated with IPOs</div>
-                  <div className="text-gray-600 mt-2 font-ibm-plex text-sm sm:text-base font-medium">Get exclusive IPO insights, market analysis, and GMP updates delivered to your inbox.</div>
+                  <div className="text-muted-foreground mt-2 font-sans text-sm sm:text-base font-normal">Get exclusive IPO insights, market analysis, and GMP updates delivered to your inbox.</div>
                 </div>
               </h2>
             </div>
@@ -107,9 +115,9 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
-              className="bg-background text-black font-ibm-plex font-medium"
+              className="bg-card text-foreground font-sans font-normal border-border"
             />
-            <Button onClick={() => subscribeToNewsletter(email)} variant="default" className="font-ibm-plex font-medium w-full sm:w-auto">
+            <Button onClick={() => subscribeToNewsletter(email)} variant="default" className="font-sans font-medium w-full sm:w-auto">
               Subscribe
             </Button>
           </div>

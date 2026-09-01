@@ -74,16 +74,16 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed left-0 top-0 h-full w-80 bg-white shadow-2xl z-50 sm:hidden"
+            className="fixed left-0 top-0 h-full w-80 bg-card shadow-2xl z-50 sm:hidden"
           >
             <div className="flex flex-col h-full">
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-border">
                 <div className="flex items-center space-x-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                     <TrendingUp className="h-5 w-5" />
                   </div>
-                  <span className="text-2xl font-bold text-gray-900 tracking-tight">
+                  <span className="text-2xl font-semibold font-serif text-foreground tracking-tight">
                     IPO Milega
                   </span>
                 </div>
@@ -105,7 +105,7 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
                       key={item.href}
                       href={item.href}
                       onClick={onClose}
-                      className="flex items-center space-x-3 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+                      className="flex items-center space-x-3 px-4 py-3 text-foreground/80 rounded-lg hover:bg-accent transition-colors font-medium"
                     >
                       <item.icon className="h-5 w-5" />
                       <span>{item.label}</span>
@@ -115,7 +115,7 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
               </div>
 
               {/* User Section */}
-              <div className="border-t border-gray-200 p-6">
+              <div className="border-t border-border p-6">
                 {session ? (
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3">
@@ -126,10 +126,10 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {session?.user?.name}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {session?.user?.email}
                         </p>
                       </div>
@@ -137,7 +137,7 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
                     <Button
                       onClick={handleSignOut}
                       variant="outline"
-                      className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
@@ -146,7 +146,7 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
                 ) : (
                   <Button
                     onClick={onClose}
-                    className="w-full bg-[#212121] hover:bg-[#212121]/90 text-white"
+                    className="w-full"
                   >
                     Sign In
                   </Button>
@@ -179,11 +179,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <ProgressProvider>
-      <header className="fixed font-ibm-plex top-0 z-50 w-full backdrop-blur-md bg-transparent border-b border-white/10">
+      <header className="fixed font-sans top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border">
         <div className="w-full">
           <div
             className="max-w-7xl mx-auto app-container flex items-center h-16 justify-between"
-            style={{ fontWeight: "400" }}
           >
             {/* Mobile Menu Button */}
             <div className="flex items-center space-x-4">
@@ -191,7 +190,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsMobileMenuOpen(true)}
-                className="sm:hidden h-8 w-8 p-0 text-black hover:bg-white/10"
+                className="sm:hidden h-8 w-8 p-0 text-foreground hover:bg-accent"
               >
                 <Menu className="h-5 w-5" />
               </Button>
@@ -199,51 +198,51 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               {/* Logo */}
               <ProgressLink
                 href="/"
-                className="flex items-center space-x-2 transition-opacity hover:opacity-80"
+                className="flex items-baseline gap-2 transition-opacity hover:opacity-80"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <span className="text-xl sm:text-2xl font-bold text-black tracking-tight drop-shadow-lg">
+                <span className="text-lg sm:text-xl font-semibold font-serif text-foreground tracking-tight">
                   IPO Milega
+                </span>
+                <span className="hidden sm:inline text-xs italic text-muted-foreground font-sans">
+                  § Prospectus Analysis
                 </span>
               </ProgressLink>
             </div>
 
-            <div className="flex items-center space-x-2 sm:space-x-4 text-xl">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {/* Desktop Navigation */}
-              <nav className="hidden sm:flex items-center space-x-1">
+              <nav className="hidden sm:flex items-center gap-6">
                 {isAdmin && (
                   <ProgressLink
                     href="/admin"
-                    className="relative px-4 py-2 text-sm font-medium text-black/80 transition-colors hover:text-black rounded-md hover:bg-white/10 backdrop-blur-sm w-full sm:w-auto text-center"
+                    className={`text-sm transition-colors ${pathname === '/admin' ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground hover:text-foreground'}`}
                   >
                     Admin
                   </ProgressLink>
                 )}
                 <ProgressLink
                   href="/"
-                  className="relative px-4 py-2 text-sm font-medium text-black/80 transition-colors hover:text-black rounded-md hover:bg-white/10 backdrop-blur-sm w-full sm:w-auto text-center"
+                  className={`text-sm transition-colors ${pathname === '/' ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground hover:text-foreground'}`}
                 >
                   Home
                 </ProgressLink>
                 <ProgressLink
+                  href="/ipos"
+                  className={`text-sm transition-colors ${pathname === '/ipos' ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground hover:text-foreground'}`}
+                >
+                  IPO list
+                </ProgressLink>
+                <ProgressLink
                   href="/blogs"
-                  className="relative px-4 py-2 text-sm font-medium text-black/80 transition-colors hover:text-black rounded-md hover:bg-white/10 backdrop-blur-sm w-full sm:w-auto text-center"
+                  className={`text-sm transition-colors ${pathname === '/blogs' ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground hover:text-foreground'}`}
                 >
                   Blogs
                 </ProgressLink>
                 <ProgressLink
-                  href="/ipos"
-                  className="relative px-4 py-2 text-sm font-medium text-black/80 transition-colors hover:text-black rounded-md hover:bg-white/10 backdrop-blur-sm w-full sm:w-auto text-center"
-                >
-                  IPOs
-                </ProgressLink>
-                <ProgressLink
                   href="/analysis"
-                  className="relative px-4 py-2 text-sm font-medium text-black/80 transition-colors hover:text-black rounded-md hover:bg-white/10 backdrop-blur-sm w-full sm:w-auto text-center"
+                  className={`text-sm transition-colors ${pathname === '/analysis' ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground hover:text-foreground'}`}
                 >
-                  Analysis
+                  Sample analysis
                 </ProgressLink>
               </nav>
 
@@ -253,7 +252,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="relative h-10 w-auto px-3 rounded-full hover:bg-white/10 transition-colors backdrop-blur-sm"
+                      className="relative h-10 w-auto px-3 rounded-full hover:bg-accent transition-colors"
                     >
                       <div className="flex items-center space-x-2">
                         <Avatar className="h-7 w-7">
@@ -262,15 +261,15 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                             {session?.user.name?.charAt(0)?.toUpperCase() || "U"}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="hidden sm:block text-sm font-medium text-black">
+                        <span className="hidden sm:block text-sm font-medium text-foreground">
                           {session?.user.name}
                         </span>
-                        <ChevronDown className="h-4 w-4 text-black/60" />
+                        <ChevronDown className="h-4 w-4 text-foreground/60" />
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
-                    className="w-56 mt-2 backdrop-blur-md bg-white/90 dark:bg-gray-900/90"
+                    className="w-56 mt-2 backdrop-blur-md bg-popover"
                     align="end"
                     forceMount
                   >
@@ -284,7 +283,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
+                      className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
                       onClick={handleSignOut}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
@@ -295,7 +294,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               ) : (
                 <Button
                   onClick={() => setShowLoginDialog(true)}
-                  className="bg-[#212121] hover:bg-[#212121]/10 text-white px-6 py-2 rounded-full font-medium transition-all hover:shadow-md backdrop-blur-sm"
+                  className="px-6 py-2 rounded-full font-medium transition-all hover:shadow-md"
                 >
                   Sign In
                 </Button>
@@ -332,7 +331,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link
-          href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Nunito:ital,wght@0,200..1000;1,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Suravaram&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>

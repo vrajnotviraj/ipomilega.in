@@ -49,6 +49,7 @@ export interface Ipo {
   blog?: Blog;
   gmp_current_ipos: string;
   gmp_price_gain: string;
+  gmp_ipo_gmp: string;
   gmp_date: string;
   gmp_subject: string;
   gmp_type: string;

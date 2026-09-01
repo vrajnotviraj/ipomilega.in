@@ -9,10 +9,11 @@ import { BlogSection } from '@/components/Home/BlogSection';
 import { LiveIposSection } from '@/components/Home/LiveIposSection';
 import { PastIposSection } from '@/components/Home/PastIposSection';
 import { UpcomingIposSection } from '@/components/Home/UpcomingIpos';
+import { ScoreMethodology } from '@/components/Home/ScoreMethodology';
+import { AnnouncementBanner } from '@/components/Home/AnnouncementBanner';
 import { getHomePageData } from '@/lib/data-fetching';
 import { Metadata } from 'next';
 import { HomePageData } from './types/homepage';
-import { HeroSection } from '@/components/Home/HeroSection';
 import { Footer } from '@/components/Home/Footer';
 import { AnimatedWrapper } from '@/components/Home/AnimatedWrapper';
 import { AnimatedSection } from '@/components/Home/AnimatedSection';
@@ -98,10 +99,8 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
 
   return (
     <AnimatedWrapper>
-      <div className="app-container">
-        <AnimatedSection>
-          <HeroSection ipos={homeData.data.live} />
-        </AnimatedSection>
+      <div className="app-container pt-24">
+        <AnnouncementBanner />
         <AnimatedSection>
           <LiveIposSection ipos={homeData.data.live} count={homeData.counts.live} />
         </AnimatedSection>
@@ -110,6 +109,9 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
         </AnimatedSection>
         <AnimatedSection>
           <PastIposSection ipos={homeData.data.past} count={homeData.counts.past} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <ScoreMethodology />
         </AnimatedSection>
         <AnimatedSection>
           <BlogSection blogs={homeData.blogList} />
