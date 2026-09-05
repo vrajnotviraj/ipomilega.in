@@ -211,24 +211,24 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
         <Button
           variant="outline"
           size="sm"
-          className="h-9 px-3 text-sm border-blue-600 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold"
+          className="h-9 px-3 text-sm border-primary bg-primary/10 text-primary hover:bg-primary/15 font-bold"
         >
-          <Sparkles className="h-4 w-4 mr-1.5 text-blue-600 animate-pulse" />
+          <Sparkles className="h-4 w-4 mr-1.5 text-primary animate-pulse" />
           AI Parser
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-7xl h-[90vh] flex flex-col font-ibm-plex p-0 overflow-hidden rounded-xl bg-white shadow-2xl">
-        <DialogHeader className="p-6 border-b bg-gradient-to-r from-blue-50 to-indigo-50/20 flex-shrink-0">
+      <DialogContent className="max-w-7xl h-[90vh] flex flex-col font-sans p-0 overflow-hidden rounded-xl bg-card shadow-2xl">
+        <DialogHeader className="p-6 border-b bg-muted/40 flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 text-white rounded-lg">
+              <div className="p-2 bg-primary text-primary-foreground rounded-lg">
                 <Sparkles className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xl font-bold text-gray-900">
+                <span className="text-xl font-bold text-foreground">
                   AI Matrix Parser
                 </span>
-                <p className="text-sm font-medium text-gray-600 mt-1">
+                <p className="text-sm font-medium text-muted-foreground mt-1">
                   Parse prospectus text for {ipoItem.ipo.ipo_name || ipoItem.ipo.upcoming_ipo_2025}
                 </p>
               </div>
@@ -236,26 +236,26 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 flex flex-row overflow-hidden min-h-0 bg-gray-50/40">
+        <div className="flex-1 flex flex-row overflow-hidden min-h-0 bg-muted/40">
           {/* Left Panel: Pasting Input */}
-          <div className="w-1/3 border-r bg-white p-6 flex flex-col gap-4 overflow-y-auto">
-            <div className="flex items-center gap-2 font-bold text-gray-800 text-base">
-              <FileText className="h-5 w-5 text-blue-600" />
+          <div className="w-1/3 border-r bg-card p-6 flex flex-col gap-4 overflow-y-auto">
+            <div className="flex items-center gap-2 font-bold text-foreground text-base">
+              <FileText className="h-5 w-5 text-primary" />
               Raw Context Text
             </div>
-            <p className="text-sm text-gray-500 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Paste the text extracted from the RHP, official documents, or websites below. The AI will parse it to fill all scoring and description fields.
             </p>
             <Textarea
               placeholder="Paste company business description, SWOT analysis, financials, management info, risks, dates, or other prospectus text here..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              className="flex-1 min-h-[350px] resize-none border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-sans text-sm rounded-lg"
+              className="flex-1 min-h-[350px] resize-none border-border focus:border-primary focus:ring-1 focus:ring-ring font-sans text-sm rounded-lg"
             />
             <Button
               onClick={handleParse}
               disabled={isParsing || !inputText.trim()}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 transition-all rounded-lg flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-11 transition-all rounded-lg flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
             >
               {isParsing ? (
                 <>
@@ -276,12 +276,12 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
             {parsedData ? (
               <div className="flex-1 flex flex-row overflow-hidden">
                 {/* Markdown Preview Column */}
-                <div className="w-1/2 border-r p-6 overflow-y-auto bg-white flex flex-col gap-4">
-                  <div className="font-bold text-gray-800 text-base flex items-center gap-2 sticky top-0 bg-white pb-2 border-b">
-                    <FileText className="h-5 w-5 text-indigo-600" />
+                <div className="w-1/2 border-r p-6 overflow-y-auto bg-card flex flex-col gap-4">
+                  <div className="font-bold text-foreground text-base flex items-center gap-2 sticky top-0 bg-card pb-2 border-b">
+                    <FileText className="h-5 w-5 text-primary" />
                     Markdown Presentation Preview
                   </div>
-                  <div className="prose prose-blue max-w-none text-sm leading-relaxed text-gray-700">
+                  <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-muted-foreground">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {markdownPreview}
                     </ReactMarkdown>
@@ -290,21 +290,21 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
 
                 {/* Interactive Matrix Inputs Column */}
                 <div className="w-1/2 p-6 overflow-y-auto flex flex-col gap-6">
-                  <div className="font-bold text-gray-800 text-base flex items-center gap-2 pb-2 border-b">
-                    <LineChart className="h-5 w-5 text-indigo-600" />
+                  <div className="font-bold text-foreground text-base flex items-center gap-2 pb-2 border-b">
+                    <LineChart className="h-5 w-5 text-primary" />
                     Analysis Scores Matrix
                   </div>
 
                   {/* Empty Pockets Alert */}
                   {emptyPockets.length > 0 ? (
-                    <Card className="border-amber-200 bg-amber-50 shadow-sm rounded-lg">
+                    <Card className="border-score-mid/30 bg-score-mid/10 shadow-sm rounded-lg">
                       <CardContent className="p-4 flex items-start gap-3">
-                        <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <AlertCircle className="h-5 w-5 text-score-mid mt-0.5 flex-shrink-0" />
                         <div className="text-sm">
-                          <span className="font-bold text-amber-900 block mb-1">
+                          <span className="font-bold text-score-mid block mb-1">
                             Missing Pockets ({emptyPockets.length})
                           </span>
-                          <span className="text-amber-800 text-xs">
+                          <span className="text-score-mid text-xs">
                             The following pockets are empty. Fill them in or re-parse:
                           </span>
                           <div className="flex flex-wrap gap-1.5 mt-2">
@@ -312,7 +312,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                               <Badge
                                 key={p}
                                 variant="outline"
-                                className="border-amber-300 bg-white text-amber-800 text-[10px] font-bold"
+                                className="border-score-mid/40 bg-card text-score-mid text-[10px] font-bold"
                               >
                                 {p}
                               </Badge>
@@ -322,8 +322,8 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                       </CardContent>
                     </Card>
                   ) : (
-                    <div className="flex items-center gap-2 text-green-700 text-sm font-bold bg-green-50 p-3 rounded-lg border border-green-200">
-                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <div className="flex items-center gap-2 text-score-good text-sm font-bold bg-score-good/10 p-3 rounded-lg border border-score-good/30">
+                      <CheckCircle2 className="h-5 w-5 text-score-good" />
                       All pockets successfully filled!
                     </div>
                   )}
@@ -331,8 +331,8 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                   {/* Edit Form */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                        <LineChart className="h-3.5 w-3.5 text-purple-600" />
+                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                        <LineChart className="h-3.5 w-3.5 text-primary" />
                         Fundamentals Score (1-10)
                       </label>
                       <Input
@@ -341,13 +341,13 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                         max={10}
                         value={parsedData.fundamentals?.score || ""}
                         onChange={(e) => handleScoreChange("fundamentals", e.target.value)}
-                        className="bg-white border-gray-200 focus:ring-blue-500 rounded-lg text-sm h-10"
+                        className="bg-card border-border focus:ring-ring rounded-lg text-sm h-10"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                        <Shield className="h-3.5 w-3.5 text-red-600" />
+                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                        <Shield className="h-3.5 w-3.5 text-destructive" />
                         Risk Score (1-10)
                       </label>
                       <Input
@@ -356,13 +356,13 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                         max={10}
                         value={parsedData.risk_meter?.score || ""}
                         onChange={(e) => handleScoreChange("risk_meter", e.target.value)}
-                        className="bg-white border-gray-200 focus:ring-blue-500 rounded-lg text-sm h-10"
+                        className="bg-card border-border focus:ring-ring rounded-lg text-sm h-10"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                        <TrendingUp className="h-3.5 w-3.5 text-green-600" />
+                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                        <TrendingUp className="h-3.5 w-3.5 text-score-good" />
                         Performance Score (1-10)
                       </label>
                       <Input
@@ -371,13 +371,13 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                         max={10}
                         value={parsedData.performance?.score || ""}
                         onChange={(e) => handleScoreChange("performance", e.target.value)}
-                        className="bg-white border-gray-200 focus:ring-blue-500 rounded-lg text-sm h-10"
+                        className="bg-card border-border focus:ring-ring rounded-lg text-sm h-10"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                        <Activity className="h-3.5 w-3.5 text-blue-600" />
+                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                        <Activity className="h-3.5 w-3.5 text-primary" />
                         Flexibility Score (1-10)
                       </label>
                       <Input
@@ -386,13 +386,13 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                         max={10}
                         value={parsedData.flexibility?.score || ""}
                         onChange={(e) => handleScoreChange("flexibility", e.target.value)}
-                        className="bg-white border-gray-200 focus:ring-blue-500 rounded-lg text-sm h-10"
+                        className="bg-card border-border focus:ring-ring rounded-lg text-sm h-10"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5 text-orange-600" />
+                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5 text-score-mid" />
                         Timing Score (1-10)
                       </label>
                       <Input
@@ -401,26 +401,26 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                         max={10}
                         value={parsedData.time?.score || ""}
                         onChange={(e) => handleScoreChange("time", e.target.value)}
-                        className="bg-white border-gray-200 focus:ring-blue-500 rounded-lg text-sm h-10"
+                        className="bg-card border-border focus:ring-ring rounded-lg text-sm h-10"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                        <Percent className="h-3.5 w-3.5 text-emerald-600" />
+                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                        <Percent className="h-3.5 w-3.5 text-score-good" />
                         Listing Gains Potential (%)
                       </label>
                       <Input
                         type="number"
                         value={parsedData.summary?.approximate_gains_potential ?? ""}
                         onChange={(e) => handleGainsChange(e.target.value)}
-                        className="bg-white border-gray-200 focus:ring-blue-500 rounded-lg text-sm h-10"
+                        className="bg-card border-border focus:ring-ring rounded-lg text-sm h-10"
                       />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-gray-700 flex items-center gap-1">
-                        <ThumbsUp className="h-3.5 w-3.5 text-indigo-600" />
+                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                        <ThumbsUp className="h-3.5 w-3.5 text-primary" />
                         Allotment Profitability Score (1-10)
                       </label>
                       <Input
@@ -429,13 +429,13 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                         max={10}
                         value={parsedData.summary?.profitability_of_allotment?.score || ""}
                         onChange={(e) => handleSummaryScoreChange(e.target.value)}
-                        className="bg-white border-gray-200 focus:ring-blue-500 rounded-lg text-sm h-10"
+                        className="bg-card border-border focus:ring-ring rounded-lg text-sm h-10"
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-gray-700">
+                    <label className="text-xs font-bold text-muted-foreground">
                       Market Position Description
                     </label>
                     <Textarea
@@ -449,12 +449,12 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                           },
                         }))
                       }
-                      className="bg-white border-gray-200 focus:ring-blue-500 text-xs rounded-lg min-h-[60px]"
+                      className="bg-card border-border focus:ring-ring text-xs rounded-lg min-h-[60px]"
                     />
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-gray-700">
+                    <label className="text-xs font-bold text-muted-foreground">
                       Risk Summary
                     </label>
                     <Textarea
@@ -468,18 +468,18 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                           },
                         }))
                       }
-                      className="bg-white border-gray-200 focus:ring-blue-500 text-xs rounded-lg min-h-[60px]"
+                      className="bg-card border-border focus:ring-ring text-xs rounded-lg min-h-[60px]"
                     />
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-500 bg-gray-50/20">
-                <Sparkles className="h-16 w-16 text-blue-200 mb-4 animate-pulse" />
-                <h3 className="font-bold text-lg text-gray-800">
+              <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-muted/20">
+                <Sparkles className="h-16 w-16 text-primary/40 mb-4 animate-pulse" />
+                <h3 className="font-bold text-lg text-foreground">
                   Ready to Parse
                 </h3>
-                <p className="text-sm max-w-md mt-2 text-gray-500">
+                <p className="text-sm max-w-md mt-2 text-muted-foreground">
                   Paste the raw prospectus text on the left panel, and click {"Parse with AI"} to generate the structured Analysis Matrix.
                 </p>
               </div>
@@ -487,18 +487,18 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
           </div>
         </div>
 
-        <div className="border-t p-6 bg-gradient-to-r from-blue-50/50 to-indigo-50/10 flex-shrink-0 flex items-center justify-between">
+        <div className="border-t p-6 bg-muted/30 flex-shrink-0 flex items-center justify-between">
           <Button
             variant="ghost"
             onClick={() => setIsOpen(false)}
-            className="text-gray-500 font-bold hover:bg-gray-100"
+            className="text-muted-foreground font-bold hover:bg-accent"
           >
             Cancel
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving || !parsedData}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold h-11 px-6 shadow-md hover:shadow-lg flex items-center gap-2 rounded-lg transition-all"
+            className="bg-score-good hover:bg-score-good/90 text-white font-bold h-11 px-6 shadow-md hover:shadow-lg flex items-center gap-2 rounded-lg transition-all"
           >
             {isSaving ? (
               <>

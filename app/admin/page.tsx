@@ -227,13 +227,12 @@ function AdminContent() {
   const { totalIpos, mainboardCount, smeCount, totalSize } = getFilteredStats()
 
   const dashboardStats = [
-    { label: "Total IPOs", value: totalIpos.toString(), icon: Building2, color: "text-[#0073E6]" },
-    { label: "Mainboard IPOs", value: mainboardCount.toString(), icon: TrendingUp, color: "text-[#00914D]" },
-    { label: "SME IPOs", value: smeCount.toString(), icon: Activity, color: "text-[#B4292E]" },
-    { label: "Total Market Cap", value: totalSize, icon: PieChart, color: "text-[#D59527]" }
+    { label: "Total IPOs", value: totalIpos.toString(), icon: Building2 },
+    { label: "Mainboard IPOs", value: mainboardCount.toString(), icon: TrendingUp },
+    { label: "SME IPOs", value: smeCount.toString(), icon: Activity },
+    { label: "Total Market Cap", value: totalSize, icon: PieChart }
   ]
 
-  console.log("isAdmin", isAdmin)
   const filterOptions = [
     { value: 'all', label: 'All IPOs', count: ipoList.length, icon: Building2 },
     { value: 'recently_added', label: 'Recently Added', count: recentlyAddedIpoList.length, icon: Plus },
@@ -256,17 +255,17 @@ function AdminContent() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 font-ibm-plex">
-        <Card className="w-full max-w-md bg-white border border-red-100 shadow-xl rounded-xl">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4 font-sans">
+        <Card className="w-full max-w-md border-destructive/20">
           <CardContent className="p-8 text-center flex flex-col items-center gap-4">
-            <div className="p-3 bg-red-50 text-red-600 rounded-full">
+            <div className="p-3 bg-destructive/10 text-destructive rounded-full">
               <Shield className="h-10 w-10" />
             </div>
-            <h2 className="text-2xl font-black text-gray-900 mt-2">Access Denied</h2>
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <h2 className="text-2xl font-semibold font-serif text-foreground mt-2">Access Denied</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               This area is restricted to administrators only. Please log in with an authorized administrator account to access this page.
             </p>
-            <Button onClick={() => router.push("/")} className="mt-4 bg-[#0073E6] hover:bg-[#0059b3] text-white font-bold w-full h-11 rounded-lg">
+            <Button onClick={() => router.push("/")} className="mt-4 w-full h-11">
               Return to Home
             </Button>
           </CardContent>
@@ -279,214 +278,261 @@ function AdminContent() {
   if (error) return <ErrorFallback error={error} />
 
   return (
-    <div className="min-h-screen app-container bg-gradient-to-br from-blue-50 mt-10 via-white to-gray-50 px-4 py-8 font-ibm-plex">
-      <div className="container mx-auto space-y-8">
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 lg:justify-start">
+    <div className="min-h-screen app-container pt-24 pb-16 font-sans">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="mb-2">
+          <div className="text-xs italic text-muted-foreground font-sans mb-1">§ Admin</div>
+          <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground mb-1">Admin Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Manage IPO listings, analysis matrices and blogs</p>
+        </div>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
+          {dashboardStats.map((stat, index) => (
+            <div key={index} className="border border-border rounded-lg bg-card p-5">
+              <div className="flex items-center justify-between mb-3">
+                <stat.icon className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="text-2xl font-semibold font-serif text-foreground">{stat.value}</div>
+              <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mt-1">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Filter buttons */}
+        <div className="flex flex-wrap items-center gap-2">
           {filterOptions.map(filter => (
-            <button key={filter.value} onClick={() => handleFilterChange(filter.value as FilterType)}
-              className={cn("flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all duration-200 shadow-md border text-sm", activeFilter === filter.value ? "bg-[#0073E6] text-white shadow-lg" : "bg-white text-gray-700 hover:bg-gray-50 border-gray-200 hover:shadow-lg")}>
+            <button
+              key={filter.value}
+              onClick={() => handleFilterChange(filter.value as FilterType)}
+              className={cn(
+                "flex items-center gap-2 px-3.5 py-2 rounded-lg font-medium transition-colors text-sm border",
+                activeFilter === filter.value
+                  ? "bg-primary text-primary-foreground border-transparent"
+                  : "bg-card text-muted-foreground hover:text-foreground border-border hover:bg-accent"
+              )}
+            >
               <filter.icon className="h-4 w-4" />
               <span>{filter.label}</span>
-              <Badge variant="secondary" className={cn("ml-1 text-xs font-bold", activeFilter === filter.value ? "bg-white/20 text-white" : "bg-gray-100 text-gray-600")}>{filter.count}</Badge>
+              <Badge
+                variant="secondary"
+                className={cn("ml-1 text-[11px] font-mono", activeFilter === filter.value ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground")}
+              >
+                {filter.count}
+              </Badge>
             </button>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-6">
-          {dashboardStats.map((stat, index) => (
-            <Card key={index} className="group hover:shadow-xl transition-all duration-300 hover:scale-105 border-0 bg-white/80 backdrop-blur-sm shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <stat.icon className={cn("h-8 w-8", stat.color, "group-hover:scale-110 transition-transform")} />
-                </div>
-                <div className="space-y-1">
-                  <div className="text-3xl font-black text-gray-900">{stat.value}</div>
-                  <div className="text-sm font-bold text-gray-900">{stat.label}</div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search IPOs by company name or type..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pl-9 pr-10 bg-card border-border h-11 text-sm"
+          />
+          {searchQuery && (
+            <Button variant="ghost" size="icon" onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-muted-foreground hover:text-foreground">
+              <XCircle className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
-        <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg">
-          <CardContent className="p-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <Input placeholder="Search IPOs by company name or type..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 pr-10 bg-white/50 h-12 border-gray-200 focus:border-[#0073E6] focus:ring-[#0073E6]" />
-              {searchQuery && <Button variant="ghost" size="icon" onClick={() => setSearchQuery('')} className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400 hover:text-gray-600"><XCircle className="h-4 w-4" /></Button>}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 bg-white/80 backdrop-blur-sm overflow-hidden shadow-lg">
-          {currentIpos.length === 0 ? (
-            <CardContent className="py-16 text-center">
-              <Building2 className="h-12 w-12 mx-auto text-gray-400" />
-              <p className="mt-4 text-lg font-black text-gray-900">No IPOs found</p>
-              <p className="mt-2 text-sm text-gray-600">{searchQuery ? `No results for "${searchQuery}"` : `No ${activeFilter} IPOs available.`}</p>
-              {searchQuery && <Button variant="outline" onClick={() => setSearchQuery('')} className="mt-4 border-[#0073E6]/20 hover:bg-[#0073E6]/10 text-[#0073E6] font-bold">Clear Search</Button>}
-            </CardContent>
-          ) : (
-            <>
-              <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full min-w-[1200px]">
-                  <thead className="bg-gray-50/80">
-                    <tr className="border-b">
-                      <th className="font-black text-left p-4 text-gray-900">Company</th>
-                      <th className="font-black text-left p-4 text-gray-900">Type</th>
-                      <th className="font-black text-left p-4 text-gray-900">Open Date</th>
-                      <th className="font-black text-left p-4 text-gray-900">Close Date</th>
-                      <th className="font-black text-left p-4 text-gray-900">Price Band</th>
-                      <th className="font-black text-left p-4 text-gray-900">Issue Size</th>
-                      <th className="font-black text-left p-4 text-gray-900">Analysis Matrix</th>
-                      <th className="font-black text-left p-4 text-gray-900">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentIpos.map(ipoItem => (
-                      <tr
-                        key={ipoItem._id}
-                        className="group hover:bg-gray-50/80 border-b border-gray-100 cursor-pointer select-none"
-                      >
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <div className="relative group cursor-pointer w-10 h-10 rounded-full border-2 overflow-hidden flex-shrink-0">
-                              <Avatar className="w-full h-full">
-                                <AvatarImage src={ipoItem.ipo.image_url} className="object-cover w-full h-full" />
-                                <AvatarFallback className="bg-[#0073E6]/10 text-[#0073E6] font-bold w-full h-full flex items-center justify-center">
-                                  {getInitials(ipoItem.ipo.upcoming_ipo_2025 || ipoItem.ipo.ipo_name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <label className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => handleLogoUpload(e, ipoItem.ipo._id!)}
-                                  className="hidden"
-                                />
-                                <Upload className="h-4 w-4 text-white" />
-                              </label>
+        {/* Table */}
+        {currentIpos.length === 0 ? (
+          <div className="border border-border rounded-lg bg-card py-16 text-center">
+            <Building2 className="h-8 w-8 mx-auto text-muted-foreground/50 mb-3" />
+            <p className="text-foreground font-medium">No IPOs found</p>
+            <p className="mt-1 text-sm text-muted-foreground">{searchQuery ? `No results for "${searchQuery}"` : `No ${activeFilter} IPOs available.`}</p>
+            {searchQuery && <Button variant="outline" onClick={() => setSearchQuery('')} className="mt-4">Clear Search</Button>}
+          </div>
+        ) : (
+          <div className="border border-border rounded-lg bg-card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1200px]">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Company</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Type</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Open Date</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Close Date</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Price Band</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Issue Size</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Analysis Matrix</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentIpos.map(ipoItem => (
+                    <tr
+                      key={ipoItem._id}
+                      className="border-b border-border last:border-b-0 hover:bg-accent/40 transition-colors"
+                    >
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative group cursor-pointer w-10 h-10 rounded-full border border-border overflow-hidden flex-shrink-0">
+                            <Avatar className="w-full h-full">
+                              <AvatarImage src={ipoItem.ipo.image_url} className="object-cover w-full h-full" />
+                              <AvatarFallback className="bg-primary/10 text-primary font-semibold w-full h-full flex items-center justify-center">
+                                {getInitials(ipoItem.ipo.upcoming_ipo_2025 || ipoItem.ipo.ipo_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <label className="absolute inset-0 bg-black/45 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleLogoUpload(e, ipoItem.ipo._id!)}
+                                className="hidden"
+                              />
+                              <Upload className="h-4 w-4 text-white" />
+                            </label>
+                          </div>
+                          <div className="font-serif font-semibold truncate text-foreground max-w-[200px]" title={ipoItem.ipo.upcoming_ipo_2025}>
+                            {ipoItem.ipo.upcoming_ipo_2025}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <Badge variant="outline" className="font-mono text-xs uppercase tracking-wide">{ipoItem.ipo.ipo_type}</Badge>
+                      </td>
+                      <td className="p-4"><div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-mono">{ipoItem.ipo.ipo_dates.ipo_open_date}</span></div></td>
+                      <td className="p-4"><div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-mono">{ipoItem.ipo.ipo_dates.ipo_close_date}</span></div></td>
+                      <td className="p-4"><div className="font-mono text-sm text-foreground">₹{ipoItem.ipo.price_band}</div></td>
+                      <td className="p-4"><div className="font-mono text-sm text-foreground">₹{ipoItem.ipo.ipo_size}</div></td>
+                      <td className="p-4">
+                        {hasAnalysis(ipoItem) ? (
+                          <div className="flex flex-col gap-1 text-[11px] font-mono min-w-[200px]">
+                            <div className="flex gap-1 flex-wrap">
+                              <Badge variant="outline" className="h-6 px-1.5" title="Fundamentals">
+                                F: {ipoItem.analysis?.summary_metrics?.fundamentals_score ?? ipoItem.analysis?.fundamentals?.score ?? 0}/10
+                              </Badge>
+                              <Badge variant="outline" className="h-6 px-1.5" title="Risk Score">
+                                R: {ipoItem.analysis?.summary_metrics?.risk_meter ?? ipoItem.analysis?.risk_meter?.score ?? 0}/10
+                              </Badge>
+                              <Badge variant="outline" className="h-6 px-1.5" title="Performance">
+                                P: {ipoItem.analysis?.summary_metrics?.performance_score ?? ipoItem.analysis?.performance?.score ?? 0}/10
+                              </Badge>
                             </div>
-                            <div className="font-black truncate text-gray-900 max-w-[200px]" title={ipoItem.ipo.upcoming_ipo_2025}>
-                              {ipoItem.ipo.upcoming_ipo_2025}
+                            <div className="flex gap-1 flex-wrap">
+                              <Badge variant="outline" className="h-6 px-1.5" title="Flexibility">
+                                Fl: {ipoItem.analysis?.summary_metrics?.flexibility_score ?? ipoItem.analysis?.flexibility?.score ?? 0}/10
+                              </Badge>
+                              <Badge variant="outline" className="h-6 px-1.5" title="Timing">
+                                T: {ipoItem.analysis?.summary_metrics?.time_score ?? ipoItem.analysis?.time?.score ?? 0}/10
+                              </Badge>
+                              <Badge variant="outline" className="h-6 px-1.5 border-score-good/30 bg-score-good/10 text-score-good" title="Listing Gains">
+                                G: {ipoItem.analysis?.summary_metrics?.approximate_gains_potential ?? ipoItem.analysis?.ipo_details?.approximate_gains_potential ?? 0}%
+                              </Badge>
                             </div>
                           </div>
-                        </td>
-                        <td className="p-4"><Badge variant={ipoItem.ipo.ipo_type === 'Mainboard' ? 'default' : 'secondary'} className="font-bold bg-[#0073E6] text-white">{ipoItem.ipo.ipo_type}</Badge></td>
-                        <td className="p-4"><div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-gray-400" /><span className="text-sm font-medium">{ipoItem.ipo.ipo_dates.ipo_open_date}</span></div></td>
-                        <td className="p-4"><div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-gray-400" /><span className="text-sm font-medium">{ipoItem.ipo.ipo_dates.ipo_close_date}</span></div></td>
-                        <td className="p-4"><div className="font-black">₹{ipoItem.ipo.price_band}</div></td>
-                        <td className="p-4"><div className="font-black">₹{ipoItem.ipo.ipo_size}</div></td>
-                        <td className="p-4">
-                          {hasAnalysis(ipoItem) ? (
-                            <div className="flex flex-col gap-1 text-[11px] font-bold min-w-[200px]">
-                              <div className="flex gap-1 flex-wrap">
-                                <Badge variant="outline" className="border-purple-200 bg-purple-50 text-purple-700 h-6 px-1.5" title="Fundamentals">
-                                  F: {ipoItem.analysis?.summary_metrics?.fundamentals_score ?? ipoItem.analysis?.fundamentals?.score ?? 0}/10
-                                </Badge>
-                                <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700 h-6 px-1.5" title="Risk Score">
-                                  R: {ipoItem.analysis?.summary_metrics?.risk_meter ?? ipoItem.analysis?.risk_meter?.score ?? 0}/10
-                                </Badge>
-                                <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700 h-6 px-1.5" title="Performance">
-                                  P: {ipoItem.analysis?.summary_metrics?.performance_score ?? ipoItem.analysis?.performance?.score ?? 0}/10
-                                </Badge>
-                              </div>
-                              <div className="flex gap-1 flex-wrap">
-                                <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 h-6 px-1.5" title="Flexibility">
-                                  Fl: {ipoItem.analysis?.summary_metrics?.flexibility_score ?? ipoItem.analysis?.flexibility?.score ?? 0}/10
-                                </Badge>
-                                <Badge variant="outline" className="border-orange-200 bg-orange-50 text-orange-700 h-6 px-1.5" title="Timing">
-                                  T: {ipoItem.analysis?.summary_metrics?.time_score ?? ipoItem.analysis?.time?.score ?? 0}/10
-                                </Badge>
-                                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 h-6 px-1.5" title="Listing Gains">
-                                  G: {ipoItem.analysis?.summary_metrics?.approximate_gains_potential ?? ipoItem.analysis?.ipo_details?.approximate_gains_potential ?? 0}%
-                                </Badge>
-                              </div>
-                            </div>
-                          ) : (
-                            <Badge variant="outline" className="border-gray-200 bg-gray-50 text-gray-500 font-bold h-6 px-2">
-                              Pending Analysis
-                            </Badge>
-                          )}
-                        </td>
-                        <td className="p-4 actions-cell">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <IpoAnalysisModal ipoItem={ipoItem} onAnalysisAdded={refreshData} />
-                            <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => router.push(`/analysis/${ipoItem.ipo.slug || ipoItem.analysis?.slug || ipoItem.ipo._id}`)}><LineChart className="h-4 w-4 mr-1.5 text-red-600" />Analysis</Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-9 px-3"><PenTool className="h-4 w-4 mr-1.5 text-primary" />Blog</Button></DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleBlogClick(ipoItem.ipo._id!)}><Plus className="h-4 w-4 mr-2" />Write New</DropdownMenuItem>
-                                {getBlogsForIpo(ipoItem.ipo._id!).map(blog => <DropdownMenuItem key={blog._id} onClick={() => handleEditBlog(blog._id!)}><Edit className="h-4 w-4 mr-2" />Edit: {blog.title?.substring(0, 20)}...</DropdownMenuItem>)}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" size="sm" className="h-9 px-3">
-                                  More
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => copyToClipboard(ipoItem.ipo._id!)}>
-                                  <Copy className="h-4 w-4 mr-2 text-primary" /> Copy ID
+                        ) : (
+                          <Badge variant="outline" className="text-muted-foreground font-medium h-6 px-2">
+                            Pending Analysis
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="p-4 actions-cell">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <IpoAnalysisModal ipoItem={ipoItem} onAnalysisAdded={refreshData} />
+                          <Button variant="outline" size="sm" className="h-9 px-3" onClick={() => router.push(`/analysis/${ipoItem.ipo.slug || ipoItem.analysis?.slug || ipoItem.ipo._id}`)}><LineChart className="h-4 w-4 mr-1.5" />Analysis</Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-9 px-3"><PenTool className="h-4 w-4 mr-1.5" />Blog</Button></DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleBlogClick(ipoItem.ipo._id!)}><Plus className="h-4 w-4 mr-2" />Write New</DropdownMenuItem>
+                              {getBlogsForIpo(ipoItem.ipo._id!).map(blog => <DropdownMenuItem key={blog._id} onClick={() => handleEditBlog(blog._id!)}><Edit className="h-4 w-4 mr-2" />Edit: {blog.title?.substring(0, 20)}...</DropdownMenuItem>)}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-9 px-3">
+                                More
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => copyToClipboard(ipoItem.ipo._id!)}>
+                                <Copy className="h-4 w-4 mr-2" /> Copy ID
+                              </DropdownMenuItem>
+                              {ipoItem.ipo.detail_url && (
+                                <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.detail_url!, '_blank')}>
+                                  <Eye className="h-4 w-4 mr-2" /> View Details
                                 </DropdownMenuItem>
-                                {ipoItem.ipo.detail_url && (
-                                  <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.detail_url!, '_blank')}>
-                                    <Eye className="h-4 w-4 mr-2 text-primary" /> View Details
-                                  </DropdownMenuItem>
-                                )}
-                                {ipoItem.ipo.ipo_details?.rhp_draft_prospectus_links?.[0]?.href && (
-                                  <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.ipo_details.rhp_draft_prospectus_links[0].href!, '_blank')}>
-                                    <ExternalLink className="h-4 w-4 mr-2 text-green-600" /> RHP Link
-                                  </DropdownMenuItem>
-                                )}
-                                {ipoItem.ipo.ipo_details?.drhp_draft_prospectus_links?.[0]?.href && (
-                                  <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.ipo_details.drhp_draft_prospectus_links[0].href!, '_blank')}>
-                                    <ExternalLink className="h-4 w-4 mr-2 text-green-600" /> DRHP Link
-                                  </DropdownMenuItem>
-                                )}
-                                {hasAnalysis(ipoItem) && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleDeleteAnalysis(ipoItem.ipo._id!)}
-                                    className="text-red-650 focus:text-red-750 font-bold"
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-2 text-red-600" /> Delete Analysis
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                              )}
+                              {ipoItem.ipo.ipo_details?.rhp_draft_prospectus_links?.[0]?.href && (
+                                <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.ipo_details.rhp_draft_prospectus_links[0].href!, '_blank')}>
+                                  <ExternalLink className="h-4 w-4 mr-2 text-score-good" /> RHP Link
+                                </DropdownMenuItem>
+                              )}
+                              {ipoItem.ipo.ipo_details?.drhp_draft_prospectus_links?.[0]?.href && (
+                                <DropdownMenuItem onClick={() => window.open(ipoItem.ipo.ipo_details.drhp_draft_prospectus_links[0].href!, '_blank')}>
+                                  <ExternalLink className="h-4 w-4 mr-2 text-score-good" /> DRHP Link
+                                </DropdownMenuItem>
+                              )}
+                              {hasAnalysis(ipoItem) && (
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteAnalysis(ipoItem.ipo._id!)}
+                                  className="text-destructive focus:text-destructive font-medium"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" /> Delete Analysis
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-border">
+              <div className="text-sm text-muted-foreground">Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredIpos.length)} of {filteredIpos.length}</div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-md border border-border text-sm text-foreground/80 hover:bg-accent disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4" /> Prev
+                </button>
+                <span className="text-sm text-muted-foreground font-mono">{currentPage} / {totalPages}</span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-md border border-border text-sm text-foreground/80 hover:bg-accent disabled:opacity-40 disabled:pointer-events-none transition-colors"
+                >
+                  Next <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
-              {/* Mobile view can be added here if needed */}
-              <CardContent className="p-6 border-t">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredIpos.length)} of {filteredIpos.length}</div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                    <span className="text-sm font-medium">Page {currentPage} of {totalPages}</span>
-                    <Button variant="outline" size="sm" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                  </div>
-                </div>
-              </CardContent>
-            </>
-          )}
-        </Card>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 function LoadingFallback() {
-  return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  return (
+    <div className="min-h-screen flex items-center justify-center font-sans">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+    </div>
+  )
 }
 
 function ErrorFallback({ error }: { error: string }) {
-  return <div className="min-h-screen flex items-center justify-center"><div className="text-center"><Shield className="h-10 w-10 mx-auto text-red-500" /><h2 className="mt-4 text-xl font-bold">Connection Error</h2><p className="text-gray-600">{error}</p><Button onClick={() => window.location.reload()} className="mt-4">Try Again</Button></div></div>
+  return (
+    <div className="min-h-screen flex items-center justify-center font-sans">
+      <div className="text-center">
+        <Shield className="h-10 w-10 mx-auto text-destructive" />
+        <h2 className="mt-4 text-xl font-semibold font-serif text-foreground">Connection Error</h2>
+        <p className="text-muted-foreground text-sm mt-1">{error}</p>
+        <Button onClick={() => window.location.reload()} className="mt-4">Try Again</Button>
+      </div>
+    </div>
+  )
 }
 
 export default function Admin() {
