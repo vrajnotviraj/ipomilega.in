@@ -13,7 +13,6 @@ import {
   getRiskTextColor,
   parseCardDate,
   formatShortDate,
-  getScoreTrustLabel,
   getAllotmentProbability,
   parseGainValue,
   getIpoType,
@@ -101,8 +100,6 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
 
   const daysUntilClosing = getDaysUntilClosing();
   const riskScore = analysis?.risk_meter?.score || 0;
-  const riskTextColor = getRiskTextColor(riskScore);
-  const scoreTrustLabel = getScoreTrustLabel(riskScore);
   const closesInLabel = daysUntilClosing < 0 ? 'TBA' : daysUntilClosing === 0 ? 'Closing today' : `${daysUntilClosing}d left`;
 
   const totalSubscription = parseGainValue(ipo?.total_sr);
@@ -179,30 +176,11 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
 
       <hr className="border-border mb-4" />
 
-      <div className="flex items-end justify-between mb-4">
-        <div>
-          <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-            <Clock className="w-3 h-3" /> Closes in
-          </div>
-          <div className="font-mono text-sm font-semibold text-foreground">{closesInLabel}</div>
+      <div className="mb-4">
+        <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+          <Clock className="w-3 h-3" /> Closes in
         </div>
-        <div className="text-right leading-none">
-          <div className="text-xs text-muted-foreground mb-1">Risk Score</div>
-          {riskScore > 0 ? (
-            <>
-              <div>
-                <span className={`font-serif font-semibold text-3xl ${riskTextColor}`}>{riskScore}</span>
-                <span className="text-muted-foreground text-sm">/10</span>
-              </div>
-              <div className={`text-[11px] font-mono uppercase tracking-wide mt-0.5 ${riskTextColor}`}>{scoreTrustLabel}</div>
-            </>
-          ) : (
-            <>
-              <span className="font-serif font-semibold text-3xl text-muted-foreground/40">–</span>
-              <span className="text-muted-foreground text-sm">/10</span>
-            </>
-          )}
-        </div>
+        <div className="font-mono text-sm font-semibold text-foreground">{closesInLabel}</div>
       </div>
 
       <div className="mt-auto pt-1">
@@ -285,7 +263,7 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
             </Avatar>
             <div className="flex flex-col items-left justify-left min-w-0 flex-1">
               <h2 className="text-base sm:text-lg font-semibold font-serif truncate">{ipo?.upcoming_ipo_2025 || 'Company Name'}</h2>
-              <p className="text-sm text-muted-foreground font-mono truncate">{ipo?.ipo_details?.issue_size || 'N/A'} | ₹{ipo?.price_band || 'N/A'}</p>
+              <p className="text-sm text-muted-foreground font-mono truncate">{ipo?.ipo_details?.issue_size || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -382,7 +360,7 @@ export function PastIpoCard({ ipo, analysis }: IpoCardProps) {
             </Avatar>
             <div className="flex flex-col items-left justify-left min-w-0 flex-1">
               <h2 className="text-base sm:text-lg font-semibold font-serif truncate">{ipo?.upcoming_ipo_2025 || 'Company Name'}</h2>
-              <p className="text-sm text-muted-foreground font-mono truncate">{ipo?.ipo_size || 'N/A'} | ₹{ipo?.price_band || 'N/A'}</p>
+              <p className="text-sm text-muted-foreground font-mono truncate">{ipo?.ipo_size || 'N/A'}</p>
             </div>
           </div>
         </div>
