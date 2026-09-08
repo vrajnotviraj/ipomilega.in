@@ -402,9 +402,9 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-16">
       {/* Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-16 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -419,10 +419,10 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
                   <PenTool className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-semibold font-serif text-foreground">
                     Create Blog Post
                   </h1>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs font-mono uppercase tracking-wide text-muted-foreground">
                     {ipoData?.ipo?.upcoming_ipo_2025} IPO Analysis
                   </p>
                 </div>
@@ -473,7 +473,7 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
           <div className="lg:col-span-3 space-y-6">
             {/* IPO Reference Card */}
             {ipoData && (
-              <Card className="border-0 bg-gradient-to-r from-primary/5 to-purple/5 backdrop-blur-sm">
+              <Card className="border-border bg-card">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -481,7 +481,7 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
                         <Building2 className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg">{ipoData.ipo.upcoming_ipo_2025}</h3>
+                        <h3 className="font-semibold font-serif text-lg text-foreground">{ipoData.ipo.upcoming_ipo_2025}</h3>
                         <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                           <span>{ipoData.ipo.ipo_type}</span>
                           <span>•</span>
@@ -498,9 +498,9 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
             )}
 
             {/* Blog Editor */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 font-serif">
                   <FileText className="h-5 w-5" />
                   {isPreviewMode ? 'Preview' : 'Blog Editor'}
                 </CardTitle>
@@ -533,7 +533,7 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
                     </div>
                     {slugExists && (
                       <div className="">
-                        <p className="text-red-500">Slug already exists</p>
+                        <p className="text-destructive">Slug already exists</p>
                       </div>
                     )}
 
@@ -595,8 +595,8 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Status & Category */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
-              <CardHeader><CardTitle className="text-lg">Publishing</CardTitle></CardHeader>
+            <Card className="border-border bg-card">
+              <CardHeader><CardTitle className="text-lg font-serif">Publishing</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Category</Label>
@@ -626,8 +626,8 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
             </Card>
 
             {/* Tags */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
-              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Tags className="h-5 w-5" />Tags</CardTitle></CardHeader>
+            <Card className="border-border bg-card">
+              <CardHeader><CardTitle className="text-lg font-serif flex items-center gap-2"><Tags className="h-5 w-5" />Tags</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex gap-2">
                   <Input
@@ -654,8 +654,8 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
             </Card>
 
             {/* SEO */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
-              <CardHeader><CardTitle className="text-lg">SEO Settings</CardTitle></CardHeader>
+            <Card className="border-border bg-card">
+              <CardHeader><CardTitle className="text-lg font-serif">SEO Settings</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Meta Description</Label>
@@ -673,8 +673,8 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
             </Card>
 
             {/* Quick Actions */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
-              <CardHeader><CardTitle className="text-lg">Quick Actions</CardTitle></CardHeader>
+            <Card className="border-border bg-card">
+              <CardHeader><CardTitle className="text-lg font-serif">Quick Actions</CardTitle></CardHeader>
               <CardContent className="space-y-2">
                 <input
                   type="file"

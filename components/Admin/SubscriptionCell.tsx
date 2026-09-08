@@ -96,7 +96,7 @@ export default function SubscriptionCell({ ipo }: { ipo: Ipo }) {
           Retail chance <span className="text-foreground">{retailChance}%</span>
           {provisional && (
             <span
-              className="ml-1 text-amber-600"
+              className="ml-1 text-score-mid"
               title="Bidding is still open. This is 'if bidding closed now' — the book will keep growing, so the real odds will be lower."
             >
               prov.
@@ -106,7 +106,7 @@ export default function SubscriptionCell({ ipo }: { ipo: Ipo }) {
       )}
 
       {freshness ? (
-        <div className={stale ? "text-amber-600" : "text-muted-foreground"}>
+        <div className={stale ? "text-score-mid" : "text-muted-foreground"}>
           {stale ? "⚠ " : ""}
           Updated {relativeAge(freshness)}
           {!captured && " (poll time)"}

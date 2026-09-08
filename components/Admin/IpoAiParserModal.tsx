@@ -225,10 +225,10 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                 <Sparkles className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xl font-bold text-foreground">
+                <span className="text-xl font-semibold font-serif text-foreground">
                   AI Matrix Parser
                 </span>
-                <p className="text-sm font-medium text-muted-foreground mt-1">
+                <p className="text-xs font-mono uppercase tracking-wide text-muted-foreground mt-1">
                   Parse prospectus text for {ipoItem.ipo.ipo_name || ipoItem.ipo.upcoming_ipo_2025}
                 </p>
               </div>
@@ -239,7 +239,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
         <div className="flex-1 flex flex-row overflow-hidden min-h-0 bg-muted/40">
           {/* Left Panel: Pasting Input */}
           <div className="w-1/3 border-r bg-card p-6 flex flex-col gap-4 overflow-y-auto">
-            <div className="flex items-center gap-2 font-bold text-foreground text-base">
+            <div className="flex items-center gap-2 font-semibold font-serif text-foreground text-base">
               <FileText className="h-5 w-5 text-primary" />
               Raw Context Text
             </div>
@@ -277,7 +277,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
               <div className="flex-1 flex flex-row overflow-hidden">
                 {/* Markdown Preview Column */}
                 <div className="w-1/2 border-r p-6 overflow-y-auto bg-card flex flex-col gap-4">
-                  <div className="font-bold text-foreground text-base flex items-center gap-2 sticky top-0 bg-card pb-2 border-b">
+                  <div className="font-semibold font-serif text-foreground text-base flex items-center gap-2 sticky top-0 bg-card pb-2 border-b">
                     <FileText className="h-5 w-5 text-primary" />
                     Markdown Presentation Preview
                   </div>
@@ -290,7 +290,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
 
                 {/* Interactive Matrix Inputs Column */}
                 <div className="w-1/2 p-6 overflow-y-auto flex flex-col gap-6">
-                  <div className="font-bold text-foreground text-base flex items-center gap-2 pb-2 border-b">
+                  <div className="font-semibold font-serif text-foreground text-base flex items-center gap-2 pb-2 border-b">
                     <LineChart className="h-5 w-5 text-primary" />
                     Analysis Scores Matrix
                   </div>
@@ -331,7 +331,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                   {/* Edit Form */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                      <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                         <LineChart className="h-3.5 w-3.5 text-primary" />
                         Fundamentals Score (1-10)
                       </label>
@@ -346,7 +346,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                      <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                         <Shield className="h-3.5 w-3.5 text-destructive" />
                         Risk Score (1-10)
                       </label>
@@ -361,7 +361,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                      <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                         <TrendingUp className="h-3.5 w-3.5 text-score-good" />
                         Performance Score (1-10)
                       </label>
@@ -376,7 +376,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                      <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                         <Activity className="h-3.5 w-3.5 text-primary" />
                         Flexibility Score (1-10)
                       </label>
@@ -391,7 +391,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                      <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5 text-score-mid" />
                         Timing Score (1-10)
                       </label>
@@ -406,7 +406,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                      <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                         <Percent className="h-3.5 w-3.5 text-score-good" />
                         Listing Gains Potential (%)
                       </label>
@@ -419,7 +419,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                      <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                         <ThumbsUp className="h-3.5 w-3.5 text-primary" />
                         Allotment Profitability Score (1-10)
                       </label>
@@ -435,7 +435,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-muted-foreground">
+                    <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">
                       Market Position Description
                     </label>
                     <Textarea
@@ -454,7 +454,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-muted-foreground">
+                    <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">
                       Risk Summary
                     </label>
                     <Textarea
@@ -476,7 +476,7 @@ export function IpoAiParserModal({ ipoItem, onAnalysisSaved }: IpoAiParserModalP
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-muted-foreground bg-muted/20">
                 <Sparkles className="h-16 w-16 text-primary/40 mb-4 animate-pulse" />
-                <h3 className="font-bold text-lg text-foreground">
+                <h3 className="font-semibold font-serif text-lg text-foreground">
                   Ready to Parse
                 </h3>
                 <p className="text-sm max-w-md mt-2 text-muted-foreground">

@@ -849,7 +849,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
     // Helper function to determine score color
     const getScoreColor = (score: number) => {
         if (score >= 8) return "text-score-good";
-        if (score >= 6) return "text-yellow-600";
+        if (score >= 6) return "text-score-mid";
         return "text-destructive";
     };
 
@@ -1039,7 +1039,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
             <div className="space-y-6 bg-muted p-6 rounded-lg max-h-[600px] overflow-y-auto">
                 {/* Key Metrics Preview */}
                 <div>
-                    <h4 className="font-bold text-lg mb-4 text-primary">Key Metrics</h4>
+                    <h4 className="font-semibold font-serif text-lg mb-4 text-primary">Key Metrics</h4>
                     <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
                         {[
                             {
@@ -1088,7 +1088,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                 {/* Timeline Preview */}
                 {analysisData.time && (
                     <div>
-                        <h4 className="font-bold text-lg mb-4 text-primary">Timeline</h4>
+                        <h4 className="font-semibold font-serif text-lg mb-4 text-primary">Timeline</h4>
                         <div className="relative h-12 mb-8">
                             <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between">
                                 {Array.from({ length: totalDots }).map((_, i) => {
@@ -1155,7 +1155,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
 
                 {/* Investor Split Preview */}
                 <div>
-                    <h4 className="font-bold text-lg mb-4 text-primary">Investor Allocation</h4>
+                    <h4 className="font-semibold font-serif text-lg mb-4 text-primary">Investor Allocation</h4>
                     <div className="grid grid-cols-3 gap-4 justify-items-center">
                         {investorData.map((item, i) => (
                             <ProgressCircle key={i} label={item.label} value={item.value} />
@@ -1166,7 +1166,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                 {/* Investment Summary Preview */}
                 {analysisData.summary && (
                     <div>
-                        <h4 className="font-bold text-lg mb-4 text-primary">Investment Summary</h4>
+                        <h4 className="font-semibold font-serif text-lg mb-4 text-primary">Investment Summary</h4>
                         <Card className="bg-card border shadow-sm">
                             <CardContent className="grid gap-4 grid-cols-1 sm:grid-cols-3 text-center p-4">
                                 <div>
@@ -1204,7 +1204,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                 {/* Performance Preview */}
                 {analysisData.performance && (
                     <div>
-                        <h4 className="font-bold text-lg mb-4 text-primary">Performance Analysis</h4>
+                        <h4 className="font-semibold font-serif text-lg mb-4 text-primary">Performance Analysis</h4>
                         <div className="bg-card p-4 rounded-lg border">
                             <p className="text-sm mb-4">{analysisData.performance.summary}</p>
                             {analysisData.performance.management_quality && (
@@ -1226,12 +1226,12 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                 {/* Fundamentals Preview */}
                 {analysisData.fundamentals && (
                     <div>
-                        <h4 className="font-bold text-lg mb-4 text-primary">Financial Fundamentals</h4>
+                        <h4 className="font-semibold font-serif text-lg mb-4 text-primary">Financial Fundamentals</h4>
                         <div className="grid gap-4 grid-cols-2">
                             {analysisData.fundamentals.revenue_details?.total_revenue && (
                                 <div className="bg-card rounded-lg border p-4 text-center">
                                     <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-                                    <span className="text-lg font-bold text-foreground">
+                                    <span className="text-lg font-mono font-semibold text-foreground">
                                         INR {(analysisData.fundamentals.revenue_details.total_revenue / 10000000).toFixed(0)} CR
                                     </span>
                                 </div>
@@ -1239,7 +1239,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                             {analysisData.fundamentals.profit_analysis?.net_profit && (
                                 <div className="bg-card rounded-lg border p-4 text-center">
                                     <p className="text-sm font-medium text-muted-foreground">Net Profit</p>
-                                    <span className="text-lg font-bold text-foreground">
+                                    <span className="text-lg font-mono font-semibold text-foreground">
                                         INR {(analysisData.fundamentals.profit_analysis.net_profit / 10000000).toFixed(0)} CR
                                     </span>
                                 </div>
@@ -1251,7 +1251,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                 {/* Risk Analysis Preview */}
                 {analysisData.risk_meter && (
                     <div>
-                        <h4 className="font-bold text-lg mb-4 text-primary">Risk Assessment</h4>
+                        <h4 className="font-semibold font-serif text-lg mb-4 text-primary">Risk Assessment</h4>
                         <div className="bg-card p-4 rounded-lg border">
                             <p className="text-sm mb-4">{analysisData.risk_meter.summary}</p>
                             {analysisData.risk_meter.risk_categories && (
@@ -1279,7 +1279,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                 {/* Flexibility Preview */}
                 {analysisData.flexibility && (
                     <div>
-                        <h4 className="font-bold text-lg mb-4 text-primary">Flexibility Analysis</h4>
+                        <h4 className="font-semibold font-serif text-lg mb-4 text-primary">Flexibility Analysis</h4>
                         <div className="bg-card p-4 rounded-lg border">
                             <p className="text-sm mb-4">{analysisData.flexibility.summary}</p>
                             <div className="grid gap-4 grid-cols-3">
@@ -1351,10 +1351,10 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                                     </Avatar>
                                 </div>
                                 <div>
-                                    <div>
+                                    <div className="font-serif font-semibold">
                                         {ipoItem.ipo.ipo_name || ipoItem.ipo.upcoming_ipo_2025 || 'Unknown Company'}
                                     </div>
-                                    <div className="text-sm font-medium text-muted-foreground mt-1">Add Comprehensive Analysis</div>
+                                    <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mt-1">Add Comprehensive Analysis</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -1410,7 +1410,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                         <>
                             {/* Left Column: Progress & Details */}
                             <div className="w-1/3 min-w-[300px] border-r bg-muted/50 flex flex-col p-6 space-y-6 overflow-y-auto">
-                                <h3 className="font-bold text-lg text-foreground sticky top-0 bg-muted/50 pb-2">
+                                <h3 className="font-serif font-semibold text-lg text-foreground sticky top-0 bg-muted/50 pb-2">
                                     Analysis Steps
                                 </h3>
                                 <div className="space-y-4">
@@ -1511,7 +1511,7 @@ export function IpoAnalysisModal({ ipoItem, onAnalysisAdded }: IpoAnalysisModalP
                         <div className="flex-1 p-6 overflow-y-auto">
                             <div className="max-w-4xl mx-auto">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-2xl font-bold text-foreground">Analysis Preview</h3>
+                                    <h3 className="text-2xl font-semibold font-serif text-foreground">Analysis Preview</h3>
                                     <div className="text-sm text-muted-foreground">
                                         {completedSteps.size} of {analysisSteps.filter(s => s.required).length} required steps completed
                                     </div>

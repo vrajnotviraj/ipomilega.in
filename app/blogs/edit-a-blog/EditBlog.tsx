@@ -383,9 +383,9 @@ export default function EditBlog({ blog }: { blog: Blog }) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-16">
       {/* Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-16 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -400,10 +400,10 @@ export default function EditBlog({ blog }: { blog: Blog }) {
                   <PenTool className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-semibold font-serif text-foreground">
                     Edit Blog Post
                   </h1>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs font-mono uppercase tracking-wide text-muted-foreground">
                     {blogPost.title || 'Untitled Post'}
                   </p>
                 </div>
@@ -459,7 +459,7 @@ export default function EditBlog({ blog }: { blog: Blog }) {
                   <FileText className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg">Blog Post Details</h3>
+                  <h3 className="font-semibold font-serif text-lg text-foreground">Blog Post Details</h3>
                   <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
@@ -483,7 +483,7 @@ export default function EditBlog({ blog }: { blog: Blog }) {
 
             {/* IPO Reference Card */}
             {ipoData && (
-              <Card className="border-0 bg-gradient-to-r from-primary/5 to-purple/5 backdrop-blur-sm">
+              <Card className="border-border bg-card">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -494,7 +494,7 @@ export default function EditBlog({ blog }: { blog: Blog }) {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h3 className="font-semibold text-lg">{ipoData.ipo.upcoming_ipo_2025}</h3>
+                        <h3 className="font-semibold font-serif text-lg text-foreground">{ipoData.ipo.upcoming_ipo_2025}</h3>
                         <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                           <span>{ipoData.ipo.ipo_type}</span>
                           <span>•</span>
@@ -510,9 +510,9 @@ export default function EditBlog({ blog }: { blog: Blog }) {
               </Card>
             )}
             {/* Blog Editor */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 font-serif">
                   <FileText className="h-5 w-5" />
                   {isPreviewMode ? 'Preview' : 'Blog Editor'}
                 </CardTitle>
@@ -647,9 +647,9 @@ export default function EditBlog({ blog }: { blog: Blog }) {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Status & Category */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-lg">Publishing</CardTitle>
+                <CardTitle className="text-lg font-serif">Publishing</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -682,9 +682,9 @@ export default function EditBlog({ blog }: { blog: Blog }) {
             </Card>
 
             {/* Tags */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
+                <CardTitle className="text-lg font-serif flex items-center gap-2">
                   <Tags className="h-5 w-5" />
                   Tags
                 </CardTitle>
@@ -717,9 +717,9 @@ export default function EditBlog({ blog }: { blog: Blog }) {
             </Card>
 
             {/* SEO */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-lg">SEO Settings</CardTitle>
+                <CardTitle className="text-lg font-serif">SEO Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -738,9 +738,9 @@ export default function EditBlog({ blog }: { blog: Blog }) {
             </Card>
 
             {/* Quick Actions */}
-            <Card className="border-0 bg-background/60 backdrop-blur-sm">
+            <Card className="border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-lg font-serif">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <input
@@ -778,9 +778,9 @@ export default function EditBlog({ blog }: { blog: Blog }) {
 
             {/* Post Info */}
             {originalBlog && (
-              <Card className="border-0 bg-background/60 backdrop-blur-sm">
+              <Card className="border-border bg-card">
                 <CardHeader>
-                  <CardTitle className="text-lg">Post Information</CardTitle>
+                  <CardTitle className="text-lg font-serif">Post Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm text-muted-foreground">
                   <div>

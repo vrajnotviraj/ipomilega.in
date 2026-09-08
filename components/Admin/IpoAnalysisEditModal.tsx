@@ -469,10 +469,10 @@ export function IpoAnalysisEditModal({
                 <Edit className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xl font-bold text-foreground">
+                <span className="text-xl font-semibold font-serif text-foreground">
                   {hasExisting ? "Edit Analysis Matrix" : "Initialize Analysis Matrix"}
                 </span>
-                <p className="text-sm font-medium text-muted-foreground mt-1">
+                <p className="text-xs font-mono uppercase tracking-wide text-muted-foreground mt-1">
                   IPO: {ipoItem.ipo.ipo_name || ipoItem.ipo.upcoming_ipo_2025}
                 </p>
               </div>
@@ -495,65 +495,65 @@ export function IpoAnalysisEditModal({
             <TabsContent value="fundamentals" className="space-y-6 m-0">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Fundamentals Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Fundamentals Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={fundamentals.score} onChange={(e) => setFundamentals(prev => ({ ...prev, score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Total Revenue (latest year, in INR)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Total Revenue (latest year, in INR)</label>
                   <Input type="number" value={fundamentals.total_revenue} onChange={(e) => setFundamentals(prev => ({ ...prev, total_revenue: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Revenue CAGR (%)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Revenue CAGR (%)</label>
                   <Input type="number" value={fundamentals.revenue_cagr} onChange={(e) => setFundamentals(prev => ({ ...prev, revenue_cagr: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Net Profit (latest year, in INR)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Net Profit (latest year, in INR)</label>
                   <Input type="number" value={fundamentals.net_profit} onChange={(e) => setFundamentals(prev => ({ ...prev, net_profit: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Profit Margin (%)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Profit Margin (%)</label>
                   <Input type="number" value={fundamentals.profit_margin} onChange={(e) => setFundamentals(prev => ({ ...prev, profit_margin: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">EBITDA (in INR)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">EBITDA (in INR)</label>
                   <Input type="number" value={fundamentals.ebitda} onChange={(e) => setFundamentals(prev => ({ ...prev, ebitda: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Total Assets (in INR)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Total Assets (in INR)</label>
                   <Input type="number" value={fundamentals.total_assets} onChange={(e) => setFundamentals(prev => ({ ...prev, total_assets: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Total Liabilities (in INR)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Total Liabilities (in INR)</label>
                   <Input type="number" value={fundamentals.total_liabilities} onChange={(e) => setFundamentals(prev => ({ ...prev, total_liabilities: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Debt-to-Equity Ratio</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Debt-to-Equity Ratio</label>
                   <Input type="number" step="0.01" value={fundamentals.debt_to_equity_ratio} onChange={(e) => setFundamentals(prev => ({ ...prev, debt_to_equity_ratio: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Current Ratio</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Current Ratio</label>
                   <Input value={fundamentals.current_ratio} placeholder="e.g. 1.5:1" onChange={(e) => setFundamentals(prev => ({ ...prev, current_ratio: e.target.value }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Quick Ratio</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Quick Ratio</label>
                   <Input value={fundamentals.quick_ratio} placeholder="e.g. 1.2:1" onChange={(e) => setFundamentals(prev => ({ ...prev, quick_ratio: e.target.value }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Return on Equity (ROE)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Return on Equity (ROE)</label>
                   <Input value={fundamentals.return_on_equity} placeholder="e.g. 15%" onChange={(e) => setFundamentals(prev => ({ ...prev, return_on_equity: e.target.value }))} className="bg-card" />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Fundamentals Summary</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Fundamentals Summary</label>
                 <Textarea value={fundamentals.summary} placeholder="Overall financial overview..." onChange={(e) => setFundamentals(prev => ({ ...prev, summary: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Market Position</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Market Position</label>
                   <Textarea value={fundamentals.market_position} placeholder="Market share and moat..." onChange={(e) => setFundamentals(prev => ({ ...prev, market_position: e.target.value }))} className="bg-card min-h-[80px]" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Business Model</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Business Model</label>
                   <Textarea value={fundamentals.business_model} placeholder="Revenue generation and scalability..." onChange={(e) => setFundamentals(prev => ({ ...prev, business_model: e.target.value }))} className="bg-card min-h-[80px]" />
                 </div>
               </div>
@@ -563,51 +563,51 @@ export function IpoAnalysisEditModal({
             <TabsContent value="performance" className="space-y-6 m-0">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Performance Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Performance Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={performance.score} onChange={(e) => setPerformance(prev => ({ ...prev, score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Management Quality Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Management Quality Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={performance.mgmt_score} onChange={(e) => setPerformance(prev => ({ ...prev, mgmt_score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Operational Years</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Operational Years</label>
                   <Input type="number" value={performance.operational_years} onChange={(e) => setPerformance(prev => ({ ...prev, operational_years: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Growth Pattern</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Growth Pattern</label>
                   <Input value={performance.growth_pattern} placeholder="e.g. Consistent Growth" onChange={(e) => setPerformance(prev => ({ ...prev, growth_pattern: e.target.value }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Growth Rate</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Growth Rate</label>
                   <Input value={performance.growth_rate} placeholder="e.g. 20% CAGR" onChange={(e) => setPerformance(prev => ({ ...prev, growth_rate: e.target.value }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Growth Consistency</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Growth Consistency</label>
                   <Input value={performance.growth_consistency} placeholder="e.g. High" onChange={(e) => setPerformance(prev => ({ ...prev, growth_consistency: e.target.value }))} className="bg-card" />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Performance Summary</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Performance Summary</label>
                 <Textarea value={performance.summary} placeholder="Overview of company performance..." onChange={(e) => setPerformance(prev => ({ ...prev, summary: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Management Experience</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Management Experience</label>
                   <Textarea value={performance.mgmt_experience} placeholder="Experience details..." onChange={(e) => setPerformance(prev => ({ ...prev, mgmt_experience: e.target.value }))} className="bg-card min-h-[60px]" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Management Track Record</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Management Track Record</label>
                   <Textarea value={performance.mgmt_track_record} placeholder="Execution success track record..." onChange={(e) => setPerformance(prev => ({ ...prev, mgmt_track_record: e.target.value }))} className="bg-card min-h-[60px]" />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Key Achievements (One per line)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Key Achievements (One per line)</label>
                   <Textarea value={performance.key_achievements} placeholder="Achievement 1&#10;Achievement 2" onChange={(e) => setPerformance(prev => ({ ...prev, key_achievements: e.target.value }))} className="bg-card min-h-[80px]" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Upcoming Projects (One per line)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Upcoming Projects (One per line)</label>
                   <Textarea value={performance.upcoming_projects} placeholder="Project 1&#10;Project 2" onChange={(e) => setPerformance(prev => ({ ...prev, upcoming_projects: e.target.value }))} className="bg-card min-h-[80px]" />
                 </div>
               </div>
@@ -617,20 +617,20 @@ export function IpoAnalysisEditModal({
             <TabsContent value="risks" className="space-y-6 m-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Risk Score (1-10, lower is better)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Risk Score (1-10, lower is better)</label>
                   <Input type="number" min={1} max={10} value={riskMeter.score} onChange={(e) => setRiskMeter(prev => ({ ...prev, score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Risk Summary</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Risk Summary</label>
                 <Textarea value={riskMeter.summary} placeholder="Summary of risks..." onChange={(e) => setRiskMeter(prev => ({ ...prev, summary: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Key Risks (One per line)</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Key Risks (One per line)</label>
                 <Textarea value={riskMeter.key_risks} placeholder="Risk 1&#10;Risk 2" onChange={(e) => setRiskMeter(prev => ({ ...prev, key_risks: e.target.value }))} className="bg-card min-h-[100px]" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Risk Mitigation</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Risk Mitigation</label>
                 <Textarea value={riskMeter.risk_mitigation} placeholder="Mitigation details..." onChange={(e) => setRiskMeter(prev => ({ ...prev, risk_mitigation: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
             </TabsContent>
@@ -639,43 +639,43 @@ export function IpoAnalysisEditModal({
             <TabsContent value="flexibility" className="space-y-6 m-0">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Flexibility Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Flexibility Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={flexibility.score} onChange={(e) => setFlexibility(prev => ({ ...prev, score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Market Adaptability Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Market Adaptability Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={flexibility.market_adaptability_score} onChange={(e) => setFlexibility(prev => ({ ...prev, market_adaptability_score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Financial Stability Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Financial Stability Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={flexibility.financial_stability_score} onChange={(e) => setFlexibility(prev => ({ ...prev, financial_stability_score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Operational Agility Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Operational Agility Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={flexibility.operational_agility_score} onChange={(e) => setFlexibility(prev => ({ ...prev, operational_agility_score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Flexibility Summary</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Flexibility Summary</label>
                 <Textarea value={flexibility.summary} placeholder="Overview of adaptability..." onChange={(e) => setFlexibility(prev => ({ ...prev, summary: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Market Adaptability Description</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Market Adaptability Description</label>
                   <Textarea value={flexibility.market_adaptability_desc} onChange={(e) => setFlexibility(prev => ({ ...prev, market_adaptability_desc: e.target.value }))} className="bg-card min-h-[60px]" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Financial Stability Description</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Financial Stability Description</label>
                   <Textarea value={flexibility.financial_stability_desc} onChange={(e) => setFlexibility(prev => ({ ...prev, financial_stability_desc: e.target.value }))} className="bg-card min-h-[60px]" />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Operational Agility Description</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Operational Agility Description</label>
                   <Textarea value={flexibility.operational_agility_desc} onChange={(e) => setFlexibility(prev => ({ ...prev, operational_agility_desc: e.target.value }))} className="bg-card min-h-[60px]" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Product Diversification</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Product Diversification</label>
                   <Textarea value={flexibility.product_diversification} onChange={(e) => setFlexibility(prev => ({ ...prev, product_diversification: e.target.value }))} className="bg-card min-h-[60px]" />
                 </div>
               </div>
@@ -685,30 +685,30 @@ export function IpoAnalysisEditModal({
             <TabsContent value="timeline" className="space-y-6 m-0">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Timing Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Timing Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={time.score} onChange={(e) => setTime(prev => ({ ...prev, score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Time to Market Score (1-10)</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Time to Market Score (1-10)</label>
                   <Input type="number" min={1} max={10} value={time.time_to_market_score} onChange={(e) => setTime(prev => ({ ...prev, time_to_market_score: parseInt(e.target.value) || 0 }))} className="bg-card" />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Timeline Summary</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Timeline Summary</label>
                 <Textarea value={time.summary} placeholder="Overview of timing..." onChange={(e) => setTime(prev => ({ ...prev, summary: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Allotment Timeline Process</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Allotment Timeline Process</label>
                   <Textarea value={time.allotment_process} onChange={(e) => setTime(prev => ({ ...prev, allotment_process: e.target.value }))} className="bg-card min-h-[60px]" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground">Market Timing Assessment</label>
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Market Timing Assessment</label>
                   <Textarea value={time.market_timing_assessment} onChange={(e) => setTime(prev => ({ ...prev, market_timing_assessment: e.target.value }))} className="bg-card min-h-[60px]" />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Time to Market Rationale</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Time to Market Rationale</label>
                 <Textarea value={time.time_to_market_rationale} onChange={(e) => setTime(prev => ({ ...prev, time_to_market_rationale: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
             </TabsContent>
@@ -717,14 +717,14 @@ export function IpoAnalysisEditModal({
             <TabsContent value="verdict" className="space-y-6 m-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                     <Percent className="h-3.5 w-3.5 text-score-good" />
                     Listing Gains Potential (%)
                   </label>
                   <Input type="number" value={summaryGains.gains_potential} onChange={(e) => setSummaryGains(prev => ({ ...prev, gains_potential: parseFloat(e.target.value) || 0 }))} className="bg-card" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-muted-foreground flex items-center gap-1">
+                  <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground flex items-center gap-1">
                     <ThumbsUp className="h-3.5 w-3.5 text-primary" />
                     Allotment Profitability Score (1-10)
                   </label>
@@ -732,11 +732,11 @@ export function IpoAnalysisEditModal({
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Listing Gains Rationale</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Listing Gains Rationale</label>
                 <Textarea value={summaryGains.gains_rationale} placeholder="Rationale for potential gains..." onChange={(e) => setSummaryGains(prev => ({ ...prev, gains_rationale: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-muted-foreground">Allotment Assessment Recommendation</label>
+                <label className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Allotment Assessment Recommendation</label>
                 <Textarea value={summaryGains.allotment_assessment} placeholder="Recommendation description..." onChange={(e) => setSummaryGains(prev => ({ ...prev, allotment_assessment: e.target.value }))} className="bg-card min-h-[60px]" />
               </div>
             </TabsContent>
