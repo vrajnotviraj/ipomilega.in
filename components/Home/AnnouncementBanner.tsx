@@ -5,8 +5,8 @@ import { ProgressLink } from '@/components/Progressbar/ProgressLink';
 
 export function AnnouncementBanner() {
   return (
-    <div className="max-w-7xl mx-auto mb-10">
-      <div className="bg-primary rounded-lg px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="max-w-7xl mx-auto mb-4 sm:mb-10">
+      <div className="bg-primary rounded-lg px-4 py-3 sm:px-6 sm:py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
         <p className="text-primary-foreground text-sm sm:text-base font-sans max-w-2xl">
           A 600-page prospectus fits on one screen — five independent scores, evidence one scroll away, no sales pitch.
         </p>

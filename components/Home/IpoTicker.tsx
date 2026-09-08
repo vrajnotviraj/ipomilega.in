@@ -52,7 +52,7 @@ export function IpoTicker({ live, upcoming }: IpoTickerProps) {
   const duration = Math.min(90, Math.max(20, entries.length * 5));
 
   return (
-    <div className="relative left-1/2 -translate-x-1/2 -mt-8 mb-8 w-screen overflow-hidden bg-[#17140F] border-y border-white/10">
+    <div className="relative left-1/2 -translate-x-1/2 -mt-4 sm:-mt-8 mb-4 sm:mb-8 w-screen overflow-hidden bg-[#17140F] border-y border-white/10">
       <div
         className="flex w-max items-center py-2.5 motion-reduce:animate-none hover:[animation-play-state:paused] animate-ticker"
         style={{ animationDuration: `${duration}s` }}

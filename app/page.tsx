@@ -100,7 +100,7 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
 
   return (
     <AnimatedWrapper>
-      <div className="app-container pt-24">
+      <div className="app-container pt-20 sm:pt-24">
         <IpoTicker live={homeData.data.live} upcoming={homeData.data.upcoming} />
         <AnnouncementBanner />
         <AnimatedSection>

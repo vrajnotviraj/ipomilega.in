@@ -19,8 +19,8 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
   );
 
   return (
-    <section className='py-15'>
-      <div className="max-w-7xl mx-auto mb-8">
+    <section className='py-6 sm:py-15'>
+      <div className="max-w-7xl mx-auto mb-4 sm:mb-8">
         <div className="flex justify-between items-center gap-4">
           <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground flex items-center gap-3">
             <span>IPOs open now</span>

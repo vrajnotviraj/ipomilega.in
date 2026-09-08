@@ -387,7 +387,7 @@ export default function AllIPOsPage() {
   return (
     <div className="min-h-screen bg-background mt-20 font-ibm-plex app-container">
       {/* Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 lg:py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
