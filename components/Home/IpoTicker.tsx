@@ -13,7 +13,7 @@ interface TickerEntry {
   key: string;
   slug: string;
   name: string;
-  score: number;
+  score: number | null;
   status: 'Open' | 'Upcoming';
 }
 
@@ -26,23 +26,26 @@ const tickerScoreColor = (score: number) => {
   return 'text-[#5C9975]';
 };
 
+const tickerStatusColor = (status: TickerEntry['status']) =>
+  status === 'Open' ? 'text-[#5C9975]' : 'text-[#D2A257]';
+
 export function IpoTicker({ live, upcoming }: IpoTickerProps) {
   const entries: TickerEntry[] = [
     ...live.map((item) => ({
       key: item._id,
       slug: item.ipo?.slug,
       name: item.ipo?.upcoming_ipo_2025,
-      score: item.analysis?.risk_meter?.score,
+      score: item.analysis?.risk_meter?.score || null,
       status: 'Open' as const,
     })),
     ...upcoming.map((item) => ({
       key: item._id,
       slug: item.ipo?.slug,
       name: item.ipo?.upcoming_ipo_2025,
-      score: item.analysis?.risk_meter?.score,
+      score: item.analysis?.risk_meter?.score || null,
       status: 'Upcoming' as const,
     })),
-  ].filter((item): item is TickerEntry => !!item.slug && !!item.name && !!item.score);
+  ].filter((item): item is TickerEntry => !!item.slug && !!item.name);
 
   if (entries.length === 0) return null;
 
@@ -65,10 +68,14 @@ export function IpoTicker({ live, upcoming }: IpoTickerProps) {
               >
                 <span className="font-serif font-medium">{entry.name}</span>
                 <span className="text-[#F5F2EA]/40">•</span>
-                <span className={`font-mono font-semibold ${tickerScoreColor(entry.score)}`}>
-                  {entry.score.toFixed(1)}
+                {entry.score !== null && (
+                  <span className={`font-mono font-semibold ${tickerScoreColor(entry.score)}`}>
+                    {entry.score.toFixed(1)}
+                  </span>
+                )}
+                <span className={`text-xs font-mono uppercase tracking-wide font-semibold ${tickerStatusColor(entry.status)}`}>
+                  {entry.status}
                 </span>
-                <span className="text-xs font-mono uppercase tracking-wide text-[#F5F2EA]/60">{entry.status}</span>
                 <span className="text-[#F5F2EA]/20 ml-4">|</span>
               </ProgressLink>
             ))}
