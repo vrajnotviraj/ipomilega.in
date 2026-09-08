@@ -1,10 +1,10 @@
 // LiveIposSection.tsx
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
-import { IpoSectionProps, HomePageIpoProps } from '@/app/types/homepage'; // Assuming this path
+import { ArrowRight, Clock } from 'lucide-react';
+import { IpoSectionProps } from '@/app/types/homepage'; // Assuming this path
 import { LiveIpoCard } from './IpoCard'; // Assuming this path
 import { getIpoType } from './ipoFormat';
 
@@ -12,62 +12,10 @@ const BOARD_TABS = ['Mainboard', 'SME'] as const;
 
 export function LiveIposSection({ ipos, count }: IpoSectionProps) {
   const [activeTab, setActiveTab] = useState<typeof BOARD_TABS[number]>('Mainboard');
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
-
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
 
   const filteredIpos = ipos.filter(
     (item) => getIpoType(item.ipo) === activeTab
   );
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) { // Mobile
-        setItemsPerPage(1);
-      } else if (window.innerWidth < 1024) { // Tablet
-        setItemsPerPage(2);
-      } else { // Desktop
-        setItemsPerPage(3);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const totalPages = Math.ceil(filteredIpos.length / itemsPerPage);
-
-  useEffect(() => {
-    setCurrentIndex(0);
-  }, [itemsPerPage, activeTab]);
-
-  const nextSlide = () => {
-    setCurrentIndex(prev => (prev + 1) % totalPages);
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex(prev => (prev - 1 + totalPages) % totalPages);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStartX.current - touchEndX.current > 50) { // Swiped left
-      nextSlide();
-    }
-    if (touchStartX.current - touchEndX.current < -50) { // Swiped right
-      prevSlide();
-    }
-  };
 
   return (
     <section className='py-15'>
@@ -115,64 +63,10 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
             </div>
           </div>
         ) : (
-          <div className="relative px-0 sm:px-14">
-            {totalPages > 1 && (
-              <button
-                onClick={prevSlide}
-                className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 items-center justify-center bg-card hover:bg-accent text-foreground/80 hover:text-foreground w-10 h-10 rounded-full shadow-sm transition-all duration-200 border border-border"
-                aria-label="Previous IPOs"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-            )}
-            <div
-              className="relative overflow-hidden"
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
-              <div
-                className="flex transition-transform duration-500 ease-in-out"
-                style={{ transform: `translateX(-${currentIndex * 100 / totalPages}%)`, width: `${totalPages * 100}%` }}
-              >
-                {Array.from({ length: totalPages }).map((_, pageIndex) => (
-                  <div key={pageIndex} className="w-full flex-shrink-0" style={{ width: `${100 / totalPages}%` }}>
-                    <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                      {filteredIpos.slice(pageIndex * itemsPerPage, (pageIndex + 1) * itemsPerPage).map((ipo: HomePageIpoProps) => (
-                        <LiveIpoCard key={ipo._id} ipo={ipo.ipo} analysis={ipo.analysis} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {totalPages > 1 && (
-              <button
-                onClick={nextSlide}
-                className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 items-center justify-center bg-card hover:bg-accent text-foreground/80 hover:text-foreground w-10 h-10 rounded-full shadow-sm transition-all duration-200 border border-border"
-                aria-label="Next IPOs"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            )}
-            {totalPages > 1 && (
-              <div className="flex sm:hidden items-center justify-center gap-6 mt-6">
-                <button
-                  onClick={prevSlide}
-                  className="bg-card hover:bg-accent text-foreground/80 hover:text-foreground p-3 rounded-full shadow-sm transition-all duration-200 border border-border"
-                  aria-label="Previous IPOs"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="bg-card hover:bg-accent text-foreground/80 hover:text-foreground p-3 rounded-full shadow-sm transition-all duration-200 border border-border"
-                  aria-label="Next IPOs"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            )}
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredIpos.map((ipo) => (
+              <LiveIpoCard key={ipo._id} ipo={ipo.ipo} analysis={ipo.analysis} />
+            ))}
           </div>
         )}
       </div>

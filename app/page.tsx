@@ -105,10 +105,10 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
           <LiveIposSection ipos={homeData.data.live} count={homeData.counts.live} />
         </AnimatedSection>
         <AnimatedSection>
-          <UpcomingIposSection ipos={homeData.data.upcoming} count={homeData.counts.upcoming} />
+          <PastIposSection ipos={homeData.data.past} count={homeData.counts.past} />
         </AnimatedSection>
         <AnimatedSection>
-          <PastIposSection ipos={homeData.data.past} count={homeData.counts.past} />
+          <UpcomingIposSection ipos={homeData.data.upcoming} count={homeData.counts.upcoming} />
         </AnimatedSection>
         <AnimatedSection>
           <ScoreMethodology />

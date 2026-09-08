@@ -45,6 +45,17 @@ export interface Ipo {
   subscription_scraped_at: string;
   subscription_status: string;
   total_sr: string;
+  // Written by the hourly subscription job in ipo_milega_scrapper.
+  // captured_at is the exchange's own "updated as on" time; scraped_at is when
+  // our job polled. Freshness should always be judged on captured_at.
+  subscription_captured_at?: string;
+  subscription_source?: string;
+  // Retail only. QIB and NII use proportionate allotment, not a lottery, so no
+  // equivalent figure exists for them -- do not add one.
+  retail_allotment_probability?: number | null;
+  // True while bidding is still open: the probability is "if bidding closed
+  // now", not a final estimate.
+  subscription_is_provisional?: boolean;
   rhp_url: string;
   blog?: Blog;
   gmp_current_ipos: string;

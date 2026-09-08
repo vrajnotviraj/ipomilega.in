@@ -385,18 +385,7 @@ export default function AllIPOsPage() {
   }
 
   return (
-    <div
-      className="min-h-screen bg-background mt-20 font-ibm-plex app-container"
-      style={{
-        background: `
-          radial-gradient(circle at 20% 30%, rgba(240, 248, 255, 1), rgba(240, 248, 255, 0) 40%),
-          radial-gradient(circle at 70% 20%, rgba(173, 216, 230, 0.6), rgba(173, 216, 230, 0) 50%),
-          radial-gradient(circle at 30% 80%, rgba(135, 206, 250, 0.5), rgba(135, 206, 250, 0) 50%),
-          radial-gradient(circle at 90% 70%, rgba(173, 216, 250, 0.5), rgba(173, 216, 250, 0) 60%)
-        `,
-        backgroundColor: "#e6f4fe",
-      }}
-    >
+    <div className="min-h-screen bg-background mt-20 font-ibm-plex app-container">
       {/* Header */}
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 lg:py-6">
@@ -411,7 +400,7 @@ export default function AllIPOsPage() {
             </div>
             {/* Search Input */}
             <div className="w-full sm:w-72 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search analysis..."
@@ -420,7 +409,7 @@ export default function AllIPOsPage() {
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="pl-9 bg-white/80 border-gray-200 text-sm h-9 rounded-lg font-ibm-plex"
+                className="pl-9 bg-card border-border text-sm h-9 rounded-lg font-ibm-plex"
               />
             </div>
           </div>
@@ -445,8 +434,8 @@ export default function AllIPOsPage() {
                 className={cn(
                   "font-bold font-ibm-plex h-9 px-3.5 rounded-lg flex items-center gap-2 transition-all",
                   isActive
-                    ? "bg-[#0073E6] hover:bg-[#005bb5] text-white shadow-sm"
-                    : "bg-white/80 hover:bg-white border-gray-200 text-gray-700 hover:text-gray-900"
+                    ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm"
+                    : "bg-card hover:bg-accent border-border text-muted-foreground hover:text-foreground"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -455,7 +444,7 @@ export default function AllIPOsPage() {
                   variant="secondary"
                   className={cn(
                     "text-xs px-1.5 py-0.2 rounded-full",
-                    isActive ? "bg-white/20 text-white" : "bg-gray-100 text-gray-700"
+                    isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
                   )}
                 >
                   {tab.count}
@@ -594,7 +583,7 @@ export default function AllIPOsPage() {
               {currentIpos.map((ipo) => (
                 <div
                   key={ipo._id}
-                  className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm"
+                  className="bg-card border border-border rounded-xl p-4 shadow-sm"
                 >
                   <div className="flex items-start justify-between mb-3 gap-2">
                     <div className="flex items-center space-x-3 flex-1 min-w-0">
@@ -619,7 +608,7 @@ export default function AllIPOsPage() {
                     </div>
                     {getStatusBadge(ipo)}
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-xs mb-3 bg-gray-50/70 p-2.5 rounded-lg border border-gray-100">
+                  <div className="grid grid-cols-2 gap-3 text-xs mb-3 bg-muted/40 p-2.5 rounded-lg border border-border">
                     <div>
                       <div className="text-muted-foreground mb-0.5">Opening</div>
                       <div className="font-semibold text-foreground">
@@ -645,7 +634,7 @@ export default function AllIPOsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-gray-100">
+                  <div className="pt-2 border-t border-border">
                     <Link href={`/analysis/${ipo?.slug}`} className="block">
                       <Button
                         size="sm"
@@ -662,9 +651,9 @@ export default function AllIPOsPage() {
             </div>
 
             {/* Pagination Controls */}
-            <CardContent className="p-4 sm:p-6 border-t border-gray-100">
+            <CardContent className="p-4 sm:p-6 border-t border-border">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="text-sm text-gray-600 font-medium font-ibm-plex">
+                <div className="text-sm text-muted-foreground font-medium font-ibm-plex">
                   Showing {startIndex + 1} to {Math.min(endIndex, filteredIpos.length)} of{" "}
                   {filteredIpos.length} Analysis
                 </div>
@@ -674,7 +663,7 @@ export default function AllIPOsPage() {
                     size="sm"
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="h-8 sm:h-9 px-3 border-gray-200 hover:bg-gray-50 font-bold font-ibm-plex"
+                    className="h-8 sm:h-9 px-3 border-border hover:bg-accent font-bold font-ibm-plex"
                   >
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Previous
@@ -687,9 +676,9 @@ export default function AllIPOsPage() {
                       defaultValue={currentPage}
                       key={currentPage}
                       onKeyDown={handleGoToPage}
-                      className="w-16 h-8 sm:h-9 text-center border-gray-200 font-medium font-ibm-plex"
+                      className="w-16 h-8 sm:h-9 text-center border-border font-medium font-ibm-plex"
                     />
-                    <span className="text-sm text-gray-600 font-medium font-ibm-plex">
+                    <span className="text-sm text-muted-foreground font-medium font-ibm-plex">
                       of {totalPages}
                     </span>
                   </div>
@@ -698,7 +687,7 @@ export default function AllIPOsPage() {
                     size="sm"
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="h-8 sm:h-9 px-3 border-gray-200 hover:bg-gray-50 font-bold font-ibm-plex"
+                    className="h-8 sm:h-9 px-3 border-border hover:bg-accent font-bold font-ibm-plex"
                   >
                     Next
                     <ChevronRight className="h-4 w-4 ml-1" />

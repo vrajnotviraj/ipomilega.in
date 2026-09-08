@@ -19,6 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Blog } from "../models/ipo";
 import { useSession } from "@/lib/auth-client";
 import { IpoAnalysisModal } from "@/components/Admin/IpoAnalysisModal";
+import SubscriptionCell from "@/components/Admin/SubscriptionCell";
 
 const getInitials = (name?: string) => {
   if (!name) return "IP";
@@ -360,6 +361,7 @@ function AdminContent() {
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Close Date</th>
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Price Band</th>
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Issue Size</th>
+                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Subscription</th>
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Analysis Matrix</th>
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Actions</th>
                   </tr>
@@ -401,6 +403,7 @@ function AdminContent() {
                       <td className="p-4"><div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-mono">{ipoItem.ipo.ipo_dates.ipo_close_date}</span></div></td>
                       <td className="p-4"><div className="font-mono text-sm text-foreground">₹{ipoItem.ipo.price_band}</div></td>
                       <td className="p-4"><div className="font-mono text-sm text-foreground">₹{ipoItem.ipo.ipo_size}</div></td>
+                      <td className="p-4"><SubscriptionCell ipo={ipoItem.ipo} /></td>
                       <td className="p-4">
                         {hasAnalysis(ipoItem) ? (
                           <div className="flex flex-col gap-1 text-[11px] font-mono min-w-[200px]">

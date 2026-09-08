@@ -12,7 +12,6 @@ import {
   getRiskBorderColor,
   getRiskTextColor,
   parseCardDate,
-  formatShortDate,
   getAllotmentProbability,
   parseGainValue,
   getIpoType,
@@ -43,40 +42,6 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
-// Horizontal OPEN / CLOSE / ALLOT / LIST stepper used on the live IPO card
-function IpoTimelineStepper({ dates }: { dates: { openDate?: string; closeDate?: string; allotDate?: string; listDate?: string } }) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const steps = [
-    { label: 'OPEN', date: parseCardDate(dates.openDate), text: formatShortDate(dates.openDate) },
-    { label: 'CLOSE', date: parseCardDate(dates.closeDate), text: formatShortDate(dates.closeDate) },
-    { label: 'ALLOT', date: parseCardDate(dates.allotDate), text: formatShortDate(dates.allotDate) },
-    { label: 'LIST', date: parseCardDate(dates.listDate), text: formatShortDate(dates.listDate) },
-  ];
-
-  return (
-    <div className="grid grid-cols-4 gap-1">
-      {steps.map((step, i) => {
-        const reached = !!step.date && step.date <= today;
-        const nextReached = i < steps.length - 1 && !!steps[i + 1].date && (steps[i + 1].date as Date) <= today;
-        return (
-          <div key={step.label}>
-            <div className="flex items-center">
-              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${reached ? 'bg-foreground' : 'bg-transparent border border-muted-foreground/40'}`} />
-              {i < steps.length - 1 && (
-                <span className={`flex-1 ml-0.5 ${reached && nextReached ? 'border-t border-foreground' : 'border-t border-dashed border-muted-foreground/40'}`} />
-              )}
-            </div>
-            <div className="mt-2 text-[10px] font-mono font-medium uppercase tracking-wide text-muted-foreground">{step.label}</div>
-            <div className="text-xs font-mono font-semibold text-foreground">{step.text}</div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 // Live IPO Card Component
 export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const router = useProgressRouter();
@@ -100,7 +65,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
 
   const daysUntilClosing = getDaysUntilClosing();
   const riskScore = analysis?.risk_meter?.score || 0;
-  const closesInLabel = daysUntilClosing < 0 ? 'TBA' : daysUntilClosing === 0 ? 'Closing today' : `${daysUntilClosing}d left`;
+  const closesInLabel = daysUntilClosing < 0 ? 'TBA' : daysUntilClosing === 0 ? 'Today' : `${daysUntilClosing}`;
 
   const totalSubscription = parseGainValue(ipo?.total_sr);
   const ipoType = getIpoType(ipo);
@@ -176,22 +141,11 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
 
       <hr className="border-border mb-4" />
 
-      <div className="mb-4">
+      <div className="mt-auto">
         <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
           <Clock className="w-3 h-3" /> Closes in
         </div>
         <div className="font-mono text-sm font-semibold text-foreground">{closesInLabel}</div>
-      </div>
-
-      <div className="mt-auto pt-1">
-        <IpoTimelineStepper
-          dates={{
-            openDate: ipo?.ipo_dates?.ipo_open_date,
-            closeDate: ipo?.ipo_dates?.ipo_close_date,
-            allotDate: ipo?.ipo_dates?.basis_of_allotment,
-            listDate: ipo?.ipo_dates?.ipo_listing_date,
-          }}
-        />
       </div>
 
       <AllotmentPredictorModal
