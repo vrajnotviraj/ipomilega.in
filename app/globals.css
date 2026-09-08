@@ -136,6 +136,21 @@
   @apply px-[6%];
 }
 
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker {
+  animation-name: ticker-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

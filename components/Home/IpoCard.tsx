@@ -66,6 +66,8 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const daysUntilClosing = getDaysUntilClosing();
   const riskScore = analysis?.risk_meter?.score || 0;
   const closesInLabel = daysUntilClosing < 0 ? 'TBA' : daysUntilClosing === 0 ? 'Today' : `${daysUntilClosing}`;
+  const closesInColor =
+    daysUntilClosing < 0 ? 'text-foreground' : daysUntilClosing <= 0 ? 'text-score-bad' : daysUntilClosing <= 2 ? 'text-score-mid' : 'text-foreground';
 
   const totalSubscription = parseGainValue(ipo?.total_sr);
   const ipoType = getIpoType(ipo);
@@ -145,7 +147,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
         <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
           <Clock className="w-3 h-3" /> Closes in
         </div>
-        <div className="font-mono text-sm font-semibold text-foreground">{closesInLabel}</div>
+        <div className={`font-mono text-sm font-semibold ${closesInColor}`}>{closesInLabel}</div>
       </div>
 
       <AllotmentPredictorModal

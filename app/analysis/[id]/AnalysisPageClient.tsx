@@ -39,7 +39,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { getIpoType, parseCardDate } from "@/components/Home/ipoFormat";
+import { getIpoType, parseCardDate, getScoreTrustLabel } from "@/components/Home/ipoFormat";
 import { AllotmentPredictorModal } from "@/components/Home/AllotmentPredictorModal";
 import { AllotmentCategoryDef } from "@/components/Home/ipoFormat";
 
@@ -409,12 +409,23 @@ const AnalysisTimeline = ({
     return Math.max(0, Math.min(100, ((d.getTime() - openD.getTime()) / total) * 100));
   };
 
+  // Dates can land close together (or coincide), which would overlap the labels below —
+  // spread stations apart with a minimum gap while keeping Open/Listing anchored at the ends.
+  const MIN_GAP = 20;
+  const positions = [0, posOf(closing), posOf(allotment), 100];
+  for (let i = 1; i < positions.length; i++) {
+    positions[i] = Math.max(positions[i], positions[i - 1] + MIN_GAP);
+  }
+  for (let i = positions.length - 2; i >= 0; i--) {
+    positions[i] = Math.min(positions[i], positions[i + 1] - MIN_GAP);
+  }
+
   const today = new Date();
   const stations = [
-    { label: "Open", date: opening, pos: 0, align: "left" as const },
-    { label: "Close", date: closing, pos: posOf(closing), align: "center" as const },
-    { label: "Allotment", date: allotment, pos: posOf(allotment), align: "center" as const },
-    { label: "Listing", date: listing, pos: 100, align: "right" as const },
+    { label: "Open", date: opening, pos: positions[0], align: "left" as const },
+    { label: "Close", date: closing, pos: positions[1], align: "center" as const },
+    { label: "Allotment", date: allotment, pos: positions[2], align: "center" as const },
+    { label: "Listing", date: listing, pos: positions[3], align: "right" as const },
   ];
 
   const fmt = (s: string) => {
@@ -424,31 +435,53 @@ const AnalysisTimeline = ({
   };
 
   return (
-    <div className="relative pt-8 pb-10 px-2">
-      <div className="absolute left-2 right-2 top-1/2 h-px bg-border" style={{ top: "38px" }} />
-      {stations.map((s) => {
-        const reached = !!parseDate(s.date) && (parseDate(s.date) as Date) <= today;
-        const alignClass =
-          s.align === "left" ? "items-start text-left" : s.align === "right" ? "items-end text-right" : "items-center text-center";
-        const translate = s.align === "left" ? "" : s.align === "right" ? "-translate-x-full" : "-translate-x-1/2";
-        return (
-          <div
-            key={s.label}
-            className={cn("absolute flex flex-col gap-2", alignClass, translate)}
-            style={{ left: `${s.pos}%`, top: 0 }}
-          >
-            <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground">{s.label}</div>
-            <span
-              className={cn(
-                "w-3 h-3 rounded-full border-2 flex-shrink-0",
-                reached ? "bg-foreground border-foreground" : "bg-card border-muted-foreground/40"
-              )}
-            />
-            <div className="text-sm font-mono font-semibold text-foreground whitespace-nowrap">{fmt(s.date)}</div>
-          </div>
-        );
-      })}
-    </div>
+    <>
+      {/* Narrow screens: the proportional layout below has no room for four date labels
+          without overlapping, so fall back to a plain vertical list. */}
+      <div className="sm:hidden space-y-4">
+        {stations.map((s) => {
+          const reached = !!parseDate(s.date) && (parseDate(s.date) as Date) <= today;
+          return (
+            <div key={s.label} className="flex items-center gap-3">
+              <span
+                className={cn(
+                  "w-3 h-3 rounded-full border-2 flex-shrink-0",
+                  reached ? "bg-foreground border-foreground" : "bg-card border-muted-foreground/40"
+                )}
+              />
+              <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground w-24 flex-shrink-0">{s.label}</div>
+              <div className="text-sm font-mono font-semibold text-foreground">{fmt(s.date)}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="hidden sm:block relative pt-8 pb-10 px-2">
+        <div className="absolute left-2 right-2 top-1/2 h-px bg-border" style={{ top: "38px" }} />
+        {stations.map((s) => {
+          const reached = !!parseDate(s.date) && (parseDate(s.date) as Date) <= today;
+          const alignClass =
+            s.align === "left" ? "items-start text-left" : s.align === "right" ? "items-end text-right" : "items-center text-center";
+          const translate = s.align === "left" ? "" : s.align === "right" ? "-translate-x-full" : "-translate-x-1/2";
+          return (
+            <div
+              key={s.label}
+              className={cn("absolute flex flex-col gap-2", alignClass, translate)}
+              style={{ left: `${s.pos}%`, top: 0 }}
+            >
+              <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground">{s.label}</div>
+              <span
+                className={cn(
+                  "w-3 h-3 rounded-full border-2 flex-shrink-0",
+                  reached ? "bg-foreground border-foreground" : "bg-card border-muted-foreground/40"
+                )}
+              />
+              <div className="text-sm font-mono font-semibold text-foreground whitespace-nowrap">{fmt(s.date)}</div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 };
 
@@ -865,6 +898,27 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   onSave={(val) => handleInlineSave("ipo_details.issue_size", val)}
                   isAdmin={isAdmin}
                   textClassName="text-lg font-mono font-semibold text-foreground"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card p-5 sm:p-6 mb-6">
+              <div className="flex items-baseline justify-between mb-3 gap-3">
+                <span className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Overall score</span>
+                <span className="flex items-baseline gap-2">
+                  <span className={cn("font-mono text-sm font-semibold uppercase tracking-wide", scoreTextClass(overallScore))}>
+                    {getScoreTrustLabel(overallScore)}
+                  </span>
+                  <span className={cn("font-serif text-3xl font-semibold", scoreTextClass(overallScore))}>
+                    {overallScore.toFixed(1)}
+                  </span>
+                  <span className="text-sm text-muted-foreground font-mono">/10</span>
+                </span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className={cn("h-full rounded-full transition-all duration-700", scoreBarClass(overallScore))}
+                  style={{ width: `${Math.max(0, Math.min(100, (overallScore / 10) * 100))}%` }}
                 />
               </div>
             </div>
