@@ -65,7 +65,8 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
 
   const daysUntilClosing = getDaysUntilClosing();
   const riskScore = analysis?.risk_meter?.score || 0;
-  const closesInLabel = daysUntilClosing < 0 ? 'TBA' : daysUntilClosing === 0 ? 'Today' : `${daysUntilClosing}`;
+  const closesInLabel =
+    daysUntilClosing < 0 ? 'TBA' : daysUntilClosing === 0 ? 'Today' : `${daysUntilClosing} day${daysUntilClosing === 1 ? '' : 's'}`;
   const closesInColor =
     daysUntilClosing < 0 ? 'text-foreground' : daysUntilClosing <= 0 ? 'text-score-bad' : daysUntilClosing <= 2 ? 'text-score-mid' : 'text-foreground';
 

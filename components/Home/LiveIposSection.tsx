@@ -3,8 +3,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Clock } from 'lucide-react';
-import { IpoSectionProps } from '@/app/types/homepage'; // Assuming this path
+import { IpoSectionProps, HomePageIpoProps } from '@/app/types/homepage'; // Assuming this path
 import { LiveIpoCard } from './IpoCard'; // Assuming this path
 import { getIpoType } from './ipoFormat';
 
@@ -53,23 +54,39 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
           ))}
         </div>
       </div>
-      <div className="max-w-7xl mx-auto">
-        {filteredIpos.length === 0 ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
-              <Clock className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground text-base font-medium font-sans">No live {activeTab} IPOs at the moment</p>
-              <p className="text-muted-foreground/70 text-sm mt-2 font-sans">Check back soon for new opportunities!</p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredIpos.map((ipo) => (
-              <LiveIpoCard key={ipo._id} ipo={ipo.ipo} analysis={ipo.analysis} />
-            ))}
-          </div>
-        )}
-      </div>
+      <motion.div layout transition={{ duration: 0.25, ease: 'easeInOut' }} className="max-w-7xl mx-auto overflow-hidden">
+        <AnimatePresence mode="wait">
+          {filteredIpos.length === 0 ? (
+            <motion.div
+              key={`empty-${activeTab}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center justify-center py-8"
+            >
+              <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
+                <Clock className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-muted-foreground text-base font-medium font-sans">No live {activeTab} IPOs at the moment</p>
+                <p className="text-muted-foreground/70 text-sm mt-2 font-sans">Check back soon for new opportunities!</p>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key={`grid-${activeTab}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {filteredIpos.map((ipo: HomePageIpoProps) => (
+                <LiveIpoCard key={ipo._id} ipo={ipo.ipo} analysis={ipo.analysis} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </section>
   );
 }
