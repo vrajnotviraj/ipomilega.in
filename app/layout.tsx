@@ -242,7 +242,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
                   href="/analysis"
                   className={`text-sm transition-colors ${pathname === '/analysis' ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground hover:text-foreground'}`}
                 >
-                  Sample analysis
+                  Analysis
                 </ProgressLink>
               </nav>
 

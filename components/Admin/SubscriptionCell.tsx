@@ -1,6 +1,8 @@
 "use client";
 
 import { Ipo } from "@/app/models/ipo";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import SubscriptionDetails from "./SubscriptionDetails";
 
 /**
  * Admin-only view of live subscription state for one IPO.
@@ -15,6 +17,9 @@ import { Ipo } from "@/app/models/ipo";
  * otherwise look fresher than the data actually is. When the job falls back to
  * ipowatch there is no exchange timestamp, so only the poll time exists and the
  * cell says so rather than implying a precision it does not have.
+ *
+ * The breakdown (QIB/NII/RII, retail chance, freshness) lives in a hover tooltip
+ * (see SubscriptionDetails) so the table row stays a single compact line.
  */
 
 const IST = "Asia/Kolkata";
@@ -23,15 +28,6 @@ function parseDate(value?: string): Date | null {
   if (!value) return null;
   const parsed = new Date(value);
   return isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function relativeAge(from: Date): string {
-  const minutes = Math.floor((Date.now() - from.getTime()) / 60000);
-  if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes} min ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ${minutes % 60}m ago`;
-  return `${Math.floor(hours / 24)}d ago`;
 }
 
 function formatIst(date: Date): string {
@@ -69,7 +65,7 @@ export default function SubscriptionCell({ ipo }: { ipo: Ipo }) {
   const ageMinutes = freshness ? (Date.now() - freshness.getTime()) / 60000 : null;
   const stale = ageMinutes !== null && ageMinutes > 120;
 
-  const tooltip = [
+  const exchangeTooltip = [
     captured ? `Exchange updated: ${formatIst(captured)} IST` : "No exchange timestamp (ipowatch fallback)",
     scraped ? `Job polled: ${formatIst(scraped)} IST` : null,
     ipo.subscription_source ? `Source: ${ipo.subscription_source}` : null,
@@ -81,39 +77,26 @@ export default function SubscriptionCell({ ipo }: { ipo: Ipo }) {
   const provisional = ipo.subscription_is_provisional !== false;
 
   return (
-    <div className="flex flex-col gap-1 font-mono text-[11px] min-w-[170px]" title={tooltip}>
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-sm font-semibold text-foreground">{total ?? "—"}</span>
-        <span className="uppercase tracking-wide text-muted-foreground">total</span>
-      </div>
-
-      <div className="text-muted-foreground">
-        QIB {qib ?? "—"} · NII {nii ?? "—"} · RII {rii ?? "—"}
-      </div>
-
-      {typeof retailChance === "number" && (
-        <div className="text-muted-foreground">
-          Retail chance <span className="text-foreground">{retailChance}%</span>
-          {provisional && (
-            <span
-              className="ml-1 text-score-mid"
-              title="Bidding is still open. This is 'if bidding closed now' — the book will keep growing, so the real odds will be lower."
-            >
-              prov.
-            </span>
-          )}
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex items-baseline gap-1.5 font-mono text-[11px] cursor-default w-fit" title={exchangeTooltip}>
+          <span className="text-sm font-semibold text-foreground">{total ?? "—"}</span>
+          <span className="uppercase tracking-wide text-muted-foreground">total</span>
+          {stale && <span className="text-score-mid">⚠</span>}
         </div>
-      )}
-
-      {freshness ? (
-        <div className={stale ? "text-score-mid" : "text-muted-foreground"}>
-          {stale ? "⚠ " : ""}
-          Updated {relativeAge(freshness)}
-          {!captured && " (poll time)"}
-        </div>
-      ) : (
-        <div className="text-muted-foreground">Never updated</div>
-      )}
-    </div>
+      </TooltipTrigger>
+      <TooltipContent side="right">
+        <SubscriptionDetails
+          qib={qib}
+          nii={nii}
+          rii={rii}
+          retailChance={retailChance}
+          provisional={provisional}
+          freshness={freshness}
+          captured={!!captured}
+          stale={stale}
+        />
+      </TooltipContent>
+    </Tooltip>
   );
 }

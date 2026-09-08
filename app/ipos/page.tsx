@@ -184,12 +184,6 @@ function IPOsContent() {
               <SelectItem value="SME">SME</SelectItem>
             </SelectContent>
           </Select>
-          <Select value="all" disabled>
-            <SelectTrigger className="bg-card border-border text-sm w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All sectors</SelectItem>
-            </SelectContent>
-          </Select>
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
             <SelectTrigger className="bg-card border-border text-sm w-full sm:w-[200px]"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -214,7 +208,6 @@ function IPOsContent() {
                 <thead>
                   <tr className="border-b border-border">
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Company</th>
-                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Sector</th>
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Type</th>
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Price band</th>
                     <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Issue size</th>
@@ -238,7 +231,6 @@ function IPOsContent() {
                           <div className="font-serif font-semibold text-foreground">{row.ipo?.upcoming_ipo_2025 || "Unnamed IPO"}</div>
                           <StatusBadge status={row.status} />
                         </td>
-                        <td className="px-4 py-4 text-sm text-muted-foreground">—</td>
                         <td className="px-4 py-4 text-sm font-semibold text-foreground">{getIpoType(row.ipo)}</td>
                         <td className="px-4 py-4 font-mono text-sm text-foreground">{priceBand ? `₹${priceBand}` : "N/A"}</td>
                         <td className="px-4 py-4 font-mono text-sm text-foreground">{row.ipo?.ipo_size ? `₹${row.ipo.ipo_size}` : "N/A"}</td>

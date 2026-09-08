@@ -20,6 +20,7 @@ import { Blog } from "../models/ipo";
 import { useSession } from "@/lib/auth-client";
 import { IpoAnalysisModal } from "@/components/Admin/IpoAnalysisModal";
 import SubscriptionCell from "@/components/Admin/SubscriptionCell";
+import { getIpoType } from "@/components/Home/ipoFormat";
 
 const getInitials = (name?: string) => {
   if (!name) return "IP";
@@ -219,7 +220,7 @@ function AdminContent() {
   const getFilteredStats = () => {
     const currentList = getCurrentIpoList()
     const totalIpos = currentList.length
-    const mainboardCount = currentList.filter(ipo => ipo.ipo.ipo_type === 'Mainboard').length
+    const mainboardCount = currentList.filter(ipo => getIpoType(ipo.ipo) === 'Mainboard').length
     const smeCount = totalIpos - mainboardCount
     const totalSize = `${totalIpos * 1500}+ Cr`
     return { totalIpos, mainboardCount, smeCount, totalSize }
@@ -397,7 +398,7 @@ function AdminContent() {
                         </div>
                       </td>
                       <td className="p-4">
-                        <Badge variant="outline" className="font-mono text-xs uppercase tracking-wide">{ipoItem.ipo.ipo_type}</Badge>
+                        <Badge variant="outline" className="font-mono text-xs uppercase tracking-wide">{getIpoType(ipoItem.ipo)}</Badge>
                       </td>
                       <td className="p-4"><div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-mono">{ipoItem.ipo.ipo_dates.ipo_open_date}</span></div></td>
                       <td className="p-4"><div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /><span className="text-sm font-mono">{ipoItem.ipo.ipo_dates.ipo_close_date}</span></div></td>

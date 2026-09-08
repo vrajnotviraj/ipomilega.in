@@ -21,6 +21,7 @@ import MarkdownRenderer from "@/components/MarkDown";
 import { Ipo } from "@/app/models/ipo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProgressRouter } from "@/components/Progressbar/useProgressRouter";
+import { getIpoType } from "@/components/Home/ipoFormat";
 import Image from "next/image";
 
 interface BlogPost {
@@ -93,18 +94,9 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
   };
 
   return (
-    <div className="min-h-screen bg-background mt-20"
-    style={{
-      background: `
-        radial-gradient(circle at 20% 30%, rgba(240, 248, 255, 1), rgba(240, 248, 255, 0) 40%),
-        radial-gradient(circle at 70% 20%, rgba(173, 216, 230, 0.6), rgba(173, 216, 230, 0) 50%),
-        radial-gradient(circle at 30% 80%, rgba(135, 206, 250, 0.5), rgba(135, 206, 250, 0) 50%),
-        radial-gradient(circle at 90% 70%, rgba(173, 216, 250, 0.5), rgba(173, 216, 250, 0) 60%)
-      `,
-      backgroundColor: '#e6f4fe',
-    }}>
+    <div className="min-h-screen bg-background mt-20">
       {/* Navigation Header */}
-      <div className="border-b bg-[#e6f4fe] backdrop-blur-sm sticky top-0 z-50">
+      <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="sm" asChild>
@@ -159,7 +151,7 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
 
             {/* Category and Tags */}
             <div className="flex items-center gap-2 mb-6 flex-wrap">
-              <Badge variant="default" className="px-4 py-2 text-sm font-medium bg-primary text-background">
+              <Badge variant="default" className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground">
                 {blog.category}
               </Badge>
               {blog.tags.slice(0, 3).map((tag, index) => (
@@ -170,7 +162,7 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
             </div>
 
             {/* Title */}
-            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-foreground leading-tight">
+            <h1 className="text-4xl md:text-5xl font-semibold font-serif mb-6 text-foreground leading-tight">
               {blog.title}
             </h1>
 
@@ -217,7 +209,7 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
 
           {/* IPO Reference Card */}
           {blog.ipo_id && (
-            <Card className="mb-12 bg-muted/30 border border-muted">
+            <Card className="mb-12 bg-card border-border">
               <CardContent className="pt-6">
                 {isLoadingIpo ? (
                   <div className="flex items-center space-x-4">
@@ -243,12 +235,12 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
                         </div>
                       )}
                       <div>
-                        <h3 className="font-semibold text-lg text-foreground mb-1">
+                        <h3 className="font-semibold font-serif text-lg text-foreground mb-1">
                           {ipoData.upcoming_ipo_2025}
                         </h3>
                         <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          <span className="bg-muted px-2 py-1 rounded">
-                            {ipoData.ipo_type || "IPO"}
+                          <span className="bg-muted px-2 py-1 rounded font-mono text-xs uppercase tracking-wide">
+                            {getIpoType(ipoData)}
                           </span>
                           <span>•</span>
                           <span>{ipoData.ipo_details?.issue_size || "Size TBA"}</span>
@@ -256,7 +248,7 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
                       </div>
                     </div>
                     <Button asChild>
-                      <Link href={`/analysis/${ipoData._id}`}>
+                      <Link href={`/analysis/${ipoData.slug}`}>
                         <TrendingUp className="h-4 w-4 mr-2" />
                         View Analysis
                       </Link>
@@ -316,7 +308,7 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
           <section>
             <div className="text-center">
 
-              <Card className="bg-muted/30 border group hover:bg-muted/50 transition-all duration-300">
+              <Card className="bg-card border-border group hover:bg-accent/40 transition-all duration-300">
                 <CardContent className="pt-6 text-center" onClick={() => router.push("/ipos")}>
                   <div className="text-muted-foreground mb-4">
                     <Building2 className="h-12 w-12 mx-auto opacity-50" />
