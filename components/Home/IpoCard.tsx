@@ -112,7 +112,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
             <TrendingUp className="w-3 h-3" /> GMP
           </div>
           <div className="font-mono text-sm font-medium text-foreground flex items-center gap-1.5">
-            <span>{ipo?.gmp_est_listing ? `₹${ipo.gmp_est_listing}` : 'N/A'}</span>
+            <span>{ipo?.gmp_est_listing ? `₹${ipo.gmp_est_listing.replace(/\s*\([^)]*\)\s*$/, '')}` : 'N/A'}</span>
             {gmpPercent !== null && (
               <span className={`text-xs font-semibold ${gmpIsPositive ? 'text-score-good' : 'text-score-bad'}`}>
                 ({gmpIsPositive ? '+' : ''}{gmpPercent}%)
