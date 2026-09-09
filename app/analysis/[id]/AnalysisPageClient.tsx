@@ -869,7 +869,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               />
             </h1>
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 mb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-4 mb-8">
               <div>
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Price band</div>
                 <EditableText
@@ -900,6 +900,35 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   textClassName="text-lg font-mono font-semibold text-foreground"
                 />
               </div>
+              <div>
+                <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">GMP</div>
+                <EditableText
+                  value={gmpValue}
+                  onSave={(val) => handleInlineSave("gmp_price_gain", val)}
+                  isAdmin={isAdmin}
+                  textClassName="text-lg font-mono font-semibold text-score-good"
+                  renderText={(val) => <span>{val ? `₹${val}` : "N/A"}</span>}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-card p-5 mb-6">
+              <h3 className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-2">Estimated listing</h3>
+              {hasGmp ? (
+                <p className="font-mono text-2xl font-semibold text-score-good">
+                  <EditableText
+                    value={gmpValue}
+                    onSave={(val) => handleInlineSave("gmp_price_gain", val)}
+                    isAdmin={isAdmin}
+                    textClassName="font-mono"
+                    renderText={(val) => <span>₹{val}</span>}
+                  />
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Grey market data isn&apos;t available for this issue. The gains estimate is fundamentals-only — it does not factor in listing-day sentiment.
+                </p>
+              )}
             </div>
 
             <div className="rounded-xl border border-border bg-card p-5 sm:p-6 mb-6">
@@ -1053,26 +1082,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
-            <div className="rounded-xl border border-border bg-card p-5">
-              <h3 className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-2">Grey market premium</h3>
-              {hasGmp ? (
-                <p className="font-mono text-2xl font-semibold text-score-good">
-                  <EditableText
-                    value={gmpValue}
-                    onSave={(val) => handleInlineSave("gmp_price_gain", val)}
-                    isAdmin={isAdmin}
-                    textClassName="font-mono"
-                    renderText={(val) => <span>₹{val}</span>}
-                  />
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Grey market data isn&apos;t available for this issue. The gains estimate is fundamentals-only — it does not factor in listing-day sentiment.
-                </p>
-              )}
-            </div>
-            <div className="flex-shrink-0 mx-auto">
+          <div className="flex justify-center">
+            <div className="flex-shrink-0">
               <OverviewRadar axes={radarAxes} overallScore={overallScore} gainsPotential={gainsPotential} />
             </div>
           </div>
@@ -1202,6 +1213,9 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               isAdmin={isAdmin}
               onSaveScore={(val) => handleInlineSave("risk_meter.score", parseInt(val) || 0)}
             />
+            <p className="text-xs text-muted-foreground italic mb-4">
+              This score reads like a safety rating, not a risk gauge: 10/10 means the lowest risk, 1/10 means the highest risk.
+            </p>
             <EditableText
               value={editedAnalysis.risk_meter.summary}
               onSave={(val) => handleInlineSave("risk_meter.summary", val)}
