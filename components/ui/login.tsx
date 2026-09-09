@@ -67,7 +67,7 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
             {isLogin ? 'Sign In' : 'Create Account'}
           </CardTitle>
           <CardDescription className="text-muted-foreground">
-            {isLogin ? 'Welcome back to IPO Dekho' : 'Join IPO Dekho today'}
+            {isLogin ? 'Welcome back to IPO Milega' : 'Join IPO Milega today'}
           </CardDescription>
         </CardHeader>
         
