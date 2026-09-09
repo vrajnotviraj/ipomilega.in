@@ -14,7 +14,6 @@ import {
   parseCardDate,
   getAllotmentProbability,
   parseGainValue,
-  parseEstListingPercent,
   getIpoType,
   getProbabilityColor,
   ALLOTMENT_CATEGORIES,
@@ -74,9 +73,6 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const totalSubscription = parseGainValue(ipo?.total_sr);
   const ipoType = getIpoType(ipo);
 
-  const gmpPercent = parseEstListingPercent(ipo?.gmp_est_listing);
-  const gmpIsPositive = gmpPercent !== null && gmpPercent >= 0;
-
   const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => ({
     ...cat,
     icon: ALLOTMENT_ICONS[cat.key],
@@ -112,12 +108,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
             <TrendingUp className="w-3 h-3" /> GMP
           </div>
           <div className="font-mono text-sm font-medium text-foreground flex items-center gap-1.5">
-            <span>{ipo?.gmp_est_listing ? `₹${ipo.gmp_est_listing.replace(/\s*\([^)]*\)\s*$/, '')}` : 'N/A'}</span>
-            {gmpPercent !== null && (
-              <span className={`text-xs font-semibold ${gmpIsPositive ? 'text-score-good' : 'text-score-bad'}`}>
-                ({gmpIsPositive ? '+' : ''}{gmpPercent}%)
-              </span>
-            )}
+            <span>{ipo?.gmp_ipo_gmp ? `₹${ipo.gmp_ipo_gmp}` : 'N/A'}</span>
           </div>
         </div>
         <div className="text-right">
@@ -255,7 +246,7 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
           <div className={`text-center p-2 sm:p-3 bg-card rounded-lg border border-border shadow-sm`}>
             <h4 className={`text-xs font-medium mb-1 text-muted-foreground`}>Expected GMP</h4>
             <div className="flex items-center justify-center space-x-1">
-              <span className={`text-xs sm:text-sm text-score-good font-mono font-semibold`}>₹{ipo?.gmp_est_listing || 'TBA'}</span>
+              <span className={`text-xs sm:text-sm text-score-good font-mono font-semibold`}>₹{ipo?.gmp_ipo_gmp || 'TBA'}</span>
             </div>
           </div>
           <div className={`text-center p-2 sm:p-3 bg-card rounded-lg border border-border shadow-sm`}>
