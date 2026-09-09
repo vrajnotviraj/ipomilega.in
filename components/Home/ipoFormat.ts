@@ -97,6 +97,15 @@ export const parseGainValue = (raw: string | undefined): number | null => {
   return parseFloat(match[0]);
 };
 
+// Extracts the "(11.83%)" style gain percentage out of a formatted Est. Listing string
+// (e.g. "104 (11.83%)" or "- (0.00%)"). Falls back to null when no percentage is present.
+export const parseEstListingPercent = (raw: string | undefined): number | null => {
+  if (!raw) return null;
+  const match = raw.match(/\(?\s*(-?\d+(?:\.\d+)?)\s*%\s*\)?/);
+  if (!match) return null;
+  return parseFloat(match[1]);
+};
+
 // Qualitative read on the risk score so a bare number ("6.9") isn't the only signal of trust
 export const getScoreTrustLabel = (score: number): string => {
   if (score >= 7) return 'Strong';

@@ -61,6 +61,10 @@ export interface Ipo {
   gmp_current_ipos: string;
   gmp_price_gain: string;
   gmp_ipo_gmp: string;
+  gmp_est_listing: string;
+  gmp_trend: string;
+  gmp_price_band: string;
+  gmp_status: string;
   gmp_date: string;
   gmp_subject: string;
   gmp_type: string;

@@ -14,6 +14,7 @@ import {
   parseCardDate,
   getAllotmentProbability,
   parseGainValue,
+  parseEstListingPercent,
   getIpoType,
   getProbabilityColor,
   ALLOTMENT_CATEGORIES,
@@ -73,7 +74,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const totalSubscription = parseGainValue(ipo?.total_sr);
   const ipoType = getIpoType(ipo);
 
-  const gmpPercent = parseGainValue(ipo?.gmp_ipo_gmp);
+  const gmpPercent = parseEstListingPercent(ipo?.gmp_est_listing);
   const gmpIsPositive = gmpPercent !== null && gmpPercent >= 0;
 
   const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => ({
@@ -105,13 +106,21 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
         {ipo?.upcoming_ipo_2025 || 'Company Name'}
       </h2>
 
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-4 gap-2">
         <div>
           <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
             <TrendingUp className="w-3 h-3" /> GMP
           </div>
           <div className="font-mono text-sm font-medium text-foreground flex items-center gap-1.5">
-            <span>{ipo?.gmp_price_gain ? `₹${ipo.gmp_price_gain}` : 'N/A'}</span>
+            <span>{ipo?.gmp_ipo_gmp ? `₹${ipo.gmp_ipo_gmp}` : 'N/A'}</span>
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1 justify-center">
+            <TrendingUp className="w-3 h-3" /> Est. Listing
+          </div>
+          <div className="font-mono text-sm font-medium text-foreground flex items-center gap-1.5 justify-center">
+            <span>{ipo?.gmp_est_listing ? `₹${ipo.gmp_est_listing}` : 'N/A'}</span>
             {gmpPercent !== null && (
               <span className={`text-xs font-semibold ${gmpIsPositive ? 'text-score-good' : 'text-score-bad'}`}>
                 ({gmpIsPositive ? '+' : ''}{gmpPercent}%)
@@ -144,11 +153,19 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
 
       <hr className="border-border mb-4" />
 
-      <div className="mt-auto">
-        <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-          <Clock className="w-3 h-3" /> Closes in
+      <div className="mt-auto flex items-start justify-between">
+        <div>
+          <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+            <Clock className="w-3 h-3" /> Closes in
+          </div>
+          <div className={`font-mono text-sm font-semibold ${closesInColor}`}>{closesInLabel}</div>
         </div>
-        <div className={`font-mono text-sm font-semibold ${closesInColor}`}>{closesInLabel}</div>
+        <div className="text-right">
+          <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1 justify-end">
+            <Layers className="w-3 h-3" /> Issue size
+          </div>
+          <div className="font-mono text-sm font-semibold text-foreground">{ipo?.ipo_details?.issue_size || 'N/A'}</div>
+        </div>
       </div>
 
       <AllotmentPredictorModal
@@ -242,11 +259,17 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4">
           <div className={`text-center p-2 sm:p-3 bg-card rounded-lg border border-border shadow-sm`}>
             <h4 className={`text-xs font-medium mb-1 text-muted-foreground`}>Expected GMP</h4>
             <div className="flex items-center justify-center space-x-1">
-              <span className={`text-xs sm:text-sm text-score-good font-mono font-semibold`}>₹{ipo?.gmp_price_gain || 'TBA'}</span>
+              <span className={`text-xs sm:text-sm text-score-good font-mono font-semibold`}>₹{ipo?.gmp_ipo_gmp || 'TBA'}</span>
+            </div>
+          </div>
+          <div className={`text-center p-2 sm:p-3 bg-card rounded-lg border border-border shadow-sm`}>
+            <h4 className={`text-xs font-medium mb-1 text-muted-foreground`}>Est. Listing</h4>
+            <div className="flex items-center justify-center space-x-1">
+              <span className={`text-xs sm:text-sm text-score-good font-mono font-semibold`}>₹{ipo?.gmp_est_listing || 'TBA'}</span>
             </div>
           </div>
           <div className={`text-center p-2 sm:p-3 bg-card rounded-lg border border-border shadow-sm`}>
