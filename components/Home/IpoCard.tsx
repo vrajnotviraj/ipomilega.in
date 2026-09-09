@@ -106,20 +106,12 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
         {ipo?.upcoming_ipo_2025 || 'Company Name'}
       </h2>
 
-      <div className="flex items-start justify-between mb-4 gap-2">
+      <div className="flex items-start justify-between mb-4">
         <div>
           <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
             <TrendingUp className="w-3 h-3" /> GMP
           </div>
           <div className="font-mono text-sm font-medium text-foreground flex items-center gap-1.5">
-            <span>{ipo?.gmp_ipo_gmp ? `₹${ipo.gmp_ipo_gmp}` : 'N/A'}</span>
-          </div>
-        </div>
-        <div className="text-center">
-          <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1 justify-center">
-            <TrendingUp className="w-3 h-3" /> Est. Listing
-          </div>
-          <div className="font-mono text-sm font-medium text-foreground flex items-center gap-1.5 justify-center">
             <span>{ipo?.gmp_est_listing ? `₹${ipo.gmp_est_listing}` : 'N/A'}</span>
             {gmpPercent !== null && (
               <span className={`text-xs font-semibold ${gmpIsPositive ? 'text-score-good' : 'text-score-bad'}`}>
@@ -259,15 +251,9 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-4">
           <div className={`text-center p-2 sm:p-3 bg-card rounded-lg border border-border shadow-sm`}>
             <h4 className={`text-xs font-medium mb-1 text-muted-foreground`}>Expected GMP</h4>
-            <div className="flex items-center justify-center space-x-1">
-              <span className={`text-xs sm:text-sm text-score-good font-mono font-semibold`}>₹{ipo?.gmp_ipo_gmp || 'TBA'}</span>
-            </div>
-          </div>
-          <div className={`text-center p-2 sm:p-3 bg-card rounded-lg border border-border shadow-sm`}>
-            <h4 className={`text-xs font-medium mb-1 text-muted-foreground`}>Est. Listing</h4>
             <div className="flex items-center justify-center space-x-1">
               <span className={`text-xs sm:text-sm text-score-good font-mono font-semibold`}>₹{ipo?.gmp_est_listing || 'TBA'}</span>
             </div>
