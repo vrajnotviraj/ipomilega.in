@@ -140,6 +140,11 @@ export async function GET() {
         });
 
         const sortedPastIposWithExistingPerformance = sortedPastIpos.filter((ipo: Ipo) => ipo.listing_price != "");
+
+        // Closed = bidding window has ended but the stock hasn't listed yet (no listing_price recorded).
+        // These previously fell out of every bucket once excluded from "past", so they'd vanish from the
+        // homepage entirely even though this is exactly when users check their allotment odds.
+        const sortedClosedIpos = sortedPastIpos.filter((ipo: Ipo) => !ipo.listing_price);
         
         const sortedTbaIpos = tbaIpos.sort((a, b) => {
             const nameA = a.upcoming_ipo_2025 || '';
@@ -153,6 +158,7 @@ export async function GET() {
         const finalLiveIpos: HomePageIpoProps[] = [];
         const finalUpcomingIpos: HomePageIpoProps[] = [];
         const finalPastIpos: HomePageIpoProps[] = [];
+        const finalClosedIpos: HomePageIpoProps[] = [];
         const finalTbaIpos: HomePageIpoProps[] = [];
         const finalAllIpos: HomePageIpoProps[] = [];
 
@@ -195,6 +201,19 @@ export async function GET() {
             });
         });
 
+        sortedClosedIpos.forEach((ipo: Ipo) => {
+            const analysisData = analysisList.find((analysis: unknown) => {
+                const analysisTyped = analysis as IpoComprehensiveAnalysis;
+                return analysisTyped.ipo_table_id === ipo._id.toString();
+            }) as IpoComprehensiveAnalysis | undefined;
+
+            finalClosedIpos.push({
+                _id: ipo._id.toString(),
+                ipo,
+                analysis: analysisData || null,
+            });
+        });
+
         sortedTbaIpos.forEach((ipo: Ipo) => {
             const analysisData = analysisList.find((analysis: unknown) => {
                 const analysisTyped = analysis as IpoComprehensiveAnalysis;
@@ -209,14 +228,15 @@ export async function GET() {
         });
 
         // Populate finalAllIpos if needed (e.g., combine all IPOs)
-        finalAllIpos.push(...finalLiveIpos, ...finalUpcomingIpos, ...finalPastIpos, ...finalTbaIpos);
-        
+        finalAllIpos.push(...finalLiveIpos, ...finalUpcomingIpos, ...finalClosedIpos, ...finalPastIpos, ...finalTbaIpos);
+
         return NextResponse.json({
             message: "Data retrieved successfully",
             success: true,
             data: {
                 upcoming: finalUpcomingIpos,
                 live: finalLiveIpos,
+                closed: finalClosedIpos,
                 past: finalPastIpos,
                 tba: finalTbaIpos,
                 all: finalAllIpos,
@@ -225,6 +245,7 @@ export async function GET() {
             counts: {
                 upcoming: finalUpcomingIpos.length,
                 live: finalLiveIpos.length,
+                closed: finalClosedIpos.length,
                 past: finalPastIpos.length,
                 tba: finalTbaIpos.length,
                 total: ipoList.length,

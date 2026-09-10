@@ -7,6 +7,7 @@ export async function generateStaticParams() {
 
 import { BlogSection } from '@/components/Home/BlogSection';
 import { LiveIposSection } from '@/components/Home/LiveIposSection';
+import { ClosedIposSection } from '@/components/Home/ClosedIposSection';
 import { IpoTicker } from '@/components/Home/IpoTicker';
 import { PastIposSection } from '@/components/Home/PastIposSection';
 import { UpcomingIposSection } from '@/components/Home/UpcomingIpos';
@@ -105,10 +106,13 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
         <AnnouncementBanner />
         <LiveIposSection ipos={homeData.data.live} count={homeData.counts.live} />
         <AnimatedSection>
-          <PastIposSection ipos={homeData.data.past} count={homeData.counts.past} />
+          <ClosedIposSection ipos={homeData.data.closed} count={homeData.counts.closed} />
         </AnimatedSection>
         <AnimatedSection>
           <UpcomingIposSection ipos={homeData.data.upcoming} count={homeData.counts.upcoming} />
+        </AnimatedSection>
+        <AnimatedSection>
+          <PastIposSection ipos={homeData.data.past} count={homeData.counts.past} />
         </AnimatedSection>
         <AnimatedSection>
           <ScoreMethodology />

@@ -4,7 +4,7 @@
 import { ArrowUpRight, ArrowUp, ArrowDown, CalendarDays } from 'lucide-react';
 import { HomePageIpoProps, IpoSectionProps } from '@/app/types/homepage';
 import { useProgressRouter } from '../Progressbar/useProgressRouter';
-import { formatShortDate, parseGainValue } from './ipoFormat';
+import { formatShortDateOrToday, parseGainValue } from './ipoFormat';
 
 function RecentlyListedCard({ item }: { item: HomePageIpoProps }) {
   const router = useProgressRouter();
@@ -30,7 +30,7 @@ function RecentlyListedCard({ item }: { item: HomePageIpoProps }) {
       <div className="flex items-start justify-between gap-3 mb-4">
         <h3 className="font-serif font-semibold text-foreground truncate">{ipo?.upcoming_ipo_2025 || 'Company Name'}</h3>
         <div className={`flex items-center gap-1 text-xs flex-shrink-0 ${riskScore > 0 ? 'text-muted-foreground' : 'text-muted-foreground/50'}`}>
-          <span>listed {formatShortDate(ipo?.ipo_dates?.ipo_listing_date)}</span>
+          <span>listed {formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)}</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
         </div>
       </div>

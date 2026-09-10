@@ -6,7 +6,7 @@ import { ArrowRight, ArrowUpRight, CalendarDays } from 'lucide-react';
 import { HomePageIpoProps, IpoSectionProps } from '@/app/types/homepage';
 import { Badge } from '../ui/badge';
 import { useProgressRouter } from '../Progressbar/useProgressRouter';
-import { formatShortDate, getRiskTextColor, getIpoType, getPriceBand } from './ipoFormat';
+import { formatShortDateOrToday, getRiskTextColor, getIpoType, getPriceBand } from './ipoFormat';
 
 function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
   const router = useProgressRouter();
@@ -23,18 +23,18 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 py-4 border-b border-border">
-      <div className="flex items-center gap-3 min-w-0">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-4 border-b border-border">
+      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
         <CalendarDays className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-        <Badge variant="outline" className="rounded-md border-border bg-transparent text-foreground text-[11px] font-mono font-medium uppercase tracking-wide px-2 py-1 flex-shrink-0">
+        <Badge variant="outline" className="rounded-md border-border bg-transparent text-foreground text-[11px] font-mono font-medium uppercase tracking-wide px-2 py-1 sm:w-[92px] sm:justify-center flex-shrink-0">
           {ipoType}
         </Badge>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="font-serif font-semibold text-foreground truncate">{ipo?.upcoming_ipo_2025 || 'Company Name'}</div>
-          <div className="text-sm text-muted-foreground truncate">Opens {formatShortDate(ipo?.ipo_dates?.ipo_open_date)}</div>
+          <div className="text-sm text-muted-foreground truncate">Opens {formatShortDateOrToday(ipo?.ipo_dates?.ipo_open_date)}</div>
         </div>
       </div>
-      <div className="flex items-center gap-6 flex-shrink-0">
+      <div className="flex items-center justify-between sm:justify-end gap-6 flex-shrink-0 pl-[26px] sm:pl-0">
         <div className="text-right hidden sm:block">
           <div className="text-xs text-muted-foreground">Price band</div>
           <div className="font-mono text-sm font-medium text-foreground">{priceBand ? `₹${priceBand}` : 'N/A'}</div>
@@ -42,7 +42,7 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
         <button
           onClick={handleViewAnalysis}
           disabled={riskScore === 0}
-          className={`flex items-center gap-1 ${riskScore === 0 ? 'cursor-default' : 'cursor-pointer'}`}
+          className={`flex items-center gap-1 flex-shrink-0 ${riskScore === 0 ? 'cursor-default' : 'cursor-pointer'}`}
           aria-label="View analysis"
         >
           {riskScore > 0 ? (

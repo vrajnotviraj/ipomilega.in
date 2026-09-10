@@ -12,7 +12,7 @@ export async function getHomePageData(): Promise<HomePageData> {
       }),
     ]);
 
-    let ipoData = { data: { upcoming: [], live: [], past: [] }, counts: { upcoming: 0, live: 0, past: 0 } };
+    let ipoData = { data: { upcoming: [], live: [], closed: [], past: [] }, counts: { upcoming: 0, live: 0, closed: 0, past: 0 } };
     let blogData = { blogList: [] };
 
     if (ipoResult.status === 'fulfilled' && ipoResult.value.ok) {
@@ -31,8 +31,8 @@ export async function getHomePageData(): Promise<HomePageData> {
   } catch (error) {
     console.error('Error fetching homepage data:', error);
     return {
-      data: { upcoming: [], live: [], past: [] },
-      counts: { upcoming: 0, live: 0, past: 0 },
+      data: { upcoming: [], live: [], closed: [], past: [] },
+      counts: { upcoming: 0, live: 0, closed: 0, past: 0 },
       blogList: [],
     };
   }
