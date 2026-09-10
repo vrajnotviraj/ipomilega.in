@@ -1,4 +1,4 @@
-# Ipo Milega v1
+# Ipo Milega
 
 
 **IPO Milega** is a modern, high-performance web platform for tracking, analyzing, and managing Indian Initial Public Offerings (IPOs). Built with **Next.js 15 (App Router)**, **TypeScript**, **MongoDB**, and **Tailwind CSS**, it delivers comprehensive IPO insights, financial performance charts, and direct admin management.
