@@ -7,11 +7,11 @@ import { IpoSectionProps } from '@/app/types/homepage';
 import { ClosedIpoRow } from './IpoCard';
 
 export function ClosedIposSection({ ipos, count }: IpoSectionProps) {
-  const visibleIpos = ipos.slice(0, 6);
-
-  if (ipos.length === 0) {
+  if (!ipos || ipos.length === 0) {
     return null;
   }
+
+  const visibleIpos = ipos.slice(0, 6);
 
   return (
     <section className="py-15">

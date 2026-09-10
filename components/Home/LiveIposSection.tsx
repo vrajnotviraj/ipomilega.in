@@ -14,7 +14,7 @@ const BOARD_TABS = ['Mainboard', 'SME'] as const;
 export function LiveIposSection({ ipos, count }: IpoSectionProps) {
   const [activeTab, setActiveTab] = useState<typeof BOARD_TABS[number]>('Mainboard');
 
-  const filteredIpos = ipos.filter(
+  const filteredIpos = (ipos || []).filter(
     (item) => getIpoType(item.ipo) === activeTab
   );
 

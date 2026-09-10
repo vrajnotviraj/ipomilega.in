@@ -31,14 +31,14 @@ const tickerStatusColor = (status: TickerEntry['status']) =>
 
 export function IpoTicker({ live, upcoming }: IpoTickerProps) {
   const entries: TickerEntry[] = [
-    ...live.map((item) => ({
+    ...(live || []).map((item) => ({
       key: item._id,
       slug: item.ipo?.slug,
       name: item.ipo?.upcoming_ipo_2025,
       score: item.analysis?.risk_meter?.score || null,
       status: 'Open' as const,
     })),
-    ...upcoming.map((item) => ({
+    ...(upcoming || []).map((item) => ({
       key: item._id,
       slug: item.ipo?.slug,
       name: item.ipo?.upcoming_ipo_2025,

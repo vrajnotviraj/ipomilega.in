@@ -58,7 +58,7 @@ function RecentlyListedCard({ item }: { item: HomePageIpoProps }) {
 }
 
 export function PastIposSection({ ipos }: IpoSectionProps) {
-  const visibleIpos = ipos.slice(0, 4);
+  const visibleIpos = (ipos || []).slice(0, 4);
 
   return (
     <section className="py-15">
@@ -67,7 +67,7 @@ export function PastIposSection({ ipos }: IpoSectionProps) {
           <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground">Recently listed</h2>
           <span className="text-muted-foreground italic text-sm font-sans flex-shrink-0 hidden sm:inline">predicted vs. actual — our credibility record</span>
         </div>
-        {ipos.length === 0 ? (
+        {visibleIpos.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
               <CalendarDays className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />

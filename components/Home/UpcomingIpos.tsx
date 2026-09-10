@@ -58,7 +58,7 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
 }
 
 export function UpcomingIposSection({ ipos, count }: IpoSectionProps) {
-  const visibleIpos = ipos.slice(0, 6);
+  const visibleIpos = (ipos || []).slice(0, 6);
 
   return (
     <section className="py-15">
@@ -74,7 +74,7 @@ export function UpcomingIposSection({ ipos, count }: IpoSectionProps) {
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
-        {ipos.length === 0 ? (
+        {visibleIpos.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
               <CalendarDays className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
