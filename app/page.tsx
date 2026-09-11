@@ -14,6 +14,7 @@ import { HomePageData } from './types/homepage';
 import { Footer } from '@/components/Home/Footer';
 import { AnimatedWrapper } from '@/components/Home/AnimatedWrapper';
 import { AnimatedSection } from '@/components/Home/AnimatedSection';
+import { PageLoader } from '@/components/ui/loader';
 
 // ISR: the page is rendered once and served from the edge cache as static HTML, then
 // re-rendered in the background at most every 5 minutes. Visitors never wait on Mongo.
@@ -22,7 +23,9 @@ import { AnimatedSection } from '@/components/Home/AnimatedSection';
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: 'IPO Milega - Your Gateway to IPO Investments | Live, Upcoming & Past IPOs',
+  title: {
+    absolute: 'IPO Milega - Your Gateway to IPO Investments | Live, Upcoming & Past IPOs',
+  },
   description: 'Discover the latest IPO opportunities with IPO Milega. Track live IPOs, upcoming listings, and past performance. Get expert insights and make informed investment decisions.',
   keywords: [
     'IPO',
@@ -129,13 +132,8 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
 
 function HomePageSkeleton() {
   return (
-    <div className="animate-pulse">
-      <div className="h-96 bg-gray-200 rounded-lg mb-8"></div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
-        ))}
-      </div>
+    <div className="app-container pt-24 pb-16">
+      <PageLoader label="Loading IPOs" />
     </div>
   );
 }

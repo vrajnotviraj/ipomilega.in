@@ -6,7 +6,7 @@ import IposClient from "./IposClient";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "All IPOs - Live, Upcoming & Listed | IPO Milega",
+  title: "All IPOs - Live, Upcoming & Listed",
   description:
     "Browse every mainboard and SME IPO: price bands, issue sizes, key dates and analysis scores. Filter by status and type.",
   alternates: { canonical: "/ipos" },

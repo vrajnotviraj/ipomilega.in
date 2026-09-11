@@ -6,7 +6,7 @@ export function Footer() {
         <section>
             <hr className="border-border w-full mx-auto" />
             <footer className="py-6">
-                <div className="max-w-7xl mx-auto text-center">
+                <div className="text-center">
                     <h2 className="text-2xl font-serif text-foreground mb-2 font-semibold">
                         IPO Milega
                     </h2>

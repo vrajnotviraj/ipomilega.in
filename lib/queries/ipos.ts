@@ -6,10 +6,36 @@ import { IpoComprehensiveAnalysis } from '@/app/models/ipo_comprehensive_analysi
 import { HomePageIpoProps } from '@/app/types/homepage';
 import { parseIpoDate, getOpenDateString, getCloseDateString } from './ipo-dates';
 
-// `tables_raw` is a ~3.4KB/doc dump of scraped HTML tables that nothing in the UI reads --
-// across 51 IPOs it was roughly half the bytes of every list response. Projecting it away at
-// the driver keeps it out of the wire, out of the RSC payload, and out of the cache entry.
-const IPO_LIST_PROJECTION = { tables_raw: 0 } as const;
+// Public card/list views (homepage, /ipos) read a small slice of each document, but the whole
+// thing was being embedded in the RSC payload. Measured across the live collection:
+//
+//   ipos      368.4KB full -> 194.0KB without tables_raw -> 118.2KB with this projection
+//   analysis  173.1KB full -> 23.3KB with ANALYSIS_CARD_PROJECTION
+//   combined  367.1KB -> 141.6KB  (-61%)
+//
+// Every field excluded here has zero references in components/Home, components/charts,
+// components/AllotmentPredictor and app/ipos. `tables_raw` alone is 173.7KB -- a dump of
+// scraped HTML tables that nothing in the app reads at all.
+const IPO_CARD_PROJECTION = {
+  tables_raw: 0,
+  about: 0,
+  ipo_valuation: 0,
+  promoters: 0,
+  rhp_url: 0,
+  financial_report: 0,
+} as const;
+
+// Admin renders the full record, so it only sheds the field nothing reads anywhere.
+const IPO_FULL_PROJECTION = { tables_raw: 0 } as const;
+
+// Cards render exactly one number off the analysis document: risk_meter.score. Pulling the
+// whole 10KB/doc analysis to show it was the single largest avoidable cost on the homepage.
+const ANALYSIS_CARD_PROJECTION = {
+  ipo_table_id: 1,
+  slug: 1,
+  company_name: 1,
+  'risk_meter.score': 1,
+} as const;
 
 export type IpoBuckets = {
   upcoming: HomePageIpoProps[];
@@ -103,13 +129,22 @@ function bucketIpos(ipoList: RawIpo[]) {
  * The two collections are read in parallel (they were sequential, costing ~230ms of
  * round-trips back to back) and joined through a Map. The previous `analysisList.find(...)`
  * inside a per-IPO loop was an O(ipos x analyses) linear scan repeated once per bucket.
+ *
+ * `full` controls how much of each document comes back. Public pages take the card
+ * projection; the admin console needs the complete records.
  */
-async function loadIpoBuckets(): Promise<IpoBuckets> {
+async function loadIpoBuckets(full: boolean): Promise<IpoBuckets> {
   const db = await getDb();
 
   const [ipos, analyses] = await Promise.all([
-    db.collection('ipos').find({}, { projection: IPO_LIST_PROJECTION }).toArray(),
-    db.collection('ipo_comprehensive_analysis').find({}).toArray(),
+    db
+      .collection('ipos')
+      .find({}, { projection: full ? IPO_FULL_PROJECTION : IPO_CARD_PROJECTION })
+      .toArray(),
+    db
+      .collection('ipo_comprehensive_analysis')
+      .find({}, full ? {} : { projection: ANALYSIS_CARD_PROJECTION })
+      .toArray(),
   ]);
 
   const analysisByIpoId = new Map<string, IpoComprehensiveAnalysis>();
@@ -141,10 +176,22 @@ async function loadIpoBuckets(): Promise<IpoBuckets> {
 }
 
 /**
+ * Buckets for public pages: card-sized documents only.
+ *
  * React `cache` dedupes this within a single render pass, so a page and its
- * `generateMetadata` share one database read instead of issuing two.
+ * `generateMetadata` share one database read instead of issuing two. The two variants keep
+ * separate cache entries, which is what we want -- a public page must never be served the
+ * admin-sized payload just because admin warmed the cache first.
+ *
+ * Note on typing: under the card projection the `analysis` objects carry only the fields in
+ * ANALYSIS_CARD_PROJECTION. Every public consumer reads it as `analysis?.risk_meter?.score`,
+ * so the absent fields are unobservable; `HomePageIpoProps` keeps the full type because admin
+ * shares it and does get complete documents.
  */
-export const getIpoBuckets = cache(loadIpoBuckets);
+export const getIpoBuckets = cache(() => loadIpoBuckets(false));
+
+/** Buckets for the admin console: complete IPO and analysis documents. */
+export const getIpoBucketsFull = cache(() => loadIpoBuckets(true));
 
 /** A single IPO by its slug -- an indexed lookup, not a full-collection scan. */
 export const getIpoBySlug = cache(async (slug: string) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, Suspense, ReactNode } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 interface ProgressContextType {
@@ -27,13 +27,18 @@ const ProgressBar = () => {
   if (!isLoading) return null;
 
   return (
-    <div
-      className="fixed top-0 left-0 z-[100] h-1.5 bg-[#0073E6] transition-all duration-200 ease-out"
-      style={{
-        width: `${progress}%`,
-        boxShadow: '0 0 10px rgba(59, 130, 246, 0.5)',
-      }}
-    />
+    <div className="fixed top-0 left-0 right-0 z-[100] h-0.5 pointer-events-none" aria-hidden="true">
+      <div
+        className="h-full bg-primary transition-[width,opacity] duration-200 ease-out"
+        style={{
+          width: `${progress}%`,
+          opacity: progress >= 100 ? 0 : 1,
+          // A short bright tail on the leading edge reads as motion without the heavy glow the
+          // old hardcoded blue bar used.
+          boxShadow: '0 0 8px 0 var(--primary)',
+        }}
+      />
+    </div>
   );
 };
 
@@ -45,21 +50,43 @@ declare global {
   }
 }
 
+/**
+ * Watches the current route and reports when it changes.
+ *
+ * This exists purely to quarantine `useSearchParams`. That hook cannot be evaluated while a
+ * route is being prerendered, so React bails the nearest Suspense boundary out to client-side
+ * rendering. ProgressProvider wraps the whole application, so calling the hook directly in it
+ * meant *every* page -- homepage included -- shipped an empty <body> and painted nothing until
+ * the JS bundle had downloaded, parsed and re-rendered the entire tree in the browser.
+ *
+ * Isolated behind its own <Suspense> and rendering null, the bail-out now costs nothing: the
+ * rest of the tree still streams as server-rendered HTML.
+ */
+const RouteChangeWatcher = ({ onRouteChange }: { onRouteChange: () => void }) => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const handler = useRef(onRouteChange);
+  handler.current = onRouteChange;
+
+  useEffect(() => {
+    handler.current();
+  }, [pathname, searchParams]);
+
+  return null;
+};
+
 export const ProgressProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  // Track route changes and complete progress when page actually loads
-  useEffect(() => {
+  const handleRouteChange = () => {
     if (isNavigating) {
       // Page has loaded, complete the progress
       completeProgress();
       setIsNavigating(false);
     }
-  }, [pathname, searchParams]);
+  };
 
   // Cleanup intervals on unmount
   useEffect(() => {
@@ -139,6 +166,9 @@ export const ProgressProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ProgressContext.Provider value={{ startProgress, completeProgress, isLoading, progress }}>
+      <Suspense fallback={null}>
+        <RouteChangeWatcher onRouteChange={handleRouteChange} />
+      </Suspense>
       <ProgressBar />
       {children}
     </ProgressContext.Provider>

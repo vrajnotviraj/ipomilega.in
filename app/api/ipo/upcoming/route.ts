@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getIpoBuckets } from "@/lib/queries/ipos";
+import { getIpoBucketsFull } from "@/lib/queries/ipos";
 import { getAllBlogs } from "@/lib/queries/blogs";
 
 // Backs the admin console, which needs every bucket plus the flat `all` list and the blog
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
-        const [buckets, blogs] = await Promise.all([getIpoBuckets(), getAllBlogs()]);
+        const [buckets, blogs] = await Promise.all([getIpoBucketsFull(), getAllBlogs()]);
 
         const all = [
             ...buckets.live,

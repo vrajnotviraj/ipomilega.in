@@ -1,13 +1,12 @@
 // PastIposSection.tsx
 'use client';
 
-import { ArrowUpRight, ArrowUp, ArrowDown, CalendarDays } from 'lucide-react';
+import { ArrowUp, ArrowDown, CalendarDays } from 'lucide-react';
 import { HomePageIpoProps, IpoSectionProps } from '@/app/types/homepage';
-import { useProgressRouter } from '../Progressbar/useProgressRouter';
+import { IpoTitleLink } from './IpoTitleLink';
 import { formatShortDateOrToday, parseGainValue } from './ipoFormat';
 
 function RecentlyListedCard({ item }: { item: HomePageIpoProps }) {
-  const router = useProgressRouter();
   const { ipo, analysis } = item;
 
   const riskScore = analysis?.risk_meter?.score || 0;
@@ -15,23 +14,14 @@ function RecentlyListedCard({ item }: { item: HomePageIpoProps }) {
   const actualGain = parseGainValue(ipo?.listing_gain);
   const isPositive = actualGain !== null && actualGain >= 0;
 
-  const handleClick = () => {
-    if (riskScore > 0 && ipo?.slug) {
-      router.push(`/analysis/${ipo.slug}`);
-    }
-  };
-
   return (
-    <button
-      onClick={handleClick}
-      disabled={riskScore === 0}
-      className={`text-left rounded-lg border border-border bg-card p-5 transition-shadow duration-200 w-full ${riskScore > 0 ? 'hover:shadow-sm cursor-pointer' : 'cursor-default'}`}
-    >
+    <div className="text-left rounded-lg border border-border bg-card p-5 w-full">
       <div className="flex items-start justify-between gap-3 mb-4">
-        <h3 className="font-serif font-semibold text-foreground truncate">{ipo?.upcoming_ipo_2025 || 'Company Name'}</h3>
-        <div className={`flex items-center gap-1 text-xs flex-shrink-0 ${riskScore > 0 ? 'text-muted-foreground' : 'text-muted-foreground/50'}`}>
-          <span>listed {formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)}</span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
+        <h3 className="font-serif font-semibold text-foreground truncate">
+          <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
+        </h3>
+        <div className={`text-xs flex-shrink-0 ${riskScore > 0 ? 'text-muted-foreground' : 'text-muted-foreground/50'}`}>
+          listed {formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)}
         </div>
       </div>
       <div className="flex items-center justify-between">
@@ -53,7 +43,7 @@ function RecentlyListedCard({ item }: { item: HomePageIpoProps }) {
           )}
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -62,7 +52,7 @@ export function PastIposSection({ ipos }: IpoSectionProps) {
 
   return (
     <section className="py-15">
-      <div className="max-w-7xl mx-auto">
+      <div>
         <div className="flex justify-between items-center gap-4 mb-2">
           <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground">Recently listed</h2>
           <span className="text-muted-foreground italic text-sm font-sans flex-shrink-0 hidden sm:inline">predicted vs. actual — our credibility record</span>

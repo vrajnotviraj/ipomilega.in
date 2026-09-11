@@ -15,7 +15,7 @@ export function ClosedIposSection({ ipos, count }: IpoSectionProps) {
 
   return (
     <section className="py-15">
-      <div className="max-w-7xl mx-auto">
+      <div>
         <div className="flex justify-between items-center gap-2 sm:gap-4 mb-2">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold font-serif text-foreground flex items-center gap-2 sm:gap-3 min-w-0">
             <span className="truncate">Bidding closed</span>

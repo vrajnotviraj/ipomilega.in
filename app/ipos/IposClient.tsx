@@ -1,12 +1,13 @@
 "use client";
-import { useEffect, useState, Suspense, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, ChevronRight, Building2, Loader2 } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Building2 } from "lucide-react";
 import { HomePageIpoProps } from "../types/homepage";
 import { useProgressRouter } from "@/components/Progressbar/useProgressRouter";
 import { useSearchParams } from "next/navigation";
 import { getIpoType, getPriceBand, getRiskTextColor, formatShortDate } from "@/components/Home/ipoFormat";
+import { IpoTitleLink } from "@/components/Home/IpoTitleLink";
 
 type Status = "Upcoming" | "Open" | "Listed";
 type Row = HomePageIpoProps & { status: Status };
@@ -31,9 +32,28 @@ export type IposClientProps = {
   past: HomePageIpoProps[];
 };
 
+/**
+ * Applies the ?filter= deep link. Kept in its own component behind <Suspense> because
+ * `useSearchParams` bails its nearest boundary out of server rendering -- inlining it in the
+ * table component would mean the rows never appear in the prerendered HTML.
+ */
+const FilterFromQuery = ({ onFilter }: { onFilter: (status: Status) => void }) => {
+  const searchParams = useSearchParams();
+  const handler = useRef(onFilter);
+  handler.current = onFilter;
+
+  useEffect(() => {
+    const filterParam = searchParams.get("filter");
+    if (filterParam === "live") handler.current("Open");
+    else if (filterParam === "upcoming") handler.current("Upcoming");
+    else if (filterParam === "past") handler.current("Listed");
+  }, [searchParams]);
+
+  return null;
+};
+
 function IPOsContent({ upcoming, live, past }: IposClientProps) {
   const router = useProgressRouter();
-  const searchParams = useSearchParams();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
@@ -41,13 +61,6 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
   const [sortBy, setSortBy] = useState<"score-desc" | "score-asc" | "closing" | "name">("score-desc");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  useEffect(() => {
-    const filterParam = searchParams.get("filter");
-    if (filterParam === "live") setStatusFilter("Open");
-    else if (filterParam === "upcoming") setStatusFilter("Upcoming");
-    else if (filterParam === "past") setStatusFilter("Listed");
-  }, [searchParams]);
 
   const allRows: Row[] = useMemo(() => [
     ...live.map((item) => ({ ...item, status: "Open" as const })),
@@ -111,7 +124,10 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
 
   return (
     <div className="min-h-screen app-container pt-24 pb-16 font-sans">
-      <div className="max-w-7xl mx-auto">
+      <Suspense fallback={null}>
+        <FilterFromQuery onFilter={setStatusFilter} />
+      </Suspense>
+      <div>
         <div className="mb-6">
           <div className="text-xs italic text-muted-foreground font-sans mb-1">§ Register</div>
           <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground mb-1">All IPOs</h1>
@@ -189,7 +205,9 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
                         className={`border-b border-border last:border-b-0 transition-colors ${canOpen ? "hover:bg-accent/40 cursor-pointer" : ""}`}
                       >
                         <td className="px-4 py-4">
-                          <div className="font-serif font-semibold text-foreground">{row.ipo?.upcoming_ipo_2025 || "Unnamed IPO"}</div>
+                          <div className="font-serif font-semibold text-foreground">
+                            <IpoTitleLink ipo={row.ipo} hasAnalysis={canOpen} />
+                          </div>
                           <StatusBadge status={row.status} />
                         </td>
                         <td className="px-4 py-4 text-sm font-semibold text-foreground">{getIpoType(row.ipo)}</td>
@@ -249,21 +267,8 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
   );
 }
 
-function LoadingFallback() {
-  return (
-    <div className="min-h-screen app-container pt-24 pb-16 flex items-center justify-center">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-    </div>
-  );
-}
-
-// useSearchParams needs a Suspense boundary, but the table itself renders from props that
-// the server already resolved -- so the HTML ships complete instead of showing a spinner
-// while the browser fetches /api/ipo/upcoming.
+// The table renders from props the server already resolved, so the HTML ships complete --
+// no outer Suspense, no spinner, no client fetch of /api/ipo/upcoming on mount.
 export default function IposClient(props: IposClientProps) {
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <IPOsContent {...props} />
-    </Suspense>
-  );
+  return <IPOsContent {...props} />;
 }

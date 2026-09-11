@@ -50,7 +50,7 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
     <div className="py-15">
       {/* Section for displaying blog posts */}
       <section>
-        <div className="max-w-7xl mx-auto">
+        <div>
           <div className="flex justify-between items-center gap-4 mb-6">
             <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground">From the blog</h2>
             <ProgressLink
@@ -97,7 +97,7 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
 
       {/* Section for Newsletter Subscription */}
       <section className="py-10">
-        <div className="max-w-7xl mx-auto">
+        <div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-center sm:text-left">
               <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground mb-2 flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:gap-3">

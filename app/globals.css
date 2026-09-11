@@ -132,8 +132,46 @@
   --sidebar-ring: #4C8A9A;
 }
 
+/* Single source of truth for the page gutter. Every page (and the site header) wraps its
+   content in this so the left/right margin is identical everywhere -- nothing should add its
+   own max-width/mx-auto on top of it. */
 .app-container {
-  @apply px-[6%];
+  @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Scrollbars. The platform default is a wide grey slab that cuts across the page and, on the
+   analysis tab strip, is thicker than the tabs it scrolls. Slim it down and paint the thumb in
+   the palette's green so it reads as part of the design instead of chrome bolted on top.
+   Firefox gets the two-property version; WebKit/Blink the pseudo-elements. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--score-good) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--score-good);
+  border-radius: 999px;
+  /* Inset the thumb inside the track without a second element. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 @keyframes ticker-scroll {

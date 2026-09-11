@@ -55,7 +55,7 @@ export default function BlogsClient({ blogs }: { blogs: BlogPost[] }) {
 
   return (
     <div className="min-h-screen app-container pt-24 pb-16 font-sans">
-      <div className="max-w-7xl mx-auto">
+      <div>
         <div className="mb-6">
           <div className="text-xs italic text-muted-foreground mb-1">§ Notes</div>
           <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground">Blog</h1>

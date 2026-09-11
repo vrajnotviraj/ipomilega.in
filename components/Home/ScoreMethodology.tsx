@@ -37,7 +37,7 @@ const MODULES = [
 export function ScoreMethodology() {
   return (
     <section className="py-15">
-      <div className="max-w-7xl mx-auto">
+      <div>
         <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground mb-2">
           How the score is built
         </h2>
@@ -45,9 +45,12 @@ export function ScoreMethodology() {
           Six automated modules read every RHP/DRHP the same way, every time. Five score independently; the sixth reconciles them into one verdict.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-border mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-8">
           {MODULES.map((module) => (
-            <div key={module.num} className="border-r border-b border-border p-6">
+            <div
+              key={module.num}
+              className="rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary/40"
+            >
               <div className="text-xs italic font-serif text-muted-foreground mb-2">{module.num}</div>
               <h3 className="font-serif font-semibold text-foreground mb-2">{module.title}</h3>
               <p className="text-sm text-muted-foreground">{module.body}</p>

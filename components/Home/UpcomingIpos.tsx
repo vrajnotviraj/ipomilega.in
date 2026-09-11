@@ -2,25 +2,18 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, CalendarDays } from 'lucide-react';
+import { ArrowRight, CalendarDays } from 'lucide-react';
 import { HomePageIpoProps, IpoSectionProps } from '@/app/types/homepage';
 import { Badge } from '../ui/badge';
-import { useProgressRouter } from '../Progressbar/useProgressRouter';
+import { IpoTitleLink } from './IpoTitleLink';
 import { formatShortDateOrToday, getRiskTextColor, getIpoType, getPriceBand } from './ipoFormat';
 
 function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
-  const router = useProgressRouter();
   const { ipo, analysis } = item;
   const riskScore = analysis?.risk_meter?.score || 0;
   const riskTextColor = getRiskTextColor(riskScore);
   const ipoType = getIpoType(ipo);
   const priceBand = getPriceBand(ipo);
-
-  const handleViewAnalysis = () => {
-    if (riskScore > 0 && ipo?.slug) {
-      router.push(`/analysis/${ipo.slug}`);
-    }
-  };
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-4 border-b border-border">
@@ -30,7 +23,9 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
           {ipoType}
         </Badge>
         <div className="min-w-0 flex-1">
-          <div className="font-serif font-semibold text-foreground truncate">{ipo?.upcoming_ipo_2025 || 'Company Name'}</div>
+          <div className="font-serif font-semibold text-foreground truncate">
+            <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
+          </div>
           <div className="text-sm text-muted-foreground truncate">Opens {formatShortDateOrToday(ipo?.ipo_dates?.ipo_open_date)}</div>
         </div>
       </div>
@@ -39,19 +34,12 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
           <div className="text-xs text-muted-foreground">Price band</div>
           <div className="font-mono text-sm font-medium text-foreground">{priceBand ? `₹${priceBand}` : 'N/A'}</div>
         </div>
-        <button
-          onClick={handleViewAnalysis}
-          disabled={riskScore === 0}
-          className={`flex items-center gap-1 flex-shrink-0 ${riskScore === 0 ? 'cursor-default' : 'cursor-pointer'}`}
-          aria-label="View analysis"
+        <span
+          className={`font-serif font-semibold text-xl flex-shrink-0 ${riskScore > 0 ? riskTextColor : 'text-muted-foreground/40'}`}
+          title="Analysis score"
         >
-          {riskScore > 0 ? (
-            <span className={`font-serif font-semibold text-xl ${riskTextColor}`}>{riskScore}</span>
-          ) : (
-            <span className="font-serif font-semibold text-xl text-muted-foreground/40">–</span>
-          )}
-          <ArrowUpRight className={`w-4 h-4 ${riskScore === 0 ? 'text-muted-foreground/30' : 'text-muted-foreground'}`} />
-        </button>
+          {riskScore > 0 ? riskScore : '–'}
+        </span>
       </div>
     </div>
   );
@@ -62,7 +50,7 @@ export function UpcomingIposSection({ ipos, count }: IpoSectionProps) {
 
   return (
     <section className="py-15">
-      <div className="max-w-7xl mx-auto">
+      <div>
         <div className="flex justify-between items-center gap-4 mb-2">
           <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground">Upcoming</h2>
           <Link

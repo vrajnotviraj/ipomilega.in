@@ -21,7 +21,6 @@ import {
   Home,
   BookOpen,
   BarChart,
-  Loader,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -31,6 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PageLoader } from "@/components/ui/loader";
 import { ProgressProvider } from "@/components/Progressbar/ProgressProvider";
 import { ProgressLink } from "@/components/Progressbar/ProgressLink";
 import { AnimatePresence, motion } from "framer-motion";
@@ -185,7 +185,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
       <header className="fixed font-sans top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border">
         <div className="w-full">
           <div
-            className="max-w-7xl mx-auto app-container flex items-center h-16 justify-between"
+            className="app-container flex items-center h-16 justify-between"
           >
             {/* Mobile Menu Button */}
             <div className="flex items-center space-x-4">
@@ -315,7 +315,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
       />
 
       <main>
-        <Suspense fallback={<Loader />}>
+        <Suspense fallback={<PageLoader />}>
           {children}
         </Suspense>
         <Toaster position="top-right" richColors />

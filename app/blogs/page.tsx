@@ -5,7 +5,7 @@ import BlogsClient from "./BlogsClient";
 export const revalidate = 600;
 
 export const metadata: Metadata = {
-  title: "Blog - IPO Analysis, Company Reviews & Market News | IPO Milega",
+  title: "Blog - IPO Analysis, Company Reviews & Market News",
   description:
     "Read our latest IPO analysis, company reviews, market news and investment guides.",
   alternates: { canonical: "/blogs" },

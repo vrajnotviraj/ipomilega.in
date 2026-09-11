@@ -405,7 +405,7 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
     <div className="min-h-screen bg-background pt-16">
       {/* Header */}
       <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-16 z-40">
-        <div className="container mx-auto px-4 py-4">
+        <div className="app-container py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="sm" asChild>
@@ -467,7 +467,7 @@ ${companyName} is set to launch its Initial Public Offering (IPO) in 2025, marki
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="app-container py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">

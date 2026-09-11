@@ -9,6 +9,8 @@ import {
   TrendingUp,
   Plus,
   Minus,
+  ChevronUp,
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +43,7 @@ import {
 } from "recharts";
 import { getIpoType, parseCardDate, getScoreTrustLabel } from "@/components/Home/ipoFormat";
 import { AllotmentPredictorModal } from "@/components/Home/AllotmentPredictorModal";
+import { ShareIpoModal } from "@/components/analysis/ShareIpoModal";
 import { AllotmentCategoryDef } from "@/components/Home/ipoFormat";
 
 interface AnalysisPageClientProps {
@@ -385,6 +388,13 @@ const AnalysisTimeline = ({
   allotment: string;
   listing: string;
 }) => {
+  // "Today" is resolved after mount, never during render: this page is ISR-cached (and
+  // prerendered at build time), so a server-side `new Date()` would be whatever moment filled
+  // the cache, and it would hydrate against a different value in the browser. Until the effect
+  // runs the rail is drawn empty, then the fill animates out to the real position.
+  const [today, setToday] = useState<Date | null>(null);
+  useEffect(() => setToday(new Date()), []);
+
   const parseDate = (s: string) => {
     if (!s) return null;
     const d = new Date(s);
@@ -409,10 +419,18 @@ const AnalysisTimeline = ({
     return Math.max(0, Math.min(100, ((d.getTime() - openD.getTime()) / total) * 100));
   };
 
-  // Dates can land close together (or coincide), which would overlap the labels below —
+  // True, date-proportional positions. Kept around because the displayed positions below get
+  // pushed apart for legibility -- "today" has to be mapped through the same distortion, or the
+  // marker would not line up with the stations it sits between.
+  const truePositions = [0, posOf(closing), posOf(allotment), 100];
+  for (let i = 1; i < truePositions.length; i++) {
+    truePositions[i] = Math.max(truePositions[i], truePositions[i - 1]);
+  }
+
+  // Dates can land close together (or coincide), which would overlap the labels below --
   // spread stations apart with a minimum gap while keeping Open/Listing anchored at the ends.
   const MIN_GAP = 20;
-  const positions = [0, posOf(closing), posOf(allotment), 100];
+  const positions = [...truePositions];
   for (let i = 1; i < positions.length; i++) {
     positions[i] = Math.max(positions[i], positions[i - 1] + MIN_GAP);
   }
@@ -420,7 +438,25 @@ const AnalysisTimeline = ({
     positions[i] = Math.min(positions[i], positions[i + 1] - MIN_GAP);
   }
 
-  const today = new Date();
+  // Piecewise-linear map from a date-proportional position to where it is actually drawn.
+  const toDisplay = (raw: number) => {
+    if (raw <= truePositions[0]) return positions[0];
+    for (let i = 1; i < truePositions.length; i++) {
+      if (raw <= truePositions[i]) {
+        const span = truePositions[i] - truePositions[i - 1];
+        const t = span === 0 ? 1 : (raw - truePositions[i - 1]) / span;
+        return positions[i - 1] + t * (positions[i] - positions[i - 1]);
+      }
+    }
+    return positions[positions.length - 1];
+  };
+
+  const todayRaw = today ? ((today.getTime() - openD.getTime()) / total) * 100 : 0;
+  // How much of the rail is behind us: nothing before the issue opens, all of it once listed.
+  const progressPct = !today ? 0 : todayRaw < 0 ? 0 : todayRaw > 100 ? 100 : toDisplay(todayRaw);
+  // Keep the marker and its label inside the box at both extremes.
+  const todayPos = Math.max(4, Math.min(96, progressPct));
+
   const stations = [
     { label: "Open", date: opening, pos: positions[0], align: "left" as const },
     { label: "Close", date: closing, pos: positions[1], align: "center" as const },
@@ -434,19 +470,27 @@ const AnalysisTimeline = ({
     return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   };
 
+  const todayLabel = today ? today.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) : "";
+  const isReached = (date: string) => {
+    const d = parseDate(date);
+    return !!d && !!today && d <= today;
+  };
+  const offsetClass = (align: "left" | "center" | "right") =>
+    align === "left" ? "" : align === "right" ? "-translate-x-full" : "-translate-x-1/2";
+
   return (
     <>
       {/* Narrow screens: the proportional layout below has no room for four date labels
           without overlapping, so fall back to a plain vertical list. */}
       <div className="sm:hidden space-y-4">
         {stations.map((s) => {
-          const reached = !!parseDate(s.date) && (parseDate(s.date) as Date) <= today;
+          const reached = isReached(s.date);
           return (
             <div key={s.label} className="flex items-center gap-3">
               <span
                 className={cn(
                   "w-3 h-3 rounded-full border-2 flex-shrink-0",
-                  reached ? "bg-foreground border-foreground" : "bg-card border-muted-foreground/40"
+                  reached ? "bg-score-good border-score-good" : "bg-card border-muted-foreground/40"
                 )}
               />
               <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground w-24 flex-shrink-0">{s.label}</div>
@@ -454,32 +498,83 @@ const AnalysisTimeline = ({
             </div>
           );
         })}
+        {today && (
+          <div className="flex items-center gap-3 pt-3 border-t border-dashed border-border">
+            <ChevronRight className="w-3 h-3 text-score-good flex-shrink-0" strokeWidth={3} />
+            <div className="text-xs font-mono uppercase tracking-wide text-score-good w-24 flex-shrink-0">Today</div>
+            <div className="text-sm font-mono font-semibold text-score-good">{todayLabel}</div>
+          </div>
+        )}
       </div>
 
-      <div className="hidden sm:block relative pt-8 pb-10 px-2">
-        <div className="absolute left-2 right-2 top-1/2 h-px bg-border" style={{ top: "38px" }} />
-        {stations.map((s) => {
-          const reached = !!parseDate(s.date) && (parseDate(s.date) as Date) <= today;
-          const alignClass =
-            s.align === "left" ? "items-start text-left" : s.align === "right" ? "items-end text-right" : "items-center text-center";
-          const translate = s.align === "left" ? "" : s.align === "right" ? "-translate-x-full" : "-translate-x-1/2";
-          return (
+      <div className="hidden sm:block pt-2">
+        {/* Station names */}
+        <div className="relative h-5">
+          {stations.map((s) => (
             <div
               key={s.label}
-              className={cn("absolute flex flex-col gap-2", alignClass, translate)}
-              style={{ left: `${s.pos}%`, top: 0 }}
+              className={cn(
+                "absolute top-0 text-xs font-mono uppercase tracking-wide text-muted-foreground whitespace-nowrap",
+                offsetClass(s.align)
+              )}
+              style={{ left: `${s.pos}%` }}
             >
-              <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground">{s.label}</div>
-              <span
-                className={cn(
-                  "w-3 h-3 rounded-full border-2 flex-shrink-0",
-                  reached ? "bg-foreground border-foreground" : "bg-card border-muted-foreground/40"
-                )}
-              />
-              <div className="text-sm font-mono font-semibold text-foreground whitespace-nowrap">{fmt(s.date)}</div>
+              {s.label}
             </div>
-          );
-        })}
+          ))}
+        </div>
+
+        {/* The rail: grey track, filled green up to today, one dot per station */}
+        <div className="relative h-4 my-1.5">
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-border" />
+          <div
+            className="absolute left-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-score-good transition-[width] duration-500"
+            style={{ width: `${progressPct}%` }}
+          />
+          {stations.map((s) => (
+            <span
+              key={s.label}
+              className={cn(
+                "absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border-2",
+                offsetClass(s.align),
+                isReached(s.date) ? "bg-score-good border-score-good" : "bg-card border-muted-foreground/40"
+              )}
+              style={{ left: `${s.pos}%` }}
+            />
+          ))}
+        </div>
+
+        {/* Today marker, pointing back up at the rail. The row keeps its height before the
+            marker resolves so nothing below it shifts. */}
+        <div className="relative h-9">
+          {today && (
+            <div
+              className="absolute top-0 -translate-x-1/2 flex flex-col items-center"
+              style={{ left: `${todayPos}%` }}
+            >
+              <ChevronUp className="w-4 h-4 -mt-1 text-score-good" strokeWidth={2.5} />
+              <span className="text-[10px] font-mono uppercase tracking-wide text-score-good whitespace-nowrap">
+                Today &middot; {todayLabel}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Dates */}
+        <div className="relative h-5">
+          {stations.map((s) => (
+            <div
+              key={s.label}
+              className={cn(
+                "absolute top-0 text-sm font-mono font-semibold text-foreground whitespace-nowrap",
+                offsetClass(s.align)
+              )}
+              style={{ left: `${s.pos}%` }}
+            >
+              {fmt(s.date)}
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );
@@ -538,6 +633,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const [editedAnalysis, setEditedAnalysis] = useState<IpoComprehensiveAnalysis>(analysis);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingTimeline, setIsEditingTimeline] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [predictorCategory, setPredictorCategory] = useState<AllotmentCategoryDef["key"] | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -735,21 +831,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const gmpValue = editedAnalysis.gmp_price_gain || ipo.gmp_price_gain || "";
   const hasGmp = gmpValue && gmpValue !== "N/A" && gmpValue !== "TBD" && gmpValue !== "TBA";
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${editedAnalysis.company_name} IPO Analysis`,
-          text: `Check out this comprehensive IPO analysis of ${editedAnalysis.company_name}. Score: ${overallScore.toFixed(1)}/10`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.error("Error sharing:", error);
-      }
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard");
-    }
+  const shareFacts = {
+    companyName: editedAnalysis.company_name,
+    slug: editedAnalysis.slug || ipo.slug || "",
+    score: overallScore,
+    gmp: gmpValue,
+    opening: timelineData.opening,
+    closing: timelineData.closing,
+    businessModel: editedAnalysis.fundamentals?.business_model || editedAnalysis.fundamentals?.summary || null,
   };
 
   const sections = [
@@ -771,7 +860,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     <div className="min-h-screen font-sans bg-background pt-16">
       {/* Slim page header */}
       <header className="sticky top-16 z-40 bg-background/90 backdrop-blur border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+        <div className="app-container py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => window.history.back()}
@@ -800,7 +889,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 Admin
               </div>
             )}
-            <Button variant="outline" size="sm" onClick={handleShare} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={() => setIsShareOpen(true)} className="gap-1.5">
               <Share2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Share</span>
             </Button>
@@ -810,7 +899,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
       {/* Section tab nav */}
       <div className="sticky top-[105px] z-30 bg-background/95 backdrop-blur border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 overflow-x-auto">
+        <div className="app-container overflow-x-auto">
           <div className="flex items-center gap-1 py-2 min-w-max">
             {sections.map((s) => (
               <button
@@ -841,7 +930,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-10">
+      <div className="app-container py-8 space-y-10">
         {/* §00 Overview */}
         <section
           ref={(el) => {
@@ -912,7 +1001,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 mb-6">
+            <div className="rounded-xl border border-border bg-card p-5">
               <h3 className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-2">Estimated listing</h3>
               {hasGmp ? (
                 <p className="font-mono text-2xl font-semibold text-score-good">
@@ -931,44 +1020,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               )}
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5 sm:p-6 mb-6">
-              <div className="flex items-baseline justify-between mb-3 gap-3">
-                <span className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Overall score</span>
-                <span className="flex items-baseline gap-2">
-                  <span className={cn("font-mono text-sm font-semibold uppercase tracking-wide", scoreTextClass(overallScore))}>
-                    {getScoreTrustLabel(overallScore)}
-                  </span>
-                  <span className={cn("font-serif text-3xl font-semibold", scoreTextClass(overallScore))}>
-                    {overallScore.toFixed(1)}
-                  </span>
-                  <span className="text-sm text-muted-foreground font-mono">/10</span>
-                </span>
-              </div>
-              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                <div
-                  className={cn("h-full rounded-full transition-all duration-700", scoreBarClass(overallScore))}
-                  style={{ width: `${Math.max(0, Math.min(100, (overallScore / 10) * 100))}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-              <div className="rounded-xl border border-border bg-card p-5">
-                <QuotaDonut data={quotaData} />
-              </div>
-              <div className="rounded-xl border border-border bg-card p-5 flex flex-col justify-center gap-3">
-                <p className="text-sm text-muted-foreground">
-                  Estimate your odds of allotment for this issue based on the current subscription figures.
-                </p>
-                <Button
-                  onClick={() => setPredictorCategory("retail")}
-                  className="gap-2 w-fit"
-                >
-                  <Clock className="h-4 w-4" />
-                  Check allotment chances
-                </Button>
-              </div>
-            </div>
           </div>
 
           {/* Timeline */}
@@ -1048,6 +1099,35 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             />
           </div>
 
+          {/* Verdict: the aggregate score next to the per-section breakdown behind it.
+              These used to sit four blocks apart, so the radar read as decoration rather
+              than as the working behind the number. */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-stretch">
+          <div className="rounded-xl border border-border bg-card p-5 sm:p-6 flex flex-col justify-center">
+            <div className="flex items-baseline justify-between mb-3 gap-3">
+              <span className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Overall score</span>
+              <span className="flex items-baseline gap-2">
+                <span className={cn("font-mono text-sm font-semibold uppercase tracking-wide", scoreTextClass(overallScore))}>
+                  {getScoreTrustLabel(overallScore)}
+                </span>
+                <span className={cn("font-serif text-3xl font-semibold", scoreTextClass(overallScore))}>
+                  {overallScore.toFixed(1)}
+                </span>
+                <span className="text-sm text-muted-foreground font-mono">/10</span>
+              </span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className={cn("h-full rounded-full transition-all duration-700", scoreBarClass(overallScore))}
+                style={{ width: `${Math.max(0, Math.min(100, (overallScore / 10) * 100))}%` }}
+              />
+            </div>
+          </div>
+            <div className="rounded-xl border border-border bg-card p-5 flex items-center justify-center">
+              <OverviewRadar axes={radarAxes} overallScore={overallScore} gainsPotential={gainsPotential} />
+            </div>
+          </div>
+
           {/* Strengths / Concerns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -1082,9 +1162,21 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             </div>
           </div>
 
-          <div className="flex justify-center">
-            <div className="flex-shrink-0">
-              <OverviewRadar axes={radarAxes} overallScore={overallScore} gainsPotential={gainsPotential} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div className="rounded-xl border border-border bg-card p-5">
+              <QuotaDonut data={quotaData} />
+            </div>
+            <div className="rounded-xl border border-border bg-card p-5 flex flex-col justify-center gap-3">
+              <p className="text-sm text-muted-foreground">
+                Estimate your odds of allotment for this issue based on the current subscription figures.
+              </p>
+              <Button
+                onClick={() => setPredictorCategory("retail")}
+                className="gap-2 w-fit"
+              >
+                <Clock className="h-4 w-4" />
+                Check allotment chances
+              </Button>
             </div>
           </div>
 
@@ -1316,9 +1408,9 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 </div>
               )}
 
-              <div className="grid sm:grid-cols-2 gap-6">
+              <div className="grid sm:grid-cols-2 gap-4">
                 {editedAnalysis.performance.historical_growth?.pattern && (
-                  <div>
+                  <div className="rounded-xl border border-border bg-card p-5">
                     <h4 className="font-serif font-semibold text-foreground mb-1.5">Historical growth</h4>
                     <p className="text-sm text-muted-foreground">
                       {editedAnalysis.performance.historical_growth.pattern}
@@ -1327,7 +1419,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   </div>
                 )}
                 {editedAnalysis.performance.market_comparison && (
-                  <div>
+                  <div className="rounded-xl border border-border bg-card p-5">
                     <h4 className="font-serif font-semibold text-foreground mb-1.5">Market comparison</h4>
                     <EditableText
                       value={editedAnalysis.performance.market_comparison}
@@ -1339,13 +1431,13 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   </div>
                 )}
                 {editedAnalysis.performance.future_potential?.growth_forecast && (
-                  <div>
+                  <div className="rounded-xl border border-border bg-card p-5">
                     <h4 className="font-serif font-semibold text-foreground mb-1.5">Future potential</h4>
                     <p className="text-sm text-muted-foreground">{editedAnalysis.performance.future_potential.growth_forecast}</p>
                   </div>
                 )}
                 {editedAnalysis.performance.consistency_analysis?.rationale && (
-                  <div>
+                  <div className="rounded-xl border border-border bg-card p-5">
                     <h4 className="font-serif font-semibold text-foreground mb-1.5">Operational consistency</h4>
                     <p className="text-sm text-muted-foreground">{editedAnalysis.performance.consistency_analysis.rationale}</p>
                   </div>
@@ -1503,20 +1595,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
               />
             )}
-
-            {editedAnalysis.time.key_milestones && editedAnalysis.time.key_milestones.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">Key milestones</h4>
-                <ul className="space-y-2">
-                  {editedAnalysis.time.key_milestones.map((m, i) => (
-                    <li key={i} className="flex items-baseline gap-3 text-sm">
-                      <span className="font-mono text-muted-foreground whitespace-nowrap">{m.date}</span>
-                      <span className="text-foreground">{m.event}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </section>
         )}
       </div>
@@ -1527,6 +1605,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         initialCategory={predictorCategory}
         onClose={() => setPredictorCategory(null)}
       />
+
+      <ShareIpoModal open={isShareOpen} onClose={() => setIsShareOpen(false)} facts={shareFacts} />
 
       {/* Floating Admin Status Bar */}
       {isAdmin && (
