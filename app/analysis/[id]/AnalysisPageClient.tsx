@@ -43,7 +43,7 @@ import {
 } from "recharts";
 import { getIpoType, parseCardDate, getScoreTrustLabel } from "@/components/Home/ipoFormat";
 import { AllotmentPredictorModal } from "@/components/Home/AllotmentPredictorModal";
-import { ShareIpoModal } from "@/components/analysis/ShareIpoModal";
+import { buildShareMessage } from "@/lib/share";
 import { AllotmentCategoryDef } from "@/components/Home/ipoFormat";
 
 interface AnalysisPageClientProps {
@@ -633,7 +633,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const [editedAnalysis, setEditedAnalysis] = useState<IpoComprehensiveAnalysis>(analysis);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingTimeline, setIsEditingTimeline] = useState(false);
-  const [isShareOpen, setIsShareOpen] = useState(false);
   const [predictorCategory, setPredictorCategory] = useState<AllotmentCategoryDef["key"] | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -831,14 +830,31 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const gmpValue = editedAnalysis.gmp_price_gain || ipo.gmp_price_gain || "";
   const hasGmp = gmpValue && gmpValue !== "N/A" && gmpValue !== "TBD" && gmpValue !== "TBA";
 
-  const shareFacts = {
-    companyName: editedAnalysis.company_name,
-    slug: editedAnalysis.slug || ipo.slug || "",
-    score: overallScore,
-    gmp: gmpValue,
-    opening: timelineData.opening,
-    closing: timelineData.closing,
-    businessModel: editedAnalysis.fundamentals?.business_model || editedAnalysis.fundamentals?.summary || null,
+  const handleShare = async () => {
+    const message = buildShareMessage({
+      companyName: editedAnalysis.company_name,
+      slug: editedAnalysis.slug || ipo.slug || "",
+      score: overallScore,
+      gmp: gmpValue,
+      opening: timelineData.opening,
+      closing: timelineData.closing,
+      businessModel: editedAnalysis.fundamentals?.business_model || editedAnalysis.fundamentals?.summary || null,
+      url: window.location.href,
+    });
+
+    // `url` is deliberately left off: the message already ends with the link, and passing both
+    // makes WhatsApp and friends paste it twice.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${editedAnalysis.company_name} IPO`, text: message });
+      } catch {
+        // The person dismissed the share sheet; nothing to report.
+      }
+      return;
+    }
+
+    await navigator.clipboard.writeText(message);
+    toast.success("Message copied", { description: "Paste it to your friends." });
   };
 
   const sections = [
@@ -889,7 +905,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 Admin
               </div>
             )}
-            <Button variant="outline" size="sm" onClick={() => setIsShareOpen(true)} className="gap-1.5">
+            <Button variant="outline" size="sm" onClick={handleShare} className="gap-1.5">
               <Share2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Share</span>
             </Button>
@@ -1605,8 +1621,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         initialCategory={predictorCategory}
         onClose={() => setPredictorCategory(null)}
       />
-
-      <ShareIpoModal open={isShareOpen} onClose={() => setIsShareOpen(false)} facts={shareFacts} />
 
       {/* Floating Admin Status Bar */}
       {isAdmin && (
