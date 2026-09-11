@@ -117,24 +117,28 @@ export interface ShareFacts {
   now?: Date;
 }
 
-/** The multi-line message a person sends to a friend. */
+/**
+ * The multi-line message a person sends to a friend: their own line first, then the three facts
+ * that decide whether the friend acts on it, then the link.
+ *
+ * It opens in the sharer's voice because that is what gets read, and it is only a starting
+ * draft -- the dialog leaves every line editable, so anyone who isn't actually applying can say
+ * so in their own words rather than being asked to pick from a list first.
+ */
 export function buildShareMessage(facts: ShareFacts): string {
   const { companyName, slug, score, gmp, gainPercent, opening, closing, businessModel, url, now } = facts;
 
-  const headline =
-    score !== undefined && score > 0
-      ? `${companyName} IPO — ${score.toFixed(1)}/10 on ${SITE_NAME}`
-      : `${companyName} IPO — analysis on ${SITE_NAME}`;
+  const scoreLine = score !== undefined && score > 0 ? `Scored ${score.toFixed(1)}/10 on ${SITE_NAME}` : null;
 
-  // Blocks are separated by a blank line; the facts block keeps its two lines together.
-  const lines = [
-    headline,
-    [gmpLine(gmp, gainPercent), closingLine(closing, opening, now)].filter(Boolean).join("\n"),
+  // Blocks are separated by a blank line; the facts keep their lines together.
+  const blocks = [
+    `I'm applying to the ${companyName} IPO — thought you'd want to see this.`,
+    [scoreLine, gmpLine(gmp, gainPercent), closingLine(closing, opening, now)].filter(Boolean).join("\n"),
     oneLiner(businessModel),
     `Full analysis → ${url || analysisUrl(slug)}`,
-  ].filter((l) => !!l);
+  ].filter((b) => !!b);
 
-  return lines.join("\n\n");
+  return blocks.join("\n\n");
 }
 
 /** The single-paragraph version used for og:description and twitter:description. */

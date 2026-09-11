@@ -5,12 +5,17 @@ import { Check, Copy, MessageCircle, Send, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { buildShareMessage, type ShareFacts } from "@/lib/share";
 
 /**
- * Asked at the moment someone is deciding whether to apply, which is exactly when they are most
- * likely to forward the issue to a friend. The dialog shows the message before it is sent --
- * nothing is posted anywhere until the person picks a destination and confirms in that app.
+ * Opened at the moment someone is deciding whether to apply, which is exactly when they are most
+ * likely to forward the issue to a friend.
+ *
+ * The draft opens in the sharer's voice -- a message that sounds like the person sending it gets
+ * read, a templated one gets scrolled past -- and every line of it stays editable, so there is no
+ * questionnaire to get through first. Nothing is posted anywhere until they pick a destination
+ * and confirm in that app.
  */
 export function ShareIpoModal({
   open,
@@ -21,6 +26,7 @@ export function ShareIpoModal({
   onClose: () => void;
   facts: Omit<ShareFacts, "url">;
 }) {
+  const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
   // Share the URL actually in the address bar (staging, a preview deploy) rather than a
@@ -29,12 +35,15 @@ export function ShareIpoModal({
 
   useEffect(() => {
     if (!open) return;
-    setHref(window.location.href);
+    const url = window.location.href;
+    setHref(url);
+    setMessage(buildShareMessage({ ...facts, url }));
     setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share);
     setCopied(false);
+    // Re-seeding on every `facts` identity change would wipe the draft mid-edit; the dialog
+    // opening is the only moment the draft should be reset.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
-
-  const message = buildShareMessage({ ...facts, url: href });
 
   const openTarget = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer");
@@ -93,8 +102,17 @@ export function ShareIpoModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-xl border border-border bg-muted/40 p-4 max-h-52 overflow-y-auto">
-          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{message}</p>
+        <div className="space-y-1.5">
+          <label htmlFor="share-message" className="text-xs font-mono uppercase tracking-wide text-muted-foreground">
+            Your message — edit it however you like
+          </label>
+          <Textarea
+            id="share-message"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={9}
+            className="text-sm leading-relaxed resize-none bg-muted/40"
+          />
         </div>
 
         <div className="grid grid-cols-3 gap-2">
