@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import BlogDisplay from "./BlogDisplay";
+import { getBlogBySlug } from "@/lib/queries/blogs";
 
 interface BlogPost {
   title: string;
@@ -18,22 +19,16 @@ interface BlogPost {
   author: string;
 }
 
-async function getBlogPost(id: string): Promise<BlogPost | null> {
-  try {
-    const url = new URL(`${process.env.NEXTAUTH_URL}/api/blogs/slug/${id}`);
-    const slugResponse = await fetch(url, {
-      method: "GET",
-    });
+export const revalidate = 600;
 
-    if (slugResponse.ok) {
-      const data = await slugResponse.json();
-      return data.blog.status === "published" ? data.blog : null;
-    }
-    return null;
-  } catch (error) {
-    console.error("Error fetching blog post:", error);
-    return null;
-  }
+// Reads Mongo directly instead of fetching this app's own /api/blogs/slug/[slug] route.
+// NEXTAUTH_URL is not set anywhere in this project, so that URL interpolated to
+// "undefined/api/blogs/slug/..." -- `new URL()` threw, the catch swallowed it, and every blog
+// page fell through to notFound(). Going straight to the query layer fixes the 404 and drops
+// the extra HTTP hop; React `cache` shares one read between generateMetadata and the page.
+async function getBlogPost(id: string): Promise<BlogPost | null> {
+  const blog = await getBlogBySlug(id);
+  return (blog as unknown as BlogPost) ?? null;
 }
 
 export async function generateMetadata({

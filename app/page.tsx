@@ -1,10 +1,5 @@
 import { Suspense } from 'react';
 
-// Add resource preloading
-export async function generateStaticParams() {
-  return [];
-}
-
 import { BlogSection } from '@/components/Home/BlogSection';
 import { LiveIposSection } from '@/components/Home/LiveIposSection';
 import { ClosedIposSection } from '@/components/Home/ClosedIposSection';
@@ -19,6 +14,12 @@ import { HomePageData } from './types/homepage';
 import { Footer } from '@/components/Home/Footer';
 import { AnimatedWrapper } from '@/components/Home/AnimatedWrapper';
 import { AnimatedSection } from '@/components/Home/AnimatedSection';
+
+// ISR: the page is rendered once and served from the edge cache as static HTML, then
+// re-rendered in the background at most every 5 minutes. Visitors never wait on Mongo.
+// `generateStaticParams` used to be exported here, but it is only meaningful on a dynamic
+// [param] route -- on a static route Next ignores it, so it bought nothing.
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'IPO Milega - Your Gateway to IPO Investments | Live, Upcoming & Past IPOs',

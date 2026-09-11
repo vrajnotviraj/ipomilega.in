@@ -2,35 +2,39 @@ import { Metadata } from 'next'
 import AnalysisPageClient from './AnalysisPageClient'
 import { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis"
 import { Ipo } from '@/app/models/ipo';
+import { getAnalysisBySlug, getAllAnalyses } from '@/lib/queries/ipos';
 import {  ArrowLeftCircle, Clock, FileSearch } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 
-// Server-side function to fetch analysis data
-async function getAnalysisData(id: string): Promise<{ ipos_analysis: IpoComprehensiveAnalysis; ipo: Ipo } | null> {
+// ISR: prerendered per slug, refreshed in the background every 5 minutes.
+export const revalidate = 300
+// Slugs published after the build still render on first request, then get cached.
+export const dynamicParams = true
+
+// Prerender every analysis slug at build time so the common case is a static file.
+export async function generateStaticParams() {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/analysis/${id}`, {
-      cache: 'no-store', // For real-time data
-      // Alternatively use: cache: 'force-cache' for static data
-    })
-    
-    if (!response.ok) {
-      return null
-    }
-    
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error('Error fetching analysis:', error)
-    return null
+    const analyses = await getAllAnalyses()
+    return analyses
+      .map((a) => a.slug)
+      .filter((slug): slug is string => Boolean(slug))
+      .map((slug) => ({ id: slug }))
+  } catch {
+    return []
   }
 }
+
+// Reads Mongo in-process. This previously fetched the app's own /api/analysis/[id] route over
+// HTTP with `cache: 'no-store'`, and because both generateMetadata and the page component call
+// it, every page view did that twice -- two HTTP round-trips, two full scans of the `ipos`
+// collection, nothing reused. getAnalysisBySlug is wrapped in React `cache`, so the two calls
+// below now share a single database read.
 
 // Generate dynamic metadata - FIXED: Changed params to Promise type
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params // Await the params Promise
-  const data = await getAnalysisData(id)
+  const data = await getAnalysisBySlug(id)
   const analysis = data?.ipos_analysis
   const ipo = data?.ipo
   
@@ -188,7 +192,7 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, id: string) 
 
 export default async function AnalysisPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const analysis = await getAnalysisData(id)
+  const analysis = await getAnalysisBySlug(id)
 
   if (!analysis) {
     return (
