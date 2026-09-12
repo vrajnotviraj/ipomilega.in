@@ -281,7 +281,7 @@ function AdminContent() {
 
   return (
     <div className="min-h-screen app-container pt-24 pb-16 font-sans">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div className="mb-2">
           <div className="text-xs italic text-muted-foreground font-sans mb-1">§ Admin</div>
           <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground mb-1">Admin Dashboard</h1>

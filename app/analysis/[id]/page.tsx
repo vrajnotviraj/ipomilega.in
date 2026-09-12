@@ -2,35 +2,56 @@ import { Metadata } from 'next'
 import AnalysisPageClient from './AnalysisPageClient'
 import { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis"
 import { Ipo } from '@/app/models/ipo';
+import { getAnalysisBySlug, getAllAnalyses } from '@/lib/queries/ipos';
+import { buildShareDescription, closingLine, gmpLine, SITE_NAME } from '@/lib/share';
 import {  ArrowLeftCircle, Clock, FileSearch } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 
-// Server-side function to fetch analysis data
-async function getAnalysisData(id: string): Promise<{ ipos_analysis: IpoComprehensiveAnalysis; ipo: Ipo } | null> {
+// ISR: prerendered per slug, refreshed in the background every 5 minutes.
+export const revalidate = 300
+// Slugs published after the build still render on first request, then get cached.
+export const dynamicParams = true
+
+// Prerender every analysis slug at build time so the common case is a static file.
+export async function generateStaticParams() {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/analysis/${id}`, {
-      cache: 'no-store', // For real-time data
-      // Alternatively use: cache: 'force-cache' for static data
-    })
-    
-    if (!response.ok) {
-      return null
-    }
-    
-    const data = await response.json()
-    return data
-  } catch (error) {
-    console.error('Error fetching analysis:', error)
-    return null
+    const analyses = await getAllAnalyses()
+    return analyses
+      .map((a) => a.slug)
+      .filter((slug): slug is string => Boolean(slug))
+      .map((slug) => ({ id: slug }))
+  } catch {
+    return []
   }
+}
+
+// Reads Mongo in-process. This previously fetched the app's own /api/analysis/[id] route over
+// HTTP with `cache: 'no-store'`, and because both generateMetadata and the page component call
+// it, every page view did that twice -- two HTTP round-trips, two full scans of the `ipos`
+// collection, nothing reused. getAnalysisBySlug is wrapped in React `cache`, so the two calls
+// below now share a single database read.
+
+// The page body scores an issue as the mean of its five section scores. Both call sites below
+// used to reimplement that from `summary_metrics` with misplaced parentheses -- one read
+// `a + b / 2`, the other `(a ?? 0 + b) / 2` -- which is how a share card ended up advertising
+// "12.0/10". Compute it once, the same way the page does.
+function overallScoreOf(analysis: IpoComprehensiveAnalysis): number {
+  const sections = [
+    analysis.fundamentals?.score,
+    analysis.risk_meter?.score,
+    analysis.performance?.score,
+    analysis.flexibility?.score,
+    analysis.time?.score,
+  ].map((n) => n ?? 0)
+
+  return sections.reduce((sum, n) => sum + n, 0) / sections.length
 }
 
 // Generate dynamic metadata - FIXED: Changed params to Promise type
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params // Await the params Promise
-  const data = await getAnalysisData(id)
+  const data = await getAnalysisBySlug(id)
   const analysis = data?.ipos_analysis
   const ipo = data?.ipo
   
@@ -41,11 +62,27 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     }
   }
 
-  const overallScore = ((analysis.summary_metrics?.fundamentals_score ?? 0) + (analysis.summary_metrics?.performance_score ?? 0) / 2).toFixed(1)
-  const gainsPercentage = analysis.ipo_details.approximate_gains_potential
+  const overallScore = overallScoreOf(analysis).toFixed(1)
   
-  const title = `${analysis.company_name} IPO Analysis - Score ${overallScore}/10 | ${gainsPercentage}% Potential Gains`
-  const description = `Comprehensive IPO analysis of ${analysis.company_name}. Issue size: ${analysis.ipo_details.issue_size}, Price band: ${analysis.ipo_details.price_band}. Investment score ${overallScore}/10 with ${gainsPercentage}% potential gains. Risk assessment, fundamentals review & timeline details.`
+  // The link-preview copy is built from the same module the in-app Share dialog uses, so a
+  // pasted WhatsApp message and the card WhatsApp renders underneath it tell the same story:
+  // the GMP, how long is left to apply, one line on the business, and where to read more.
+  const gmp = gmpLine(analysis.gmp_price_gain ?? ipo?.gmp_price_gain)
+  const deadline = closingLine(analysis.time?.issue_dates?.closing, analysis.time?.issue_dates?.opening)
+
+  const title = [`${analysis.company_name} IPO`, gmp, deadline?.replace(/\.$/, '')]
+    .filter(Boolean)
+    .join(' \u00b7 ')
+
+  const description = buildShareDescription({
+    companyName: analysis.company_name,
+    slug: id,
+    score: Number(overallScore),
+    gmp: analysis.gmp_price_gain ?? ipo?.gmp_price_gain,
+    opening: analysis.time?.issue_dates?.opening,
+    closing: analysis.time?.issue_dates?.closing,
+    businessModel: analysis.fundamentals?.business_model || analysis.fundamentals?.summary,
+  })
   
   const keywords = [
     `${analysis.company_name} IPO`,
@@ -80,12 +117,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       type: 'article',
       url: `/analysis/${id}`,
       siteName: 'IPO Analysis Platform',
+      // Deliberately our own card, never `ipo.image_url`: a shared link should carry the IPO
+      // Milega mark, not the issuing company's logo, which reads as if the company published it.
       images: [
         {
-          url: `${ipo?.image_url}`, // You'll need to create this
+          url: '/og-image.png',
           width: 1200,
           height: 630,
-          alt: `${analysis.company_name} IPO Analysis`,
+          alt: `${SITE_NAME} - ${analysis.company_name} IPO analysis`,
         }
       ],
       locale: 'en_IN',
@@ -96,8 +135,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       card: 'summary_large_image',
       title,
       description,
-      images: [`${ipo?.image_url}`], // You'll need to create this
-      creator: '@yourtwitterhandle', // Replace with your Twitter handle
+      images: ['/og-image.png'],
+      creator: '@ipomilega',
     },
     
     // Additional SEO metadata
@@ -135,7 +174,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 // Generate JSON-LD structured data
 function generateStructuredData(analysis: IpoComprehensiveAnalysis, id: string) {
-  const overallScore = ((analysis.summary_metrics?.fundamentals_score ?? 0 + (analysis.summary_metrics?.performance_score ?? 0)) / 2).toFixed(1)
+  const overallScore = overallScoreOf(analysis).toFixed(1)
   
   return {
     '@context': 'https://schema.org',
@@ -188,7 +227,7 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, id: string) 
 
 export default async function AnalysisPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const analysis = await getAnalysisData(id)
+  const analysis = await getAnalysisBySlug(id)
 
   if (!analysis) {
     return (

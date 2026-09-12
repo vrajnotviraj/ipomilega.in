@@ -94,10 +94,10 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
   };
 
   return (
-    <div className="min-h-screen bg-background mt-20">
+    <div className="min-h-screen bg-background pt-20">
       {/* Navigation Header */}
       <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
+        <div className="app-container py-4">
           <div className="flex items-center justify-between">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/blogs" className="flex items-center text-muted-foreground hover:text-foreground">
@@ -131,8 +131,8 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+      <div className="app-container py-8">
+        <div>
           {/* Article Header */}
           <header className="mb-12">
             {/* Featured Image */}

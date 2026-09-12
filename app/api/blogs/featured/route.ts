@@ -1,22 +1,19 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongo";
+import { getFeaturedBlogs } from "@/lib/queries/blogs";
+
+export const revalidate = 600;
 
 export async function GET() {
     try {
-        const {db} = await connectToDatabase();
-        const blogs = await db.collection("blogs").find({status: "published"}).toArray();
-        
-        const blogList = blogs || [];
-        const sortedBlogList = blogList.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        const threeFeaturedBlogList = sortedBlogList.slice(0, 3);
+        const blogList = await getFeaturedBlogs();
         return NextResponse.json({
             message: "Data retrieved successfully",
             success: true,
-            blogList: threeFeaturedBlogList
+            blogList,
         });
     }
     catch (error) {
-        console.error("Error in /api/admin:", error);
+        console.error("Error in /api/blogs/featured:", error);
         return NextResponse.json({
             message: error instanceof Error ? error.message : "Something went wrong",
             success: false,

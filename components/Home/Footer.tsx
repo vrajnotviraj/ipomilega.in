@@ -8,7 +8,7 @@ export function Footer() {
         <section>
             <hr className="border-border w-full mx-auto" />
             <footer className="py-6">
-                <div className="max-w-7xl mx-auto text-center">
+                <div className="text-center">
                     <Logo size="lg" className="justify-center mb-2" />
                     <div className="w-full overflow-hidden">
                         <p className="text-muted-foreground font-sans text-sm">

@@ -1,179 +1,49 @@
-import { Ipo } from "@/app/models/ipo";
-import { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis";
-import { HomePageIpoProps } from "@/app/types/homepage";
-import { Blog } from "@/app/models/ipo";
-import { connectToDatabase } from "@/lib/mongo";
 import { NextResponse } from "next/server";
+import { getIpoBucketsFull } from "@/lib/queries/ipos";
+import { getAllBlogs } from "@/lib/queries/blogs";
 
-// Helper function to parse date strings like "12 June" or "June 12, 2025"
-function parseIpoDate(dateString: string, currentYear: number = new Date().getFullYear()): Date | null {
-    if (!dateString) return null;
-    
-    const cleanDate = dateString.trim();
-    
-    if (cleanDate.toLowerCase() === 'tba' || cleanDate === '-' || cleanDate === '') {
-        return null;
-    }
-    
-    if (cleanDate === '2025' || cleanDate === currentYear.toString()) {
-        return null;
-    }
-    
-    if (cleanDate.includes(',') && cleanDate.includes('2025')) {
-        const parsedDate = new Date(cleanDate);
-        return isNaN(parsedDate.getTime()) ? null : parsedDate;
-    }
-    
-    const dateWithYear = `${cleanDate} ${currentYear}`;
-    const parsedDate = new Date(dateWithYear);
-    return isNaN(parsedDate.getTime()) ? null : parsedDate;
-}
+// Backs the admin console, which needs every bucket plus the flat `all` list and the blog
+// list. Public pages no longer call this -- /ipos server-renders from getIpoBuckets() directly
+// instead of shipping a blank page and fetching this payload from the browser.
+export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
-        const { db } = await connectToDatabase();
-        const ipos = await db.collection("ipos").find({}).toArray();
-        const ipoList = ipos || [];
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const twoDaysAgo = new Date();
-        twoDaysAgo.setDate(today.getDate() - 2);
-        const currentYear = today.getFullYear();
-        
-        const upcomingIpos: Ipo[] = [];
-        const liveIpos: Ipo[] = [];
-        const pastIpos: Ipo[] = [];
-        const tbaIpos: Ipo[] = [];
-        const recentlyAddedIpos: Ipo[] = [];
-        
-        ipoList.forEach((ipo: unknown) => {
-            const ipoData = ipo as Ipo;
+        const [buckets, blogs] = await Promise.all([getIpoBucketsFull(), getAllBlogs()]);
 
-            if (ipoData.scraped_at) {
-                const scrapedDate = new Date(ipoData.scraped_at);
-                if (!isNaN(scrapedDate.getTime()) && scrapedDate >= twoDaysAgo) {
-                    recentlyAddedIpos.push(ipoData);
-                }
-            }
-            
-            let openDateString = '';
-            let closeDateString = '';
-            
-            if (ipoData.ipo_dates?.ipo_open_date) {
-                openDateString = ipoData.ipo_dates.ipo_open_date;
-            } else if (ipoData.open_date) {
-                openDateString = ipoData.open_date;
-            }
-            
-            if (ipoData.ipo_dates?.ipo_close_date) {
-                closeDateString = ipoData.ipo_dates.ipo_close_date;
-            } else if (ipoData.closing_date) {
-                closeDateString = ipoData.closing_date;
-            }
-            
-            const openDate = parseIpoDate(openDateString, currentYear);
-            const closeDate = parseIpoDate(closeDateString, currentYear);
-            
-            if (!openDate || !closeDate) {
-                tbaIpos.push(ipoData);
-                return;
-            }
-            
-            openDate.setHours(0, 0, 0, 0);
-            closeDate.setHours(23, 59, 59, 999);
-            
-            if (openDate > today) {
-                upcomingIpos.push(ipoData);
-            } else if (openDate <= today && closeDate >= today) {
-                liveIpos.push(ipoData);
-            } else if (closeDate < today) {
-                pastIpos.push(ipoData);
-            }
-        });
-        
-        const sortedUpcomingIpos = upcomingIpos.sort((a, b) => {
-            const dateA = parseIpoDate(a.ipo_dates?.ipo_open_date || a.open_date, currentYear);
-            const dateB = parseIpoDate(b.ipo_dates?.ipo_open_date || b.open_date, currentYear);
-            if (!dateA || !dateB) return 0;
-            return dateA.getTime() - dateB.getTime();
-        });
-        
-        const sortedLiveIpos = liveIpos.sort((a, b) => {
-            const dateA = parseIpoDate(a.ipo_dates?.ipo_close_date || a.closing_date, currentYear);
-            const dateB = parseIpoDate(b.ipo_dates?.ipo_close_date || b.closing_date, currentYear);
-            if (!dateA || !dateB) return 0;
-            return dateA.getTime() - dateB.getTime();
-        });
-        
-        const sortedPastIpos = pastIpos.sort((a, b) => {
-            const dateA = parseIpoDate(a.ipo_dates?.ipo_close_date || a.closing_date, currentYear);
-            const dateB = parseIpoDate(b.ipo_dates?.ipo_close_date || b.closing_date, currentYear);
-            if (!dateA || !dateB) return 0;
-            return dateB.getTime() - dateA.getTime();
-        });
-
-        const sortedPastIposWithExistingPerformance =sortedPastIpos.filter((ipo: Ipo) => ipo.listing_price != "");
-        
-        const sortedTbaIpos = tbaIpos.sort((a, b) => {
-            const nameA = a.upcoming_ipo_2025 || '';
-            const nameB = b.upcoming_ipo_2025 || '';
-            return nameA.localeCompare(nameB);
-        });
-
-        const sortedRecentlyAddedIpos = recentlyAddedIpos.sort((a, b) => {
-            const dateA = a.scraped_at ? new Date(a.scraped_at).getTime() : 0;
-            const dateB = b.scraped_at ? new Date(b.scraped_at).getTime() : 0;
-            return dateB - dateA;
-        });
-
-        const analysisList = await db.collection("ipo_comprehensive_analysis").find({}).toArray();
-        const blogsList = await db.collection("blogs").find({}).toArray();
-
-        const createFinalList = (list: Ipo[]): HomePageIpoProps[] => {
-            return list.map((ipo: Ipo) => {
-                const analysisData = analysisList.find((analysis: unknown) => {
-                    const analysisTyped = analysis as IpoComprehensiveAnalysis;
-                    return analysisTyped.ipo_table_id === ipo._id.toString();
-                }) as IpoComprehensiveAnalysis | undefined;
-                return {
-                    _id: ipo._id.toString(),
-                    ipo,
-                    analysis: analysisData || null,
-                };
-            });
-        };
-        
-        const finalLiveIpos = createFinalList(sortedLiveIpos);
-        const finalUpcomingIpos = createFinalList(sortedUpcomingIpos);
-        const finalPastIpos = createFinalList(sortedPastIposWithExistingPerformance);
-        const finalTbaIpos = createFinalList(sortedTbaIpos);
-        const finalRecentlyAddedIpos = createFinalList(sortedRecentlyAddedIpos);
-        const finalAllIpos = createFinalList(ipoList as unknown as Ipo[]);
+        const all = [
+            ...buckets.live,
+            ...buckets.upcoming,
+            ...buckets.closed,
+            ...buckets.past,
+            ...buckets.tba,
+        ];
 
         return NextResponse.json({
             message: "Data retrieved successfully",
             success: true,
             data: {
-                upcoming: finalUpcomingIpos,
-                live: finalLiveIpos,
-                past: finalPastIpos,
-                tba: finalTbaIpos,
-                all: finalAllIpos,
-                recently_added: finalRecentlyAddedIpos,
-                blogs: blogsList as unknown as Blog[],
+                upcoming: buckets.upcoming,
+                live: buckets.live,
+                closed: buckets.closed,
+                past: buckets.past,
+                tba: buckets.tba,
+                all,
+                recently_added: buckets.recently_added,
+                blogs,
             },
             counts: {
-                upcoming: finalUpcomingIpos.length,
-                live: finalLiveIpos.length,
-                past: finalPastIpos.length,
-                tba: finalTbaIpos.length,
-                recently_added: finalRecentlyAddedIpos.length,
-                total: ipoList.length,
+                upcoming: buckets.upcoming.length,
+                live: buckets.live.length,
+                closed: buckets.closed.length,
+                past: buckets.past.length,
+                tba: buckets.tba.length,
+                recently_added: buckets.recently_added.length,
+                total: all.length,
             },
         });
     } catch (error) {
-        console.error("Error in /api/admin:", error);
+        console.error("Error in /api/ipo/upcoming:", error);
         return NextResponse.json({
             message: error instanceof Error ? error.message : "Something went wrong",
             success: false,

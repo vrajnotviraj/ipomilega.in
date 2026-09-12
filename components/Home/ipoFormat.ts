@@ -89,6 +89,18 @@ export const formatShortDate = (dateString: string | undefined): string => {
   return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 };
 
+// Same as formatShortDate, but reads as "Today" when the date is today instead of "18 Aug"
+export const formatShortDateOrToday = (dateString: string | undefined): string => {
+  const date = parseCardDate(dateString);
+  if (!date) return 'TBA';
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const compareDate = new Date(date);
+  compareDate.setHours(0, 0, 0, 0);
+  if (compareDate.getTime() === today.getTime()) return 'Today';
+  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+};
+
 // Extracts a signed numeric value out of a loosely-formatted percentage string (e.g. "▲ 21.4%", "-4.2%")
 export const parseGainValue = (raw: string | undefined): number | null => {
   if (!raw) return null;

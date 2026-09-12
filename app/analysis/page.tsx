@@ -316,7 +316,7 @@ export default function AllIPOsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 mt-20">
+        <div className="app-container pt-24 pb-16">
           <div className="mb-8 sm:mb-12">
             <Skeleton className="h-8 sm:h-10 w-40 sm:w-48 bg-muted/50 mb-2" />
             <Skeleton className="h-5 sm:h-6 w-80 sm:w-96 bg-muted/50" />
@@ -363,7 +363,7 @@ export default function AllIPOsPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center font-ibm-plex">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 text-center">
+        <div className="app-container py-8 text-center">
           <Card className="max-w-2xl mx-auto bg-background/60 backdrop-blur-sm border border-destructive/50">
             <CardHeader>
               <CardTitle className="text-red-600 dark:text-red-400 flex items-center justify-center gap-2">
@@ -385,10 +385,10 @@ export default function AllIPOsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background mt-20 font-ibm-plex app-container">
+    <div className="min-h-screen bg-background font-ibm-plex app-container pt-24 pb-16">
       {/* Header */}
       <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 lg:py-6">
+        <div className="py-3 sm:py-4 lg:py-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary truncate">
@@ -416,7 +416,7 @@ export default function AllIPOsPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 space-y-6">
+      <div className="py-4 sm:py-6 lg:py-8 space-y-6">
         {/* Filter Tabs */}
         <div className="flex flex-wrap gap-2 sm:gap-3 items-center">
           {filterTabs.map((tab) => {

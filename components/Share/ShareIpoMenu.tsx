@@ -12,112 +12,33 @@ import {
 import { Copy, Link2, Mail, MessageCircle, Send, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { parseCardDate } from "@/components/Home/ipoFormat";
-
-// The IPO facts a share message is built from. Everything is optional except
-// the company name -- rows with no value are dropped instead of printing "N/A",
-// so a half-filled analysis still produces a clean message.
-export interface ShareIpoDetails {
-  companyName: string;
-  status?: string;
-  ipoType?: string;
-  priceBand?: string;
-  lotSize?: number | null;
-  lotShares?: number | null;
-  minInvestment?: number | null;
-  issueSize?: string;
-  openDate?: string;
-  closeDate?: string;
-  allotmentDate?: string;
-  listingDate?: string;
-  gmp?: string;
-  score?: number;
-  url: string;
-}
-
-const inr = (value: number) => `₹${Math.round(value).toLocaleString("en-IN")}`;
-
-// Dates reach us in whatever shape the scraper stored ("2026-09-10", "10 Sept
-// 2026", ...). Normalise so a shared message never leaks a raw ISO string.
-const fmtDate = (value?: string) => {
-  const date = parseCardDate(value);
-  if (!date) return clean(value);
-  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-};
-
-// Both price band and GMP arrive with or without the rupee sign.
-const rupee = (value: string) => (/^\d/.test(value) ? `₹${value}` : value);
-
-const clean = (value?: string | null) => {
-  const trimmed = (value || "").trim();
-  if (!trimmed) return "";
-  if (["n/a", "na", "tbd", "tba", "-"].includes(trimmed.toLowerCase())) return "";
-  return trimmed;
-};
-
-/**
- * The one and only share message. It is composed here and sent as-is to every
- * channel -- there is deliberately no editable draft anywhere in the UI, so a
- * shared analysis always carries the same IPO details we show on the page.
- */
-export const buildShareMessage = (d: ShareIpoDetails): string => {
-  const lines: string[] = [];
-
-  const heading = [clean(d.status), clean(d.ipoType)].filter(Boolean).join(" · ");
-  lines.push(`*${d.companyName} IPO*${heading ? ` — ${heading}` : ""}`);
-  lines.push("");
-
-  const priceBand = clean(d.priceBand);
-  if (priceBand) lines.push(`Price band: ${rupee(priceBand)}`);
-
-  // lotShares is shares per lot, which is what an applicant actually bids for;
-  // lotSize alone is just the lot count and reads as "1" for most issues.
-  if (d.lotShares) lines.push(`Lot size: ${d.lotShares} shares`);
-  else if (d.lotSize) lines.push(`Lot size: ${d.lotSize}`);
-
-  if (d.minInvestment) lines.push(`Min investment: ${inr(d.minInvestment)}`);
-
-  const issueSize = clean(d.issueSize);
-  if (issueSize) lines.push(`Issue size: ${issueSize}`);
-
-  const open = fmtDate(d.openDate);
-  const close = fmtDate(d.closeDate);
-  if (open || close) lines.push(`Dates: ${[open, close].filter(Boolean).join(" — ")}`);
-
-  const allotment = fmtDate(d.allotmentDate);
-  if (allotment) lines.push(`Allotment: ${allotment}`);
-
-  const listing = fmtDate(d.listingDate);
-  if (listing) lines.push(`Listing: ${listing}`);
-
-  const gmp = clean(d.gmp);
-  if (gmp) lines.push(`GMP: ${rupee(gmp)}`);
-
-  if (typeof d.score === "number" && !Number.isNaN(d.score)) {
-    lines.push(`IPO Milega score: ${d.score.toFixed(1)}/10`);
-  }
-
-  lines.push("");
-  lines.push(`Full analysis: ${d.url}`);
-
-  return lines.join("\n");
-};
-
-// WhatsApp is the only channel that renders *bold*; strip the markers elsewhere.
-const plain = (message: string) => message.replace(/\*/g, "");
+import {
+  analysisUrl,
+  buildShareMessage,
+  plainShareMessage,
+  type ShareFacts,
+} from "@/lib/share";
 
 interface ShareIpoMenuProps {
-  details: ShareIpoDetails;
+  facts: ShareFacts;
   className?: string;
   align?: "start" | "center" | "end";
 }
 
-export function ShareIpoMenu({ details, className, align = "end" }: ShareIpoMenuProps) {
-  const message = buildShareMessage(details);
-  const plainMessage = plain(message);
+/**
+ * Pick who to send an IPO to; the message itself is fixed.
+ *
+ * Every channel gets the same copy out of `buildShareMessage` -- the details on
+ * the analysis page, in the site's voice. Nothing here composes or edits text,
+ * so a forwarded IPO always carries the same facts we published.
+ */
+export function ShareIpoMenu({ facts, className, align = "end" }: ShareIpoMenuProps) {
+  const url = facts.url || analysisUrl(facts.slug);
+  const message = buildShareMessage(facts);
+  const plain = plainShareMessage(message);
 
-  const openChannel = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer");
+  const openChannel = (target: string) => {
+    window.open(target, "_blank", "noopener,noreferrer");
   };
 
   const copy = async (text: string, label: string) => {
@@ -140,10 +61,12 @@ export function ShareIpoMenu({ details, className, align = "end" }: ShareIpoMenu
       key: "telegram",
       label: "Telegram",
       icon: Send,
+      // Telegram appends its own link preview, so the trailing link is dropped
+      // from the text to avoid showing the URL twice.
       onSelect: () =>
         openChannel(
-          `https://t.me/share/url?url=${encodeURIComponent(details.url)}&text=${encodeURIComponent(
-            plain(message.replace(`\nFull analysis: ${details.url}`, "")).trim()
+          `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(
+            plain.replace(`Full analysis → ${url}`, "").trim()
           )}`
         ),
     },
@@ -152,7 +75,7 @@ export function ShareIpoMenu({ details, className, align = "end" }: ShareIpoMenu
       label: "X (Twitter)",
       icon: Share2,
       onSelect: () =>
-        openChannel(`https://twitter.com/intent/tweet?text=${encodeURIComponent(plainMessage)}`),
+        openChannel(`https://twitter.com/intent/tweet?text=${encodeURIComponent(plain)}`),
     },
     {
       key: "email",
@@ -161,8 +84,8 @@ export function ShareIpoMenu({ details, className, align = "end" }: ShareIpoMenu
       onSelect: () =>
         openChannel(
           `mailto:?subject=${encodeURIComponent(
-            `${details.companyName} IPO — details & analysis`
-          )}&body=${encodeURIComponent(plainMessage)}`
+            `${facts.companyName} IPO — details & analysis`
+          )}&body=${encodeURIComponent(plain)}`
         ),
     },
   ];
@@ -179,7 +102,7 @@ export function ShareIpoMenu({ details, className, align = "end" }: ShareIpoMenu
         <DropdownMenuLabel className="font-normal">
           <p className="text-sm font-medium leading-none">Share IPO details</p>
           <p className="mt-1 text-xs leading-snug text-muted-foreground">
-            Sends the full {details.companyName} details as shown here.
+            Sends the {facts.companyName} details exactly as shown here.
           </p>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -191,14 +114,14 @@ export function ShareIpoMenu({ details, className, align = "end" }: ShareIpoMenu
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={() => copy(plainMessage, "IPO details copied")}
+          onSelect={() => copy(plain, "IPO details copied")}
           className="cursor-pointer gap-2"
         >
           <Copy className="h-4 w-4 text-muted-foreground" />
           Copy details
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => copy(details.url, "Link copied")}
+          onSelect={() => copy(url, "Link copied")}
           className="cursor-pointer gap-2"
         >
           <Link2 className="h-4 w-4 text-muted-foreground" />

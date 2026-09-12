@@ -14,13 +14,13 @@ const BOARD_TABS = ['Mainboard', 'SME'] as const;
 export function LiveIposSection({ ipos, count }: IpoSectionProps) {
   const [activeTab, setActiveTab] = useState<typeof BOARD_TABS[number]>('Mainboard');
 
-  const filteredIpos = ipos.filter(
+  const filteredIpos = (ipos || []).filter(
     (item) => getIpoType(item.ipo) === activeTab
   );
 
   return (
     <section className='py-6 sm:py-15'>
-      <div className="max-w-7xl mx-auto mb-4 sm:mb-8">
+      <div className="mb-4 sm:mb-8">
         <div className="flex justify-between items-center gap-4">
           <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground flex items-center gap-3">
             <span>IPOs open now</span>
@@ -54,7 +54,7 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
           ))}
         </div>
       </div>
-      <motion.div layout transition={{ duration: 0.25, ease: 'easeInOut' }} className="max-w-7xl mx-auto overflow-hidden">
+      <motion.div layout transition={{ duration: 0.25, ease: 'easeInOut' }} className="overflow-hidden">
         <AnimatePresence mode="wait">
           {filteredIpos.length === 0 ? (
             <motion.div
