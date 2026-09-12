@@ -112,8 +112,10 @@ export interface ShareFacts {
   opening?: string | null;
   closing?: string | null;
   businessModel?: string | null;
-  /** Overridable so the menu can share the URL actually in the address bar. */
+  /** Overridable so the page can share the URL actually in the address bar. */
   url?: string;
+  /** The signed-in sharer, used to sign the message off. Absent when logged out. */
+  sharerName?: string | null;
   now?: Date;
   // The issue facts. All optional: a row with no value is dropped rather than
   // printed as "N/A", so a half-filled analysis still shares cleanly.
@@ -153,22 +155,28 @@ export function formatFullDay(dateStr: string | null | undefined): string | null
 /**
  * The message that goes out when someone shares an IPO.
  *
- * It is the issue's own details -- what a friend needs in order to decide
- * whether to apply -- written in the site's voice, never the sharer's. There is
- * deliberately no editable draft and nothing to choose: tapping Share hands
- * this exact text to the system share sheet, and the only decision left is who
- * receives it.
+ * It carries the issue's own details -- what a friend needs in order to decide
+ * whether to apply -- and opens and signs off like a person sending it on,
+ * because a bare block of figures lands like spam.
+ *
+ * Those personal lines are written for the sharer, not by them: tapping Share
+ * hands this exact text to the system share sheet, and the only decision left
+ * is who receives it. There is no draft to edit.
  *
  * Plain text, no markup: it has to read the same in WhatsApp, Telegram, email
  * and notes, and only WhatsApp would render `*bold*` rather than print it.
  */
 export function buildShareMessage(facts: ShareFacts): string {
   const {
-    companyName, slug, score, gmp, gainPercent, opening, closing, url, now,
+    companyName, slug, score, gmp, gainPercent, opening, closing, url, now, sharerName,
     ipoType, status, priceBand, lotShares, minInvestment, issueSize, allotment, listing,
   } = facts;
 
   const heading = [value(status), value(ipoType)].filter(Boolean).join(" · ");
+
+  // Better-auth stores whatever the provider gave us, usually a full name; the
+  // first word is what a person would actually sign off with.
+  const firstName = (value(sharerName) || "").split(/\s+/)[0];
 
   const band = value(priceBand);
   const open = formatFullDay(opening);
@@ -188,10 +196,13 @@ export function buildShareMessage(facts: ShareFacts): string {
 
   // Blocks are separated by a blank line; the details keep their lines together.
   const blocks = [
-    `${companyName} IPO${heading ? ` — ${heading}` : ""}`,
+    `Thought you'd want to see this — ${companyName} IPO${heading ? ` (${heading})` : ""}.`,
     details.join("\n"),
     closingLine(closing, opening, now),
-    `Full analysis → ${url || analysisUrl(slug)}`,
+    [
+      `Full analysis → ${url || analysisUrl(slug)}`,
+      firstName ? `— ${firstName}, via ${SITE_NAME}` : null,
+    ].filter(Boolean).join("\n"),
   ].filter((b) => !!b);
 
   return blocks.join("\n\n");

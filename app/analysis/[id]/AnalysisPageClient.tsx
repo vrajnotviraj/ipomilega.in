@@ -859,6 +859,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     allotment: timelineData.allotment,
     listing: timelineData.listing,
     url: shareUrl,
+    sharerName: session?.data?.user?.name,
   };
 
   // One tap, one message. The system share sheet is the only step, and picking
