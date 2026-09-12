@@ -27,6 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Logo } from "@/components/Brand/Logo";
 import { ProgressProvider } from "@/components/Progressbar/ProgressProvider";
 import { ProgressLink } from "@/components/Progressbar/ProgressLink";
 import { AnimatePresence, motion } from "framer-motion";
@@ -79,14 +80,7 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-border">
-                <div className="flex items-center space-x-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                    <TrendingUp className="h-5 w-5" />
-                  </div>
-                  <span className="text-2xl font-semibold font-serif text-foreground tracking-tight">
-                    IPO Milega
-                  </span>
-                </div>
+                <Logo size="lg" />
                 <Button
                   variant="ghost"
                   size="sm"
@@ -198,14 +192,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
               {/* Logo */}
               <ProgressLink
                 href="/"
-                className="flex items-baseline gap-2 transition-opacity hover:opacity-80"
+                className="flex items-center transition-opacity hover:opacity-80"
+                aria-label="IPO Milega home"
               >
-                <span className="text-lg sm:text-xl font-semibold font-serif text-foreground tracking-tight">
-                  IPO Milega
-                </span>
-                <span className="hidden sm:inline text-xs italic text-muted-foreground font-sans">
-                  § Prospectus Analysis
-                </span>
+                <Logo size="sm" showTagline markClassName="h-8 w-8" />
               </ProgressLink>
             </div>
 

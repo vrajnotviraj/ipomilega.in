@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="IPO Milega">
+  <rect width="32" height="32" rx="9" fill="#1F4E5C"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6">
+    <path d="M6.5 22.5 12 14.5l4.5 4L23 9" stroke="#F5F2EA"/>
+    <path d="M18.6 9H23v4.4" stroke="#D8A85C"/>
+  </g>
+  <rect x="6.5" y="25.4" width="19" height="1.6" rx=".8" fill="#F5F2EA" opacity=".28"/>
+</svg>

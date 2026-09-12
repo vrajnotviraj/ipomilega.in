@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ArrowLeft,
-  Share2,
   Loader2,
   Clock,
   TrendingUp,
@@ -42,6 +41,7 @@ import {
 import { getIpoType, parseCardDate, getScoreTrustLabel } from "@/components/Home/ipoFormat";
 import { AllotmentPredictorModal } from "@/components/Home/AllotmentPredictorModal";
 import { AllotmentCategoryDef } from "@/components/Home/ipoFormat";
+import { ShareIpoMenu, type ShareIpoDetails } from "@/components/Share/ShareIpoMenu";
 
 interface AnalysisPageClientProps {
   analysis: IpoComprehensiveAnalysis;
@@ -540,6 +540,13 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const [isEditingTimeline, setIsEditingTimeline] = useState(false);
   const [predictorCategory, setPredictorCategory] = useState<AllotmentCategoryDef["key"] | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  // Resolved on the client only -- there is no configured public site URL to
+  // build a canonical link from during SSR.
+  const [shareUrl, setShareUrl] = useState("");
+
+  useEffect(() => {
+    setShareUrl(window.location.href);
+  }, []);
 
   const session = useSession();
   const isAdmin = ["admin@gmail.com", "snehshah7634@gmail.com", "shahvraj114@gmail.com", "devanshisoni2004@gmail.com", "devanshisoni2311@gmail.com"].includes(
@@ -659,14 +666,15 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     { label: "Risk", score: riskScore },
   ];
 
+  // Bands are stored in several shapes -- "130 - 140", "₹130 to 140 Per Share",
+  // or a single "140". The cut-off price is always the last number in the string.
   const getUpperPrice = () => {
     const priceBand = editedAnalysis.ipo_details?.price_band;
-    if (priceBand && typeof priceBand === "string" && priceBand.includes(" - ")) {
-      const parts = priceBand.split(" - ");
-      const upperPrice = parseFloat(parts[1]?.trim());
-      return isNaN(upperPrice) ? null : upperPrice;
-    }
-    return null;
+    if (!priceBand || typeof priceBand !== "string") return null;
+    const numbers = priceBand.replace(/,/g, "").match(/\d+(?:\.\d+)?/g);
+    if (!numbers?.length) return null;
+    const upperPrice = parseFloat(numbers[numbers.length - 1]);
+    return isNaN(upperPrice) ? null : upperPrice;
   };
 
   const formatPriceBand = () => {
@@ -677,7 +685,10 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   const upperPrice = getUpperPrice();
   const lotSize = editedAnalysis.ipo_details?.lot_size;
-  const minInvestment = upperPrice && lotSize ? upperPrice * lotSize : null;
+  // `shares` is shares per lot and `lot_size` the lot count (1 for a retail
+  // minimum), so one lot costs cut-off price x shares -- not x lot_size.
+  const lotShares = editedAnalysis.ipo_details?.shares || lotSize;
+  const minInvestment = upperPrice && lotShares ? upperPrice * lotShares : null;
 
   const timelineData = {
     opening: editedAnalysis.time?.issue_dates?.opening || "",
@@ -735,21 +746,24 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const gmpValue = editedAnalysis.gmp_price_gain || ipo.gmp_price_gain || "";
   const hasGmp = gmpValue && gmpValue !== "N/A" && gmpValue !== "TBD" && gmpValue !== "TBA";
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${editedAnalysis.company_name} IPO Analysis`,
-          text: `Check out this comprehensive IPO analysis of ${editedAnalysis.company_name}. Score: ${overallScore.toFixed(1)}/10`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.error("Error sharing:", error);
-      }
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard");
-    }
+  // Everything a share message carries. Built from the same values rendered on
+  // the page so a shared analysis and the page never drift apart.
+  const shareDetails: ShareIpoDetails = {
+    companyName: editedAnalysis.company_name || ipo.ipo_name || "This",
+    status: statusInfo.label === "Status Unknown" ? "" : statusInfo.label,
+    ipoType,
+    priceBand: formatPriceBand(),
+    lotSize,
+    lotShares,
+    minInvestment,
+    issueSize: editedAnalysis.ipo_details?.issue_size,
+    openDate: timelineData.opening,
+    closeDate: timelineData.closing,
+    allotmentDate: timelineData.allotment,
+    listingDate: timelineData.listing,
+    gmp: hasGmp ? gmpValue : "",
+    score: overallScore,
+    url: shareUrl,
   };
 
   const sections = [
@@ -800,10 +814,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 Admin
               </div>
             )}
-            <Button variant="outline" size="sm" onClick={handleShare} className="gap-1.5">
-              <Share2 className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Share</span>
-            </Button>
+            <ShareIpoMenu details={shareDetails} />
           </div>
         </div>
       </header>
@@ -882,7 +893,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               <div>
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Lot size</div>
                 <div className="text-lg font-mono font-semibold text-foreground">
-                  {lotSize ? `${lotSize} shares` : "N/A"}
+                  {lotShares ? `${lotShares} shares` : "N/A"}
                 </div>
               </div>
               <div>

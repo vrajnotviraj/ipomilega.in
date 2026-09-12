@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator"
 import { signIn, signUp } from "@/lib/auth-client"
 import { toast } from "sonner"
+import { LogoMark } from "@/components/Brand/Logo"
 
 interface LoginDialogProps {
   isOpen: boolean
@@ -63,6 +64,7 @@ export function LoginDialog({ isOpen, onClose }: LoginDialogProps) {
     <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <LogoMark className="h-11 w-11 mx-auto mb-3" />
           <CardTitle className="text-primary">
             {isLogin ? 'Sign In' : 'Create Account'}
           </CardTitle>

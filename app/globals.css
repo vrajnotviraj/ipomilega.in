@@ -55,6 +55,11 @@
   --radius: 0.625rem;
   --background: #F5F2EA;
   --foreground: #201C16;
+  /* Brand mark. Fixed artwork rather than a themed surface -- only the fill and
+     accent lift in dark (see .dark below) so the seal stays readable. */
+  --brand-mark: #1F4E5C;
+  --brand-mark-fg: #F5F2EA;
+  --brand-accent: #D8A85C;
   --card: #FBF9F4;
   --card-foreground: #201C16;
   --popover: #FBF9F4;
@@ -95,6 +100,11 @@
 .dark {
   --background: #17140F;
   --foreground: #F5F2EA;
+  /* The seal keeps its shape in dark, but a deep teal on a near-black page
+     reads as a hole -- lift the fill and the accent so it stays legible. */
+  --brand-mark: #2E6B7D;
+  --brand-mark-fg: #F5F2EA;
+  --brand-accent: #E0B36A;
   --card: #201C16;
   --card-foreground: #F5F2EA;
   --popover: #201C16;

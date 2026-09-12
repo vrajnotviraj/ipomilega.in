@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Badge } from "../ui/badge";
 import { ArrowRight, Clock } from "lucide-react";
 import Image from "next/image";
+import { LogoMark } from "@/components/Brand/Logo";
 
 interface BlogCardProps {
   blog: Blog;
@@ -26,9 +27,7 @@ export function BlogCard({ blog }: BlogCardProps) {
             />
           ) : (
             <div className="text-center">
-              <div className="w-24 h-16 mx-auto mb-2 bg-primary/80 rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-semibold font-serif text-lg">IPO Milega</span>
-              </div>
+              <LogoMark className="h-12 w-12 mx-auto mb-2" />
               <p className="text-background/70 text-xs font-medium tracking-wide">
                 {blog.author}
               </p>
