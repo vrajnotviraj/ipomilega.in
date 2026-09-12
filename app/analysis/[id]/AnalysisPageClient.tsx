@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ArrowLeft,
+  Share2,
   Loader2,
   Clock,
   TrendingUp,
@@ -42,8 +43,7 @@ import {
 } from "recharts";
 import { getIpoType, parseCardDate, getScoreTrustLabel } from "@/components/Home/ipoFormat";
 import { AllotmentPredictorModal } from "@/components/Home/AllotmentPredictorModal";
-import type { ShareFacts } from "@/lib/share";
-import { ShareIpoMenu } from "@/components/Share/ShareIpoMenu";
+import { buildShareMessage, type ShareFacts } from "@/lib/share";
 import { AllotmentCategoryDef } from "@/components/Home/ipoFormat";
 
 interface AnalysisPageClientProps {
@@ -861,6 +861,28 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     url: shareUrl,
   };
 
+  // One tap, one message. The system share sheet is the only step, and picking
+  // the recipient there is the only decision the sharer makes -- there is no
+  // channel list to work through and no draft to edit.
+  const handleShare = async () => {
+    const message = buildShareMessage(shareFacts);
+
+    // `url` is deliberately left off: the message already ends with the link, and
+    // passing both makes WhatsApp and friends paste it twice.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${editedAnalysis.company_name} IPO`, text: message });
+      } catch {
+        // The person dismissed the share sheet; nothing to report.
+      }
+      return;
+    }
+
+    // Desktop browsers without a share sheet: hand them the same text to paste.
+    await navigator.clipboard.writeText(message);
+    toast.success("IPO details copied", { description: "Paste it to whoever you want to send it to." });
+  };
+
   const sections = [
     { key: "overview", num: "§00", label: "Overview" },
     { key: "financials", num: "§01", label: "Financials", score: fundamentalsScore },
@@ -909,7 +931,10 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 Admin
               </div>
             )}
-            <ShareIpoMenu facts={shareFacts} />
+            <Button variant="outline" size="sm" onClick={handleShare} className="gap-1.5">
+              <Share2 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
           </div>
         </div>
       </header>

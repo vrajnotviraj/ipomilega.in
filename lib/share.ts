@@ -155,11 +155,12 @@ export function formatFullDay(dateStr: string | null | undefined): string | null
  *
  * It is the issue's own details -- what a friend needs in order to decide
  * whether to apply -- written in the site's voice, never the sharer's. There is
- * deliberately no editable draft: the sharer picks who to send it to, and the
- * facts that go with it are always the ones shown on the analysis page.
+ * deliberately no editable draft and nothing to choose: tapping Share hands
+ * this exact text to the system share sheet, and the only decision left is who
+ * receives it.
  *
- * `*bold*` markers are WhatsApp syntax; `plainShareMessage` strips them for the
- * channels that render them literally.
+ * Plain text, no markup: it has to read the same in WhatsApp, Telegram, email
+ * and notes, and only WhatsApp would render `*bold*` rather than print it.
  */
 export function buildShareMessage(facts: ShareFacts): string {
   const {
@@ -187,18 +188,13 @@ export function buildShareMessage(facts: ShareFacts): string {
 
   // Blocks are separated by a blank line; the details keep their lines together.
   const blocks = [
-    `*${companyName} IPO*${heading ? ` — ${heading}` : ""}`,
+    `${companyName} IPO${heading ? ` — ${heading}` : ""}`,
     details.join("\n"),
     closingLine(closing, opening, now),
     `Full analysis → ${url || analysisUrl(slug)}`,
   ].filter((b) => !!b);
 
   return blocks.join("\n\n");
-}
-
-/** WhatsApp is the only channel that renders `*bold*`; strip it everywhere else. */
-export function plainShareMessage(message: string): string {
-  return message.replace(/\*/g, "");
 }
 
 /** The single-paragraph version used for og:description and twitter:description. */
