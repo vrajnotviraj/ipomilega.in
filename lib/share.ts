@@ -161,7 +161,9 @@ export function formatFullDay(dateStr: string | null | undefined): string | null
  *
  * Those personal lines are written for the sharer, not by them: tapping Share
  * hands this exact text to the system share sheet, and the only decision left
- * is who receives it. There is no draft to edit.
+ * is who receives it. There is no draft to edit -- which is also why the opener
+ * states the sharer is applying without asking: forwarding an issue you are
+ * putting money into is the case this button exists for.
  *
  * Plain text, no markup: it has to read the same in WhatsApp, Telegram, email
  * and notes, and only WhatsApp would render `*bold*` rather than print it.
@@ -196,7 +198,7 @@ export function buildShareMessage(facts: ShareFacts): string {
 
   // Blocks are separated by a blank line; the details keep their lines together.
   const blocks = [
-    `Thought you'd want to see this — ${companyName} IPO${heading ? ` (${heading})` : ""}.`,
+    `I'm applying for the ${companyName} IPO${heading ? ` (${heading})` : ""}. You might want to check this out.`,
     details.join("\n"),
     closingLine(closing, opening, now),
     [
