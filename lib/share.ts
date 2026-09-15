@@ -114,97 +114,36 @@ export interface ShareFacts {
   businessModel?: string | null;
   /** Overridable so the page can share the URL actually in the address bar. */
   url?: string;
-  /** The signed-in sharer, used to sign the message off. Absent when logged out. */
-  sharerName?: string | null;
   now?: Date;
-  // The issue facts. All optional: a row with no value is dropped rather than
-  // printed as "N/A", so a half-filled analysis still shares cleanly.
-  ipoType?: string | null;
-  status?: string | null;
-  priceBand?: string | null;
-  /** Shares per lot -- what a retail applicant actually bids for. */
-  lotShares?: number | null;
-  minInvestment?: number | null;
-  issueSize?: string | null;
-  allotment?: string | null;
-  listing?: string | null;
-}
-
-const PLACEHOLDERS = ["n/a", "na", "tba", "tbd", "-"];
-
-/** Trims a stored field, treating the scrapers' placeholders as absent. */
-function value(raw: string | number | null | undefined): string | null {
-  const text = raw === null || raw === undefined ? "" : String(raw).trim();
-  if (!text || PLACEHOLDERS.includes(text.toLowerCase())) return null;
-  return text;
-}
-
-/** Price band and issue size are stored with or without the rupee sign. */
-function rupee(text: string): string {
-  return /^\d/.test(text) ? `₹${text}` : text;
-}
-
-/** "15 Sept 2026" -- the long form, since a forwarded message outlives the week. */
-export function formatFullDay(dateStr: string | null | undefined): string | null {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return value(dateStr);
-  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: IST });
 }
 
 /**
  * The message that goes out when someone shares an IPO.
  *
- * It carries the issue's own details -- what a friend needs in order to decide
- * whether to apply -- and opens and signs off like a person sending it on,
- * because a bare block of figures lands like spam.
+ * Four things, and nothing else: the GMP, how long is left to apply, one line
+ * on what the company does, and the link. A forwarded message is read on a lock
+ * screen -- the full details are one tap away on the page, so repeating them
+ * here only buries the part that makes someone act.
  *
- * Those personal lines are written for the sharer, not by them: tapping Share
- * hands this exact text to the system share sheet, and the only decision left
- * is who receives it. There is no draft to edit -- which is also why the opener
- * states the sharer is applying without asking: forwarding an issue you are
+ * It opens in the sharer's voice, but the line is written for them rather than
+ * by them: tapping Share hands this exact text to the system share sheet, and
+ * the only decision left is who receives it. There is no draft to edit, which
+ * is why the opener states they are applying -- forwarding an issue you are
  * putting money into is the case this button exists for.
  *
  * Plain text, no markup: it has to read the same in WhatsApp, Telegram, email
  * and notes, and only WhatsApp would render `*bold*` rather than print it.
  */
 export function buildShareMessage(facts: ShareFacts): string {
-  const {
-    companyName, slug, score, gmp, gainPercent, opening, closing, url, now, sharerName,
-    ipoType, status, priceBand, lotShares, minInvestment, issueSize, allotment, listing,
-  } = facts;
+  const { companyName, slug, gmp, gainPercent, opening, closing, businessModel, url, now } = facts;
 
-  const heading = [value(status), value(ipoType)].filter(Boolean).join(" · ");
-
-  // Better-auth stores whatever the provider gave us, usually a full name; the
-  // first word is what a person would actually sign off with.
-  const firstName = (value(sharerName) || "").split(/\s+/)[0];
-
-  const band = value(priceBand);
-  const open = formatFullDay(opening);
-  const close = formatFullDay(closing);
-
-  const details = [
-    band ? `Price band: ${rupee(band)}` : null,
-    lotShares ? `Lot size: ${lotShares} shares` : null,
-    minInvestment ? `Min investment: ₹${Math.round(minInvestment).toLocaleString("en-IN")}` : null,
-    value(issueSize) ? `Issue size: ${rupee(value(issueSize)!)}` : null,
-    open || close ? `Dates: ${[open, close].filter(Boolean).join(" — ")}` : null,
-    formatFullDay(allotment) ? `Allotment: ${formatFullDay(allotment)}` : null,
-    formatFullDay(listing) ? `Listing: ${formatFullDay(listing)}` : null,
-    gmpLine(gmp, gainPercent),
-    score !== undefined && score > 0 ? `${SITE_NAME} score: ${score.toFixed(1)}/10` : null,
-  ].filter(Boolean);
-
-  // Blocks are separated by a blank line; the details keep their lines together.
+  // Blocks are separated by a blank line; GMP and the deadline stay together
+  // because they are read as one thought -- worth this much, this long left.
   const blocks = [
-    `I'm applying for the ${companyName} IPO${heading ? ` (${heading})` : ""}. You might want to check this out.`,
-    details.join("\n"),
-    closingLine(closing, opening, now),
-    [
-      `Full analysis → ${url || analysisUrl(slug)}`,
-      firstName ? `— ${firstName}, via ${SITE_NAME}` : null,
-    ].filter(Boolean).join("\n"),
+    `Hey, I'm applying to the ${companyName} IPO.`,
+    [gmpLine(gmp, gainPercent), closingLine(closing, opening, now)].filter(Boolean).join("\n"),
+    oneLiner(businessModel),
+    `Full analysis → ${url || analysisUrl(slug)}`,
   ].filter((b) => !!b);
 
   return blocks.join("\n\n");

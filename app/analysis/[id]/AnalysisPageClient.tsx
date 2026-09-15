@@ -841,25 +841,16 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const gmpValue = editedAnalysis.gmp_price_gain || ipo.gmp_price_gain || "";
   const hasGmp = gmpValue && gmpValue !== "N/A" && gmpValue !== "TBD" && gmpValue !== "TBA";
 
-  // Everything the share message carries, read off the same values this page
-  // renders, so a forwarded IPO and the page never drift apart.
+  // What the share message carries, read off the same values this page renders,
+  // so a forwarded IPO and the page never drift apart.
   const shareFacts: ShareFacts = {
     companyName: editedAnalysis.company_name,
     slug: editedAnalysis.slug || ipo.slug || "",
-    score: overallScore,
     gmp: hasGmp ? gmpValue : null,
-    status: statusInfo.label === "Status Unknown" ? null : statusInfo.label,
-    ipoType,
-    priceBand: editedAnalysis.ipo_details?.price_band,
-    lotShares,
-    minInvestment,
-    issueSize: editedAnalysis.ipo_details?.issue_size,
     opening: timelineData.opening,
     closing: timelineData.closing,
-    allotment: timelineData.allotment,
-    listing: timelineData.listing,
+    businessModel: editedAnalysis.fundamentals?.business_model || editedAnalysis.fundamentals?.summary || null,
     url: shareUrl,
-    sharerName: session?.data?.user?.name,
   };
 
   // One tap, one message. The system share sheet is the only step, and picking
