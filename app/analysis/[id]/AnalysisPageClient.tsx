@@ -5,12 +5,14 @@ import {
   ArrowLeft,
   Share2,
   Loader2,
-  Clock,
   TrendingUp,
   Plus,
   Minus,
   ChevronUp,
   ChevronRight,
+  User,
+  Users,
+  Landmark,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,10 +43,27 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { getIpoType, parseCardDate, getScoreTrustLabel } from "@/components/Home/ipoFormat";
+import { useRouter } from "next/navigation";
+import {
+  getIpoType,
+  parseCardDate,
+  getScoreTrustLabel,
+  getAllotmentProbability,
+  getProbabilityColor,
+  parseGainValue,
+  ALLOTMENT_CATEGORIES,
+} from "@/components/Home/ipoFormat";
 import { AllotmentPredictorModal } from "@/components/Home/AllotmentPredictorModal";
 import { buildShareMessage, type ShareFacts } from "@/lib/share";
 import { AllotmentCategoryDef } from "@/components/Home/ipoFormat";
+
+// Same iconography as the home-page card, so the two allotment rows read as the
+// same control in both places.
+const ALLOTMENT_ICONS: Record<AllotmentCategoryDef["key"], typeof User> = {
+  retail: User,
+  shni: Users,
+  bhni: Landmark,
+};
 
 interface AnalysisPageClientProps {
   analysis: IpoComprehensiveAnalysis;
@@ -401,10 +420,22 @@ const AnalysisTimeline = ({
     return isNaN(d.getTime()) ? null : d;
   };
 
+  // Every position on this rail is measured in whole IST days. The stations are
+  // calendar dates with no time on them, while "today" is the current instant --
+  // comparing the two directly drifts the marker by however far into the day it
+  // is, which on the closing day itself lands it visibly past the Close dot.
+  const dayNumber = (d: Date) => {
+    const [y, m, day] = d
+      .toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })
+      .split("-")
+      .map(Number);
+    return Date.UTC(y, m - 1, day) / 86_400_000;
+  };
+
   const openD = parseDate(opening);
   const listD = parseDate(listing);
 
-  if (!openD || !listD || listD.getTime() <= openD.getTime()) {
+  if (!openD || !listD || dayNumber(listD) <= dayNumber(openD)) {
     return (
       <div className="text-center text-sm text-muted-foreground py-6 font-sans">
         Timeline will be available once opening and listing dates are confirmed.
@@ -412,11 +443,12 @@ const AnalysisTimeline = ({
     );
   }
 
-  const total = listD.getTime() - openD.getTime();
+  const openDay = dayNumber(openD);
+  const total = dayNumber(listD) - openDay;
   const posOf = (s: string) => {
     const d = parseDate(s);
     if (!d) return 0;
-    return Math.max(0, Math.min(100, ((d.getTime() - openD.getTime()) / total) * 100));
+    return Math.max(0, Math.min(100, ((dayNumber(d) - openDay) / total) * 100));
   };
 
   // True, date-proportional positions. Kept around because the displayed positions below get
@@ -451,7 +483,7 @@ const AnalysisTimeline = ({
     return positions[positions.length - 1];
   };
 
-  const todayRaw = today ? ((today.getTime() - openD.getTime()) / total) * 100 : 0;
+  const todayRaw = today ? ((dayNumber(today) - openDay) / total) * 100 : 0;
   // How much of the rail is behind us: nothing before the issue opens, all of it once listed.
   const progressPct = !today ? 0 : todayRaw < 0 ? 0 : todayRaw > 100 ? 100 : toDisplay(todayRaw);
   // Keep the marker and its label inside the box at both extremes.
@@ -473,7 +505,7 @@ const AnalysisTimeline = ({
   const todayLabel = today ? today.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) : "";
   const isReached = (date: string) => {
     const d = parseDate(date);
-    return !!d && !!today && d <= today;
+    return !!d && !!today && dayNumber(d) <= dayNumber(today);
   };
   const offsetClass = (align: "left" | "center" | "right") =>
     align === "left" ? "" : align === "right" ? "-translate-x-full" : "-translate-x-1/2";
@@ -643,6 +675,38 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     setShareUrl(window.location.href);
   }, []);
 
+  const router = useRouter();
+
+  // The page header and the tab bar stack underneath the fixed site header, and
+  // anchors have to clear all three. Measuring beats hardcoded offsets: the
+  // heights differ between breakpoints, and a stale number leaves the tab bar
+  // sitting on top of the header it is supposed to sit below.
+  const chromeRef = useRef<HTMLDivElement | null>(null);
+  const [siteHeaderHeight, setSiteHeaderHeight] = useState(64);
+
+  useEffect(() => {
+    const siteHeader = document.querySelector("header.fixed");
+    const measure = () => {
+      const top = siteHeader?.getBoundingClientRect().height ?? 64;
+      setSiteHeaderHeight(top);
+      // scroll-padding on the scroller handles every anchor jump at once,
+      // including scrollIntoView, so sections need no scroll-margin of their own.
+      document.documentElement.style.scrollPaddingTop = `${top + (chromeRef.current?.offsetHeight ?? 0) + 12}px`;
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (siteHeader) observer.observe(siteHeader);
+    if (chromeRef.current) observer.observe(chromeRef.current);
+    window.addEventListener("resize", measure);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      document.documentElement.style.scrollPaddingTop = "";
+    };
+  }, []);
+
   const session = useSession();
   const isAdmin = ["admin@gmail.com", "snehshah7634@gmail.com", "shahvraj114@gmail.com", "devanshisoni2004@gmail.com", "devanshisoni2311@gmail.com"].includes(
     session?.data?.user?.email || ""
@@ -794,6 +858,15 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   const ipoType = getIpoType(ipo);
 
+  // The same odds the home-page card leads with. They were only reachable here
+  // through a button two screens down, so someone who arrived from a card lost
+  // the one number they came for.
+  const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => ({
+    ...cat,
+    icon: ALLOTMENT_ICONS[cat.key],
+    probability: getAllotmentProbability(parseGainValue(ipo?.[cat.ratioField])),
+  }));
+
   const getStatusInfo = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -890,14 +963,44 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  // A shared analysis usually opens in a fresh tab, where history.back() lands on
+  // about:blank or walks straight out of the site -- which is what people were
+  // hitting. Step back only when there is provably an IPO Milega page behind us.
+  //
+  // Two ways that is true: we arrived by client-side navigation (the tab's entry
+  // document is some other URL, so the router pushed an entry to get here), or
+  // this page was loaded outright from another page of ours. Anything else --
+  // opened from WhatsApp, pasted into the address bar -- goes home instead.
+  const handleBack = () => {
+    const entry = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    const stripHash = (u: string) => u.split("#")[0];
+
+    const arrivedInApp = !!entry?.name && stripHash(entry.name) !== stripHash(window.location.href);
+
+    let cameFromOurSite = false;
+    try {
+      cameFromOurSite =
+        !!document.referrer && new URL(document.referrer).origin === window.location.origin;
+    } catch {
+      cameFromOurSite = false;
+    }
+
+    if (arrivedInApp || cameFromOurSite) router.back();
+    else router.push("/");
+  };
+
   return (
     <div className="min-h-screen font-sans bg-background pt-16">
-      {/* Slim page header */}
-      <header className="sticky top-16 z-40 bg-background/90 backdrop-blur border-b border-border">
+      {/* Page header and tab bar travel as one sticky block: separate offsets drift
+          apart whenever the site header's height changes with the breakpoint. */}
+      <div ref={chromeRef} className="sticky z-40" style={{ top: siteHeaderHeight }}>
+      <header className="bg-background/90 backdrop-blur border-b border-border">
         <div className="app-container py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
-              onClick={() => window.history.back()}
+              onClick={handleBack}
               className="border border-border hover:bg-accent h-9 w-9 rounded-full flex items-center justify-center flex-shrink-0"
               aria-label="Go back"
             >
@@ -932,7 +1035,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
       </header>
 
       {/* Section tab nav */}
-      <div className="sticky top-[105px] z-30 bg-background/95 backdrop-blur border-b border-border">
+      <div className="bg-background/95 backdrop-blur border-b border-border">
         <div className="app-container overflow-x-auto">
           <div className="flex items-center gap-1 py-2 min-w-max">
             {sections.map((s) => (
@@ -962,6 +1065,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             ))}
           </div>
         </div>
+      </div>
+
       </div>
 
       <div className="app-container py-8 space-y-10">
@@ -1033,6 +1138,33 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   renderText={(val) => <span>{val ? `₹${val}` : "N/A"}</span>}
                 />
               </div>
+            </div>
+
+            <div className="mb-8">
+              <h3 className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">
+                Allotment chances
+              </h3>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                {allotmentCategories.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setPredictorCategory(cat.key)}
+                    className="flex flex-col items-center gap-1 text-center py-3 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-accent transition-colors cursor-pointer"
+                    aria-label={`Estimate ${cat.label} allotment chance`}
+                  >
+                    <cat.icon className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className={cn("font-mono text-lg font-semibold", getProbabilityColor(cat.probability))}>
+                      {cat.probability !== null ? `${cat.probability}%` : "N/A"}
+                    </span>
+                    <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground border-b border-dotted border-muted-foreground/50 leading-tight">
+                      {cat.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Estimated from the current subscription figures. Tap a category to work it out for your application size.
+              </p>
             </div>
 
             <div className="rounded-xl border border-border bg-card p-5">
@@ -1196,22 +1328,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            <div className="rounded-xl border border-border bg-card p-5">
-              <QuotaDonut data={quotaData} />
-            </div>
-            <div className="rounded-xl border border-border bg-card p-5 flex flex-col justify-center gap-3">
-              <p className="text-sm text-muted-foreground">
-                Estimate your odds of allotment for this issue based on the current subscription figures.
-              </p>
-              <Button
-                onClick={() => setPredictorCategory("retail")}
-                className="gap-2 w-fit"
-              >
-                <Clock className="h-4 w-4" />
-                Check allotment chances
-              </Button>
-            </div>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <QuotaDonut data={quotaData} />
           </div>
 
           {investorTableData.length > 0 && (
@@ -1250,7 +1368,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               sectionRefs.current["financials"] = el;
             }}
             id="financials"
-            className="scroll-mt-40"
           >
             <SectionHeading
               num="§01"
@@ -1330,7 +1447,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               sectionRefs.current["risk"] = el;
             }}
             id="risk"
-            className="scroll-mt-40"
           >
             <SectionHeading
               num="§02"
@@ -1388,7 +1504,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               sectionRefs.current["performance"] = el;
             }}
             id="performance"
-            className="scroll-mt-40"
           >
             <SectionHeading
               num="§03"
@@ -1510,7 +1625,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               sectionRefs.current["flexibility"] = el;
             }}
             id="flexibility"
-            className="scroll-mt-40"
           >
             <SectionHeading
               num="§04"
@@ -1593,7 +1707,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               sectionRefs.current["timing"] = el;
             }}
             id="timing"
-            className="scroll-mt-40"
           >
             <SectionHeading
               num="§05"
