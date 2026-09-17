@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="IPO Milega">
+  <!-- App/favicon tile. Radius 14 matches the comp's rounded square. -->
+  <rect width="64" height="64" rx="14" fill="#1F4E5C"/>
+  <g transform="translate(7.31 7.31) scale(1.0286)" fill="none" stroke="#F5F2EA" stroke-width="2.43" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="24" cy="24" r="17.5"/>
+    <polyline points="10.5,30.75 19.3,22 26,28.7 37.5,17.25"/>
+    <polyline points="29.4,17.25 37.5,17.25 37.5,25.35"/>
+  </g>
+</svg>

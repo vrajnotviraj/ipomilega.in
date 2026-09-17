@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="IPO Milega">
+  <!-- Reversed mark for ink/dark grounds. Cream is the background token, #F5F2EA. -->
+  <g fill="none" stroke="#F5F2EA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="24" cy="24" r="17.5"/>
+    <polyline points="10.5,30.75 19.3,22 26,28.7 37.5,17.25"/>
+    <polyline points="29.4,17.25 37.5,17.25 37.5,25.35"/>
+  </g>
+</svg>
