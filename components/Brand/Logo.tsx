@@ -1,38 +1,31 @@
 import { cn } from "@/lib/utils";
 
 /**
- * IPO Milega brand mark: a teal seal holding a rising market line that breaks
- * out into a gold arrow. Colours come from the brand tokens in globals.css
- * (--brand-mark / --brand-mark-fg / --brand-accent), which lift slightly in
- * dark so the seal never sinks into the page.
+ * IPO Milega brand mark: a scan ring sweeping an ascending arrow -- continuous
+ * analysis, from filing to listing gain.
+ *
+ * Monoline and single-colour, as approved. The stroke is `--brand-mark`, which
+ * is the primary teal in light (#1F4E5C) and lifts to #2E6B7D in dark so the
+ * mark never sinks into the page. Concrete-colour copies for the places that
+ * cannot read a CSS variable -- favicon, OG images, anything handed to a third
+ * party -- live in `public/logo/`.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 32 32"
+      viewBox="0 0 48 48"
       role="img"
       aria-label="IPO Milega"
       className={cn("h-9 w-9", className)}
+      fill="none"
+      stroke="var(--brand-mark)"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
-      <rect width="32" height="32" rx="9" fill="var(--brand-mark)" />
-      <g
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2.6"
-      >
-        <path d="M6.5 22.5 12 14.5l4.5 4L23 9" stroke="var(--brand-mark-fg)" />
-        <path d="M18.6 9H23v4.4" stroke="var(--brand-accent)" />
-      </g>
-      <rect
-        x="6.5"
-        y="25.4"
-        width="19"
-        height="1.6"
-        rx="0.8"
-        fill="var(--brand-mark-fg)"
-        opacity="0.28"
-      />
+      <circle cx="24" cy="24" r="17.5" />
+      <polyline points="10.5,30.75 19.3,22 26,28.7 37.5,17.25" />
+      <polyline points="29.4,17.25 37.5,17.25 37.5,25.35" />
     </svg>
   );
 }
