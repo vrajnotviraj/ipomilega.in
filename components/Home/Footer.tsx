@@ -2,6 +2,7 @@
 "use client";
 
 import { Logo } from "@/components/Brand/Logo";
+import { ProgressLink } from "@/components/Progressbar/ProgressLink";
 
 export function Footer() {
     return (
@@ -13,6 +14,13 @@ export function Footer() {
                     <div className="w-full overflow-hidden">
                         <p className="text-muted-foreground font-sans text-sm">
                             © <span className="font-mono">{new Date().getFullYear()}</span> IPO Milega. All rights reserved.
+                            <span className="mx-2 text-border" aria-hidden="true">|</span>
+                            <ProgressLink
+                                href="/about"
+                                className="transition-colors hover:text-foreground"
+                            >
+                                About
+                            </ProgressLink>
                         </p>
                     </div>
                 </div>
