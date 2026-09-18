@@ -46,6 +46,7 @@ import {
 import { useRouter } from "next/navigation";
 import {
   getIpoType,
+  formatIssueSize,
   parseCardDate,
   getScoreTrustLabel,
   getAllotmentProbability,
@@ -54,6 +55,7 @@ import {
   ALLOTMENT_CATEGORIES,
 } from "@/components/Home/ipoFormat";
 import { AllotmentPredictorModal } from "@/components/Home/AllotmentPredictorModal";
+import { GmpTrendChart } from "@/components/charts/GmpTrendChart";
 import { buildShareMessage, type ShareFacts } from "@/lib/share";
 import { AllotmentCategoryDef } from "@/components/Home/ipoFormat";
 
@@ -1186,6 +1188,13 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               )}
             </div>
 
+            {/* The trend behind the single GMP figure above: which way it has
+                been moving, and how far. Reads its own series client-side, so
+                it is not frozen by this page's five-minute ISR cache. */}
+            <div className="mt-4">
+              <GmpTrendChart ipoId={ipo._id} companyName={editedAnalysis.company_name} />
+            </div>
+
           </div>
 
           {/* Timeline */}
@@ -1723,7 +1732,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Issue size</div>
-                <div className="text-lg font-serif font-semibold text-foreground">{editedAnalysis.ipo_details?.issue_size || "N/A"}</div>
+                <div className="text-lg font-serif font-semibold text-foreground">{formatIssueSize(editedAnalysis.ipo_details?.issue_size) || "Size TBA"}</div>
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Market timing</div>
