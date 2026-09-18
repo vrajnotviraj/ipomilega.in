@@ -21,7 +21,7 @@ import MarkdownRenderer from "@/components/MarkDown";
 import { Ipo } from "@/app/models/ipo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProgressRouter } from "@/components/Progressbar/useProgressRouter";
-import { getIpoType } from "@/components/Home/ipoFormat";
+import { getIpoType, formatIssueSize } from "@/components/Home/ipoFormat";
 import Image from "next/image";
 
 interface BlogPost {
@@ -243,7 +243,7 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
                             {getIpoType(ipoData)}
                           </span>
                           <span>•</span>
-                          <span>{ipoData.ipo_details?.issue_size || "Size TBA"}</span>
+                          <span>{formatIssueSize(ipoData.ipo_details?.issue_size) || "Size TBA"}</span>
                         </div>
                       </div>
                     </div>

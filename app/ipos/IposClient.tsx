@@ -6,7 +6,7 @@ import { Search, ChevronLeft, ChevronRight, Building2 } from "lucide-react";
 import { HomePageIpoProps } from "../types/homepage";
 import { useProgressRouter } from "@/components/Progressbar/useProgressRouter";
 import { useSearchParams } from "next/navigation";
-import { getIpoType, getPriceBand, getRiskTextColor, formatShortDate } from "@/components/Home/ipoFormat";
+import { getIpoType, getPriceBand, getRiskTextColor, formatShortDate, formatIssueSize } from "@/components/Home/ipoFormat";
 import { IpoTitleLink } from "@/components/Home/IpoTitleLink";
 
 type Status = "Upcoming" | "Open" | "Listed";
@@ -196,6 +196,14 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
                   {pageRows.map((row) => {
                     const riskScore = row.analysis?.risk_meter?.score || 0;
                     const priceBand = getPriceBand(row.ipo);
+                    const issueSizeValue = formatIssueSize(row.ipo?.ipo_size);
+                    // This column prefixes ₹ because ipo_size is normally a bare amount ("500 Cr").
+                    // Once an unfixed clause is dropped, what remains can be a share count instead,
+                    // which must not be given a rupee sign.
+                    const issueSize =
+                      issueSizeValue && /^[\d.]/.test(issueSizeValue) && !/share/i.test(issueSizeValue)
+                        ? `₹${issueSizeValue}`
+                        : issueSizeValue;
                     const date = dateCell(row);
                     const canOpen = riskScore > 0 && !!row.ipo?.slug;
                     return (
@@ -212,7 +220,7 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
                         </td>
                         <td className="px-4 py-4 text-sm font-semibold text-foreground">{getIpoType(row.ipo)}</td>
                         <td className="px-4 py-4 font-mono text-sm text-foreground">{priceBand ? `₹${priceBand}` : "N/A"}</td>
-                        <td className="px-4 py-4 font-mono text-sm text-foreground">{row.ipo?.ipo_size ? `₹${row.ipo.ipo_size}` : "N/A"}</td>
+                        <td className="px-4 py-4 font-mono text-sm text-foreground">{issueSize || "Size TBA"}</td>
                         <td className="px-4 py-4">
                           <div className="text-xs text-muted-foreground">{date.label}</div>
                           <div className="font-mono text-sm font-semibold text-foreground">{date.value}</div>

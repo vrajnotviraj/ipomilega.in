@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatIssueSize } from "@/components/Home/ipoFormat";
 
 type FilterType = "all" | "live" | "upcoming" | "past";
 
@@ -524,7 +525,7 @@ export default function AllIPOsPage() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm font-medium text-foreground">
-                          {ipo.ipo_details?.issue_size || "N/A"}
+                          {formatIssueSize(ipo.ipo_details?.issue_size) || "Size TBA"}
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
@@ -602,7 +603,7 @@ export default function AllIPOsPage() {
                           {ipo.company_name}
                         </h3>
                         <p className="text-xs text-muted-foreground">
-                          {ipo.ipo_details?.issue_size || "N/A"}
+                          {formatIssueSize(ipo.ipo_details?.issue_size) || "Size TBA"}
                         </p>
                       </div>
                     </div>

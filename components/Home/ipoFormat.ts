@@ -184,3 +184,34 @@ export const getMarketLotRows = (
   const max = rows.find((r) => categoryRe.test(r.application) && /maximum/i.test(r.application));
   return { min, max };
 };
+
+// An RHP prints a figure that hasn't been fixed yet as a bracketed bullet — "[●]" — and the
+// scraper stores the detail-page text verbatim, so an issue size arrives as
+// "Approx [●] Crores, 1,43,00,000 Equity Shares" while the rupee amount is genuinely still
+// undecided. Rendered raw, that puts a stray "[.]" on the card. Drop the clauses whose figure is
+// still a placeholder, keep the ones carrying a real number, and return null when none do — an
+// unannounced size should fall back to "TBA", not print the prospectus's punctuation.
+//
+// Fixed at display time rather than in the scraper deliberately: the stored text is a faithful
+// copy of the source, every document already in Mongo carries it, and an admin editing the field
+// should see what the prospectus actually says.
+const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
+
+export const formatIssueSize = (raw: string | undefined | null): string | null => {
+  const text = raw?.trim();
+  if (!text) return null;
+
+  const lower = text.toLowerCase();
+  if (lower === 'n/a' || lower === 'tba' || lower === 'tbd' || text === '-') return null;
+
+  // The clause separator is a comma followed by whitespace. Commas inside an Indian-format
+  // number ("1,43,00,000") never are, so this splits the string into its two clauses without
+  // cutting the share count apart.
+  const kept = text
+    .split(/,\s+/)
+    .map((clause) => clause.trim())
+    .filter((clause) => clause && !UNFIXED_VALUE_RE.test(clause));
+
+  if (kept.length === 0) return null;
+  return kept.join(', ');
+};
