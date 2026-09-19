@@ -147,6 +147,17 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
     return { yDomain: [min, max] as [number, number], yTicks: ticks };
   }, [points]);
 
+  // A single reading spans no time at all, and ["dataMin","dataMax"] on a
+  // zero-width domain collapses the axis and hides the point. Half a day either
+  // side gives the dot an axis to sit in the middle of.
+  const xDomain = useMemo((): [number | string, number | string] => {
+    if (points?.length === 1) {
+      const half = 12 * 60 * 60 * 1000;
+      return [points[0].ts - half, points[0].ts + half];
+    }
+    return ["dataMin", "dataMax"];
+  }, [points]);
+
   // Below roughly a day and a half, ticks that only say the date repeat
   // themselves; past it, ticks carrying a clock time are noise.
   const spanMs = points && points.length > 1 ? points[points.length - 1].ts - points[0].ts : 0;
@@ -211,20 +222,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
 
   const last = points[points.length - 1];
 
-  // One reading is a value, not a trend. Say the value and say so.
-  if (points.length === 1) {
-    return (
-      <div className="rounded-xl border border-border bg-card p-5">
-        {header}
-        <p className="font-mono text-2xl font-semibold text-foreground">{formatRupees(last.gmp)}</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          One reading so far, taken {formatDayTime(last.ts)}. A direction needs at least two.
-        </p>
-        {disclaimer}
-      </div>
-    );
-  }
-
   const directionColor =
     summary!.direction === "up"
       ? "text-score-good"
@@ -247,12 +244,20 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
         <span className="font-mono text-2xl font-semibold text-foreground">
           {formatRupees(last.gmp)}
         </span>
-        <span className={cn("flex items-center gap-1 text-sm font-medium", directionColor)}>
-          <DirectionIcon className="w-4 h-4" aria-hidden="true" />
-          {directionWord}
-          {summary!.change !== 0 && ` ${formatDelta(summary!.change)}`}
-          <span className="text-muted-foreground font-normal">since {formatDay(summary!.first.ts)}</span>
-        </span>
+        {points.length === 1 ? (
+          // A direction needs two readings. Until there are, the card says what
+          // it has rather than implying a trend it cannot see yet.
+          <span className="text-sm text-muted-foreground">
+            First reading, {formatDayTime(last.ts)}
+          </span>
+        ) : (
+          <span className={cn("flex items-center gap-1 text-sm font-medium", directionColor)}>
+            <DirectionIcon className="w-4 h-4" aria-hidden="true" />
+            {directionWord}
+            {summary!.change !== 0 && ` ${formatDelta(summary!.change)}`}
+            <span className="text-muted-foreground font-normal">since {formatDay(summary!.first.ts)}</span>
+          </span>
+        )}
       </div>
 
       {showTable ? (
@@ -303,7 +308,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                 dataKey="ts"
                 type="number"
                 scale="time"
-                domain={["dataMin", "dataMax"]}
+                domain={xDomain}
                 tickFormatter={tickFormatter}
                 tickLine={false}
                 axisLine={false}
@@ -363,6 +368,13 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
             </AreaChart>
           </ResponsiveContainer>
         </div>
+      )}
+
+      {points.length === 1 && (
+        <p className="mt-3 text-xs text-muted-foreground">
+          The line builds from here: a point is added each time the grey market is requoted
+          at a different price.
+        </p>
       )}
 
       {disclaimer}
