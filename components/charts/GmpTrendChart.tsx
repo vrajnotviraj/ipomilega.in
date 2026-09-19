@@ -182,13 +182,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
     </div>
   );
 
-  const disclaimer = (
-    <p className="mt-3 text-xs text-muted-foreground">
-      Grey-market premium as published by ipowatch. It is an unofficial dealer quote, not
-      exchange data, and it is not a forecast of the listing price.
-    </p>
-  );
-
   if (failed) {
     return (
       <div className="rounded-xl border border-border bg-card p-5">
@@ -215,7 +208,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
           No GMP readings recorded for this issue yet. The trend appears once the grey market
           has been quoted more than once.
         </p>
-        {disclaimer}
       </div>
     );
   }
@@ -376,8 +368,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
           at a different price.
         </p>
       )}
-
-      {disclaimer}
     </div>
   );
 }
