@@ -47,6 +47,7 @@ import { useRouter } from "next/navigation";
 import {
   getIpoType,
   formatIssueSize,
+  isUnfixedValue,
   parseCardDate,
   getScoreTrustLabel,
   getAllotmentProbability,
@@ -841,6 +842,10 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const formatPriceBand = () => {
     const priceBand = editedAnalysis.ipo_details?.price_band;
     if (!priceBand) return "N/A";
+    // The same RHP placeholder the issue size carries. A band that has not been
+    // fixed prints as "[●] to [●] Per Share", and a rupee sign in front of it
+    // makes it read like a price rather than a blank.
+    if (isUnfixedValue(priceBand)) return "Price TBA";
     return priceBand.includes("₹") ? priceBand : `₹${priceBand}`;
   };
 

@@ -35,10 +35,10 @@ export const getPriceBand = (ipo: {
   ipo_details?: { ipo_price_band?: string };
 } | null | undefined): string | null => {
   const primary = ipo?.price_band?.trim();
-  if (primary && primary.toLowerCase() !== 'n/a') return primary;
+  if (primary && primary.toLowerCase() !== 'n/a' && !isUnfixedValue(primary)) return primary;
 
   const fallback = ipo?.ipo_details?.ipo_price_band?.trim();
-  if (fallback && fallback.toLowerCase() !== 'n/a') return fallback;
+  if (fallback && fallback.toLowerCase() !== 'n/a' && !isUnfixedValue(fallback)) return fallback;
 
   return null;
 };
@@ -196,6 +196,16 @@ export const getMarketLotRows = (
 // copy of the source, every document already in Mongo carries it, and an admin editing the field
 // should see what the prospectus actually says.
 const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
+
+/**
+ * Is this figure still the prospectus's placeholder rather than a number?
+ *
+ * Exported because the issue size is not the only field it reaches: a price
+ * band that has not been fixed arrives as "[●] to [●] Per Share", and putting
+ * a rupee sign in front of that does not make it a price.
+ */
+export const isUnfixedValue = (raw: string | undefined | null): boolean =>
+  UNFIXED_VALUE_RE.test(raw ?? '');
 
 export const formatIssueSize = (raw: string | undefined | null): string | null => {
   const text = raw?.trim();
