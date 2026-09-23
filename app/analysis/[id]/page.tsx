@@ -3,13 +3,13 @@ import AnalysisPageClient from './AnalysisPageClient'
 import { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis"
 import { Ipo } from '@/app/models/ipo';
 import { getAnalysisBySlug, getAllAnalyses } from '@/lib/queries/ipos';
-import { buildShareDescription, closingLine, gmpLine, SITE_NAME } from '@/lib/share';
+import { buildShareDescription, closingLine, gmpLine } from '@/lib/share';
 import {  ArrowLeftCircle, Clock, FileSearch } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 
-// ISR: prerendered per slug, refreshed in the background every 5 minutes.
-export const revalidate = 300
+// ISR: prerendered per slug, refreshed in the background at most once a minute.
+export const revalidate = 60
 // Slugs published after the build still render on first request, then get cached.
 export const dynamicParams = true
 
@@ -117,16 +117,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       type: 'article',
       url: `/analysis/${id}`,
       siteName: 'IPO Analysis Platform',
-      // Deliberately our own card, never `ipo.image_url`: a shared link should carry the IPO
-      // Milega mark, not the issuing company's logo, which reads as if the company published it.
-      images: [
-        {
-          url: '/og-image.png',
-          width: 1200,
-          height: 630,
-          alt: `${SITE_NAME} - ${analysis.company_name} IPO analysis`,
-        }
-      ],
+      // The brand card rendered by app/opengraph-image.tsx. It has to be named here: defining
+      // `openGraph` on this page replaces the root one, so the inherited image would be dropped.
+      // Deliberately never `ipo.image_url` -- a shared link should carry our brand, not the
+      // issuing company's logo, which reads as if the company published it.
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: `${analysis.company_name} IPO analysis on IPO Milega` }],
       locale: 'en_IN',
     },
     
@@ -135,7 +130,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       card: 'summary_large_image',
       title,
       description,
-      images: ['/og-image.png'],
+      images: ['/twitter-image'],
       creator: '@ipomilega',
     },
     

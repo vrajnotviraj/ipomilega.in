@@ -16,11 +16,13 @@ import { AnimatedWrapper } from '@/components/Home/AnimatedWrapper';
 import { AnimatedSection } from '@/components/Home/AnimatedSection';
 import { PageLoader } from '@/components/ui/loader';
 
-// ISR: the page is rendered once and served from the edge cache as static HTML, then
-// re-rendered in the background at most every 5 minutes. Visitors never wait on Mongo.
+// ISR: the page is rendered once and served from cache as static HTML, then re-rendered in
+// the background at most once a minute. Visitors never wait on Mongo. Writes (admin edits,
+// the scraper via /api/revalidate) purge it immediately; this window is only the fallback,
+// and at 5 minutes it was long enough for a stale copy to survive several refreshes.
 // `generateStaticParams` used to be exported here, but it is only meaningful on a dynamic
 // [param] route -- on a static route Next ignores it, so it bought nothing.
-export const revalidate = 300;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: {
@@ -56,28 +58,20 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://ipomilega.com',
+    url: 'https://ipomilega.in',
     title: 'IPO Milega - Your Gateway to IPO Investments',
     description: 'Discover the latest IPO opportunities with IPO Milega. Track live IPOs, upcoming listings, and past performance.',
     siteName: 'IPO Milega',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'IPO Milega - IPO Investment Platform',
-      },
-    ],
+    // Image comes from app/opengraph-image.tsx (the brand mark), not a hardcoded file.
   },
   twitter: {
     card: 'summary_large_image',
     title: 'IPO Milega - Your Gateway to IPO Investments',
     description: 'Discover the latest IPO opportunities. Track live IPOs, upcoming listings, and past performance.',
-    images: ['/twitter-image.png'],
     creator: '@ipomilega',
   },
   alternates: {
-    canonical: 'https://ipomilega.com',
+    canonical: 'https://ipomilega.in',
   },
   verification: {
     google: 'your-google-verification-code',

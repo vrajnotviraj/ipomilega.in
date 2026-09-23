@@ -8,7 +8,7 @@
 // Everything here is pure and timezone-explicit, so it produces the same string on the server
 // (where the page is ISR-rendered) as in the browser.
 
-export const SITE_URL = "https://ipomilega.com";
+export const SITE_URL = "https://ipomilega.in";
 export const SITE_NAME = "IPO Milega";
 
 // Every date in an Indian IPO calendar is an IST date. The server may run anywhere, so "today"

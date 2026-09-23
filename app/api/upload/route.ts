@@ -4,7 +4,7 @@ import path from 'path';
 import { nanoid } from 'nanoid';
 import { uploadToS3 } from '@/lib/aws';
 import os from 'os';
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidateSite } from '@/lib/revalidate';
 
 // Type for the response
 interface UploadResponse {
@@ -92,16 +92,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<UploadRes
     await unlink(tempFilePath).catch(err => console.warn('Failed to delete temp file:', err));
 
     // Revalidate Next.js cache so Home section and other pages update immediately
-    try {
-      revalidateTag('ipos');
-      revalidateTag('homepage');
-      revalidatePath('/');
-      revalidatePath('/ipos');
-      revalidatePath('/admin');
-      revalidatePath('/analysis');
-    } catch (cacheError) {
-      console.warn('Revalidation error:', cacheError);
-    }
+    revalidateSite();
 
     return NextResponse.json({
       success: true,

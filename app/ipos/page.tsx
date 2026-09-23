@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import { getIpoBuckets } from "@/lib/queries/ipos";
 import IposClient from "./IposClient";
 
-// ISR: rendered once and served as static HTML, refreshed in the background every 5 minutes.
-export const revalidate = 300;
+// ISR: rendered once and served as static HTML, refreshed in the background at most once a minute.
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "All IPOs - Live, Upcoming & Listed",

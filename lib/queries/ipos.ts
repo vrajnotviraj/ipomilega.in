@@ -53,9 +53,27 @@ function toPlain<T>(doc: T): T {
   return JSON.parse(JSON.stringify(doc));
 }
 
+/**
+ * Midnight of today's *Indian* calendar date, in server-local time.
+ *
+ * `new Date().setHours(0,0,0,0)` uses the server's timezone. Hosted in UTC, that put the day
+ * boundary at 05:30 IST, so from midnight until 05:30 every morning an IPO opening today was
+ * still "upcoming" and one that closed yesterday was still "live". parseIpoDate builds its
+ * dates at server-local midnight too, so comparing against this keeps both sides aligned.
+ */
+function todayInIndia(): Date {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return new Date(get('year'), get('month') - 1, get('day'));
+}
+
 function bucketIpos(ipoList: RawIpo[]) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = todayInIndia();
   const twoDaysAgo = new Date(today);
   twoDaysAgo.setDate(today.getDate() - 2);
   const currentYear = today.getFullYear();

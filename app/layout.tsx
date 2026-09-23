@@ -7,7 +7,7 @@ import SiteChrome from "@/components/SiteChrome";
 // re-mounted the whole shell on the client, shipped better-auth/framer-motion/radix in the
 // shared bundle, and could not export `metadata` at all (Next forbids it in client files).
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ipomilega.com"),
+  metadataBase: new URL("https://ipomilega.in"),
   title: {
     default: "IPO Milega - Your Gateway to IPO Investments",
     template: "%s | IPO Milega",
