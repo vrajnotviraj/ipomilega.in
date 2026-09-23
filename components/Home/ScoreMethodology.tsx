@@ -44,6 +44,10 @@ export function ScoreMethodology() {
         <p className="text-muted-foreground text-sm sm:text-base font-sans max-w-2xl">
           Six automated modules read every RHP/DRHP the same way, every time. Five score independently; the sixth reconciles them into one verdict.
         </p>
+        <p className="text-muted-foreground text-sm font-sans max-w-2xl mt-3">
+          From the closing day, institutional (QIB) demand nudges the score by up to 1.5 points: a strong QIB book adds to it, and
+          once bidding has closed, an undersubscribed one takes away. Hover a score to see the adjustment.
+        </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-8">
           {MODULES.map((module) => (
