@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongo";
+import { revalidateSite } from "@/lib/revalidate";
 import { ObjectId } from "mongodb";
 
 
@@ -45,6 +46,7 @@ export async function DELETE(
             }, { status: 404 });
         }
         await db.collection("blogs").deleteOne({ _id: new ObjectId(id) });
+        revalidateSite();
         return NextResponse.json({
             message: "Blog deleted successfully",
             success: true,
@@ -77,6 +79,7 @@ export async function PUT(
             }, { status: 404 });
         }
         await db.collection("blogs").updateOne({ _id: new ObjectId(id) }, { $set: { ...body } });
+        revalidateSite();
         return NextResponse.json({
             message: "Blog updated successfully",
             success: true,

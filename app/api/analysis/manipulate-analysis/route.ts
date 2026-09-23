@@ -1,6 +1,7 @@
 // app/api/analysis/manipulate-analysis/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongo";
+import { revalidateSite } from "@/lib/revalidate";
 import { ObjectId } from "mongodb";
 
 // Type definitions for request body
@@ -460,6 +461,7 @@ export async function POST(req: NextRequest) {
           { ipo_table_id: analysisDoc.ipo_table_id },
           { $set: updateDoc }
         );
+      revalidateSite();
 
       return NextResponse.json({
         success: true,
@@ -475,6 +477,7 @@ export async function POST(req: NextRequest) {
       // Insert new document
       result = await db.collection("ipo_comprehensive_analysis")
         .insertOne(analysisDoc);
+      revalidateSite();
 
       return NextResponse.json({
         success: true,
@@ -559,6 +562,7 @@ export async function DELETE(req: NextRequest) {
 
     const result = await db.collection("ipo_comprehensive_analysis")
       .deleteOne({ ipo_table_id: ipoTableId });
+    revalidateSite();
 
     if (result.deletedCount === 0) {
       return NextResponse.json({

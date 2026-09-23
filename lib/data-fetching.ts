@@ -35,11 +35,11 @@ export async function getHomePageData(): Promise<HomePageData> {
       blogList,
     };
   } catch (error) {
+    // Rethrow rather than return empty buckets. The homepage is ISR-cached, so an empty
+    // fallback from one slow/failed Mongo read got frozen in as *the* homepage for the whole
+    // revalidate window -- visitors saw missing sections until they refreshed past it. When a
+    // background revalidation throws, Next keeps serving the last good page instead.
     console.error('Error fetching homepage data:', error);
-    return {
-      data: { upcoming: [], live: [], closed: [], past: [] },
-      counts: { upcoming: 0, live: 0, closed: 0, past: 0 },
-      blogList: [],
-    };
+    throw error;
   }
 }

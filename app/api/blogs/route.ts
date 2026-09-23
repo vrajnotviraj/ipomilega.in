@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongo";
+import { revalidateSite } from "@/lib/revalidate";
 import { ObjectId } from "mongodb";
 
 interface BlogPost {
@@ -79,6 +80,7 @@ export async function POST(request: Request) {
             { _id: new ObjectId(body.ipo_id) },
             { $set: { slug: slug } }
         );
+        revalidateSite();
 
         return NextResponse.json({
             message: "Data retrieved successfully",
