@@ -160,7 +160,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
           <div className="text-xs text-foreground/70 flex items-center gap-1 mb-1 justify-end">
             <Layers className="w-3 h-3" /> Issue size
           </div>
-          <div className="font-mono text-sm font-semibold text-foreground">{formatIssueSize(ipo?.ipo_details?.issue_size) || 'Size TBA'}</div>
+          <div className="font-mono text-sm font-semibold text-foreground">{formatIssueSize(ipo?.ipo_details?.issue_size) || formatIssueSize(ipo?.ipo_size) || 'Size TBA'}</div>
         </div>
       </div>
 
@@ -304,7 +304,7 @@ export function UpcomingIpoCard({ ipo, analysis }: IpoCardProps) {
             </Avatar>
             <div className="flex flex-col items-left justify-left min-w-0 flex-1">
               <h2 className="text-base sm:text-lg font-semibold font-serif truncate">{ipo?.upcoming_ipo_2025 || 'Company Name'}</h2>
-              <p className="text-sm text-muted-foreground font-mono truncate">{formatIssueSize(ipo?.ipo_details?.issue_size) || 'Size TBA'}</p>
+              <p className="text-sm text-muted-foreground font-mono truncate">{formatIssueSize(ipo?.ipo_details?.issue_size) || formatIssueSize(ipo?.ipo_size) || 'Size TBA'}</p>
             </div>
           </div>
         </div>
