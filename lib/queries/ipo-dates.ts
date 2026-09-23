@@ -41,7 +41,7 @@ export function parseIpoDate(
 }
 
 export type IpoDateFields = {
-  ipo_dates?: { ipo_open_date?: string; ipo_close_date?: string };
+  ipo_dates?: { ipo_open_date?: string; ipo_close_date?: string; ipo_listing_date?: string };
   open_date?: string;
   closing_date?: string;
 };
@@ -52,4 +52,8 @@ export function getOpenDateString(ipo: IpoDateFields): string {
 
 export function getCloseDateString(ipo: IpoDateFields): string {
   return ipo.ipo_dates?.ipo_close_date || ipo.closing_date || '';
+}
+
+export function getListingDateString(ipo: IpoDateFields): string {
+  return ipo.ipo_dates?.ipo_listing_date || '';
 }
