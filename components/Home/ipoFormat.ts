@@ -225,3 +225,103 @@ export const formatIssueSize = (raw: string | undefined | null): string | null =
   if (kept.length === 0) return null;
   return kept.join(', ');
 };
+
+// --- QIB demand signal -------------------------------------------------------------------------
+//
+// Institutions (mutual funds, FIIs, insurers) do their own diligence and bid almost entirely on
+// the closing day, so their subscription on that day is the market's "smart money" read -- a
+// 60x total can hide a 1.5x QIB book that retail and HNI froth carried. Traders treat it as a
+// deciding factor, so it nudges the analysis score: decent weight, capped at +/-1.5 so it never
+// overrides the prospectus read.
+//
+// Timing is the whole design. On days 1-2 QIB sits near 0x as a matter of course, so it says
+// nothing and is ignored. On the closing day the bids are landing through the afternoon: a high
+// figure already means something, a low one may just be early, so only the bonus applies. Once
+// bidding has closed the figure is final and counts both ways.
+//
+// Thresholds are mainboard rules of thumb. SME books often have no QIB portion at all, and
+// ipowatch prints 0 for "no portion" and "no demand" alike, so a 0x SME QIB is treated as absent.
+
+export type QibTier = 'weak' | 'neutral' | 'good' | 'strong';
+
+export interface QibSignal {
+  qib: number;
+  tier: QibTier;
+  /** Points added to the analysis score (already withheld if negative on closing day). */
+  delta: number;
+  /** Bidding has closed, so the figure is final. False on the closing day itself. */
+  final: boolean;
+}
+
+const QIB_TIERS: { min: number; tier: QibTier; delta: number }[] = [
+  { min: 50, tier: 'strong', delta: 1.5 },
+  { min: 10, tier: 'good', delta: 1 },
+  { min: 1, tier: 'neutral', delta: 0 },
+  { min: -Infinity, tier: 'weak', delta: -1.5 },
+];
+
+/** Today's Indian calendar date as a comparable yyyymmdd number, whatever the server's zone. */
+const indiaDayKey = (now: Date = new Date()): number => {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return get('year') * 10000 + get('month') * 100 + get('day');
+};
+
+// parseCardDate builds the date at local midnight, so its local fields are the calendar date.
+const dayKey = (date: Date): number => date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
+
+export const getQibSignal = (
+  ipo: {
+    qib_sr?: string;
+    subscription_is_provisional?: boolean;
+    ipo_type?: string;
+    subscription_date_range?: string;
+    ipo_details?: { ipo_listing?: string };
+    detail_url?: string;
+    ipo_dates?: { ipo_close_date?: string };
+    closing_date?: string;
+  } | null | undefined,
+  now: Date = new Date()
+): QibSignal | null => {
+  const qib = parseGainValue(ipo?.qib_sr);
+  if (qib === null || qib < 0) return null;
+  if (qib === 0 && /sme/i.test(getIpoType(ipo))) return null;
+
+  const close = parseCardDate(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date);
+  if (!close) return null;
+
+  const today = indiaDayKey(now);
+  const closeKey = dayKey(close);
+  if (today < closeKey) return null;
+
+  // Past the close date, or the capture service has already marked the book final.
+  const final = today > closeKey || ipo?.subscription_is_provisional === false;
+  const { tier, delta } = QIB_TIERS.find((t) => qib >= t.min)!;
+  return { qib, tier, delta: final ? delta : Math.max(0, delta), final };
+};
+
+/** The analysis score with the QIB nudge applied. An IPO with no analysis stays at 0 ("–"). */
+export const applyQibAdjustment = (baseScore: number, signal: QibSignal | null): number => {
+  if (!baseScore || !signal || signal.delta === 0) return baseScore;
+  return Math.round(Math.min(10, Math.max(0, baseScore + signal.delta)) * 10) / 10;
+};
+
+/** Colour for the QIB figure itself. A low closing-day figure may just be early, so it stays neutral. */
+export const getQibColor = (signal: QibSignal | null): string => {
+  if (!signal) return 'text-foreground';
+  if (signal.tier === 'strong' || signal.tier === 'good') return 'text-score-good';
+  if (signal.tier === 'weak' && signal.final) return 'text-score-bad';
+  return 'text-foreground';
+};
+
+/** "+0.8 QIB" style tooltip text for a score that has been nudged. */
+export const describeQibAdjustment = (baseScore: number, signal: QibSignal | null): string => {
+  if (!baseScore || !signal || signal.delta === 0) return 'Analysis score';
+  const sign = signal.delta > 0 ? '+' : '';
+  return `Analysis score ${baseScore} ${sign}${signal.delta} for ${signal.qib}x QIB subscription${signal.final ? '' : ' (closing day)'}`;
+};

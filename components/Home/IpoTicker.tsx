@@ -3,6 +3,7 @@
 
 import { HomePageIpoProps } from '@/app/types/homepage';
 import { ProgressLink } from '../Progressbar/ProgressLink';
+import { applyQibAdjustment, getQibSignal } from './ipoFormat';
 
 interface IpoTickerProps {
   live: HomePageIpoProps[];
@@ -35,7 +36,7 @@ export function IpoTicker({ live, upcoming }: IpoTickerProps) {
       key: item._id,
       slug: item.ipo?.slug,
       name: item.ipo?.upcoming_ipo_2025,
-      score: item.analysis?.risk_meter?.score || null,
+      score: applyQibAdjustment(item.analysis?.risk_meter?.score || 0, getQibSignal(item.ipo)) || null,
       status: 'Open' as const,
     })),
     ...(upcoming || []).map((item) => ({

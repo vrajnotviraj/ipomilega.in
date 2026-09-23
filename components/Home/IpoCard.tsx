@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, CheckCircle, ClockAlert, Clock, TrendingUp, Layers, User, Users, Landmark, Lock } from 'lucide-react';
+import { Calendar, CheckCircle, ClockAlert, Clock, TrendingUp, Layers, User, Users, Landmark, Lock, Building2 } from 'lucide-react';
 import { Ipo } from '@/app/models/ipo';
 import { IpoComprehensiveAnalysis } from '@/app/models/ipo_comprehensive_analysis';
 import { Card, CardContent, CardHeader } from '../ui/card';
@@ -22,6 +22,10 @@ import {
   formatIssueSize,
   ALLOTMENT_CATEGORIES,
   AllotmentCategoryDef,
+  getQibSignal,
+  getQibColor,
+  applyQibAdjustment,
+  describeQibAdjustment,
 } from './ipoFormat';
 
 const ALLOTMENT_ICONS: Record<AllotmentCategoryDef['key'], typeof User> = {
@@ -71,6 +75,8 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
     daysUntilClosing < 0 ? 'text-foreground' : daysUntilClosing <= 0 ? 'text-score-bad' : daysUntilClosing <= 2 ? 'text-score-mid' : 'text-foreground';
 
   const totalSubscription = parseGainValue(ipo?.total_sr);
+  const qibSubscription = parseGainValue(ipo?.qib_sr);
+  const qibSignal = getQibSignal(ipo);
   const ipoType = getIpoType(ipo);
 
   const gmpPercent = parseEstListingPercent(ipo?.gmp_price_gain);
@@ -94,7 +100,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
         <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
       </h2>
 
-      <div className="flex items-start justify-between mb-4">
+      <div className="grid grid-cols-3 gap-2 mb-4">
         <div>
           <div className="text-xs text-foreground/70 flex items-center gap-1 mb-1">
             <TrendingUp className="w-3 h-3" /> GMP
@@ -105,9 +111,20 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
             </span>
           </div>
         </div>
+        {/* QIB on its own: institutions bid on the closing day, and their demand is the signal
+            a blended total hides. Coloured only once it can mean something -- see getQibSignal. */}
+        <div
+          className="text-center"
+          title={qibSignal ? 'Institutional (QIB) subscription' : 'Institutions mostly bid on the closing day, so this is usually near 0x until then'}
+        >
+          <div className="text-xs text-foreground/70 flex items-center gap-1 mb-1 justify-center">
+            <Building2 className="w-3 h-3" /> QIB
+          </div>
+          <div className={`font-mono text-sm font-medium ${getQibColor(qibSignal)}`}>{qibSubscription !== null ? `${qibSubscription}x` : 'N/A'}</div>
+        </div>
         <div className="text-right">
           <div className="text-xs text-foreground/70 flex items-center gap-1 mb-1 justify-end">
-            <Layers className="w-3 h-3" /> Subscription
+            <Layers className="w-3 h-3" /> Total
           </div>
           <div className="font-mono text-sm font-medium text-foreground">{totalSubscription !== null ? `${totalSubscription}x` : 'N/A'}</div>
         </div>
@@ -163,12 +180,15 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
 export function ClosedIpoRow({ ipo, analysis }: IpoCardProps) {
   const [predictorCategory, setPredictorCategory] = useState<AllotmentCategoryDef['key'] | null>(null);
 
-  const riskScore = analysis?.risk_meter?.score || 0;
+  const baseScore = analysis?.risk_meter?.score || 0;
+  const qibSignal = getQibSignal(ipo);
+  const riskScore = applyQibAdjustment(baseScore, qibSignal);
   const ipoType = getIpoType(ipo);
 
   const gmpPercent = parseEstListingPercent(ipo?.gmp_price_gain);
   const gmpIsPositive = gmpPercent !== null && gmpPercent >= 0;
   const totalSubscription = parseGainValue(ipo?.total_sr);
+  const qibSubscription = parseGainValue(ipo?.qib_sr);
 
   return (
     <div className="flex flex-col gap-1.5 py-3.5 sm:py-4 border-b border-border">
@@ -188,7 +208,11 @@ export function ClosedIpoRow({ ipo, analysis }: IpoCardProps) {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-xs text-muted-foreground">Sub</div>
+            <div className="text-xs text-muted-foreground">QIB</div>
+            <div className={`font-mono text-sm font-medium ${getQibColor(qibSignal)}`}>{qibSubscription !== null ? `${qibSubscription}x` : 'N/A'}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs text-muted-foreground">Total</div>
             <div className="font-mono text-sm font-medium text-foreground">{totalSubscription !== null ? `${totalSubscription}x` : 'N/A'}</div>
           </div>
         </div>
@@ -200,7 +224,7 @@ export function ClosedIpoRow({ ipo, analysis }: IpoCardProps) {
         </button>
         <span
           className={`font-serif font-semibold text-xl flex-shrink-0 ${riskScore > 0 ? getRiskTextColor(riskScore) : 'text-muted-foreground/40'}`}
-          title="Analysis score"
+          title={describeQibAdjustment(baseScore, qibSignal)}
         >
           {riskScore > 0 ? riskScore : '–'}
         </span>
