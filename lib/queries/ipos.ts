@@ -4,7 +4,7 @@ import { getDb } from '@/lib/mongo';
 import { Ipo } from '@/app/models/ipo';
 import { IpoComprehensiveAnalysis } from '@/app/models/ipo_comprehensive_analysis';
 import { HomePageIpoProps } from '@/app/types/homepage';
-import { parseIpoDate, getOpenDateString, getCloseDateString } from './ipo-dates';
+import { parseIpoDate, getOpenDateString, getCloseDateString, getListingDateString } from './ipo-dates';
 
 // Public card/list views (homepage, /ipos) read a small slice of each document, but the whole
 // thing was being embedded in the RSC payload. Measured across the live collection:
@@ -129,13 +129,23 @@ function bucketIpos(ipoList: RawIpo[]) {
       (a.scraped_at ? new Date(a.scraped_at).getTime() : 0)
   );
 
+  // Listed once the listing date has arrived. This used to key off `listing_price`, which
+  // only the ipowatch performance-tracker scrape fills in -- when that scrape stopped
+  // matching, every IPO sat in "closed" forever and "Recently listed" was always empty.
+  // A recorded listing price still counts, for rows whose listing date is missing.
+  const isListed = (ipo: RawIpo) => {
+    if (ipo.listing_price) return true;
+    const listingDate = parseIpoDate(getListingDateString(ipo), currentYear);
+    return listingDate !== null && listingDate <= today;
+  };
+
   return {
     upcoming,
     live,
-    // Listed: bidding over and a listing price recorded.
-    past: past.filter((ipo) => ipo.listing_price),
+    // Listed: bidding over and the stock has started trading.
+    past: past.filter(isListed),
     // Closed: bidding over but not yet listed -- when users check allotment odds.
-    closed: past.filter((ipo) => !ipo.listing_price),
+    closed: past.filter((ipo) => !isListed(ipo)),
     tba,
     recentlyAdded,
   };
