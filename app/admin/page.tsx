@@ -20,6 +20,7 @@ import { Blog } from "../models/ipo";
 import { useSession } from "@/lib/auth-client";
 import { IpoAnalysisModal } from "@/components/Admin/IpoAnalysisModal";
 import SubscriptionCell from "@/components/Admin/SubscriptionCell";
+import ServiceStatus from "@/components/Admin/ServiceStatus";
 import { getIpoType } from "@/components/Home/ipoFormat";
 
 const getInitials = (name?: string) => {
@@ -287,6 +288,8 @@ function AdminContent() {
           <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground mb-1">Admin Dashboard</h1>
           <p className="text-sm text-muted-foreground">Manage IPO listings, analysis matrices and blogs</p>
         </div>
+
+        <ServiceStatus />
 
         {/* Stat cards */}
         <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
