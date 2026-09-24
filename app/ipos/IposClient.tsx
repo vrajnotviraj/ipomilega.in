@@ -8,6 +8,7 @@ import { useProgressRouter } from "@/components/Progressbar/useProgressRouter";
 import { useSearchParams } from "next/navigation";
 import { getIpoType, getPriceBand, getRiskTextColor, formatShortDate, formatIssueSize } from "@/components/Home/ipoFormat";
 import { IpoTitleLink } from "@/components/Home/IpoTitleLink";
+import { IpoLogo } from "@/components/Home/IpoLogo";
 
 type Status = "Upcoming" | "Open" | "Listed";
 type Row = HomePageIpoProps & { status: Status };
@@ -20,8 +21,20 @@ const STATUS_STYLES: Record<Status, string> = {
 
 function StatusBadge({ status }: { status: Status }) {
   return (
-    <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium ${STATUS_STYLES[status]}`}>
+    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-mono font-medium ${STATUS_STYLES[status]}`}>
       {status}
+    </span>
+  );
+}
+
+// Allotment / listing dates as small chips under the name. Skipped when the date isn't known
+// yet, so an upcoming IPO with nothing scheduled doesn't grow a row of "TBA"s.
+function DateBadge({ label, date }: { label: string; date: string | undefined }) {
+  const value = formatShortDate(date);
+  if (value === "TBA") return null;
+  return (
+    <span className="inline-block px-2 py-0.5 rounded border border-border text-[11px] font-mono text-muted-foreground whitespace-nowrap">
+      {label} <span className="font-semibold text-foreground">{value}</span>
     </span>
   );
 }
@@ -213,10 +226,19 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
                         className={`border-b border-border last:border-b-0 transition-colors ${canOpen ? "hover:bg-accent/40 cursor-pointer" : ""}`}
                       >
                         <td className="px-4 py-4">
-                          <div className="font-serif font-semibold text-foreground">
-                            <IpoTitleLink ipo={row.ipo} hasAnalysis={canOpen} />
+                          <div className="flex items-center gap-3">
+                            <IpoLogo src={row.ipo?.image_url} name={row.ipo?.upcoming_ipo_2025} />
+                            <div className="min-w-0">
+                              <div className="font-serif font-semibold text-foreground">
+                                <IpoTitleLink ipo={row.ipo} hasAnalysis={canOpen} />
+                              </div>
+                              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                                <StatusBadge status={row.status} />
+                                <DateBadge label="Allot" date={row.ipo?.ipo_dates?.basis_of_allotment} />
+                                <DateBadge label="Lists" date={row.ipo?.ipo_dates?.ipo_listing_date} />
+                              </div>
+                            </div>
                           </div>
-                          <StatusBadge status={row.status} />
                         </td>
                         <td className="px-4 py-4 text-sm font-semibold text-foreground">{getIpoType(row.ipo)}</td>
                         <td className="px-4 py-4 font-mono text-sm text-foreground">{priceBand ? `₹${priceBand}` : "N/A"}</td>
