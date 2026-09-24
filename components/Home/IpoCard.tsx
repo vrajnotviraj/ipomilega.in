@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useProgressRouter } from '../Progressbar/useProgressRouter';
 import { IpoTitleLink } from './IpoTitleLink';
+import { IpoLogo } from './IpoLogo';
 import { AllotmentPredictorModal } from './AllotmentPredictorModal';
 import {
   getRiskBorderColor,
@@ -96,9 +97,12 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
         </Badge>
       </div>
 
-      <h2 className="text-lg font-semibold font-serif text-foreground leading-snug mb-4">
-        <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
-      </h2>
+      <div className="flex items-center gap-3 mb-4">
+        <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} size="lg" />
+        <h2 className="text-lg font-semibold font-serif text-foreground leading-snug min-w-0">
+          <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
+        </h2>
+      </div>
 
       <div className="grid grid-cols-3 gap-2 mb-4">
         <div>
@@ -197,6 +201,7 @@ export function ClosedIpoRow({ ipo, analysis }: IpoCardProps) {
         <Badge variant="outline" className="rounded-md border-border bg-transparent text-foreground text-[10px] sm:text-[11px] font-mono font-medium uppercase tracking-wide px-1.5 sm:px-2 py-0.5 sm:py-1 sm:w-[92px] sm:justify-center flex-shrink-0">
           {ipoType}
         </Badge>
+        <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} size="sm" />
         <span className="font-serif font-semibold text-foreground truncate text-[15px] sm:text-base flex-1 min-w-0">
           <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
         </span>
@@ -229,7 +234,7 @@ export function ClosedIpoRow({ ipo, analysis }: IpoCardProps) {
           {riskScore > 0 ? riskScore : '–'}
         </span>
       </div>
-      <div className="text-xs sm:text-sm text-foreground/70 truncate pl-[22px] sm:pl-[132px]">
+      <div className="text-xs sm:text-sm text-foreground/70 truncate pl-[22px] sm:pl-[172px]">
         Allotment <span className="font-semibold text-foreground">{formatShortDateOrToday(ipo?.ipo_dates?.basis_of_allotment)}</span>
         <span className="mx-1">&middot;</span>
         Lists <span className="font-semibold text-foreground">{formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)}</span>

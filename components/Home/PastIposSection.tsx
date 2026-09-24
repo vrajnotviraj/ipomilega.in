@@ -4,61 +4,100 @@
 import { ArrowUp, ArrowDown, CalendarDays } from 'lucide-react';
 import { HomePageIpoProps, IpoSectionProps } from '@/app/types/homepage';
 import { IpoTitleLink } from './IpoTitleLink';
+import { IpoLogo } from './IpoLogo';
 import { formatShortDateOrToday, parseEstListingPercent, parseGainValue } from './ipoFormat';
 
-function GainFigure({ value }: { value: number | null }) {
-  if (value === null) {
+function PriceFigure({ price, gain, align = 'left' }: { price: number | null; gain: number | null; align?: 'left' | 'right' }) {
+  if (price === null && gain === null) {
     return <div className="font-mono text-sm font-semibold text-muted-foreground/40">N/A</div>;
   }
-  const isPositive = value >= 0;
+  const isPositive = gain !== null && gain >= 0;
   return (
-    <div className={`font-mono text-sm font-semibold flex items-center gap-1 ${isPositive ? 'text-score-good' : 'text-score-bad'}`}>
-      {isPositive ? <ArrowUp className="w-3.5 h-3.5" /> : <ArrowDown className="w-3.5 h-3.5" />}
-      {Math.abs(value).toFixed(1)}%
+    <div className={`flex flex-col ${align === 'right' ? 'items-end' : 'items-start'}`}>
+      {price !== null && <div className="font-mono text-base font-semibold text-foreground">₹{formatPrice(price)}</div>}
+      {gain !== null && (
+        <div className={`font-mono text-xs font-semibold flex items-center gap-0.5 ${isPositive ? 'text-score-good' : 'text-score-bad'}`}>
+          {isPositive ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+          {Math.abs(gain).toFixed(1)}%
+        </div>
+      )}
     </div>
   );
 }
 
+const formatPrice = (value: number) =>
+  value.toLocaleString('en-IN', { maximumFractionDigits: Number.isInteger(value) ? 0 : 2 });
+
+/** Issue price: the GMP feed's upper band, else the scraped performance row's issue price. */
+function issuePrice(ipo: HomePageIpoProps['ipo']): number | null {
+  return parseGainValue(ipo?.gmp_price_band) || parseGainValue(ipo?.ipo_price) || null;
+}
+
 /**
- * Listing-day gain in percent. The performance scrape stores it as "10.17%"; when only the
- * listing price made it in, derive it from the issue price (the GMP feed's upper band).
+ * GMP-implied listing price and its gain. The feed stores both in one string, "584 (37.74%)";
+ * the leading number is "-" when no GMP was ever quoted, so derive the price from the gain.
  */
-function actualListingGain(ipo: HomePageIpoProps['ipo']): number | null {
-  const stored = parseGainValue(ipo?.listing_gain);
-  if (stored !== null) return stored;
-  const listed = parseGainValue(ipo?.listing_price);
-  const issue = parseGainValue(ipo?.gmp_price_band);
-  if (listed === null || !issue) return null;
-  return ((listed - issue) / issue) * 100;
+function estimatedListing(ipo: HomePageIpoProps['ipo']) {
+  const raw = ipo?.gmp_est_listing || ipo?.gmp_price_gain;
+  const gain = parseEstListingPercent(raw);
+  const leading = raw?.trim().match(/^-?[\d,]+(?:\.\d+)?/);
+  let price = leading ? parseFloat(leading[0].replace(/,/g, '')) : null;
+  const issue = issuePrice(ipo);
+  if (price === null && gain !== null && issue) price = Math.round(issue * (1 + gain / 100));
+  return { price, gain };
+}
+
+/**
+ * Actual listing-day price and gain. The performance scrape stores the gain as "10.17%"; when
+ * only one of the two made it in, derive the other from the issue price.
+ */
+function actualListing(ipo: HomePageIpoProps['ipo']) {
+  const price = parseGainValue(ipo?.listing_price);
+  let gain = parseGainValue(ipo?.listing_gain);
+  const issue = issuePrice(ipo);
+  if (gain === null && price !== null && issue) gain = ((price - issue) / issue) * 100;
+  const derivedPrice = price === null && gain !== null && issue ? Math.round(issue * (1 + gain / 100) * 100) / 100 : null;
+  return { price: price ?? derivedPrice, gain };
 }
 
 function RecentlyListedCard({ item }: { item: HomePageIpoProps }) {
   const { ipo, analysis } = item;
 
   const riskScore = analysis?.risk_meter?.score || 0;
-  // gmp_price_gain is the GMP-implied listing price with its gain, "584 (37.74%)". Compare
-  // like with like: the card's other column is a percentage.
-  const predictedGain = parseEstListingPercent(ipo?.gmp_est_listing || ipo?.gmp_price_gain);
-  const actualGain = actualListingGain(ipo);
+  const issue = issuePrice(ipo);
+  const estimated = estimatedListing(ipo);
+  const actual = actualListing(ipo);
 
   return (
     <div className="text-left rounded-lg border border-border bg-card p-5 w-full">
       <div className="flex items-start justify-between gap-3 mb-4">
-        <h3 className="font-serif font-semibold text-foreground truncate">
-          <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
-        </h3>
+        <div className="flex items-center gap-3 min-w-0">
+          <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} />
+          <div className="min-w-0">
+            <h3 className="font-serif font-semibold text-foreground truncate">
+              <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
+            </h3>
+            {issue !== null && <div className="text-xs text-muted-foreground font-mono">Issue ₹{formatPrice(issue)}</div>}
+          </div>
+        </div>
         <div className={`text-xs flex-shrink-0 ${riskScore > 0 ? 'text-muted-foreground' : 'text-muted-foreground/50'}`}>
           listed {formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)}
         </div>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
-          <div className="text-xs text-muted-foreground mb-1">Predicted (GMP)</div>
-          <GainFigure value={predictedGain} />
+          <div className="text-xs text-muted-foreground mb-1">Est. listing (GMP)</div>
+          <PriceFigure price={estimated.price} gain={estimated.gain} />
         </div>
         <div className="text-right flex flex-col items-end">
           <div className="text-xs text-muted-foreground mb-1">Actual listing</div>
-          <GainFigure value={actualGain} />
+          {actual.price === null && actual.gain === null ? (
+            <div className="font-mono text-sm font-semibold text-muted-foreground/50" title="Listing-day price has not been captured for this IPO yet">
+              Awaiting
+            </div>
+          ) : (
+            <PriceFigure price={actual.price} gain={actual.gain} align="right" />
+          )}
         </div>
       </div>
     </div>

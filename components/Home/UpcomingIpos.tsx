@@ -6,6 +6,7 @@ import { ArrowRight, CalendarDays } from 'lucide-react';
 import { HomePageIpoProps, IpoSectionProps } from '@/app/types/homepage';
 import { Badge } from '../ui/badge';
 import { IpoTitleLink } from './IpoTitleLink';
+import { IpoLogo } from './IpoLogo';
 import { formatShortDateOrToday, getRiskTextColor, getIpoType, getPriceBand } from './ipoFormat';
 
 function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
@@ -22,6 +23,7 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
         <Badge variant="outline" className="rounded-md border-border bg-transparent text-foreground text-[11px] font-mono font-medium uppercase tracking-wide px-2 py-1 sm:w-[92px] sm:justify-center flex-shrink-0">
           {ipoType}
         </Badge>
+        <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} />
         <div className="min-w-0 flex-1">
           <div className="font-serif font-semibold text-foreground truncate">
             <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
