@@ -133,6 +133,24 @@ export const getAllotmentProbability = (subscriptionRatio: number | null): numbe
   return Math.max(1, Math.round(100 / subscriptionRatio));
 };
 
+// Allotment odds as "1 in 40" rather than "2.5%". User feedback: a percentage read like "how many
+// people applied" and made readers stop to convert; "1 in 40" is understood at a glance.
+// The subscription ratio *is* the N in the lottery approximation, so it's printed directly --
+// one decimal below 10x (1.4x -> "1 in 1.4") so small books don't all collapse to "1 in 1".
+export const formatAllotmentOdds = (subscriptionRatio: number | null): string => {
+  if (subscriptionRatio === null || isNaN(subscriptionRatio) || subscriptionRatio < 0) return 'N/A';
+  if (subscriptionRatio <= 1) return '1 in 1';
+  const n = subscriptionRatio < 10 ? Math.round(subscriptionRatio * 10) / 10 : Math.round(subscriptionRatio);
+  return `1 in ${n.toLocaleString('en-IN')}`;
+};
+
+// Plain-language sentence under the odds, for the predictor modal.
+export const describeAllotmentOdds = (subscriptionRatio: number | null): string | null => {
+  if (subscriptionRatio === null || isNaN(subscriptionRatio) || subscriptionRatio < 0) return null;
+  if (subscriptionRatio <= 1) return 'Not fully subscribed yet — every valid application should get shares.';
+  return `Roughly 1 out of every ${formatAllotmentOdds(subscriptionRatio).slice(5)} applicants gets shares.`;
+};
+
 // Color-code an allotment-chance percentage the same way scores are color-coded
 export const getProbabilityColor = (probability: number | null): string => {
   if (probability === null) return 'text-muted-foreground';

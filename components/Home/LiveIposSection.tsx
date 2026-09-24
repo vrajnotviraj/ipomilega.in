@@ -38,7 +38,7 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
-        <div className="flex items-center gap-6 mt-4 border-b border-border">
+        <div data-tour="board-tabs" className="flex items-center gap-6 mt-4 border-b border-border">
           {BOARD_TABS.map((tab) => (
             <button
               key={tab}

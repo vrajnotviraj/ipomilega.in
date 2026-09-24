@@ -12,6 +12,7 @@ import { getHomePageData } from '@/lib/data-fetching';
 import { Metadata } from 'next';
 import { HomePageData } from './types/homepage';
 import { Footer } from '@/components/Home/Footer';
+import { Walkthrough } from '@/components/Home/Walkthrough';
 import { AnimatedWrapper } from '@/components/Home/AnimatedWrapper';
 import { AnimatedSection } from '@/components/Home/AnimatedSection';
 import { PageLoader } from '@/components/ui/loader';
@@ -120,6 +121,7 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
         </AnimatedSection>
         <Footer />
       </div>
+      <Walkthrough />
     </AnimatedWrapper>
   );
 }
