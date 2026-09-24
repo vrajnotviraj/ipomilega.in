@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import SiteChrome from "@/components/SiteChrome";
 
 // Now a server component. It previously carried "use client", which meant every route
@@ -39,6 +40,10 @@ export default function RootLayout({
           <SiteChrome>{children}</SiteChrome>
         </Suspense>
       </body>
+      {/* Google Analytics: only loads when a Measurement ID is configured (e.g. G-XXXXXXXXXX),
+          so local dev and staging without the env var send nothing. The component also tracks
+          client-side route changes, which a plain gtag snippet would miss in the App Router. */}
+      {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
     </html>
   );
 }
