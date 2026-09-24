@@ -52,6 +52,7 @@ import {
   getScoreTrustLabel,
   getAllotmentProbability,
   getProbabilityColor,
+  formatAllotmentOdds,
   parseGainValue,
   ALLOTMENT_CATEGORIES,
 } from "@/components/Home/ipoFormat";
@@ -868,11 +869,15 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   // The same odds the home-page card leads with. They were only reachable here
   // through a button two screens down, so someone who arrived from a card lost
   // the one number they came for.
-  const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => ({
-    ...cat,
-    icon: ALLOTMENT_ICONS[cat.key],
-    probability: getAllotmentProbability(parseGainValue(ipo?.[cat.ratioField])),
-  }));
+  const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => {
+    const ratio = parseGainValue(ipo?.[cat.ratioField]);
+    return {
+      ...cat,
+      icon: ALLOTMENT_ICONS[cat.key],
+      probability: getAllotmentProbability(ratio),
+      odds: formatAllotmentOdds(ratio),
+    };
+  });
 
   const getStatusInfo = () => {
     const today = new Date();
@@ -1156,14 +1161,15 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   <button
                     key={cat.key}
                     onClick={() => setPredictorCategory(cat.key)}
-                    className="flex flex-col items-center gap-1 text-center py-3 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-accent transition-colors cursor-pointer"
-                    aria-label={`Estimate ${cat.label} allotment chance`}
+                    className="group relative flex flex-col items-center gap-1 text-center py-3 rounded-xl border border-primary/25 bg-primary/[0.04] hover:border-primary/60 hover:bg-accent active:scale-[0.97] transition-all cursor-pointer"
+                    aria-label={`${cat.label} allotment odds ${cat.odds} — tap for details`}
                   >
+                    <ChevronRight className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-primary/60 group-hover:text-primary transition-colors" />
                     <cat.icon className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className={cn("font-mono text-lg font-semibold", getProbabilityColor(cat.probability))}>
-                      {cat.probability !== null ? `${cat.probability}%` : "N/A"}
+                    <span className={cn("font-mono text-lg font-semibold whitespace-nowrap", getProbabilityColor(cat.probability))}>
+                      {cat.odds}
                     </span>
-                    <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground border-b border-dotted border-muted-foreground/50 leading-tight">
+                    <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground leading-tight">
                       {cat.label}
                     </span>
                   </button>

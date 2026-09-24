@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, CheckCircle, ClockAlert, Clock, TrendingUp, Layers, User, Users, Landmark, Lock, Building2 } from 'lucide-react';
+import { Calendar, CheckCircle, ClockAlert, Clock, TrendingUp, Layers, User, Users, Landmark, Lock, Building2, ChevronRight } from 'lucide-react';
 import { Ipo } from '@/app/models/ipo';
 import { IpoComprehensiveAnalysis } from '@/app/models/ipo_comprehensive_analysis';
 import { Card, CardContent, CardHeader } from '../ui/card';
@@ -19,6 +19,7 @@ import {
   parseEstListingPercent,
   getIpoType,
   getProbabilityColor,
+  formatAllotmentOdds,
   formatShortDateOrToday,
   formatIssueSize,
   ALLOTMENT_CATEGORIES,
@@ -34,6 +35,12 @@ const ALLOTMENT_ICONS: Record<AllotmentCategoryDef['key'], typeof User> = {
   shni: Users,
   bhni: Landmark,
 };
+
+// Tappable tiles need to *look* tappable on phones, where there is no hover to discover them:
+// a primary-tinted border and a chevron at rest, plus press feedback. (Testers tapped a plain
+// number, saw nothing change, and concluded nothing on the card was clickable.)
+const TAPPABLE_TILE =
+  'group relative flex flex-col items-center gap-1 text-center py-2 rounded-lg border border-primary/25 bg-primary/[0.04] hover:border-primary/60 hover:bg-accent active:scale-[0.97] transition-all cursor-pointer';
 
 interface IpoCardProps {
   ipo: Ipo | null;
@@ -83,11 +90,15 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const gmpPercent = parseEstListingPercent(ipo?.gmp_price_gain);
   const gmpIsPositive = gmpPercent !== null && gmpPercent >= 0;
 
-  const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => ({
-    ...cat,
-    icon: ALLOTMENT_ICONS[cat.key],
-    probability: getAllotmentProbability(parseGainValue(ipo?.[cat.ratioField])),
-  }));
+  const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => {
+    const ratio = parseGainValue(ipo?.[cat.ratioField]);
+    return {
+      ...cat,
+      icon: ALLOTMENT_ICONS[cat.key],
+      probability: getAllotmentProbability(ratio),
+      odds: formatAllotmentOdds(ratio),
+    };
+  });
 
   return (
     <div className="w-full max-w-sm mx-auto h-full flex flex-col rounded-xl border border-border bg-card p-5 font-sans">
@@ -99,12 +110,12 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
 
       <div className="flex items-center gap-3 mb-4">
         <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} size="lg" />
-        <h2 className="text-lg font-semibold font-serif text-foreground leading-snug min-w-0">
+        <h2 data-tour="ipo-name" className="text-lg font-semibold font-serif text-foreground leading-snug min-w-0">
           <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
         </h2>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div data-tour="demand" className="grid grid-cols-3 gap-2 mb-4">
         <div>
           <div className="text-xs text-foreground/70 flex items-center gap-1 mb-1">
             <TrendingUp className="w-3 h-3" /> GMP
@@ -134,21 +145,25 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        {allotmentCategories.map((cat) => (
-          <button
-            key={cat.key}
-            onClick={() => setPredictorCategory(cat.key)}
-            className="flex flex-col items-center gap-1 text-center py-2 rounded-lg border border-border bg-background/40 hover:border-primary/50 hover:bg-accent transition-colors cursor-pointer"
-            aria-label={`Predict ${cat.label} allotment chance`}
-          >
-            <cat.icon className="w-3.5 h-3.5 text-muted-foreground" />
-            <span className={`font-mono text-sm font-semibold ${getProbabilityColor(cat.probability)}`}>{cat.probability !== null ? `${cat.probability}%` : 'N/A'}</span>
-            <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground border-b border-dotted border-muted-foreground/50 leading-tight">
-              {cat.label}
-            </span>
-          </button>
-        ))}
+      <div data-tour="odds" className="mb-4">
+        <div className="text-xs text-foreground/70 mb-1.5">Allotment odds</div>
+        <div className="grid grid-cols-3 gap-2">
+          {allotmentCategories.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => setPredictorCategory(cat.key)}
+              className={TAPPABLE_TILE}
+              aria-label={`${cat.label} allotment odds ${cat.odds} — tap for details`}
+            >
+              <ChevronRight className="absolute top-1 right-1 w-3 h-3 text-primary/60 group-hover:text-primary transition-colors" />
+              <cat.icon className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className={`font-mono text-sm font-semibold whitespace-nowrap ${getProbabilityColor(cat.probability)}`}>{cat.odds}</span>
+              <span className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground leading-tight">
+                {cat.label}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <hr className="border-border mb-4" />
@@ -223,9 +238,11 @@ export function ClosedIpoRow({ ipo, analysis }: IpoCardProps) {
         </div>
         <button
           onClick={() => setPredictorCategory('retail')}
-          className="rounded-md border border-border px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-mono font-medium text-foreground hover:border-primary/50 hover:bg-accent transition-colors cursor-pointer flex-shrink-0"
+          data-tour="check-odds"
+          className="inline-flex items-center gap-0.5 rounded-md border border-primary/40 bg-primary/[0.06] px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-mono font-medium text-primary hover:border-primary hover:bg-accent active:scale-[0.97] transition-all cursor-pointer flex-shrink-0"
         >
           Check odds
+          <ChevronRight className="w-3 h-3" />
         </button>
         <span
           className={`font-serif font-semibold text-xl flex-shrink-0 ${riskScore > 0 ? getRiskTextColor(riskScore) : 'text-muted-foreground/40'}`}

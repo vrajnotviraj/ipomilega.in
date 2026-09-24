@@ -10,6 +10,8 @@ import {
   getMarketLotRows,
   getAllotmentProbability,
   getProbabilityColor,
+  formatAllotmentOdds,
+  describeAllotmentOdds,
   parseGainValue,
 } from './ipoFormat';
 
@@ -32,6 +34,7 @@ export function AllotmentPredictorModal({ ipo, companyName, initialCategory, onC
   const ratio = parseGainValue(ipo?.[activeCategory.ratioField]);
   const probability = getAllotmentProbability(ratio);
   const probabilityColor = getProbabilityColor(probability);
+  const oddsSentence = describeAllotmentOdds(ratio);
   const lots = getMarketLotRows(ipo?.ipo_market_lot, activeCategory.matchKeyword);
 
   return (
@@ -65,12 +68,13 @@ export function AllotmentPredictorModal({ ipo, companyName, initialCategory, onC
               <div className="font-mono text-sm font-semibold text-foreground">{ratio !== null ? `${ratio}x` : 'N/A'}</div>
             </div>
             <div className="text-right">
-              <div className="text-xs text-muted-foreground mb-1">Estimated allotment chance</div>
+              <div className="text-xs text-muted-foreground mb-1">Your odds</div>
               <div className={`font-serif text-2xl font-semibold ${probabilityColor}`}>
-                {probability !== null ? `${probability}%` : 'N/A'}
+                {formatAllotmentOdds(ratio)}
               </div>
             </div>
           </div>
+          {oddsSentence && <p className="text-sm text-foreground/80 -mt-2">{oddsSentence}</p>}
 
           <div>
             <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-2">Application size</div>
@@ -92,7 +96,7 @@ export function AllotmentPredictorModal({ ipo, companyName, initialCategory, onC
             <p className="text-xs text-muted-foreground/80 italic">{activeCategory.ratioNote}</p>
           )}
           <p className="text-xs text-muted-foreground/70 border-t border-border pt-3">
-            Estimated using a standard proportional-lottery approximation (100 ÷ subscription ratio). Actual allotment is decided by the registrar&apos;s lottery and may differ.
+            Estimated with the standard lottery approximation: at 40x subscription, about 1 in 40 applicants gets a lot. Actual allotment is decided by the registrar&apos;s lottery and may differ.
           </p>
         </div>
       </DialogContent>
