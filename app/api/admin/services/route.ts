@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Proxies the two Render services' status reports to the admin panel. Server-side so the
+// Proxies the three Render services' status reports to the admin panel. Server-side so the
 // browser needs no CORS allowance and the optional status token never reaches the client.
 //
 // Both `/` routes are public on the services themselves, so this exposes nothing new.
-// The scraper sleeps between runs on Render's free plan; the first request wakes it,
+// The scraper and analysis services sleep between runs on Render's free plan; the first request wakes it,
 // which can take close to a minute, hence the long timeout.
 
 export const dynamic = "force-dynamic";
@@ -13,6 +13,7 @@ export const maxDuration = 60;
 const SERVICES = {
   scraper: process.env.SCRAPER_SERVICE_URL || "https://ipo-milega-scrapper-1.onrender.com",
   live: process.env.LIVE_SERVICE_URL || "https://ipo-subscription-live-sm4f.onrender.com",
+  analysis: process.env.ANALYSIS_SERVICE_URL || "https://notebookalternative.onrender.com",
 } as const;
 
 type ServiceName = keyof typeof SERVICES;
@@ -38,7 +39,7 @@ async function fetchJson(url: string, init?: RequestInit) {
 export async function GET(request: NextRequest) {
   const name = request.nextUrl.searchParams.get("service") as ServiceName | null;
   if (!name || !(name in SERVICES)) {
-    return NextResponse.json({ success: false, error: "service must be 'scraper' or 'live'" }, { status: 400 });
+    return NextResponse.json({ success: false, error: "service must be 'scraper', 'live' or 'analysis'" }, { status: 400 });
   }
   const base = SERVICES[name].replace(/\/$/, "");
   const started = Date.now();
