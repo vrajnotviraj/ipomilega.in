@@ -289,8 +289,6 @@ function AdminContent() {
           <p className="text-sm text-muted-foreground">Manage IPO listings, analysis matrices and blogs</p>
         </div>
 
-        <ServiceStatus />
-
         {/* Stat cards */}
         <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4">
           {dashboardStats.map((stat, index) => (
@@ -516,6 +514,8 @@ function AdminContent() {
             </div>
           </div>
         )}
+
+        <ServiceStatus />
       </div>
     </div>
   )
