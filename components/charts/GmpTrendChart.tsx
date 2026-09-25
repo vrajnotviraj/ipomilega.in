@@ -9,12 +9,10 @@
  *
  * Three things about the data shape drive the design:
  *
- *   1. One point per IST day. The capture runs hourly, and the API folds each
- *      day into its closing figure plus the path it took. A flat day still gets
- *      its point -- 14 on the 24th and still 14 on the 25th is two points.
- *   2. A day that fluctuated says so on the chart itself: the dot is labelled
- *      with its intraday path ("14-15-14"), and the table and tooltip repeat it.
- *      Dots are coloured by the day-on-day move.
+ *   1. One point per IST day, showing that day's latest GMP. The capture runs
+ *      hourly and each new quote replaces the day's value. A flat day still
+ *      gets its point -- 14 on the 24th and still 14 on the 25th is two points.
+ *   2. Dots are coloured by the day-on-day move.
  *   3. GMP in rupees and the estimated gain in percent are two scales. They
  *      share a card but never a plot: the line is rupees, on one axis, and the
  *      percentage lives in the tooltip and the table.
@@ -38,10 +36,6 @@ interface GmpDay {
   t: string;
   date: string;
   gmp: number;
-  path: number[];
-  open: number;
-  high: number;
-  low: number;
   est_listing_price: number | null;
   est_listing_percent: number | null;
   as_of: string;
@@ -84,11 +78,6 @@ function formatRupees(value: number) {
 function formatDelta(value: number) {
   if (value === 0) return "₹0";
   return `${value > 0 ? "+" : "-"}₹${Math.abs(value).toLocaleString("en-IN")}`;
-}
-
-/** "14-15-14" -- the day's intraday path. */
-function formatPath(path: number[]) {
-  return path.map((v) => v.toLocaleString("en-IN")).join("-");
 }
 
 function deltaClass(delta: number | null) {
@@ -143,10 +132,9 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
   }, [points]);
 
   // Ticks have to land on round numbers, so the axis is snapped to a 1/2/5 step
-  // rather than to the padded extremes of the data. Intraday highs and lows are
-  // included so a fluctuation label never sits off the plot.
+  // rather than to the padded extremes of the data.
   const { yDomain, yTicks } = useMemo(() => {
-    const values = points?.flatMap((p) => [p.gmp, p.high, p.low]) ?? [];
+    const values = points?.map((p) => p.gmp) ?? [];
     const rawMin = values.length ? Math.min(...values) : 0;
     const rawMax = values.length ? Math.max(...values) : 1;
 
@@ -269,13 +257,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
         )}
       </div>
 
-      {last.live && last.path.length > 1 && (
-        <p className="-mt-2 mb-4 text-xs text-muted-foreground">
-          Today so far: <span className="font-mono text-foreground">{formatPath(last.path)}</span>
-          {" · "}range {formatRupees(last.low)}–{formatRupees(last.high)}
-        </p>
-      )}
-
       {showTable ? (
         <div className="max-h-[220px] overflow-y-auto">
           <table className="w-full text-sm">
@@ -286,7 +267,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
               <tr className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground">
                 <th scope="col" className="text-left font-medium py-1.5">Date</th>
                 <th scope="col" className="text-right font-medium py-1.5">GMP</th>
-                <th scope="col" className="text-right font-medium py-1.5">During the day</th>
                 <th scope="col" className="text-right font-medium py-1.5">Change</th>
               </tr>
             </thead>
@@ -302,9 +282,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                   <td className="py-1.5 text-right font-mono tabular-nums text-foreground">
                     {formatRupees(p.gmp)}
                   </td>
-                  <td className="py-1.5 text-right font-mono tabular-nums text-muted-foreground">
-                    {p.path.length > 1 ? formatPath(p.path) : "—"}
-                  </td>
                   <td className={cn("py-1.5 text-right font-mono tabular-nums", deltaClass(p.delta))}>
                     {p.delta === null ? "—" : p.delta === 0 ? "No change" : formatDelta(p.delta)}
                   </td>
@@ -318,7 +295,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
         // nested scrollbar to reach its own tick labels.
         <div className="h-[220px] -ml-2">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={points} margin={{ top: 22, right: 16, bottom: 0, left: 0 }}>
+            <AreaChart data={points} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
               <defs>
                 <linearGradient id="gmpWash" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.16} />
@@ -371,11 +348,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                           </span>
                         )}
                       </p>
-                      {point.path.length > 1 && (
-                        <p className="font-mono text-xs text-muted-foreground">
-                          During the day: {formatPath(point.path)}
-                        </p>
-                      )}
                       {point.est_listing_percent !== null && (
                         <p className="font-mono text-xs text-muted-foreground">
                           Est. gain {point.est_listing_percent.toFixed(2)}%
@@ -396,9 +368,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 fill="url(#gmpWash)"
-                // One dot per date, coloured by the day-on-day move. A day that
-                // fluctuated carries its path above the dot, so "14-15-14" is
-                // readable without hovering.
+                // One dot per date, coloured by the day-on-day move.
                 dot={(props: { cx?: number; cy?: number; index?: number; payload?: ChartPoint }) => {
                   const { cx, cy, index, payload } = props;
                   const key = `gmp-dot-${index}`;
@@ -413,18 +383,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                     <g key={key}>
                       {payload.live && <circle cx={cx} cy={cy} r={8} fill={fill} opacity={0.25} />}
                       <circle cx={cx} cy={cy} r={4} fill={fill} stroke="var(--card)" strokeWidth={2} />
-                      {payload.path.length > 1 && (
-                        <text
-                          x={cx}
-                          y={cy - 12}
-                          textAnchor="middle"
-                          fontSize={10}
-                          fontFamily="var(--font-mono, monospace)"
-                          fill="var(--muted-foreground)"
-                        >
-                          {formatPath(payload.path)}
-                        </text>
-                      )}
                     </g>
                   );
                 }}
@@ -438,7 +396,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
 
       {points.length === 1 && (
         <p className="mt-3 text-xs text-muted-foreground">
-          The line builds from here: one point per day, with any moves during the day shown on it.
+          The line builds from here: one point per day, showing that day&apos;s latest GMP.
         </p>
       )}
     </div>

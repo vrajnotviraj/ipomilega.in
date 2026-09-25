@@ -4,7 +4,8 @@ import { connectToDatabase } from "@/lib/mongo";
 
 /**
  * The GMP series behind the trend chart on an analysis page: ONE point per IST
- * day, carrying that day's closing figure and the intraday path it took.
+ * day, carrying that day's latest figure. A new quote later in the day replaces
+ * the day's value rather than adding a point.
  *
  * Rows come from `gmp_snapshots`, written hourly by the ipo-subscription-live
  * capture service. A row is stored when the figures move, plus the first
@@ -14,8 +15,6 @@ import { connectToDatabase } from "@/lib/mongo";
  *
  * Per day:
  *   - gmp:  the day's last reading -- what the chart plots,
- *   - path: the readings in order with repeats collapsed, e.g. [14, 15, 14]
- *           when the quote went 14 -> 15 -> 14 within the day,
  *   - live: true on today's point, whose figure is the latest capture.
  *
  * Revalidated rather than no-store: capture runs hourly, so a five-minute cache
@@ -48,10 +47,6 @@ interface DayPoint {
   /** The IST calendar date, e.g. "2026-09-24". */
   date: string;
   gmp: number;
-  path: number[];
-  open: number;
-  high: number;
-  low: number;
   est_listing_price: number | null;
   est_listing_percent: number | null;
   /** When the day's closing figure was last confirmed. */
@@ -115,17 +110,11 @@ function buildDailySeries(rows: GmpSnapshotDoc[], now = Date.now()): DayPoint[] 
   return [...byDay.entries()]
     .sort(([a], [b]) => a - b)
     .map(([day, list]) => {
-      const path: number[] = [];
-      for (const r of list) if (path[path.length - 1] !== r.row.gmp) path.push(r.row.gmp);
       const close = list[list.length - 1];
       return {
         t: new Date(istNoon(day)).toISOString(),
         date: istDate(day),
         gmp: close.row.gmp,
-        path,
-        open: path[0],
-        high: Math.max(...path),
-        low: Math.min(...path),
         est_listing_price: close.row.est_listing_price ?? null,
         est_listing_percent: close.row.est_listing_percent ?? null,
         as_of: new Date(close.ms).toISOString(),
