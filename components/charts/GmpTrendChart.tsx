@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * How the grey-market premium has moved.
+ * How the grey-market premium has moved, one point per date.
  *
  * The question this answers is "is GMP going up or down", so the direction is
  * stated in words at the top and the line is the evidence for it, not the other
@@ -9,14 +9,12 @@
  *
  * Three things about the data shape drive the design:
  *
- *   1. The series is event-based, not sampled. `gmp_snapshots` only records a
- *      reading when the figures actually moved, so the gaps between points are
- *      real information. The x-axis is therefore a true time scale -- spacing
- *      the points evenly would invent a steady cadence that does not exist.
- *   2. It starts empty. Nothing was recorded before the capture service began,
- *      and there is no backfill to buy, so the first days of any issue have one
- *      or two points. A line drawn through two points is not a trend, and the
- *      sparse states below say so rather than dressing it up.
+ *   1. One point per IST day. The capture runs hourly, and the API folds each
+ *      day into its closing figure plus the path it took. A flat day still gets
+ *      its point -- 14 on the 24th and still 14 on the 25th is two points.
+ *   2. A day that fluctuated says so on the chart itself: the dot is labelled
+ *      with its intraday path ("14-15-14"), and the table and tooltip repeat it.
+ *      Dots are coloured by the day-on-day move.
  *   3. GMP in rupees and the estimated gain in percent are two scales. They
  *      share a card but never a plot: the line is rupees, on one axis, and the
  *      percentage lives in the tooltip and the table.
@@ -36,16 +34,24 @@ import { ArrowDownRight, ArrowRight, ArrowUpRight, TrendingUp } from "lucide-rea
 
 import { cn } from "@/lib/utils";
 
-interface GmpPoint {
+interface GmpDay {
   t: string;
+  date: string;
   gmp: number;
+  path: number[];
+  open: number;
+  high: number;
+  low: number;
   est_listing_price: number | null;
   est_listing_percent: number | null;
-  trend: string;
+  as_of: string;
+  live: boolean;
 }
 
-interface ChartPoint extends GmpPoint {
+interface ChartPoint extends GmpDay {
   ts: number;
+  /** Rupee move from the previous day's close; null for the first day. */
+  delta: number | null;
 }
 
 interface GmpTrendChartProps {
@@ -55,15 +61,14 @@ interface GmpTrendChartProps {
 }
 
 const IST = "Asia/Kolkata";
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 function formatDay(ts: number) {
   return new Date(ts).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: IST });
 }
 
-function formatDayTime(ts: number) {
-  return new Date(ts).toLocaleString("en-IN", {
-    day: "numeric",
-    month: "short",
+function formatTime(ts: number) {
+  return new Date(ts).toLocaleTimeString("en-IN", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -81,6 +86,16 @@ function formatDelta(value: number) {
   return `${value > 0 ? "+" : "-"}₹${Math.abs(value).toLocaleString("en-IN")}`;
 }
 
+/** "14-15-14" -- the day's intraday path. */
+function formatPath(path: number[]) {
+  return path.map((v) => v.toLocaleString("en-IN")).join("-");
+}
+
+function deltaClass(delta: number | null) {
+  if (!delta) return "text-muted-foreground";
+  return delta > 0 ? "text-score-good" : "text-score-bad";
+}
+
 export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
   const [points, setPoints] = useState<ChartPoint[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -94,8 +109,14 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
       .then((data) => {
         if (cancelled) return;
         if (!data?.success) throw new Error(data?.message || "Request failed");
-        const series: GmpPoint[] = Array.isArray(data.series) ? data.series : [];
-        setPoints(series.map((p) => ({ ...p, ts: new Date(p.t).getTime() })));
+        const series: GmpDay[] = Array.isArray(data.series) ? data.series : [];
+        setPoints(
+          series.map((p, i) => ({
+            ...p,
+            ts: new Date(p.t).getTime(),
+            delta: i === 0 ? null : p.gmp - series[i - 1].gmp,
+          }))
+        );
       })
       .catch(() => {
         if (!cancelled) setFailed(true);
@@ -122,11 +143,10 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
   }, [points]);
 
   // Ticks have to land on round numbers, so the axis is snapped to a 1/2/5 step
-  // rather than to the padded extremes of the data -- padding the min and max
-  // directly produces an axis reading 9 / 29 / 49 / 70, which is unreadable at a
-  // glance even though it is arithmetically fine.
+  // rather than to the padded extremes of the data. Intraday highs and lows are
+  // included so a fluctuation label never sits off the plot.
   const { yDomain, yTicks } = useMemo(() => {
-    const values = points?.map((p) => p.gmp) ?? [];
+    const values = points?.flatMap((p) => [p.gmp, p.high, p.low]) ?? [];
     const rawMin = values.length ? Math.min(...values) : 0;
     const rawMax = values.length ? Math.max(...values) : 1;
 
@@ -147,21 +167,14 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
     return { yDomain: [min, max] as [number, number], yTicks: ticks };
   }, [points]);
 
-  // A single reading spans no time at all, and ["dataMin","dataMax"] on a
-  // zero-width domain collapses the axis and hides the point. Half a day either
-  // side gives the dot an axis to sit in the middle of.
-  const xDomain = useMemo((): [number | string, number | string] => {
-    if (points?.length === 1) {
-      const half = 12 * 60 * 60 * 1000;
-      return [points[0].ts - half, points[0].ts + half];
-    }
-    return ["dataMin", "dataMax"];
+  // Half a day either side, so the first and last dates sit inside the plot
+  // with room for their labels -- and a single day has an axis at all.
+  const xDomain = useMemo((): [number, number] => {
+    if (!points || points.length === 0) return [0, 1];
+    return [points[0].ts - DAY_MS / 2, points[points.length - 1].ts + DAY_MS / 2];
   }, [points]);
 
-  // Below roughly a day and a half, ticks that only say the date repeat
-  // themselves; past it, ticks carrying a clock time are noise.
-  const spanMs = points && points.length > 1 ? points[points.length - 1].ts - points[0].ts : 0;
-  const tickFormatter = spanMs < 36 * 60 * 60 * 1000 ? formatDayTime : formatDay;
+  const xTicks = useMemo(() => points?.map((p) => p.ts) ?? [], [points]);
 
   const header = (
     <div className="flex items-center justify-between gap-3 mb-3">
@@ -169,7 +182,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
         <TrendingUp className="w-3.5 h-3.5" />
         GMP trend
       </h3>
-      {points && points.length > 1 && (
+      {points && points.length > 0 && (
         <button
           type="button"
           onClick={() => setShowTable((v) => !v)}
@@ -206,7 +219,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
         {header}
         <p className="text-sm text-muted-foreground">
           No GMP readings recorded for this issue yet. The trend appears once the grey market
-          has been quoted more than once.
+          has been quoted on more than one day.
         </p>
       </div>
     );
@@ -237,11 +250,9 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
           {formatRupees(last.gmp)}
         </span>
         {points.length === 1 ? (
-          // A direction needs two readings. Until there are, the card says what
-          // it has rather than implying a trend it cannot see yet.
-          <span className="text-sm text-muted-foreground">
-            First reading, {formatDayTime(last.ts)}
-          </span>
+          // A direction needs two days. Until there are, the card says what it
+          // has rather than implying a trend it cannot see yet.
+          <span className="text-sm text-muted-foreground">First day, {formatDay(last.ts)}</span>
         ) : (
           <span className={cn("flex items-center gap-1 text-sm font-medium", directionColor)}>
             <DirectionIcon className="w-4 h-4" aria-hidden="true" />
@@ -250,30 +261,52 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
             <span className="text-muted-foreground font-normal">since {formatDay(summary!.first.ts)}</span>
           </span>
         )}
+        {last.live && (
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="w-1.5 h-1.5 rounded-full bg-score-good animate-pulse" aria-hidden="true" />
+            Live · as of {formatTime(new Date(last.as_of).getTime())} today
+          </span>
+        )}
       </div>
+
+      {last.live && last.path.length > 1 && (
+        <p className="-mt-2 mb-4 text-xs text-muted-foreground">
+          Today so far: <span className="font-mono text-foreground">{formatPath(last.path)}</span>
+          {" · "}range {formatRupees(last.low)}–{formatRupees(last.high)}
+        </p>
+      )}
 
       {showTable ? (
         <div className="max-h-[220px] overflow-y-auto">
           <table className="w-full text-sm">
             <caption className="sr-only">
-              GMP readings for {companyName || "this IPO"}, oldest first
+              Daily GMP for {companyName || "this IPO"}, newest first
             </caption>
             <thead>
               <tr className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground">
-                <th scope="col" className="text-left font-medium py-1.5">Reading</th>
+                <th scope="col" className="text-left font-medium py-1.5">Date</th>
                 <th scope="col" className="text-right font-medium py-1.5">GMP</th>
-                <th scope="col" className="text-right font-medium py-1.5">Est. gain</th>
+                <th scope="col" className="text-right font-medium py-1.5">During the day</th>
+                <th scope="col" className="text-right font-medium py-1.5">Change</th>
               </tr>
             </thead>
             <tbody>
               {[...points].reverse().map((p) => (
-                <tr key={p.ts} className="border-t border-border">
-                  <td className="py-1.5 text-muted-foreground">{formatDayTime(p.ts)}</td>
+                <tr key={p.date} className="border-t border-border">
+                  <td className="py-1.5 text-muted-foreground">
+                    {formatDay(p.ts)}
+                    {p.live && (
+                      <span className="ml-1.5 text-[10px] font-mono uppercase text-score-good">Live</span>
+                    )}
+                  </td>
                   <td className="py-1.5 text-right font-mono tabular-nums text-foreground">
                     {formatRupees(p.gmp)}
                   </td>
                   <td className="py-1.5 text-right font-mono tabular-nums text-muted-foreground">
-                    {p.est_listing_percent === null ? "—" : `${p.est_listing_percent.toFixed(2)}%`}
+                    {p.path.length > 1 ? formatPath(p.path) : "—"}
+                  </td>
+                  <td className={cn("py-1.5 text-right font-mono tabular-nums", deltaClass(p.delta))}>
+                    {p.delta === null ? "—" : p.delta === 0 ? "No change" : formatDelta(p.delta)}
                   </td>
                 </tr>
               ))}
@@ -285,7 +318,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
         // nested scrollbar to reach its own tick labels.
         <div className="h-[220px] -ml-2">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={points} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
+            <AreaChart data={points} margin={{ top: 22, right: 16, bottom: 0, left: 0 }}>
               <defs>
                 <linearGradient id="gmpWash" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.16} />
@@ -301,10 +334,12 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                 type="number"
                 scale="time"
                 domain={xDomain}
-                tickFormatter={tickFormatter}
+                ticks={xTicks}
+                interval="preserveStartEnd"
+                tickFormatter={formatDay}
                 tickLine={false}
                 axisLine={false}
-                minTickGap={28}
+                minTickGap={16}
                 tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
               />
               <YAxis
@@ -324,10 +359,23 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                   const point = payload[0].payload as ChartPoint;
                   return (
                     <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
-                      <p className="text-xs text-muted-foreground">{formatDayTime(point.ts)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatDay(point.ts)}
+                        {point.live && ` · Live, ${formatTime(new Date(point.as_of).getTime())}`}
+                      </p>
                       <p className="font-mono text-sm font-semibold text-foreground">
                         GMP {formatRupees(point.gmp)}
+                        {point.delta !== null && (
+                          <span className={cn("ml-1.5 text-xs", deltaClass(point.delta))}>
+                            {point.delta === 0 ? "no change" : formatDelta(point.delta)}
+                          </span>
+                        )}
                       </p>
+                      {point.path.length > 1 && (
+                        <p className="font-mono text-xs text-muted-foreground">
+                          During the day: {formatPath(point.path)}
+                        </p>
+                      )}
                       {point.est_listing_percent !== null && (
                         <p className="font-mono text-xs text-muted-foreground">
                           Est. gain {point.est_listing_percent.toFixed(2)}%
@@ -339,21 +387,47 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
               />
 
               <Area
-                type="monotone"
+                // Straight segments: a quote jumps rather than glides, and a
+                // smoothed curve would overshoot between days.
+                type="linear"
                 dataKey="gmp"
                 stroke="var(--chart-1)"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 fill="url(#gmpWash)"
-                // Every dot is one real observation, so they are worth drawing
-                // while there are few enough to read. The 2px surface ring keeps
-                // them legible where they sit on the line.
-                dot={
-                  points.length <= 24
-                    ? { r: 4, fill: "var(--chart-1)", stroke: "var(--card)", strokeWidth: 2 }
-                    : false
-                }
+                // One dot per date, coloured by the day-on-day move. A day that
+                // fluctuated carries its path above the dot, so "14-15-14" is
+                // readable without hovering.
+                dot={(props: { cx?: number; cy?: number; index?: number; payload?: ChartPoint }) => {
+                  const { cx, cy, index, payload } = props;
+                  const key = `gmp-dot-${index}`;
+                  if (cx == null || cy == null || !payload) return <g key={key} />;
+                  const fill =
+                    payload.delta && payload.delta > 0
+                      ? "var(--score-good)"
+                      : payload.delta && payload.delta < 0
+                        ? "var(--score-bad)"
+                        : "var(--chart-1)";
+                  return (
+                    <g key={key}>
+                      {payload.live && <circle cx={cx} cy={cy} r={8} fill={fill} opacity={0.25} />}
+                      <circle cx={cx} cy={cy} r={4} fill={fill} stroke="var(--card)" strokeWidth={2} />
+                      {payload.path.length > 1 && (
+                        <text
+                          x={cx}
+                          y={cy - 12}
+                          textAnchor="middle"
+                          fontSize={10}
+                          fontFamily="var(--font-mono, monospace)"
+                          fill="var(--muted-foreground)"
+                        >
+                          {formatPath(payload.path)}
+                        </text>
+                      )}
+                    </g>
+                  );
+                }}
                 activeDot={{ r: 5, fill: "var(--chart-1)", stroke: "var(--card)", strokeWidth: 2 }}
                 isAnimationActive={false}
               />
@@ -364,8 +438,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
 
       {points.length === 1 && (
         <p className="mt-3 text-xs text-muted-foreground">
-          The line builds from here: a point is added each time the grey market is requoted
-          at a different price.
+          The line builds from here: one point per day, with any moves during the day shown on it.
         </p>
       )}
     </div>
