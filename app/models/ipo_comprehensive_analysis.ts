@@ -44,6 +44,18 @@ interface IpoFundamentals {
         quick_ratio: string | null; // Can be null
         return_on_equity: string | null; // Can be null
     };
+    // Added after launch; analyses generated before then don't carry them.
+    debt?: {
+        total_debt: string | null; // e.g. "₹120 Cr" or "Debt-free"
+        summary: string;
+    };
+    offer_structure?: {
+        fresh_issue: string | null;
+        offer_for_sale: string | null;
+        promoters_selling: boolean | null;
+        selling_shareholders: string;
+        why_selling: string;
+    };
 }
 
 interface IpoRiskMeter {

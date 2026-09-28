@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { stripCitations } from "@/lib/citations";
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,6 +55,17 @@ JSON Schema for "parsedData":
       "current_ratio": "string (e.g. '1.5:1' or 'N/A')",
       "quick_ratio": "string (e.g. '1.2:1' or 'N/A')",
       "return_on_equity": "string (e.g. '15%' or 'N/A')"
+    },
+    "debt": {
+      "total_debt": "string (total borrowings, e.g. '₹120 Cr' or 'Debt-free'. null if not stated)",
+      "summary": "string (how heavy the debt is and whether IPO money repays it, max 30 words)"
+    },
+    "offer_structure": {
+      "fresh_issue": "string (fresh issue size, e.g. '₹200 Cr'. null if none)",
+      "offer_for_sale": "string (offer for sale size, e.g. '₹100 Cr'. null if none)",
+      "promoters_selling": boolean (true if promoters sell shares in the OFS),
+      "selling_shareholders": "string (who is selling in the OFS, or 'None')",
+      "why_selling": "string (what the fresh money is for and why existing holders are selling, max 50 words)"
     }
   },
   "risk_meter": {
@@ -209,8 +221,9 @@ Ensure you fill as many empty pockets as possible using details in the text. Mak
 
     return NextResponse.json({
       success: true,
-      parsedData: parsedResult.parsedData,
-      markdownPreview: parsedResult.markdownPreview,
+      // Pasted Gemini text carries "[cite: N]" markers the model copies straight through.
+      parsedData: stripCitations(parsedResult.parsedData),
+      markdownPreview: stripCitations(parsedResult.markdownPreview),
     });
   } catch (error) {
     console.error("AI Parsing Route error:", error);

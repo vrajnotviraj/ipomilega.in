@@ -962,18 +962,85 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   const sections = [
     { key: "overview", num: "§00", label: "Overview" },
-    { key: "financials", num: "§01", label: "Financials", score: fundamentalsScore },
-    { key: "risk", num: "§02", label: "Risk", score: riskScore },
-    { key: "performance", num: "§03", label: "Performance", score: performanceScore },
-    { key: "flexibility", num: "§04", label: "Flexibility", score: flexibilityScore },
-    { key: "timing", num: "§05", label: "Timing", score: timeScore },
+    // Timing sits right after the overview: whether to apply now is the first
+    // question people bring here, ahead of the deeper financials.
+    { key: "timing", num: "§01", label: "Timing", score: timeScore },
+    { key: "financials", num: "§02", label: "Financials", score: fundamentalsScore },
+    { key: "risk", num: "§03", label: "Risk", score: riskScore },
+    { key: "performance", num: "§04", label: "Performance", score: performanceScore },
+    { key: "flexibility", num: "§05", label: "Flexibility", score: flexibilityScore },
   ];
+
+  // While a tab's smooth scroll is in flight the spy would light up every section
+  // it passes on the way, so it stands down until the scroll settles.
+  const spyPausedUntil = useRef(0);
 
   const handleTabClick = (key: string) => {
     setActiveTab(key);
+    spyPausedUntil.current = Date.now() + 900;
     const section = sectionRefs.current[key];
     if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  // Scroll-spy: the active tab follows whichever section is under the sticky
+  // chrome. The line sits just below the tab bar -- the same offset anchors use.
+  useEffect(() => {
+    let frame = 0;
+    let resume = 0;
+    const update = () => {
+      frame = 0;
+      const wait = spyPausedUntil.current - Date.now();
+      if (wait > 0) {
+        // A long jump can outlast the pause; hold it until scrolling goes quiet,
+        // then take one reading where the scroll landed.
+        spyPausedUntil.current = Math.max(spyPausedUntil.current, Date.now() + 150);
+        window.clearTimeout(resume);
+        resume = window.setTimeout(update, spyPausedUntil.current - Date.now() + 10);
+        return;
+      }
+      const line = (parseFloat(document.documentElement.style.scrollPaddingTop) || 160) + 8;
+      const present = sections.filter((s) => sectionRefs.current[s.key]);
+      if (!present.length) return;
+
+      // The last sections are often too short to ever reach the line.
+      const atBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      let current = present[0].key;
+      if (atBottom) {
+        current = present[present.length - 1].key;
+      } else {
+        for (const s of present) {
+          if (sectionRefs.current[s.key]!.getBoundingClientRect().top <= line) current = s.key;
+        }
+      }
+      setActiveTab((prev) => (prev === current ? prev : current));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(resume);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+    // Section keys are static; refs are read live on every scroll.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the active tab visible in the horizontally scrolling bar. Scrolls only
+  // the bar -- scrollIntoView would also yank the page.
+  const tabBarRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const bar = tabBarRef.current;
+    const tab = bar?.querySelector<HTMLElement>(`[data-section="${activeTab}"]`);
+    if (!bar || !tab) return;
+    const left = tab.offsetLeft - (bar.clientWidth - tab.offsetWidth) / 2;
+    bar.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [activeTab]);
 
   // A shared analysis usually opens in a fresh tab, where history.back() lands on
   // about:blank or walks straight out of the site -- which is what people were
@@ -1048,11 +1115,13 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
       {/* Section tab nav */}
       <div className="bg-background/95 backdrop-blur border-b border-border">
-        <div className="app-container overflow-x-auto">
-          <div className="flex items-center gap-1 py-2 min-w-max">
+        <div ref={tabBarRef} className="app-container overflow-x-auto">
+          <div className="relative flex items-center gap-1 py-2 min-w-max">
             {sections.map((s) => (
               <button
                 key={s.key}
+                data-section={s.key}
+                aria-current={activeTab === s.key ? "true" : undefined}
                 onClick={() => handleTabClick(s.key)}
                 className={cn(
                   "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors font-sans",
@@ -1381,7 +1450,52 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           )}
         </section>
 
-        {/* §01 Financials */}
+        {/* §01 Timing */}
+        {editedAnalysis.time && (
+          <section
+            ref={(el) => {
+              sectionRefs.current["timing"] = el;
+            }}
+            id="timing"
+          >
+            <SectionHeading
+              num="§01"
+              title="Timing"
+              score={timeScore}
+              isAdmin={isAdmin}
+              onSaveScore={(val) => handleInlineSave("time.score", parseInt(val) || 0)}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Issue type</div>
+                <div className="text-lg font-serif font-semibold text-foreground">{ipoType}</div>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Issue size</div>
+                <div className="text-lg font-serif font-semibold text-foreground">{formatIssueSize(editedAnalysis.ipo_details?.issue_size) || "Size TBA"}</div>
+              </div>
+              <div className="rounded-xl border border-border bg-card p-4">
+                <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Market timing</div>
+                <div className={cn("text-lg font-serif font-semibold", scoreTextClass(timeScore))}>
+                  {timeScore >= 6 ? "Favourable" : timeScore >= 4 ? "Neutral" : "Unfavourable"}
+                </div>
+              </div>
+            </div>
+
+            {editedAnalysis.time.market_timing_assessment && (
+              <EditableText
+                value={editedAnalysis.time.market_timing_assessment}
+                onSave={(val) => handleInlineSave("time.market_timing_assessment", val)}
+                type="textarea"
+                isAdmin={isAdmin}
+                textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
+              />
+            )}
+          </section>
+        )}
+
+        {/* §02 Financials */}
         {editedAnalysis.fundamentals && (
           <section
             ref={(el) => {
@@ -1390,7 +1504,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             id="financials"
           >
             <SectionHeading
-              num="§01"
+              num="§02"
               title="Financials"
               score={fundamentalsScore}
               isAdmin={isAdmin}
@@ -1403,6 +1517,78 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               isAdmin={isAdmin}
               textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
             />
+
+            {/* The three questions testers asked first: how much debt, who is
+                selling, and why. Older analyses don't carry these fields. */}
+            {(editedAnalysis.fundamentals.debt || editedAnalysis.fundamentals.offer_structure) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                {editedAnalysis.fundamentals.debt && (
+                  <div className="rounded-xl border border-border bg-card p-5">
+                    <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Debt on the company</div>
+                    <EditableText
+                      value={editedAnalysis.fundamentals.debt.total_debt || "Not stated"}
+                      onSave={(val) => handleInlineSave("fundamentals.debt.total_debt", val)}
+                      isAdmin={isAdmin}
+                      textClassName="text-lg font-serif font-semibold text-foreground"
+                    />
+                    <EditableText
+                      value={editedAnalysis.fundamentals.debt.summary}
+                      onSave={(val) => handleInlineSave("fundamentals.debt.summary", val)}
+                      type="textarea"
+                      isAdmin={isAdmin}
+                      className="mt-2 block"
+                      textClassName="text-sm text-muted-foreground whitespace-pre-wrap block"
+                    />
+                  </div>
+                )}
+                {editedAnalysis.fundamentals.offer_structure && (() => {
+                  const offer = editedAnalysis.fundamentals.offer_structure;
+                  return (
+                    <div className="rounded-xl border border-border bg-card p-5">
+                      <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Who is selling, and why</div>
+                      <div className="flex flex-wrap gap-2 my-2">
+                        <span className="px-2 py-0.5 rounded-md border border-border text-[11px] font-mono">
+                          Fresh issue: {offer.fresh_issue || "None"}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md border border-border text-[11px] font-mono">
+                          OFS: {offer.offer_for_sale || "None"}
+                        </span>
+                        {offer.promoters_selling !== null && (
+                          <span
+                            className={cn(
+                              "px-2 py-0.5 rounded-md border text-[11px] font-mono font-semibold",
+                              offer.promoters_selling
+                                ? "bg-score-bad/15 text-score-bad border-score-bad/30"
+                                : "bg-score-good/15 text-score-good border-score-good/30"
+                            )}
+                          >
+                            {offer.promoters_selling ? "Promoters selling" : "Promoters not selling"}
+                          </span>
+                        )}
+                      </div>
+                      {offer.selling_shareholders && offer.selling_shareholders !== "None" && (
+                        <EditableText
+                          value={offer.selling_shareholders}
+                          onSave={(val) => handleInlineSave("fundamentals.offer_structure.selling_shareholders", val)}
+                          type="textarea"
+                          isAdmin={isAdmin}
+                          className="block mb-2"
+                          textClassName="text-sm text-foreground whitespace-pre-wrap block"
+                        />
+                      )}
+                      <EditableText
+                        value={offer.why_selling}
+                        onSave={(val) => handleInlineSave("fundamentals.offer_structure.why_selling", val)}
+                        type="textarea"
+                        isAdmin={isAdmin}
+                        className="block"
+                        textClassName="text-sm text-muted-foreground whitespace-pre-wrap block"
+                      />
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
             {editedAnalysis.financialReport && editedAnalysis.financialReport.length > 0 && (
               <Card className="mt-8">
@@ -1460,7 +1646,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           </section>
         )}
 
-        {/* §02 Risk */}
+        {/* §03 Risk */}
         {editedAnalysis.risk_meter && (
           <section
             ref={(el) => {
@@ -1469,7 +1655,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             id="risk"
           >
             <SectionHeading
-              num="§02"
+              num="§03"
               title="Risk"
               score={riskScore}
               isAdmin={isAdmin}
@@ -1517,7 +1703,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           </section>
         )}
 
-        {/* §03 Performance */}
+        {/* §04 Performance */}
         {editedAnalysis.performance && (
           <section
             ref={(el) => {
@@ -1526,7 +1712,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             id="performance"
           >
             <SectionHeading
-              num="§03"
+              num="§04"
               title="Performance"
               score={performanceScore}
               isAdmin={isAdmin}
@@ -1638,7 +1824,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           </section>
         )}
 
-        {/* §04 Flexibility */}
+        {/* §05 Flexibility */}
         {editedAnalysis.flexibility && (
           <section
             ref={(el) => {
@@ -1647,7 +1833,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             id="flexibility"
           >
             <SectionHeading
-              num="§04"
+              num="§05"
               title="Flexibility"
               score={flexibilityScore}
               isAdmin={isAdmin}
@@ -1717,51 +1903,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 </div>
               )}
             </div>
-          </section>
-        )}
-
-        {/* §05 Timing */}
-        {editedAnalysis.time && (
-          <section
-            ref={(el) => {
-              sectionRefs.current["timing"] = el;
-            }}
-            id="timing"
-          >
-            <SectionHeading
-              num="§05"
-              title="Timing"
-              score={timeScore}
-              isAdmin={isAdmin}
-              onSaveScore={(val) => handleInlineSave("time.score", parseInt(val) || 0)}
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              <div className="rounded-xl border border-border bg-card p-4">
-                <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Issue type</div>
-                <div className="text-lg font-serif font-semibold text-foreground">{ipoType}</div>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-4">
-                <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Issue size</div>
-                <div className="text-lg font-serif font-semibold text-foreground">{formatIssueSize(editedAnalysis.ipo_details?.issue_size) || "Size TBA"}</div>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-4">
-                <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Market timing</div>
-                <div className={cn("text-lg font-serif font-semibold", scoreTextClass(timeScore))}>
-                  {timeScore >= 6 ? "Favourable" : timeScore >= 4 ? "Neutral" : "Unfavourable"}
-                </div>
-              </div>
-            </div>
-
-            {editedAnalysis.time.market_timing_assessment && (
-              <EditableText
-                value={editedAnalysis.time.market_timing_assessment}
-                onSave={(val) => handleInlineSave("time.market_timing_assessment", val)}
-                type="textarea"
-                isAdmin={isAdmin}
-                textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
-              />
-            )}
           </section>
         )}
       </div>

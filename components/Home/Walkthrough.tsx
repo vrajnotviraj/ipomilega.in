@@ -91,26 +91,30 @@ export function Walkthrough() {
   const step = steps[index];
   const active = !!step;
 
-  const measure = useCallback(() => {
-    if (!step) return;
-    const el = findTarget(step);
-    setRect(el ? el.getBoundingClientRect() : null);
-  }, [step]);
-
   // Bring the current target into view, then keep the spotlight glued to it.
+  //
+  // Measured every frame rather than on scroll/resize events: on iOS Safari the
+  // smooth scroll, momentum and the collapsing toolbar keep moving the target
+  // after the last event fires, which left the ring sitting a row below the
+  // button it was meant to frame. Re-renders only when the box actually moves.
   useLayoutEffect(() => {
     if (!step) return;
     findTarget(step)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    measure();
-    const settle = window.setTimeout(measure, 400);
-    window.addEventListener('resize', measure);
-    window.addEventListener('scroll', measure, true);
-    return () => {
-      window.clearTimeout(settle);
-      window.removeEventListener('resize', measure);
-      window.removeEventListener('scroll', measure, true);
+    let frame = 0;
+    let last = '';
+    const track = () => {
+      const el = findTarget(step);
+      const r = el ? el.getBoundingClientRect() : null;
+      const key = r ? `${Math.round(r.top)},${Math.round(r.left)},${Math.round(r.width)},${Math.round(r.height)}` : '';
+      if (key !== last) {
+        last = key;
+        setRect(r);
+      }
+      frame = requestAnimationFrame(track);
     };
-  }, [step, measure]);
+    track();
+    return () => cancelAnimationFrame(frame);
+  }, [step]);
 
   const finish = useCallback((how: 'skipped' | 'done') => {
     writeFlag(how);
@@ -157,7 +161,7 @@ export function Walkthrough() {
 
       {rect ? (
         <div
-          className="absolute rounded-xl ring-2 ring-primary pointer-events-none transition-all duration-300 ease-out"
+          className="absolute rounded-xl ring-2 ring-primary pointer-events-none"
           style={{
             top: rect.top - PAD,
             left: rect.left - PAD,
@@ -171,7 +175,7 @@ export function Walkthrough() {
       )}
 
       <div
-        className="absolute rounded-xl border border-border bg-card text-card-foreground shadow-xl p-4 transition-all duration-300 ease-out"
+        className="absolute rounded-xl border border-border bg-card text-card-foreground shadow-xl p-4"
         style={{ top: tipTop, left: tipLeft, width: tipWidth }}
       >
         <div className="text-[11px] font-mono uppercase tracking-wide text-muted-foreground mb-1">

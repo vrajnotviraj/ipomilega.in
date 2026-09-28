@@ -90,6 +90,17 @@ interface FundamentalsData {
     quick_ratio: string | null;
     return_on_equity: string | null;
   };
+  debt?: {
+    total_debt: string | null;
+    summary: string;
+  };
+  offer_structure?: {
+    fresh_issue: string | null;
+    offer_for_sale: string | null;
+    promoters_selling: boolean | null;
+    selling_shareholders: string;
+    why_selling: string;
+  };
 }
 
 interface TimeData {
@@ -315,7 +326,10 @@ export async function POST(req: NextRequest) {
           current_ratio: null,
           quick_ratio: null,
           return_on_equity: null
-        }
+        },
+        // Only present on analyses generated with them; omitted rather than blanked otherwise.
+        ...(fundamentals?.debt && { debt: fundamentals.debt }),
+        ...(fundamentals?.offer_structure && { offer_structure: fundamentals.offer_structure }),
       },
 
       investorSplit: investorSplit || [],

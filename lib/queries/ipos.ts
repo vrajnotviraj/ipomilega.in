@@ -4,6 +4,7 @@ import { getDb } from '@/lib/mongo';
 import { Ipo } from '@/app/models/ipo';
 import { IpoComprehensiveAnalysis } from '@/app/models/ipo_comprehensive_analysis';
 import { HomePageIpoProps } from '@/app/types/homepage';
+import { stripCitations } from '@/lib/citations';
 import { parseIpoDate, getOpenDateString, getCloseDateString, getListingDateString } from './ipo-dates';
 
 // Public card/list views (homepage, /ipos) read a small slice of each document, but the whole
@@ -244,7 +245,8 @@ export const getAnalysisBySlug = cache(
     if (!analysis) return null;
 
     return toPlain({
-      ipos_analysis: analysis,
+      // Every text field on the page, the metadata and the share message reads from here.
+      ipos_analysis: stripCitations(toPlain(analysis)),
       ipo,
     }) as unknown as { ipos_analysis: IpoComprehensiveAnalysis; ipo: Ipo };
   }
@@ -254,5 +256,5 @@ export const getAnalysisBySlug = cache(
 export const getAllAnalyses = cache(async (): Promise<IpoComprehensiveAnalysis[]> => {
   const db = await getDb();
   const analyses = await db.collection('ipo_comprehensive_analysis').find({}).toArray();
-  return toPlain(analyses) as unknown as IpoComprehensiveAnalysis[];
+  return stripCitations(toPlain(analyses)) as unknown as IpoComprehensiveAnalysis[];
 });
