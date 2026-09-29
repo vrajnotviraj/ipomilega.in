@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth";
 
 // Proxies the Render services' public status reports so the browser needs no CORS and the status token stays server-side.
 // The scraper and analysis services sleep between runs; waking one can take close to a minute.
@@ -39,6 +40,8 @@ async function fetchLiveExtra(base: string) {
 }
 
 export async function GET(request: NextRequest) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   const name = request.nextUrl.searchParams.get("service") as keyof typeof SERVICES | null;
   if (!name || !(name in SERVICES)) {
     return NextResponse.json({ success: false, error: "service must be 'scraper', 'live' or 'analysis'" }, { status: 400 });

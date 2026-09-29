@@ -16,8 +16,9 @@ export async function POST(request: Request) {
         const db = await getDb();
         const { email, name } = await request.json();
 
-        if (!email) {
-            return NextResponse.json({ message: "Email is required.", success: false }, { status: 400 });
+        // A string check, or a JSON body like {"email": {"$ne": null}} becomes a Mongo operator.
+        if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || (name != null && typeof name !== "string")) {
+            return NextResponse.json({ message: "A valid email is required.", success: false }, { status: 400 });
         }
 
         const users = db.collection<Subscription>("user_activity");

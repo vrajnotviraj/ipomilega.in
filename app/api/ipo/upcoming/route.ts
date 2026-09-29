@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { getIpoBucketsFull } from "@/lib/queries/ipos";
 import { getAllBlogs } from "@/lib/queries/blogs";
+import { requireAdmin } from "@/lib/auth";
 
 // Admin console data: complete records for every bucket, plus the flat list and blogs.
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
+    const denied = await requireAdmin(request);
+    if (denied) return denied;
     try {
         const [{ upcoming, live, closed, past, tba, recently_added }, blogs] =
             await Promise.all([getIpoBucketsFull(), getAllBlogs()]);

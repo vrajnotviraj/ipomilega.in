@@ -1,111 +1,92 @@
-# Ipo Milega V1
+# IPO Milega
 
+A web app for tracking Indian IPOs. It shows what's live, upcoming and closed, tracks grey market premium (GMP) over time, and publishes a scored analysis for each issue.
 
-**IPO Milega** is a modern, high-performance web platform for tracking, analyzing, and managing Indian Initial Public Offerings (IPOs). Built with **Next.js 15 (App Router)**, **TypeScript**, **MongoDB**, and **Tailwind CSS**, it delivers comprehensive IPO insights, financial performance charts, and direct admin management.
+It's built on Next.js 15 (App Router), TypeScript, MongoDB and Tailwind CSS. Auth is Better Auth with Google sign-in.
 
----
+## What it does
 
-## ✨ Features
+- Lists live, upcoming, closed and past IPOs, split by mainboard and SME.
+- Scores each IPO on fundamentals, risk, flexibility, performance and timing.
+- Charts GMP history and financials with Recharts.
+- Lets admins edit analysis fields in place (double-click a field) and write blog posts.
+- Parses pasted prospectus text into a draft analysis through any OpenAI-compatible API.
 
-- 📊 **Live, Upcoming & Past IPO Dashboard**: Filterable and searchable views for active subscriptions, upcoming listings, and historical IPO performances.
-- 🎯 **Comprehensive IPO Analysis**: Deep-dive analytics covering Overall Score, Profitability Assessment, Financial Fundamentals, Risk Meter, Business Flexibility, and Management Quality.
-- ✏️ **Direct Inline Admin Editing**: Admins can double-click any field (metrics, descriptions, scores) on the analysis page for seamless, real-time in-place editing.
-- 📈 **Interactive Financial & Allocation Charts**: Visual breakdown of investor quota allocations (Retail, QIB, NII) and multi-year financial performance trends using Recharts.
-- 🤖 **AI Prospectus Parser**: Automated AI tool for parsing DRHP/RHP documents and populating comprehensive IPO analytics.
-- 🔐 **Authentication & Role Control**: Secure authentication integrated via Better Auth with Google social login and role-based admin access.
-- ⚡ **SEO & Performance Optimized**: Built with Next.js Server Components, JSON-LD structured data, metadata optimization, and MongoDB connection caching.
+The IPO data itself comes from separate scraper jobs that write straight to MongoDB. This repo is only the website, so on a fresh database you'll see empty lists until you load some `ipos` documents.
 
----
+## Setup
 
-## 🛠️ Tech Stack
-
-- **Framework**: Next.js 15 (App Router, Server Components, TypeScript)
-- **Styling**: Tailwind CSS, CSS Modules, Lucide Icons, Radix UI
-- **Database**: MongoDB with Mongoose (cached connections)
-- **Authentication**: Better Auth (Google OAuth & Credentials)
-- **Data Visualization**: Recharts (Interactive Bar & Pie Charts)
-- **Toast Notifications**: Sonner
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (v18.x or higher)
-- MongoDB instance (Local or MongoDB Atlas)
-
-### Environment Setup
-
-Create a `.env` file in the root directory with the following variables:
-
-```env
-# MongoDB Connection
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/ipomilega
-
-# App & Auth Configurations
-NEXTAUTH_URL=http://localhost:3000
-BETTER_AUTH_SECRET=your_auth_secret_key
-
-# Google OAuth Credentials
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-```
-
-### Installation
+You need Node.js 18+ and a MongoDB database (local or Atlas).
 
 ```bash
-# Install dependencies
+git clone <this-repo>
+cd ipomilega.in
 npm install
+cp .env.example .env.local
+```
 
-# Start the development server
+Fill in `.env.local`. The required block is:
+
+| Variable | What it's for |
+| :--- | :--- |
+| `MONGODB_URI`, `MONGODB_DB` | Your database |
+| `BETTER_AUTH_SECRET` | Signs sessions. Generate with `openssl rand -base64 32` |
+| `BETTER_AUTH_URL`, `NEXTAUTH_URL` | The site's origin, `http://localhost:3000` locally |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth app |
+| `NEXT_PUBLIC_ADMIN_EMAILS` | Comma-separated admin emails |
+
+For Google OAuth, create a web client in the [Google Cloud console](https://console.cloud.google.com/apis/credentials) and add `http://localhost:3000/api/auth/callback/google` as a redirect URI (plus your production URL later).
+
+Everything else in `.env.example` is optional. Skip S3 and uploads fail; skip OpenAI and the AI parser returns an error. The rest of the site still works.
+
+Then create the indexes once and start the dev server:
+
+```bash
+node scripts/ensure-indexes.mjs
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000).
 
----
+## Admin access
 
-## 📂 Project Structure
+Sign in with an email listed in `NEXT_PUBLIC_ADMIN_EMAILS` and you'll see the admin console at `/admin` plus inline edit controls on analysis pages.
 
-```
-├── app/                      # Routes only (pages, layouts, API routes, OG images)
-│   ├── admin/                # Admin dashboard
-│   ├── analysis/             # Analysis list and [id] detail pages
-│   ├── api/                  # API routes (IPO, analysis, blogs, auth)
-│   ├── blogs/                # Blog list, detail, create and edit pages
-│   ├── ipos/                 # All IPOs list
-│   ├── layout.tsx            # Root layout
-│   └── page.tsx              # Home page
-├── components/
-│   ├── admin/                # Admin modal and status widgets
-│   ├── blog/                 # Markdown renderer
-│   ├── charts/               # Recharts components
-│   ├── home/                 # Home page sections
-│   ├── ipo/                  # IPO pieces shared across pages
-│   ├── layout/               # Site chrome, footer, logo
-│   ├── progress/             # Route progress bar
-│   └── ui/                   # shadcn primitives
-├── hooks/                    # Standalone React hooks
-├── lib/                      # Server, data and formatting helpers
-├── types/                    # Data models and shared types
-├── scripts/                  # One-off maintenance scripts
-└── public/                   # Static assets
-```
+The server checks this on every write, and it only trusts **verified** emails. Google sign-in counts as verified. Email/password sign-up doesn't verify anything, so an account made that way never gets admin rights, even with a matching address.
 
----
+`NEXT_PUBLIC_ADMIN_EMAILS` is baked in at build time, so rebuild after you change it.
 
-## 📜 Scripts
+## Image uploads
 
-| Command | Action |
+Uploads go to S3 with a public-read ACL. Set the 4 `AWS_*` variables, then add your bucket's host to `images.remotePatterns` in `next.config.ts`, or Next.js will refuse to render the images.
+
+## Background jobs
+
+The scrapers call `POST /api/revalidate` with `Authorization: Bearer <REVALIDATE_SECRET>` after they write, so cached pages refresh. If you don't run those jobs, leave `REVALIDATE_SECRET` empty and the endpoint stays shut.
+
+## Scripts
+
+| Command | What it does |
 | :--- | :--- |
-| `npm run dev` | Launches local development server |
-| `npm run build` | Compiles production build |
-| `npm run start` | Starts production server |
-| `npm run lint` | Runs ESLint code quality checks |
+| `npm run dev` | Dev server (builds into `.next-dev`) |
+| `npm run build` | Production build |
+| `npm run start` | Serves the production build |
+| `npm run lint` | ESLint |
+| `node scripts/ensure-indexes.mjs` | Creates the MongoDB indexes. Safe to re-run |
+| `node scripts/make-ipos-live.js [n]` | Demo helper: moves n analysed IPOs into the Live bucket |
 
----
+## Project layout
 
-## 🔒 Admin Access
+```
+app/          Routes: pages, layouts, API handlers, OG images
+components/   UI, grouped by area (home, ipo, admin, blog, charts, layout, ui)
+hooks/        React hooks
+lib/          Server helpers: Mongo, auth, S3, queries, formatting
+types/        Data models
+scripts/      Maintenance scripts
+public/       Static assets
+```
 
-Users logged in with administrative email credentials automatically receive direct inline edit privileges, allowing real-time modification of IPO data, timeline milestones, and evaluation scores directly on the site.
+## Deploying
+
+Any Node host that runs Next.js works (Vercel is the easy one). Set the same variables there, with `BETTER_AUTH_URL` and `NEXTAUTH_URL` pointing at your real domain, and add that domain's callback URL to your Google OAuth client.

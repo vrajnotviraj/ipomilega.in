@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripCitations } from "@/lib/citations";
+import { requireAdmin } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   try {
     const { text, companyName } = await req.json();
 

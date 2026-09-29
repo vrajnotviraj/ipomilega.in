@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
+import { requireAdmin } from "@/lib/auth";
 import { revalidateSite } from "@/lib/revalidate";
 import { ObjectId } from "mongodb";
 
@@ -31,7 +32,9 @@ export async function GET(_request: Request, { params }: Params) {
     }
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: Params) {
+    const denied = await requireAdmin(request);
+    if (denied) return denied;
     try {
         const id = (await params).id;
         const { db, blog } = await findBlog(id);
@@ -46,6 +49,8 @@ export async function DELETE(_request: Request, { params }: Params) {
 }
 
 export async function PUT(request: Request, { params }: Params) {
+    const denied = await requireAdmin(request);
+    if (denied) return denied;
     try {
         const id = (await params).id;
         const body = await request.json();

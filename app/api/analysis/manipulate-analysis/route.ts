@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongo";
+import { requireAdmin } from "@/lib/auth";
 import { revalidateSite } from "@/lib/revalidate";
 import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 
@@ -156,6 +157,8 @@ function buildAnalysisDoc(body: RequestBody, ipoRecord: IpoRecord) {
 
 /** Creates or replaces the analysis for one IPO. */
 export async function POST(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   try {
     const body: RequestBody = await req.json();
 
@@ -236,6 +239,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
   try {
     const ipoTableId = req.nextUrl.searchParams.get('ipo_table_id');
     if (!ipoTableId) return missingIdResponse();

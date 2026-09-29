@@ -23,6 +23,10 @@ export const { signIn, signUp, useSession, signOut } = createAuthClient({
   baseURL: process.env.BETTER_AUTH_URL
 })
 
-const ADMIN_EMAILS = ["admin@gmail.com", "snehshah7634@gmail.com", "shahvraj114@gmail.com", "devanshisoni2004@gmail.com", "devanshisoni2311@gmail.com"]
+// Comma-separated; NEXT_PUBLIC_ so the client can show admin controls. The server re-checks in requireAdmin.
+const ADMIN_EMAILS = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean)
 
-export const isAdminEmail = (email?: string | null) => ADMIN_EMAILS.includes(email || "")
+export const isAdminEmail = (email?: string | null) => !!email && ADMIN_EMAILS.includes(email.toLowerCase())

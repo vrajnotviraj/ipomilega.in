@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
+import { requireAdmin } from "@/lib/auth";
 import { revalidateSite } from "@/lib/revalidate";
 import { ObjectId } from "mongodb";
 import { Blog } from "@/types/ipo";
@@ -38,6 +39,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const denied = await requireAdmin(request);
+    if (denied) return denied;
     try {
         const db = await getDb();
         const body: Blog = await request.json();
