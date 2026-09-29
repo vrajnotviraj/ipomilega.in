@@ -142,7 +142,7 @@ export const formatAllotmentPercent = (subscriptionRatio: number | null): string
 export const describeAllotmentOdds = (subscriptionRatio: number | null): string | null => {
   if (!isValidRatio(subscriptionRatio)) return null;
   if (subscriptionRatio <= 1) return 'Not fully subscribed yet, so every valid application should get shares.';
-  return `Roughly 1 out of every ${formatAllotmentOdds(subscriptionRatio).slice(5)} applicants gets shares.`;
+  return `Roughly 1 out of every ${formatAllotmentOdds(subscriptionRatio).slice(5)} applicants gets allotment.`;
 };
 
 export const getProbabilityColor = (probability: number | null): string => {
