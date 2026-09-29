@@ -87,14 +87,13 @@ export interface ShareFacts {
 }
 
 /**
- * The message a Share tap hands to the share sheet: GMP and deadline, one line on the business, the link.
+ * The message a Share tap hands to the share sheet: GMP and deadline, the link.
  * Plain text on purpose: only WhatsApp renders `*bold*`; Telegram, email and notes print the asterisks.
  */
-export function buildShareMessage({ companyName, slug, gmp, opening, closing, businessModel, url }: ShareFacts): string {
+export function buildShareMessage({ companyName, slug, gmp, opening, closing, url }: ShareFacts): string {
   return [
     `Hey, I'm applying to the ${companyName} IPO.`,
     [gmpLine(gmp), closingLine(closing, opening)].filter(Boolean).join("\n"),
-    oneLiner(businessModel),
     `Full analysis → ${url || `${SITE_URL}/analysis/${slug}`}`,
   ]
     .filter(Boolean)
