@@ -1,0 +1,14 @@
+# IPO Milega
+
+> IPO Milega tracks every Indian IPO, mainboard and SME, on NSE and BSE. It shows live GMP, subscription, allotment and listing dates, and gives each IPO a score out of 10 based on a structured reading of its RHP/DRHP.
+
+Data is refreshed several times a day. GMP (grey market premium) is unofficial and changes daily. Scores are an analytical opinion, not investment advice.
+
+## Pages
+
+- [Home](https://ipomilega.in/): IPOs open for bidding, bidding closed (grouped by allotment day), upcoming and recently listed
+- [All IPOs](https://ipomilega.in/ipos): every IPO, with filters for status and board
+- [IPO analysis index](https://ipomilega.in/analysis): every scored analysis
+- [IPO analysis](https://ipomilega.in/analysis/{slug}): one IPO's price band, dates, GMP, subscription, fundamentals, risks, financials and score
+- [About](https://ipomilega.in/about): where the data comes from and how scoring works
+- [Sitemap](https://ipomilega.in/sitemap.xml): every analysis URL

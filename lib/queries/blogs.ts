@@ -1,6 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import { getDb } from '@/lib/mongo';
+import { cached } from '@/lib/cache';
 import { Blog } from '@/app/models/ipo';
 
 // NOTE: `content` is deliberately *not* projected away on list queries. The cards derive both
@@ -17,7 +18,7 @@ function toPlain<T>(doc: T): T {
  * Sorting and slicing now happen in Mongo; the old version pulled the whole collection
  * into Node, sorted it in JS and threw away everything past index 2.
  */
-export const getFeaturedBlogs = cache(async (): Promise<Blog[]> => {
+export const getFeaturedBlogs = cache(cached(async (): Promise<Blog[]> => {
   const db = await getDb();
   const blogs = await db
     .collection('blogs')
@@ -26,10 +27,10 @@ export const getFeaturedBlogs = cache(async (): Promise<Blog[]> => {
     .limit(3)
     .toArray();
   return toPlain(blogs) as unknown as Blog[];
-});
+}, 'getFeaturedBlogs'));
 
 /** All published posts for the /blogs index. */
-export const getPublishedBlogs = cache(async (): Promise<Blog[]> => {
+export const getPublishedBlogs = cache(cached(async (): Promise<Blog[]> => {
   const db = await getDb();
   const blogs = await db
     .collection('blogs')
@@ -37,17 +38,17 @@ export const getPublishedBlogs = cache(async (): Promise<Blog[]> => {
     .sort({ created_at: -1 })
     .toArray();
   return toPlain(blogs) as unknown as Blog[];
-});
+}, 'getPublishedBlogs'));
 
 /** A single published post by slug, content included. */
-export const getBlogBySlug = cache(async (slug: string): Promise<Blog | null> => {
+export const getBlogBySlug = cache(cached(async (slug: string): Promise<Blog | null> => {
   const db = await getDb();
   const blog = await db.collection('blogs').findOne({ slug });
   if (!blog || blog.status !== 'published') return null;
   return toPlain(blog) as unknown as Blog;
-});
+}, 'getBlogBySlug'));
 
-export const getBlogCategories = cache(async () => {
+export const getBlogCategories = cache(cached(async () => {
   const db = await getDb();
   // One grouped read replaces four near-identical find() calls that ran back to back.
   const docs = await db
@@ -66,7 +67,7 @@ export const getBlogCategories = cache(async () => {
     market_news: byCategory('Market News'),
     investment_guide: byCategory('Investment Guide'),
   };
-});
+}, 'getBlogCategories'));
 
 /** Every blog, published or draft -- admin only. */
 export const getAllBlogs = cache(async (): Promise<Blog[]> => {

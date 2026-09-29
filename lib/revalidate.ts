@@ -1,5 +1,6 @@
 import 'server-only';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { SITE_DATA_TAG } from '@/lib/cache';
 
 /**
  * Drops every ISR page (home, /ipos, /analysis/[slug], blogs) so the next request renders
@@ -13,6 +14,7 @@ import { revalidatePath } from 'next/cache';
 export function revalidateSite() {
   try {
     revalidatePath('/', 'layout');
+    revalidateTag(SITE_DATA_TAG);
   } catch (error) {
     console.warn('Revalidation error:', error);
   }

@@ -84,14 +84,15 @@ export const parseCardDate = (dateString: string | undefined): Date | null => {
 
 // Utility function to format a date string as "18 Aug"
 // Whole days from today until the IPO closes: 0 = closes today, -1 = no usable close date.
-export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string }; closing_date?: string } | null | undefined): number => {
-  const closingDate = parseCardDate(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date);
-  if (!closingDate) return -1;
-  closingDate.setHours(0, 0, 0, 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return Math.round((closingDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+// Whole days from today to the date (negative once it has passed), or null when the date is unknown
+export const daysFromToday = (dateString: string | undefined): number | null => {
+  const date = parseCardDate(dateString);
+  if (!date) return null;
+  return Math.round((date.setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
 };
+
+export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string }; closing_date?: string } | null | undefined): number =>
+  daysFromToday(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date) ?? -1;
 
 export const formatShortDate = (dateString: string | undefined): string => {
   const date = parseCardDate(dateString);
@@ -109,6 +110,21 @@ export const formatShortDateOrToday = (dateString: string | undefined): string =
   compareDate.setHours(0, 0, 0, 0);
   if (compareDate.getTime() === today.getTime()) return 'Today';
   return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+};
+
+// Where to check allotment status once the basis of allotment is out (today or earlier), else null.
+// We don't scrape the registrar, so link the exchange's own checker instead: BSE covers mainboard
+// (listed on both) and BSE SME; NSE-only issues (NSE Emerge) need NSE's.
+export const getAllotmentCheckUrl = (ipo: {
+  ipo_dates?: { basis_of_allotment?: string };
+  ipo_details?: { ipo_listing?: string };
+} | null | undefined): string | null => {
+  const days = daysFromToday(ipo?.ipo_dates?.basis_of_allotment);
+  if (days === null || days > 0) return null;
+  const listing = ipo?.ipo_details?.ipo_listing || '';
+  return /nse/i.test(listing) && !/bse/i.test(listing)
+    ? 'https://www.nseindia.com/invest/check-trades-bids-verify-ipo-bids'
+    : 'https://www.bseindia.com/investors/appli_check.aspx';
 };
 
 // Extracts a signed numeric value out of a loosely-formatted percentage string (e.g. "▲ 21.4%", "-4.2%")

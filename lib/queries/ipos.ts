@@ -1,5 +1,6 @@
 import 'server-only';
 import { cache } from 'react';
+import { cached } from '@/lib/cache';
 import { getDb } from '@/lib/mongo';
 import { Ipo } from '@/app/models/ipo';
 import { IpoComprehensiveAnalysis } from '@/app/models/ipo_comprehensive_analysis';
@@ -162,7 +163,7 @@ function bucketIpos(ipoList: RawIpo[]) {
  * `full` controls how much of each document comes back. Public pages take the card
  * projection; the admin console needs the complete records.
  */
-async function loadIpoBuckets(full: boolean): Promise<IpoBuckets> {
+async function readIpoDocs(full: boolean) {
   const db = await getDb();
 
   const [ipos, analyses] = await Promise.all([
@@ -175,6 +176,15 @@ async function loadIpoBuckets(full: boolean): Promise<IpoBuckets> {
       .find({}, full ? {} : { projection: ANALYSIS_CARD_PROJECTION })
       .toArray(),
   ]);
+  return toPlain({ ipos, analyses });
+}
+
+// The public read takes ~3s against Atlas (Mongo still loads each full document to project it).
+// Only the raw documents are cached: bucketing depends on today's date and stays per-request.
+const readCardIpoDocs = cached(() => readIpoDocs(false), 'ipo-card-docs');
+
+async function loadIpoBuckets(full: boolean): Promise<IpoBuckets> {
+  const { ipos, analyses } = full ? await readIpoDocs(true) : await readCardIpoDocs();
 
   const analysisByIpoId = new Map<string, IpoComprehensiveAnalysis>();
   for (const analysis of analyses) {
@@ -230,7 +240,7 @@ export const getIpoBySlug = cache(async (slug: string) => {
 });
 
 /** Analysis + its parent IPO for /analysis/[slug]. */
-export const getAnalysisBySlug = cache(
+export const getAnalysisBySlug = cache(cached(
   async (slug: string): Promise<{ ipos_analysis: IpoComprehensiveAnalysis; ipo: Ipo } | null> => {
     const db = await getDb();
 
@@ -249,12 +259,19 @@ export const getAnalysisBySlug = cache(
       ipos_analysis: stripCitations(toPlain(analysis)),
       ipo,
     }) as unknown as { ipos_analysis: IpoComprehensiveAnalysis; ipo: Ipo };
-  }
-);
+  },
+  'analysis-by-slug'
+));
 
-/** Every analysis, for the /analysis index. */
-export const getAllAnalyses = cache(async (): Promise<IpoComprehensiveAnalysis[]> => {
+/**
+ * Every analysis slug with its last edit, for prerendering and the sitemap. Replaces a read of
+ * every full analysis document (~620KB, ~10s against Atlas) that only ever used the slug.
+ */
+export const getAnalysisSlugs = cache(cached(async (): Promise<{ slug: string; updated_at?: string }[]> => {
   const db = await getDb();
-  const analyses = await db.collection('ipo_comprehensive_analysis').find({}).toArray();
-  return stripCitations(toPlain(analyses)) as unknown as IpoComprehensiveAnalysis[];
-});
+  const docs = await db
+    .collection('ipo_comprehensive_analysis')
+    .find({ slug: { $nin: [null, ''] } }, { projection: { _id: 0, slug: 1, updated_at: 1 } })
+    .toArray();
+  return toPlain(docs) as unknown as { slug: string; updated_at?: string }[];
+}, 'analysis-slugs'));

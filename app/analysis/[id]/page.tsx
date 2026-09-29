@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import AnalysisPageClient from './AnalysisPageClient'
 import { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis"
 import { Ipo } from '@/app/models/ipo';
-import { getAnalysisBySlug, getAllAnalyses } from '@/lib/queries/ipos';
-import { buildShareDescription, closingLine, gmpLine } from '@/lib/share';
+import { getAnalysisBySlug, getAnalysisSlugs } from '@/lib/queries/ipos';
+import { buildShareDescription, closingLine, gmpLine, formatDay, overallScoreOf, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
 import {  ArrowLeftCircle, Clock, FileSearch } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
@@ -16,11 +16,8 @@ export const dynamicParams = true
 // Prerender every analysis slug at build time so the common case is a static file.
 export async function generateStaticParams() {
   try {
-    const analyses = await getAllAnalyses()
-    return analyses
-      .map((a) => a.slug)
-      .filter((slug): slug is string => Boolean(slug))
-      .map((slug) => ({ id: slug }))
+    const analyses = await getAnalysisSlugs()
+    return analyses.map(({ slug }) => ({ id: slug }))
   } catch {
     return []
   }
@@ -31,22 +28,6 @@ export async function generateStaticParams() {
 // it, every page view did that twice -- two HTTP round-trips, two full scans of the `ipos`
 // collection, nothing reused. getAnalysisBySlug is wrapped in React `cache`, so the two calls
 // below now share a single database read.
-
-// The page body scores an issue as the mean of its five section scores. Both call sites below
-// used to reimplement that from `summary_metrics` with misplaced parentheses -- one read
-// `a + b / 2`, the other `(a ?? 0 + b) / 2` -- which is how a share card ended up advertising
-// "12.0/10". Compute it once, the same way the page does.
-function overallScoreOf(analysis: IpoComprehensiveAnalysis): number {
-  const sections = [
-    analysis.fundamentals?.score,
-    analysis.risk_meter?.score,
-    analysis.performance?.score,
-    analysis.flexibility?.score,
-    analysis.time?.score,
-  ].map((n) => n ?? 0)
-
-  return sections.reduce((sum, n) => sum + n, 0) / sections.length
-}
 
 // Generate dynamic metadata - FIXED: Changed params to Promise type
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -106,35 +87,32 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     title,
     description,
     keywords: keywords.join(', '),
-    authors: [{ name: 'IPO Analysis Team' }],
-    creator: 'IPO Analysis Platform',
-    publisher: 'IPO Analysis Platform',
-    
-    // Open Graph metadata for social sharing
+    authors: [{ name: SITE_NAME }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
+
+    // The preview image is app/analysis/[id]/opengraph-image.tsx: a per-IPO card with the score,
+    // GMP and dates. Named explicitly, since openGraphBase's site card would otherwise win.
     openGraph: {
+      ...openGraphBase(),
+      images: [{ url: `/analysis/${id}/opengraph-image`, width: 1200, height: 630, alt: `${analysis.company_name} IPO analysis on ${SITE_NAME}` }],
+      type: 'article',
       title,
       description,
-      type: 'article',
       url: `/analysis/${id}`,
-      siteName: 'IPO Analysis Platform',
-      // The brand card rendered by app/opengraph-image.tsx. It has to be named here: defining
-      // `openGraph` on this page replaces the root one, so the inherited image would be dropped.
-      // Deliberately never `ipo.image_url` -- a shared link should carry our brand, not the
-      // issuing company's logo, which reads as if the company published it.
-      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: `${analysis.company_name} IPO analysis on IPO Milega` }],
-      locale: 'en_IN',
+      publishedTime: analysis.created_at ? String(analysis.created_at) : undefined,
+      modifiedTime: analysis.updated_at ? String(analysis.updated_at) : undefined,
+      section: 'IPO Analysis',
     },
-    
-    // Twitter Card metadata
+
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/twitter-image'],
+      images: [`/analysis/${id}/twitter-image`],
       creator: '@ipomilega',
     },
-    
-    // Additional SEO metadata
+
     robots: {
       index: true,
       follow: true,
@@ -146,77 +124,73 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         'max-snippet': -1,
       },
     },
-    
-    // Structured data for rich snippets
-    other: {
-      'article:published_time': new Date().toISOString(),
-      'article:modified_time': new Date().toISOString(),
-      'article:author': 'IPO Analysis Team',
-      'article:section': 'IPO Analysis',
-      'article:tag': keywords.slice(0, 5).join(','),
-    },
-    
-    // Canonical URL
+
     alternates: {
       canonical: `/analysis/${id}`,
     },
-    
-    // Additional metadata
+
     category: 'Finance',
-    classification: 'IPO Analysis',
   }
 }
 
-// Generate JSON-LD structured data
-function generateStructuredData(analysis: IpoComprehensiveAnalysis, id: string) {
-  const overallScore = overallScoreOf(analysis).toFixed(1)
-  
+// JSON-LD: the analysis as an Article, the facts people ask about as an FAQ (what answer engines
+// quote), and the breadcrumb trail. Every answer comes from the same record the page renders, and
+// a question is left out when its fact is missing rather than answered with a placeholder.
+function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | undefined, id: string) {
+  const name = analysis.company_name
+  const url = `${SITE_URL}/analysis/${id}`
+  const organization = { '@type': 'Organization', name: SITE_NAME, url: SITE_URL }
+  const opening = formatDay(analysis.time?.issue_dates?.opening)
+  const closing = formatDay(analysis.time?.issue_dates?.closing)
+  const allotment = formatDay(ipo?.ipo_dates?.basis_of_allotment || analysis.time?.allotment_timeline?.date)
+  const listing = formatDay(ipo?.ipo_dates?.ipo_listing_date || analysis.time?.listing_details?.expected_date)
+  const exchanges = analysis.time?.listing_details?.exchanges?.filter(Boolean).join(' and ')
+  const gmp = gmpLine(analysis.gmp_price_gain ?? ipo?.gmp_price_gain)
+  const priceBand = analysis.ipo_details?.price_band
+
+  const faq: [string, string | null][] = [
+    [`What is the price band of the ${name} IPO?`, priceBand ? `The ${name} IPO price band is ${priceBand}.` : null],
+    [`What is the ${name} IPO GMP?`, gmp ? `The latest grey market premium is ${gmp.replace(/^GMP /, '')}. GMP is unofficial and changes daily.` : null],
+    [`When does the ${name} IPO open and close?`, opening && closing ? `Bidding opens on ${opening} and closes on ${closing}.` : null],
+    [`What is the ${name} IPO allotment date?`, allotment ? `The basis of allotment is expected on ${allotment}.` : null],
+    [`When will ${name} shares list?`, listing ? `Listing is expected on ${listing}${exchanges ? ` on ${exchanges}` : ''}.` : null],
+    [`Where can I check ${name} IPO allotment status?`, `Once allotment is out, check it on the registrar's website or on the BSE or NSE allotment status page, using your PAN or application number.`],
+    [`What is IPO Milega's score for the ${name} IPO?`, `${overallScoreOf(analysis).toFixed(1)}/10, the average of its fundamentals, risk, performance, flexibility and timing scores.${analysis.fundamentals?.summary ? ` ${analysis.fundamentals.summary}` : ''}`],
+  ]
+
   return {
     '@context': 'https://schema.org',
-    '@type': 'FinancialProduct',
-    name: `${analysis.company_name} IPO`,
-    description: `${analysis.company_name} IPO analysis: financials, risk factors, peer comparison and an overall score.`,
-    provider: {
-      '@type': 'Organization',
-      name: 'IPO Analysis Platform',
-    },
-    offers: {
-      '@type': 'Offer',
-      priceCurrency: 'INR',
-      price: analysis.ipo_details.price_band,
-      availability: 'https://schema.org/InStock',
-      validFrom: analysis.time.issue_dates.opening,
-      validThrough: analysis.time.issue_dates.closing,
-    },
-    review: {
-      '@type': 'Review',
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: overallScore,
-        bestRating: '10',
-        worstRating: '0',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: `${name} IPO analysis`,
+        description: `${name} IPO analysis: financials, risk factors, peer comparison and an overall score.`,
+        url,
+        datePublished: analysis.created_at,
+        dateModified: analysis.updated_at ?? analysis.created_at,
+        author: organization,
+        publisher: organization,
+        about: { '@type': 'Corporation', name, description: analysis.fundamentals?.business_model },
       },
-      author: {
-        '@type': 'Organization',
-        name: 'IPO Analysis Team',
+      {
+        '@type': 'FAQPage',
+        mainEntity: faq
+          .filter((qa): qa is [string, string] => Boolean(qa[1]))
+          .map(([question, answer]) => ({
+            '@type': 'Question',
+            name: question,
+            acceptedAnswer: { '@type': 'Answer', text: answer },
+          })),
       },
-      reviewBody: analysis.fundamentals.summary,
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: overallScore,
-      bestRating: '10',
-      worstRating: '0',
-      ratingCount: '1',
-    },
-    url: `/analysis/${id}`,
-    datePublished: new Date().toISOString(),
-    dateModified: new Date().toISOString(),
-    mainEntity: {
-      '@type': 'Corporation',
-      name: analysis.company_name,
-      description: analysis.fundamentals.business_model,
-    }
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: 'IPO Analysis', item: `${SITE_URL}/analysis` },
+          { '@type': 'ListItem', position: 3, name: `${name} IPO analysis`, item: url },
+        ],
+      },
+    ],
   }
 }
 
@@ -277,49 +251,11 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
     )
   }
 
-  const structuredData = generateStructuredData(analysis.ipos_analysis, id)
+  const structuredData = generateStructuredData(analysis.ipos_analysis, analysis.ipo, id)
 
   return (
     <>
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData)
-        }}
-      />
-      
-      {/* Breadcrumb structured data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: [
-              {
-                '@type': 'ListItem',
-                position: 1,
-                name: 'Home',
-                item: '/',
-              },
-              {
-                '@type': 'ListItem',
-                position: 2,
-                name: 'IPO Analysis',
-                item: '/admin',
-              },
-              {
-                '@type': 'ListItem',
-                position: 3,
-                name: `${analysis.ipos_analysis.company_name} Analysis`,
-                item: `/analysis/${id}`,
-              },
-            ],
-          })
-        }}
-      />
-      
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <AnalysisPageClient analysis={analysis.ipos_analysis} ipo={analysis.ipo} />
     </>
   )

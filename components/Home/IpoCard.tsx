@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, CheckCircle, ClockAlert, Clock, TrendingUp, Layers, User, Users, Landmark, Lock, Building2, ChevronRight } from 'lucide-react';
+import { Calendar, CheckCircle, ClockAlert, Clock, TrendingUp, Layers, User, Users, Landmark, Building2, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { Ipo } from '@/app/models/ipo';
 import { IpoComprehensiveAnalysis } from '@/app/models/ipo_comprehensive_analysis';
 import { Card, CardContent, CardHeader } from '../ui/card';
@@ -29,6 +29,7 @@ import {
   getQibColor,
   applyQibAdjustment,
   describeQibAdjustment,
+  getAllotmentCheckUrl,
 } from './ipoFormat';
 
 const ALLOTMENT_ICONS: Record<AllotmentCategoryDef['key'], typeof User> = {
@@ -181,57 +182,29 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   );
 }
 
-// Closed IPO Row Component — bidding has ended but the stock hasn't listed yet.
-// A compact list row (not a full card): this is the window when people mostly want
-// two things at a glance — when allotment/listing happens, and their odds of getting shares.
-export function ClosedIpoRow({ ipo, analysis }: IpoCardProps) {
-  const [predictorCategory, setPredictorCategory] = useState<AllotmentCategoryDef['key'] | null>(null);
-
+// Closed IPO Card — bidding has ended but the stock hasn't listed yet. Deliberately lighter than
+// the live card: final GMP and subscription, the listing date, and where to check allotment
+// once it's out. ClosedIposSection groups these by allotment day.
+export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
   const baseScore = analysis?.risk_meter?.score || 0;
   const qibSignal = getQibSignal(ipo);
   const riskScore = applyQibAdjustment(baseScore, qibSignal);
-  const ipoType = getIpoType(ipo);
 
   const gmpPercent = parseEstListingPercent(ipo?.gmp_price_gain);
   const gmpIsPositive = gmpPercent !== null && gmpPercent >= 0;
   const totalSubscription = parseGainValue(ipo?.total_sr);
-  const qibSubscription = parseGainValue(ipo?.qib_sr);
+  const allotmentCheckUrl = getAllotmentCheckUrl(ipo);
 
   return (
-    <div className="flex flex-col gap-1.5 py-3.5 sm:py-4 border-b border-border">
-      <div className="flex items-center gap-2 sm:gap-3">
-        <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-chart-5 flex-shrink-0" />
-        <Badge variant="outline" className="rounded-md border-border bg-transparent text-foreground text-[10px] sm:text-[11px] font-mono font-medium uppercase tracking-wide px-1.5 sm:px-2 py-0.5 sm:py-1 sm:w-[92px] sm:justify-center flex-shrink-0">
-          {ipoType}
-        </Badge>
+    <div className="flex flex-col gap-3 rounded-xl bg-secondary p-4 font-sans">
+      <div className="flex items-center gap-3">
         <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} size="sm" />
-        <span className="font-serif font-semibold text-foreground truncate text-[15px] sm:text-base flex-1 min-w-0">
-          <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
-        </span>
-        <div className="hidden sm:flex items-center gap-6 flex-shrink-0">
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground">GMP</div>
-            <div className={`font-mono text-sm font-medium ${gmpPercent !== null ? (gmpIsPositive ? 'text-score-good' : 'text-score-bad') : 'text-muted-foreground/40'}`}>
-              {gmpPercent !== null ? `${gmpIsPositive ? '+' : ''}${gmpPercent}%` : 'N/A'}
-            </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-serif font-semibold text-foreground truncate">
+            <IpoTitleLink ipo={ipo} hasAnalysis={riskScore > 0} />
           </div>
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground">QIB</div>
-            <div className={`font-mono text-sm font-medium ${getQibColor(qibSignal)}`}>{qibSubscription !== null ? `${qibSubscription}x` : 'N/A'}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground">Total</div>
-            <div className="font-mono text-sm font-medium text-foreground">{totalSubscription !== null ? `${totalSubscription}x` : 'N/A'}</div>
-          </div>
+          <div className="text-[11px] font-mono uppercase tracking-wide text-muted-foreground">{getIpoType(ipo)}</div>
         </div>
-        <button
-          onClick={() => setPredictorCategory('retail')}
-          data-tour="check-odds"
-          className="inline-flex items-center gap-0.5 rounded-md border border-primary/40 bg-primary/[0.06] px-2 sm:px-2.5 py-1 sm:py-1.5 text-[11px] sm:text-xs font-mono font-medium text-primary hover:border-primary hover:bg-accent active:scale-[0.97] transition-all cursor-pointer flex-shrink-0"
-        >
-          Check odds
-          <ChevronRight className="w-3 h-3" />
-        </button>
         <span
           className={`font-serif font-semibold text-xl flex-shrink-0 ${riskScore > 0 ? getRiskTextColor(riskScore) : 'text-muted-foreground/40'}`}
           title={describeQibAdjustment(baseScore, qibSignal)}
@@ -239,18 +212,36 @@ export function ClosedIpoRow({ ipo, analysis }: IpoCardProps) {
           {riskScore > 0 ? riskScore : '–'}
         </span>
       </div>
-      <div className="text-xs sm:text-sm text-foreground/70 truncate pl-[22px] sm:pl-[172px]">
-        Allotment <span className="font-semibold text-foreground">{formatShortDateOrToday(ipo?.ipo_dates?.basis_of_allotment)}</span>
-        <span className="mx-1">&middot;</span>
-        Lists <span className="font-semibold text-foreground">{formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)}</span>
+
+      <div className="grid grid-cols-3 gap-2 text-sm">
+        <div>
+          <div className="text-xs text-muted-foreground">GMP</div>
+          <div className={`font-mono font-medium ${gmpPercent !== null ? (gmpIsPositive ? 'text-score-good' : 'text-score-bad') : 'text-muted-foreground/40'}`}>
+            {gmpPercent !== null ? `${gmpIsPositive ? '+' : ''}${gmpPercent}%` : 'N/A'}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-muted-foreground">Subscribed</div>
+          <div className="font-mono font-medium text-foreground">{totalSubscription !== null ? `${totalSubscription}x` : 'N/A'}</div>
+        </div>
+        <div className="text-right">
+          <div className="text-xs text-muted-foreground">Lists</div>
+          <div className="font-mono font-medium text-foreground">{formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)}</div>
+        </div>
       </div>
 
-      <AllotmentPredictorModal
-        ipo={ipo}
-        companyName={ipo?.upcoming_ipo_2025 || 'Company'}
-        initialCategory={predictorCategory}
-        onClose={() => setPredictorCategory(null)}
-      />
+      {allotmentCheckUrl && (
+        <a
+          href={allotmentCheckUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-tour="check-allotment"
+          className="inline-flex items-center justify-center gap-1 rounded-md bg-primary py-2 text-xs font-mono font-medium text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all"
+        >
+          Check allotment
+          <ArrowUpRight className="w-3.5 h-3.5" />
+        </a>
+      )}
     </div>
   );
 }

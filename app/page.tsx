@@ -16,6 +16,7 @@ import { Walkthrough } from '@/components/Home/Walkthrough';
 import { AnimatedWrapper } from '@/components/Home/AnimatedWrapper';
 import { AnimatedSection } from '@/components/Home/AnimatedSection';
 import { PageLoader } from '@/components/ui/loader';
+import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
 
 // ISR: the page is rendered once and served from cache as static HTML, then re-rendered in
 // the background at most once a minute. Visitors never wait on Mongo. Writes (admin edits,
@@ -57,12 +58,10 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://ipomilega.in',
+    ...openGraphBase(),
+    url: '/',
     title: 'IPO Milega | Every Indian IPO, Scored',
     description: 'Track live, upcoming and past Indian IPOs, with a scored breakdown of every prospectus.',
-    siteName: 'IPO Milega',
     // Image comes from app/opengraph-image.tsx (the brand mark), not a hardcoded file.
   },
   twitter: {
@@ -72,11 +71,32 @@ export const metadata: Metadata = {
     creator: '@ipomilega',
   },
   alternates: {
-    canonical: 'https://ipomilega.in',
+    canonical: '/',
   },
-  verification: {
-    google: 'your-google-verification-code',
-  },
+};
+
+// Who publishes the site, and what it is -- the entity answer engines cite. Home page only.
+const SITE_STRUCTURED_DATA = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/apple-icon.png`,
+      sameAs: ['https://x.com/ipomilega'],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: 'Live, upcoming and past Indian IPOs with GMP, subscription, allotment dates and a scored analysis of every prospectus.',
+      publisher: { '@id': `${SITE_URL}/#organization` },
+      inLanguage: 'en-IN',
+    },
+  ],
 };
 
 export default async function HomePage() {
@@ -84,6 +104,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_STRUCTURED_DATA) }} />
       <div className="relative z-10">
         <Suspense fallback={<HomePageSkeleton />}>
           <HomeContent dataPromise={homeDataPromise} />

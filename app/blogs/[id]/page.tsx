@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { openGraphBase } from "@/lib/share";
 import { notFound } from "next/navigation";
 import BlogDisplay from "./BlogDisplay";
 import { getBlogBySlug } from "@/lib/queries/blogs";
@@ -51,7 +52,10 @@ export async function generateMetadata({
     description: blog.meta_description,
     keywords: blog.tags.join(", "),
     authors: [{ name: blog.author }],
+    alternates: { canonical: `/blogs/${id}` },
     openGraph: {
+      ...openGraphBase(),
+      url: `/blogs/${id}`,
       title: blog.title,
       description: blog.meta_description,
       type: "article",

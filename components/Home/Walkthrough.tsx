@@ -47,9 +47,9 @@ const STEPS: Step[] = [
     body: '"1 in 40" means about 1 out of every 40 applicants gets shares. Tap any box to see the details.',
   },
   {
-    target: 'check-odds',
+    target: 'check-allotment',
     title: 'Closed IPOs',
-    body: 'Bidding is over for these. Tap "Check odds" to see your chances before allotment day.',
+    body: 'Bidding is over for these. Once allotment is out, tap "Check allotment" to see if you got shares.',
   },
 ];
 

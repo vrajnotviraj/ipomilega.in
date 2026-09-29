@@ -1,15 +1,19 @@
 import { Metadata } from "next";
+import { openGraphBase } from "@/lib/share";
 import { getIpoBuckets } from "@/lib/queries/ipos";
 import IposClient from "./IposClient";
 
 // ISR: rendered once and served as static HTML, refreshed in the background at most once a minute.
 export const revalidate = 60;
 
+const title = "All IPOs - Live, Upcoming & Listed";
+const description = "Browse every mainboard and SME IPO: price bands, issue sizes, key dates and analysis scores. Filter by status and type.";
+
 export const metadata: Metadata = {
-  title: "All IPOs - Live, Upcoming & Listed",
-  description:
-    "Browse every mainboard and SME IPO: price bands, issue sizes, key dates and analysis scores. Filter by status and type.",
+  title,
+  description,
   alternates: { canonical: "/ipos" },
+  openGraph: { ...openGraphBase(), title, description, url: "/ipos" },
 };
 
 /**

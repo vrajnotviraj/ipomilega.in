@@ -8,8 +8,24 @@
 // Everything here is pure and timezone-explicit, so it produces the same string on the server
 // (where the page is ISR-rendered) as in the browser.
 
+import type { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis";
+
 export const SITE_URL = "https://ipomilega.in";
 export const SITE_NAME = "IPO Milega";
+
+/**
+ * Shared by every page's `openGraph`. Next replaces the whole object per page rather than merging
+ * it, and a page that sets its own also drops the root app/opengraph-image, so the image is named
+ * here. Config images beat file-based ones, so a page with its own card names it explicitly.
+ * A function, not a constant: Next mutates the `images` it resolves, so a shared array came back
+ * empty on every page after the first.
+ */
+export const openGraphBase = () => ({
+  siteName: SITE_NAME,
+  locale: "en_IN",
+  type: "website" as const,
+  images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${SITE_NAME} - Prospectus analysis for every Indian IPO` }],
+});
 
 // Every date in an Indian IPO calendar is an IST date. The server may run anywhere, so "today"
 // is always resolved against Asia/Kolkata rather than the host clock's local day.
@@ -65,10 +81,7 @@ export function closingLine(
 }
 
 /**
- * "GMP ₹329 (29.53%)".
- *
- * `gmp_price_gain` already arrives as an amount with the gain in brackets, so the percentage is
- * only appended when the stored value doesn't carry one.
+ * "GMP ₹25 (+6.17%)" for a premium amount, "GMP +6.17%" for an estimated-listing string.
  */
 export function gmpLine(
   gmp: string | number | null | undefined,
@@ -76,6 +89,14 @@ export function gmpLine(
 ): string | null {
   const raw = gmp === null || gmp === undefined ? "" : String(gmp).trim();
   if (!raw || ["n/a", "na", "tba", "tbd", "-", "0"].includes(raw.toLowerCase())) return null;
+
+  // `gmp_price_gain` is the *estimated listing price* with the gain in brackets ("430 (6.17%)" on
+  // a ₹405 issue), so the amount is not the premium. Only the percentage is, so show that alone.
+  const estListing = raw.match(/^₹?\s*[\d,.]+\s*\(\s*([+-]?[\d.]+)\s*%\s*\)$/);
+  if (estListing) {
+    const pct = estListing[1];
+    return `GMP ${pct.startsWith("-") || pct.startsWith("+") ? pct : `+${pct}`}%`;
+  }
 
   const amount = raw.startsWith("₹") ? raw : `₹${raw}`;
   if (raw.includes("%")) return `GMP ${amount}`;
@@ -162,4 +183,20 @@ export function buildShareDescription(facts: ShareFacts): string {
   ].filter(Boolean);
 
   return parts.join(" ");
+}
+
+// The page body scores an issue as the mean of its five section scores. The metadata and
+// structured data once reimplemented that from `summary_metrics` with misplaced parentheses,
+// which is how a share card ended up advertising "12.0/10". The metadata, JSON-LD and preview
+// image all compute it here, the same way the page does.
+export function overallScoreOf(analysis: Pick<IpoComprehensiveAnalysis, 'fundamentals' | 'risk_meter' | 'performance' | 'flexibility' | 'time'>): number {
+  const sections = [
+    analysis.fundamentals?.score,
+    analysis.risk_meter?.score,
+    analysis.performance?.score,
+    analysis.flexibility?.score,
+    analysis.time?.score,
+  ].map((n) => n ?? 0)
+
+  return sections.reduce((sum, n) => sum + n, 0) / sections.length
 }

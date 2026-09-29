@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongo";
+import { cached } from "@/lib/cache";
 
-// Always read fresh: this feeds the /analysis list, which should show a new analysis the
-// moment it lands rather than whatever a cache captured earlier.
+// Feeds the /analysis list. The read goes through the shared server cache, which every
+// analysis write purges, so a new analysis still shows up the moment it lands.
 export const dynamic = "force-dynamic";
 
 // The /analysis table renders these fields and nothing else. Returning the whole document
@@ -18,17 +19,19 @@ const LIST_PROJECTION = {
     "summary_metrics.risk_meter": 1,
 } as const;
 
+const readAnalysisList = cached(async () => {
+    const {db} = await connectToDatabase();
+    const ipos = await db
+        .collection("ipo_comprehensive_analysis")
+        .find({}, { projection: LIST_PROJECTION })
+        .toArray();
+    return JSON.parse(JSON.stringify(ipos));
+}, "analysis-list");
+
 export async function GET() {
     try {
-        
-        const {db} = await connectToDatabase();
-        const ipos = await db
-            .collection("ipo_comprehensive_analysis")
-            .find({}, { projection: LIST_PROJECTION })
-            .toArray();
-        
-        const ipoList = ipos || [];
-        
+        const ipoList = await readAnalysisList();
+
         return NextResponse.json({
             message: "Data retrieved successfully",
             success: true,

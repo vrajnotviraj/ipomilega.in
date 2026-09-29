@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import SiteChrome from "@/components/SiteChrome";
+import { openGraphBase, SITE_NAME } from "@/lib/share";
 
 // Now a server component. It previously carried "use client", which meant every route
 // re-mounted the whole shell on the client, shipped better-auth/framer-motion/radix in the
@@ -15,6 +16,9 @@ export const metadata: Metadata = {
   },
   description:
     "Track live IPOs, upcoming listings and past performance with AI-generated analysis of every RHP/DRHP filing.",
+  applicationName: SITE_NAME,
+  openGraph: openGraphBase(),
+  twitter: { card: "summary_large_image", site: "@ipomilega" },
 };
 
 export default function RootLayout({
