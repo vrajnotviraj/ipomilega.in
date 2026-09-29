@@ -219,7 +219,7 @@ function AdminContent() {
     <div className="min-h-screen app-container pt-24 pb-16 font-sans">
       <div className="space-y-6">
         <div className="mb-2">
-          <div className="text-xs italic text-muted-foreground font-sans mb-1">§ Admin</div>
+          <div className="text-xs italic text-muted-foreground font-sans mb-1">Admin</div>
           <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground mb-1">Admin Dashboard</h1>
           <p className="text-sm text-muted-foreground">Manage IPO listings, analysis matrices and blogs</p>
         </div>

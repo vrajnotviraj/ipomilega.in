@@ -59,7 +59,8 @@ import {
 } from "@/lib/ipo-format";
 import { AllotmentPredictorModal } from "@/components/ipo/AllotmentPredictorModal";
 import { GmpTrendChart } from "@/components/charts/GmpTrendChart";
-import { buildShareMessage, type ShareFacts } from "@/lib/share";
+import { buildShareMessage, gmpLine, type ShareFacts } from "@/lib/share";
+import { parseEstListingPercent } from "@/lib/ipo-format";
 
 // Same icons as the home-page card, so both allotment rows read as one control.
 const ALLOTMENT_ICONS: Record<AllotmentCategoryDef["key"], typeof User> = {
@@ -853,6 +854,12 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   const gmpValue = editedAnalysis.gmp_price_gain || ipo.gmp_price_gain || "";
   const hasGmp = gmpValue && gmpValue !== "N/A" && gmpValue !== "TBD" && gmpValue !== "TBA";
+  // gmpValue is the estimated listing ("360 (31.25%)"), so the GMP tile shows the premium itself,
+  // matching the trend chart, and falls back to just the gain when no premium was scraped.
+  const gmpPercent = parseEstListingPercent(gmpValue);
+  const gmpTile = ipo.gmp_ipo_gmp && !isNaN(parseFloat(ipo.gmp_ipo_gmp))
+    ? `₹${ipo.gmp_ipo_gmp}${gmpPercent != null ? ` (${gmpPercent >= 0 ? "+" : ""}${gmpPercent}%)` : ""}`
+    : gmpLine(hasGmp ? gmpValue : null)?.replace(/^GMP /, "") ?? "N/A";
 
   // Built from the values this page renders, so a shared message never drifts from the page.
   const shareFacts: ShareFacts = {
@@ -885,12 +892,12 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   // Timing comes right after the overview: whether to apply now is the first question people bring.
   const sections = [
-    { key: "overview", num: "§00", label: "Overview" },
-    { key: "timing", num: "§01", label: "Timing", score: timeScore },
-    { key: "financials", num: "§02", label: "Financials", score: fundamentalsScore },
-    { key: "risk", num: "§03", label: "Risk", score: riskScore },
-    { key: "performance", num: "§04", label: "Performance", score: performanceScore },
-    { key: "flexibility", num: "§05", label: "Flexibility", score: flexibilityScore },
+    { key: "overview", num: "00", label: "Overview" },
+    { key: "timing", num: "01", label: "Timing", score: timeScore },
+    { key: "financials", num: "02", label: "Financials", score: fundamentalsScore },
+    { key: "risk", num: "03", label: "Risk", score: riskScore },
+    { key: "performance", num: "04", label: "Performance", score: performanceScore },
+    { key: "flexibility", num: "05", label: "Flexibility", score: flexibilityScore },
   ];
 
   // The scroll spy pauses during a tab's smooth scroll so it does not light up every section it passes.
@@ -1060,7 +1067,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
       </div>
 
       <div className="app-container py-8 space-y-10">
-        {/* §00 Overview */}
+        {/* 00 Overview */}
         <section
           ref={sectionRef("overview")}
           id="overview"
@@ -1118,13 +1125,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </div>
               <div>
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">GMP</div>
-                <EditableText
-                  value={gmpValue}
-                  onSave={(val) => handleInlineSave("gmp_price_gain", val)}
-                  isAdmin={isAdmin}
-                  textClassName="text-lg font-mono font-semibold text-score-good"
-                  renderText={(val) => <span>{val ? `₹${val}` : "N/A"}</span>}
-                />
+                {/* Live scraper value; admins correct the listing estimate below instead. */}
+                <div className="text-lg font-mono font-semibold text-score-good">{gmpTile}</div>
               </div>
             </div>
 
@@ -1330,14 +1332,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           )}
         </section>
 
-        {/* §01 Timing */}
+        {/* 01 Timing */}
         {editedAnalysis.time && (
           <section
             ref={sectionRef("timing")}
             id="timing"
           >
             <SectionHeading
-              num="§01"
+              num="01"
               title="Timing"
               score={timeScore}
               isAdmin={isAdmin}
@@ -1373,14 +1375,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           </section>
         )}
 
-        {/* §02 Financials */}
+        {/* 02 Financials */}
         {editedAnalysis.fundamentals && (
           <section
             ref={sectionRef("financials")}
             id="financials"
           >
             <SectionHeading
-              num="§02"
+              num="02"
               title="Financials"
               score={fundamentalsScore}
               isAdmin={isAdmin}
@@ -1521,14 +1523,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           </section>
         )}
 
-        {/* §03 Risk */}
+        {/* 03 Risk */}
         {editedAnalysis.risk_meter && (
           <section
             ref={sectionRef("risk")}
             id="risk"
           >
             <SectionHeading
-              num="§03"
+              num="03"
               title="Risk"
               score={riskScore}
               isAdmin={isAdmin}
@@ -1576,14 +1578,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           </section>
         )}
 
-        {/* §04 Performance */}
+        {/* 04 Performance */}
         {editedAnalysis.performance && (
           <section
             ref={sectionRef("performance")}
             id="performance"
           >
             <SectionHeading
-              num="§04"
+              num="04"
               title="Performance"
               score={performanceScore}
               isAdmin={isAdmin}
@@ -1695,14 +1697,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           </section>
         )}
 
-        {/* §05 Flexibility */}
+        {/* 05 Flexibility */}
         {editedAnalysis.flexibility && (
           <section
             ref={sectionRef("flexibility")}
             id="flexibility"
           >
             <SectionHeading
-              num="§05"
+              num="05"
               title="Flexibility"
               score={flexibilityScore}
               isAdmin={isAdmin}

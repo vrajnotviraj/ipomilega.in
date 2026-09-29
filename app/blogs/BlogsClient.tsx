@@ -39,7 +39,7 @@ export default function BlogsClient({ blogs }: { blogs: Blog[] }) {
     <div className="min-h-screen app-container pt-24 pb-16 font-sans">
       <div>
         <div className="mb-6">
-          <div className="text-xs italic text-muted-foreground mb-1">§ Notes</div>
+          <div className="text-xs italic text-muted-foreground mb-1">Notes</div>
           <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground">Blog</h1>
         </div>
 

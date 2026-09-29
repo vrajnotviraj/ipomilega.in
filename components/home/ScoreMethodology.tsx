@@ -1,31 +1,31 @@
 const MODULES = [
   {
-    num: '§01',
+    num: '01',
     title: 'Financial fundamentals',
     body: 'Revenue, profit, margins, leverage and key ratios across three fiscal years.',
   },
   {
-    num: '§02',
+    num: '02',
     title: 'Risk factors',
     body: 'Every named risk in the prospectus, sorted and weighed, plus any pending litigation.',
   },
   {
-    num: '§03',
+    num: '03',
     title: 'Performance',
     body: 'Growth history, management track record and standing against listed peers.',
   },
   {
-    num: '§04',
+    num: '04',
     title: 'Flexibility',
     body: 'How adaptable the business is to demand shocks, input costs and new markets.',
   },
   {
-    num: '§05',
+    num: '05',
     title: 'Timing',
     body: 'Issue size, market conditions and where this filing sits in the listing calendar.',
   },
   {
-    num: '§06',
+    num: '06',
     title: 'Final synthesis',
     body: 'Combines the 5 scores into one overall number, with a plain-English list of what looks good and what worries us.',
   },

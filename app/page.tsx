@@ -95,7 +95,7 @@ export default async function HomePage() {
   const { data, counts, blogList } = await getHomePageData();
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden paper-texture">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_STRUCTURED_DATA) }} />
       <div className="relative z-10">
         <div className="app-container pt-20 sm:pt-24">

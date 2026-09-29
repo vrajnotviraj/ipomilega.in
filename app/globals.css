@@ -160,3 +160,52 @@
     @apply bg-background text-foreground font-sans;
   }
 }
+
+/*
+ * Home background, kept close to how print sites do it: a flat paper tone does most of the work,
+ * with soft shading patches and a barely-there grain on top. Inline SVGs mean no requests, and there
+ * are no blend modes, since a full-page blend repaints on every scroll.
+ */
+.paper-texture::before,
+.paper-texture::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Soft shading patches for uneven ink absorption, plus grain whose alpha averages ~8% (max 16%). */
+.paper-texture::before {
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0 0.12 0.16 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 60% 40% at 15% 10%, rgb(120 95 50 / 0.13), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 85% 35%, rgb(120 95 50 / 0.1), transparent 70%),
+    radial-gradient(ellipse 70% 45% at 40% 80%, rgb(120 95 50 / 0.12), transparent 70%);
+  background-size: 200px, 100% 100%, 100% 100%, 100% 100%;
+}
+
+/* One faint dashed GMP-style trend line rising behind the top of the page, fading out downward. */
+.paper-texture::after {
+  inset: 0 0 auto;
+  height: 520px;
+  background-color: var(--primary);
+  opacity: 0.08;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Cpolyline points='18,212 88,233 159,230 229,230 300,249 371,227 441,228 512,208 582,191 653,208 724,183 794,162 865,144 935,160 1006,177 1076,156 1147,142 1200,130' fill='none' stroke='%23000' stroke-width='3' stroke-linejoin='round' stroke-dasharray='10 8' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"), linear-gradient(to bottom, #000 35%, transparent);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Cpolyline points='18,212 88,233 159,230 229,230 300,249 371,227 441,228 512,208 582,191 653,208 724,183 794,162 865,144 935,160 1006,177 1076,156 1147,142 1200,130' fill='none' stroke='%23000' stroke-width='3' stroke-linejoin='round' stroke-dasharray='10 8' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"), linear-gradient(to bottom, #000 35%, transparent);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.dark .paper-texture::before {
+  opacity: 0.6;
+}
+
+.dark .paper-texture::after {
+  background-color: var(--brand-mark);
+  opacity: 0.2;
+}

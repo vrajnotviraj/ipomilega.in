@@ -24,6 +24,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatIssueSize } from "@/lib/ipo-format";
+import { gmpLine } from "@/lib/share";
 
 type FilterType = "all" | "live" | "upcoming" | "past";
 
@@ -73,9 +74,8 @@ function getRiskColor(score: number) {
 }
 
 function formatGmpDisplay(ipo: IpoComprehensiveAnalysis) {
-  const val = ipo.gmp_price_gain || "";
-  if (!val || val === "N/A" || val === "TBD" || val === "TBA") return "N/A";
-  return val.includes("₹") ? val : `₹${val}`;
+  // gmp_price_gain holds the estimated listing ("360 (31.25%)"), so the GMP column shows the gain only.
+  return gmpLine(ipo.gmp_price_gain)?.replace(/^GMP /, "") ?? "N/A";
 }
 
 function formatPriceBand(priceBand: string | undefined) {

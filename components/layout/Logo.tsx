@@ -34,7 +34,7 @@ export function Logo({ size, className, showTagline = false }: { size: keyof typ
       <span className="flex items-baseline gap-2 min-w-0">
         <span className={cn("font-serif font-semibold tracking-tight text-foreground", SIZES[size].word)}>IPO Milega</span>
         {showTagline && (
-          <span className="hidden sm:inline text-xs italic text-muted-foreground font-sans">§ Prospectus Analysis</span>
+          <span className="hidden sm:inline text-xs italic text-muted-foreground font-sans">Prospectus Analysis</span>
         )}
       </span>
     </span>

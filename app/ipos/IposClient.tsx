@@ -120,7 +120,7 @@ export default function IposClient({ upcoming, live, past }: {
       </Suspense>
       <div>
         <div className="mb-6">
-          <div className="text-xs italic text-muted-foreground font-sans mb-1">§ Register</div>
+          <div className="text-xs italic text-muted-foreground font-sans mb-1">Register</div>
           <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground mb-1">All IPOs</h1>
           <p className="text-sm text-muted-foreground">{filteredRows.length} of {allRows.length} IPOs</p>
         </div>
