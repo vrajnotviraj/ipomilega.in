@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
     process.env.NEXT_DIST_DIR || (process.env.NODE_ENV === "development" ? ".next-dev" : ".next"),
   // Caps stale-while-revalidate at an hour; the default of a year lets CDNs serve a stale homepage for too long.
   expireTime: 3600,
+  // PostHog reverse proxy. Its API paths end in a slash (`/e/`), so Next must not redirect them.
+  skipTrailingSlashRedirect: true,
+  async rewrites() {
+    return [
+      { source: "/ingest/static/:path*", destination: "https://us-assets.i.posthog.com/static/:path*" },
+      { source: "/ingest/array/:path*", destination: "https://us-assets.i.posthog.com/array/:path*" },
+      { source: "/ingest/:path*", destination: "https://us.i.posthog.com/:path*" },
+    ];
+  },
   images: {
     // S3 objects send no Cache-Control and logos/covers are keyed by id, so cache them for 30 days.
     minimumCacheTTL: 60 * 60 * 24 * 30,

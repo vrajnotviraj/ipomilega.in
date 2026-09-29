@@ -1,6 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from "next/font/google";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { openGraphBase, SITE_NAME } from "@/lib/share";
@@ -30,7 +29,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="min-h-screen items-center">
         <SiteChrome>{children}</SiteChrome>
       </body>
-      {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
     </html>
   );
 }
