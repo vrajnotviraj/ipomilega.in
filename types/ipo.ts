@@ -38,6 +38,9 @@ export interface Ipo {
   ipo_market_lot: IpoMarketLot[];
   promoters: string;
   nii_sr: string;
+  // The two NII tiers; missing on IPOs captured before the split.
+  snii_sr?: string;
+  bnii_sr?: string;
   qib_sr: string;
   rii_sr: string;
   subscription_date_range: string;
@@ -47,7 +50,7 @@ export interface Ipo {
   // The exchange's own "updated as on" time; judge freshness on this, not subscription_scraped_at.
   subscription_captured_at?: string;
   subscription_source?: string;
-  // Retail only: QIB and NII allotment is proportionate, not a lottery, so they have no such figure.
+  // Retail only, from the scraper; the site computes every category's odds with getAllotmentRatio.
   retail_allotment_probability?: number | null;
   // While bidding is open, the probability means "if bidding closed now".
   subscription_is_provisional?: boolean;

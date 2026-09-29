@@ -53,8 +53,8 @@ import {
   getAllotmentProbability,
   getProbabilityColor,
   formatAllotmentOdds,
-  parseGainValue,
   ALLOTMENT_CATEGORIES,
+  getAllotmentRatio,
   type AllotmentCategoryDef,
 } from "@/lib/ipo-format";
 import { AllotmentPredictorModal } from "@/components/ipo/AllotmentPredictorModal";
@@ -797,12 +797,12 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   // The same odds the home-page card leads with.
   const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => {
-    const ratio = parseGainValue(ipo?.[cat.ratioField]);
+    const { lottery } = getAllotmentRatio(ipo, cat);
     return {
       ...cat,
       icon: ALLOTMENT_ICONS[cat.key],
-      probability: getAllotmentProbability(ratio),
-      odds: formatAllotmentOdds(ratio),
+      probability: getAllotmentProbability(lottery),
+      odds: formatAllotmentOdds(lottery),
     };
   });
 

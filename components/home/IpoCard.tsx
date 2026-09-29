@@ -18,6 +18,7 @@ import {
   formatShortDateOrToday,
   formatIssueSize,
   ALLOTMENT_CATEGORIES,
+  getAllotmentRatio,
   AllotmentCategoryDef,
   getQibSignal,
   getQibColor,
@@ -58,12 +59,12 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const gmpPercent = parseEstListingPercent(ipo?.gmp_price_gain);
 
   const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => {
-    const ratio = parseGainValue(ipo?.[cat.ratioField]);
+    const { lottery } = getAllotmentRatio(ipo, cat);
     return {
       ...cat,
       icon: ALLOTMENT_ICONS[cat.key],
-      probability: getAllotmentProbability(ratio),
-      odds: formatAllotmentPercent(ratio),
+      probability: getAllotmentProbability(lottery),
+      odds: formatAllotmentPercent(lottery),
     };
   });
 

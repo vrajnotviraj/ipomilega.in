@@ -11,7 +11,8 @@ import {
   getProbabilityColor,
   formatAllotmentOdds,
   describeAllotmentOdds,
-  parseGainValue,
+  getAllotmentRatio,
+  COMBINED_NII_NOTE,
 } from '@/lib/ipo-format';
 
 // Opens when initialCategory is set, on that category's tab.
@@ -33,9 +34,9 @@ export function AllotmentPredictorModal({
   }, [initialCategory]);
 
   const activeCategory = ALLOTMENT_CATEGORIES.find((c) => c.key === activeKey) || ALLOTMENT_CATEGORIES[0];
-  const ratio = parseGainValue(ipo?.[activeCategory.ratioField]);
-  const probability = getAllotmentProbability(ratio);
-  const oddsSentence = describeAllotmentOdds(ratio);
+  const { subscription: ratio, lottery, usesCombinedNii } = getAllotmentRatio(ipo, activeCategory);
+  const probability = getAllotmentProbability(lottery);
+  const oddsSentence = describeAllotmentOdds(lottery);
   const lots = getMarketLotRows(ipo?.ipo_market_lot, activeCategory.matchKeyword);
 
   return (
@@ -71,7 +72,7 @@ export function AllotmentPredictorModal({
             <div className="text-right">
               <div className="text-xs text-muted-foreground mb-1">Your odds</div>
               <div className={`font-serif text-2xl font-semibold ${getProbabilityColor(probability)}`}>
-                {formatAllotmentOdds(ratio)}
+                {formatAllotmentOdds(lottery)}
               </div>
             </div>
           </div>
@@ -93,11 +94,11 @@ export function AllotmentPredictorModal({
             </div>
           </div>
 
-          {activeCategory.ratioNote && (
-            <p className="text-xs text-muted-foreground/80 italic">{activeCategory.ratioNote}</p>
-          )}
+          {usesCombinedNii && <p className="text-xs text-muted-foreground/80 italic">{COMBINED_NII_NOTE}</p>}
           <p className="text-xs text-muted-foreground/70 border-t border-border pt-3">
-            Estimated with the standard lottery approximation: at 40x subscription, about 1 in 40 applicants gets a lot. Actual allotment is decided by the registrar&apos;s lottery and may differ.
+            {activeKey === 'bhni'
+              ? 'B-HNI winners get the S-HNI minimum (about ₹2 lakh) by draw of lots, so the odds assume everyone applies at the ₹10 lakh minimum: roughly 5x better than the subscription alone suggests. Applying bigger doesn\'t raise your chance.'
+              : 'Estimated with the standard lottery approximation: at 40x subscription, about 1 in 40 applicants wins. Applying bigger doesn\'t raise your chance. The registrar\'s draw decides, and it may differ.'}
           </p>
         </div>
       </DialogContent>

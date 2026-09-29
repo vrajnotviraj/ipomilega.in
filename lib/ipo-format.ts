@@ -121,7 +121,7 @@ export const getAllotmentProbability = (subscriptionRatio: number | null): numbe
   return Math.max(1, Math.round(100 / subscriptionRatio));
 };
 
-// "1 in 40": the ratio is the N. One decimal below 10x so small books don't all read "1 in 1".
+// "1 in 40": the lottery ratio (see getAllotmentRatio) is the N. One decimal below 10x so small books don't all read "1 in 1".
 export const formatAllotmentOdds = (subscriptionRatio: number | null): string => {
   if (!isValidRatio(subscriptionRatio)) return 'N/A';
   if (subscriptionRatio <= 1) return '1 in 1';
@@ -152,23 +152,50 @@ export const getProbabilityColor = (probability: number | null): string => {
   return 'text-score-bad';
 };
 
-// The scraper has no separate S-HNI/B-HNI subscription, so both HNI tiers use the combined NII ratio.
+type RatioField = 'rii_sr' | 'snii_sr' | 'bnii_sr';
+
 export interface AllotmentCategoryDef {
   key: 'retail' | 'shni' | 'bhni';
   label: string;
   /** Regex fragment matched against ipo_market_lot[].application. */
   matchKeyword: string;
-  ratioField: 'rii_sr' | 'nii_sr';
-  ratioNote?: string;
+  ratioField: RatioField;
 }
-
-const HNI_RATIO_NOTE = "S-HNI and B-HNI subscription isn't tracked separately, so this uses the combined NII ratio.";
 
 export const ALLOTMENT_CATEGORIES: AllotmentCategoryDef[] = [
   { key: 'retail', label: 'Retail', matchKeyword: 'retail', ratioField: 'rii_sr' },
-  { key: 'shni', label: 'S-HNI', matchKeyword: 's[- ]?hni', ratioField: 'nii_sr', ratioNote: HNI_RATIO_NOTE },
-  { key: 'bhni', label: 'B-HNI', matchKeyword: 'b[- ]?hni', ratioField: 'nii_sr', ratioNote: HNI_RATIO_NOTE },
+  { key: 'shni', label: 'S-HNI', matchKeyword: 's[- ]?hni', ratioField: 'snii_sr' },
+  { key: 'bhni', label: 'B-HNI', matchKeyword: 'b[- ]?hni', ratioField: 'bnii_sr' },
 ];
+
+/**
+ * A category's subscription, and `lottery`: applicants per winning slot, the N in "1 in N".
+ *
+ * Retail winners get one lot. Since April 2022 (SEBI ICDR) every NII winner, S-HNI or B-HNI, gets
+ * the S-HNI minimum application (just over ₹2L) by draw of lots, from that tier's own pool. If
+ * everyone applies at their tier's minimum, N = subscription × slot ÷ minimum application. That's
+ * 1× for retail and S-HNI, and about ⅕ for B-HNI (₹2L slot, ₹10L minimum), so B-HNI odds run
+ * about 5x better than the same subscription in S-HNI. Bigger applications mean fewer applicants,
+ * so real odds are a little better than this for retail and S-HNI.
+ */
+export const getAllotmentRatio = (
+  ipo: Partial<Record<RatioField | 'nii_sr', string>> & { ipo_market_lot?: IpoMarketLot[] } | null | undefined,
+  cat: AllotmentCategoryDef
+): { subscription: number | null; lottery: number | null; usesCombinedNii: boolean } => {
+  const tierRatio = parseGainValue(ipo?.[cat.ratioField]);
+  // IPOs captured before the split, or from ipowatch, only have the combined NII figure.
+  const usesCombinedNii = tierRatio === null && cat.key !== 'retail';
+  const subscription = usesCombinedNii ? parseGainValue(ipo?.nii_sr) : tierRatio;
+  if (subscription === null || cat.key !== 'bhni') return { subscription, lottery: subscription, usesCombinedNii };
+
+  const slot = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, 's[- ]?hni').min?.shares);
+  const minApp = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, cat.matchKeyword).min?.shares);
+  // No lot table: fall back to the ₹2L/₹10L thresholds the rows would give.
+  const lottery = subscription * (slot && minApp ? slot / minApp : 0.2);
+  return { subscription, lottery, usesCombinedNii };
+};
+
+export const COMBINED_NII_NOTE = "This IPO's S-HNI and B-HNI subscription isn't split yet, so this uses the combined NII figure.";
 
 // The Minimum and Maximum application-size rows for one category.
 export const getMarketLotRows = (
