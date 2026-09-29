@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { getDb, closeConnection } from "@/lib/mongo";
+import { getDb } from "@/lib/mongo";
 
 let auth: unknown;
 
@@ -29,8 +29,3 @@ try {
 }
 
 export { auth };
-
-process.on("SIGTERM", async () => {
-  console.log("SIGTERM signal received. Closing MongoDB connection.");
-  await closeConnection();
-});

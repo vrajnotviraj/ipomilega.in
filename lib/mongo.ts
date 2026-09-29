@@ -45,7 +45,3 @@ export function getDb(): Promise<Db> {
   return globalWithMongo._mongoConnectPromise;
 }
 
-export async function closeConnection() {
-  await client.close();
-  globalWithMongo._mongoConnectPromise = undefined;
-}
