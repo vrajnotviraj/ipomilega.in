@@ -144,6 +144,18 @@ export const formatAllotmentOdds = (subscriptionRatio: number | null): string =>
   return `1 in ${n.toLocaleString('en-IN')}`;
 };
 
+// Allotment odds as a percentage ("2.5%") for the home-page card, where the compact form scans
+// better across a grid; the detail page and predictor modal keep the "1 in 40" form above.
+// Extra decimals at the low end so heavily oversubscribed books don't all read "0%".
+export const formatAllotmentPercent = (subscriptionRatio: number | null): string => {
+  if (subscriptionRatio === null || isNaN(subscriptionRatio) || subscriptionRatio < 0) return 'N/A';
+  if (subscriptionRatio <= 1) return '100%';
+  const pct = 100 / subscriptionRatio;
+  if (pct < 0.01) return '<0.01%';
+  const decimals = pct >= 10 ? 0 : pct >= 1 ? 1 : 2;
+  return `${Number(pct.toFixed(decimals))}%`;
+};
+
 // Plain-language sentence under the odds, for the predictor modal.
 export const describeAllotmentOdds = (subscriptionRatio: number | null): string | null => {
   if (subscriptionRatio === null || isNaN(subscriptionRatio) || subscriptionRatio < 0) return null;

@@ -19,7 +19,7 @@ import {
   parseEstListingPercent,
   getIpoType,
   getProbabilityColor,
-  formatAllotmentOdds,
+  formatAllotmentPercent,
   formatShortDateOrToday,
   formatIssueSize,
   ALLOTMENT_CATEGORIES,
@@ -96,7 +96,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
       ...cat,
       icon: ALLOTMENT_ICONS[cat.key],
       probability: getAllotmentProbability(ratio),
-      odds: formatAllotmentOdds(ratio),
+      odds: formatAllotmentPercent(ratio),
     };
   });
 
