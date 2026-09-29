@@ -112,7 +112,7 @@ export function PastIposSection({ ipos }: IpoSectionProps) {
       <div>
         <div className="flex justify-between items-center gap-4 mb-2">
           <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground">Recently listed</h2>
-          <span className="text-muted-foreground italic text-sm font-sans flex-shrink-0 hidden sm:inline">predicted vs. actual — our credibility record</span>
+          <span className="text-muted-foreground italic text-sm font-sans flex-shrink-0 hidden sm:inline">what we predicted vs. what happened</span>
         </div>
         {visibleIpos.length === 0 ? (
           <div className="flex items-center justify-center py-8">

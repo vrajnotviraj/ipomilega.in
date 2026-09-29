@@ -369,7 +369,7 @@ export default function AllIPOsPage() {
             <CardHeader>
               <CardTitle className="text-red-600 dark:text-red-400 flex items-center justify-center gap-2">
                 <FileText className="h-5 w-5" />
-                Failed to Load Data
+                Couldn&apos;t load the data
               </CardTitle>
               <CardDescription className="text-muted-foreground">{error}</CardDescription>
             </CardHeader>
@@ -396,7 +396,7 @@ export default function AllIPOsPage() {
                 All IPO Analysis
               </h1>
               <p className="text-xs sm:text-sm lg:text-base text-muted-foreground hidden sm:block">
-                Comprehensive fundamentals, risk assessment, timeline, and listing gain insights
+                Fundamentals, risks, key dates and listing-gain estimates for every IPO we&apos;ve scored
               </p>
             </div>
             {/* Search Input */}
@@ -458,11 +458,11 @@ export default function AllIPOsPage() {
         {filteredIpos.length === 0 ? (
           <Card className="max-w-2xl mx-auto bg-background/60 backdrop-blur-sm border border-muted/50 text-center p-8">
             <CardHeader>
-              <CardTitle className="text-foreground">No Analysis Found</CardTitle>
+              <CardTitle className="text-foreground">No analysis found</CardTitle>
               <CardDescription className="text-muted-foreground">
                 {searchQuery
                   ? `No analysis matching "${searchQuery}".`
-                  : "There are currently no IPOs with analysis in this category."}
+                  : "No IPO in this category has an analysis yet."}
               </CardDescription>
             </CardHeader>
             <CardContent>

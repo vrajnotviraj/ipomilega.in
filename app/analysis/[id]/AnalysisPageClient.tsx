@@ -347,7 +347,7 @@ const OverviewRadar = ({
         </text>
       </svg>
       <p className="text-xs text-muted-foreground text-center mt-2 max-w-[220px] font-sans">
-        Approx. gains potential <span className="font-mono font-semibold text-score-mid">{gainsPotential}%</span> — fundamentals
+        Approx. gains potential <span className="font-mono font-semibold text-score-mid">{gainsPotential}%</span> (fundamentals only)
       </p>
     </div>
   );
@@ -1231,7 +1231,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                     key={cat.key}
                     onClick={() => setPredictorCategory(cat.key)}
                     className="group relative flex flex-col items-center gap-1 text-center py-3 rounded-xl border border-primary/25 bg-primary/[0.04] hover:border-primary/60 hover:bg-accent active:scale-[0.97] transition-all cursor-pointer"
-                    aria-label={`${cat.label} allotment odds ${cat.odds} — tap for details`}
+                    aria-label={`${cat.label} allotment odds ${cat.odds}, tap for details`}
                   >
                     <ChevronRight className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-primary/60 group-hover:text-primary transition-colors" />
                     <cat.icon className="w-3.5 h-3.5 text-muted-foreground" />
@@ -1263,7 +1263,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Grey market data isn&apos;t available for this issue. The gains estimate is fundamentals-only — it does not factor in listing-day sentiment.
+                  Grey market data isn&apos;t available for this issue, so the gains estimate uses fundamentals only and ignores listing-day sentiment.
                 </p>
               )}
             </div>
@@ -1662,7 +1662,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               onSaveScore={(val) => handleInlineSave("risk_meter.score", parseInt(val) || 0)}
             />
             <p className="text-xs text-muted-foreground italic mb-4">
-              This score reads like a safety rating, not a risk gauge: 10/10 means the lowest risk, 1/10 means the highest risk.
+              Read this score as a safety rating: 10/10 means the lowest risk, 1/10 the highest.
             </p>
             <EditableText
               value={editedAnalysis.risk_meter.summary}

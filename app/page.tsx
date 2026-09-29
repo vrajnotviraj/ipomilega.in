@@ -27,9 +27,9 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'IPO Milega - Your Gateway to IPO Investments | Live, Upcoming & Past IPOs',
+    absolute: 'IPO Milega | Live, Upcoming & Past Indian IPOs, Scored',
   },
-  description: 'Discover the latest IPO opportunities with IPO Milega. Track live IPOs, upcoming listings, and past performance. Get expert insights and make informed investment decisions.',
+  description: 'Track live, upcoming and past Indian IPOs. Every prospectus gets a scored breakdown, next to GMP, subscription and your allotment odds.',
   keywords: [
     'IPO',
     'Initial Public Offering',
@@ -60,15 +60,15 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://ipomilega.in',
-    title: 'IPO Milega - Your Gateway to IPO Investments',
-    description: 'Discover the latest IPO opportunities with IPO Milega. Track live IPOs, upcoming listings, and past performance.',
+    title: 'IPO Milega | Every Indian IPO, Scored',
+    description: 'Track live, upcoming and past Indian IPOs, with a scored breakdown of every prospectus.',
     siteName: 'IPO Milega',
     // Image comes from app/opengraph-image.tsx (the brand mark), not a hardcoded file.
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'IPO Milega - Your Gateway to IPO Investments',
-    description: 'Discover the latest IPO opportunities. Track live IPOs, upcoming listings, and past performance.',
+    title: 'IPO Milega | Every Indian IPO, Scored',
+    description: 'Track live, upcoming and past Indian IPOs, with a scored breakdown of every prospectus.',
     creator: '@ipomilega',
   },
   alternates: {

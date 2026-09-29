@@ -5,26 +5,26 @@ import { ScoreMethodology } from "@/components/Home/ScoreMethodology";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "What IPO Milega is, where its IPO data comes from, and how every RHP/DRHP is scored the same way, every time.",
+    "What IPO Milega is, where its IPO data comes from, and how we score every RHP/DRHP by the same rules.",
   alternates: { canonical: "/about" },
 };
 
 const WHAT_WE_DO = [
   {
     title: "One place for every Indian IPO",
-    body: "Live, closed, upcoming and past issues in a single view — dates, price band, lot size, subscription figures and listing performance, kept current as the calendar moves.",
+    body: "Live, closed, upcoming and past issues in one list: dates, price band, lot size, subscription and listing performance, updated as the calendar moves.",
   },
   {
     title: "The prospectus, read for you",
-    body: "An RHP runs to hundreds of pages. We read every filing the same way and publish the financials, the named risks and the peer comparison as something you can scan in a few minutes.",
+    body: "An RHP runs to hundreds of pages. We read every filing the same way and pull out the financials, the named risks and the peer comparison, so you can get through it in a few minutes.",
   },
   {
-    title: "A score you can interrogate",
+    title: "A score you can pick apart",
     body: "Each IPO gets an overall score backed by six modules. The breakdown is on the page next to the number, so you can see which parts carried it and which dragged it down.",
   },
   {
     title: "Context around the numbers",
-    body: "Allotment odds, investor quota splits, multi-year financial charts and written analysis, so the figures sit in a story rather than a spreadsheet.",
+    body: "Allotment odds, investor quota splits, multi-year financial charts and a written take, so you know what the numbers mean for this issue.",
   },
 ];
 
@@ -36,10 +36,10 @@ export default function AboutPage() {
           About IPO Milega
         </h1>
         <p className="text-muted-foreground font-sans text-base sm:text-lg leading-relaxed">
-          IPO Milega tracks every Indian Initial Public Offering and turns the filings
-          behind them into something a regular investor can actually read. No tips, no
-          calls to buy — just the prospectus, the financials and the risks, laid out the
-          same way for every issue.
+          IPO Milega tracks every Indian IPO and turns the filings behind it into
+          something a regular investor can actually read. You get the prospectus, the
+          financials and the risks, laid out the same way for every issue. We don&apos;t
+          give tips or tell you what to buy.
         </p>
       </section>
 
@@ -48,7 +48,7 @@ export default function AboutPage() {
           What we do
         </h2>
         <p className="text-muted-foreground text-sm sm:text-base font-sans max-w-2xl">
-          Four things, and we try to do them consistently rather than quickly.
+          Four things, done the same way for every issue.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-8">
@@ -71,19 +71,19 @@ export default function AboutPage() {
           Where the data comes from
         </h2>
         <p className="text-muted-foreground font-sans text-sm sm:text-base leading-relaxed mb-4">
-          IPO details, subscription figures and listing prices are sourced from public
-          filings and exchange disclosures. Analysis is generated from the RHP/DRHP a
-          company files with SEBI, then reviewed before it is published. Live numbers —
-          subscription and grey market premium in particular — move through the day, so
-          treat what you see as the latest reading rather than a settled figure.
+          IPO details, subscription figures and listing prices come from public filings
+          and exchange disclosures. We generate the analysis from the RHP/DRHP a company
+          files with SEBI and review it before it goes live. Live numbers (subscription
+          and grey market premium especially) move through the day, so treat what you
+          see as the latest reading.
         </p>
         <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground mb-4 mt-10">
           A note on what this isn&apos;t
         </h2>
         <p className="text-muted-foreground font-sans text-sm sm:text-base leading-relaxed">
-          Nothing on IPO Milega is investment advice, and we are not a registered
-          investment adviser. Scores are a summary of what a filing says, not a prediction
-          of what a stock will do. Read the prospectus, weigh your own position, and speak
+          Nothing on IPO Milega is investment advice, and we aren&apos;t a registered
+          investment adviser. A score sums up what the filing says. It can&apos;t tell you
+          what the stock will do after listing. Read the prospectus, weigh your own position, and speak
           to a qualified adviser before you apply.
         </p>
       </section>

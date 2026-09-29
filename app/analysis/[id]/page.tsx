@@ -175,7 +175,7 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, id: string) 
     '@context': 'https://schema.org',
     '@type': 'FinancialProduct',
     name: `${analysis.company_name} IPO`,
-    description: `Comprehensive IPO analysis of ${analysis.company_name} with detailed fundamentals, risk assessment, and investment potential evaluation.`,
+    description: `${analysis.company_name} IPO analysis: financials, risk factors, peer comparison and an overall score.`,
     provider: {
       '@type': 'Organization',
       name: 'IPO Analysis Platform',
@@ -237,11 +237,11 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
             
             <div className="space-y-2">
               <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
-                Analysis In Progress
+                Analysis in progress
               </h1>
               <p className="text-slate-600 leading-relaxed">
-                We&apos;re currently preparing a comprehensive analysis for this IPO. 
-                Our team is working diligently to provide you with detailed insights.
+                We&apos;re still working through this IPO&apos;s prospectus. The analysis
+                shows up here once we&apos;ve reviewed it.
               </p>
             </div>
           </div>
@@ -250,7 +250,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
           <div className="flex items-center justify-center gap-3 p-4 bg-[#93c5fd] rounded-lg border border-[#93c5fd]">
             <Clock className="h-5 w-5 text-white animate-pulse" />
             <span className="text-sm font-medium text-white">
-              Expected completion: Soon
+              Should be ready soon
             </span>
           </div>
 

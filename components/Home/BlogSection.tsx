@@ -103,8 +103,8 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
               <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground mb-2 flex flex-col items-center gap-2 sm:flex-row sm:items-center sm:gap-3">
                 <MailOpen className="w-7 h-7 text-muted-foreground" />
                 <div>
-                  <div>Stay Updated with IPOs</div>
-                  <div className="text-muted-foreground mt-2 font-sans text-sm sm:text-base font-normal">Get exclusive IPO insights, market analysis, and GMP updates delivered to your inbox.</div>
+                  <div>Get IPO updates by email</div>
+                  <div className="text-muted-foreground mt-2 font-sans text-sm sm:text-base font-normal">New analyses and GMP moves, sent straight to your inbox.</div>
                 </div>
               </h2>
             </div>

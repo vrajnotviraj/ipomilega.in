@@ -10,7 +10,7 @@ import SiteChrome from "@/components/SiteChrome";
 export const metadata: Metadata = {
   metadataBase: new URL("https://ipomilega.in"),
   title: {
-    default: "IPO Milega - Your Gateway to IPO Investments",
+    default: "IPO Milega | Every Indian IPO, Scored",
     template: "%s | IPO Milega",
   },
   description:

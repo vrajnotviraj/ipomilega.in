@@ -10,7 +10,7 @@ const MODULES = [
   {
     num: '§02',
     title: 'Risk factors',
-    body: 'Every named risk in the prospectus, categorised and weighed — plus litigation exposure.',
+    body: 'Every named risk in the prospectus, sorted and weighed, plus any pending litigation.',
   },
   {
     num: '§03',
@@ -30,7 +30,7 @@ const MODULES = [
   {
     num: '§06',
     title: 'Final synthesis',
-    body: 'Reconciles the five scores into one overall score and a plain-English summary of strengths and concerns.',
+    body: 'Combines the 5 scores into one overall number, with a plain-English list of what looks good and what worries us.',
   },
 ];
 
@@ -42,7 +42,7 @@ export function ScoreMethodology() {
           How the score is built
         </h2>
         <p className="text-muted-foreground text-sm sm:text-base font-sans max-w-2xl">
-          Six automated modules read every RHP/DRHP the same way, every time. Five score independently; the sixth reconciles them into one verdict.
+          Six automated modules read every RHP/DRHP by the same rules. Five of them score on their own, and the sixth combines those into one verdict.
         </p>
         <p className="text-muted-foreground text-sm font-sans max-w-2xl mt-3">
           From the closing day, institutional (QIB) demand nudges the score by up to 1.5 points: a strong QIB book adds to it, and
