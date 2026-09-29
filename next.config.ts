@@ -1,20 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // `next dev` wipes its build directory on boot, which pulls files out from under a server
-  // started by `next start` from the same directory -- running both (staging on :3100, dev on
-  // :3000) left the production server reading half-deleted manifests. Dev therefore builds into
-  // its own `.next-dev`; override with NEXT_DIST_DIR if needed.
+  // `next dev` wipes its build dir on boot, so it builds into `.next-dev` to not break a `next start` in the same folder.
   distDir:
     process.env.NEXT_DIST_DIR || (process.env.NODE_ENV === "development" ? ".next-dev" : ".next"),
-  // ISR pages go out with `s-maxage=<revalidate>, stale-while-revalidate=<expireTime - revalidate>`.
-  // The default expireTime is a year, which lets any CDN/proxy in front keep handing out a
-  // stale homepage "while revalidating" more or less indefinitely -- the refresh-until-it-
-  // updates symptom. Cap staleness at an hour; nothing on the site should be older than that.
+  // Caps stale-while-revalidate at an hour; the default of a year lets CDNs serve a stale homepage for too long.
   expireTime: 3600,
   images: {
-    // Upstream S3 objects carry no Cache-Control, so the optimizer's default of 60s applied.
-    // Logos and blog covers are keyed by id and effectively immutable.
+    // S3 objects send no Cache-Control and logos/covers are keyed by id, so cache them for 30 days.
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {

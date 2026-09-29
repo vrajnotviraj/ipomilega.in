@@ -2,43 +2,26 @@ import { NextResponse } from "next/server";
 import { getIpoBucketsFull } from "@/lib/queries/ipos";
 import { getAllBlogs } from "@/lib/queries/blogs";
 
-// Backs the admin console, which needs every bucket plus the flat `all` list and the blog
-// list. Public pages no longer call this -- /ipos server-renders from getIpoBuckets() directly
-// instead of shipping a blank page and fetching this payload from the browser.
+// Admin console data: complete records for every bucket, plus the flat list and blogs.
 export const dynamic = "force-dynamic";
 
 export async function GET() {
     try {
-        const [buckets, blogs] = await Promise.all([getIpoBucketsFull(), getAllBlogs()]);
-
-        const all = [
-            ...buckets.live,
-            ...buckets.upcoming,
-            ...buckets.closed,
-            ...buckets.past,
-            ...buckets.tba,
-        ];
+        const [{ upcoming, live, closed, past, tba, recently_added }, blogs] =
+            await Promise.all([getIpoBucketsFull(), getAllBlogs()]);
+        const all = [...live, ...upcoming, ...closed, ...past, ...tba];
 
         return NextResponse.json({
             message: "Data retrieved successfully",
             success: true,
-            data: {
-                upcoming: buckets.upcoming,
-                live: buckets.live,
-                closed: buckets.closed,
-                past: buckets.past,
-                tba: buckets.tba,
-                all,
-                recently_added: buckets.recently_added,
-                blogs,
-            },
+            data: { upcoming, live, closed, past, tba, all, recently_added, blogs },
             counts: {
-                upcoming: buckets.upcoming.length,
-                live: buckets.live.length,
-                closed: buckets.closed.length,
-                past: buckets.past.length,
-                tba: buckets.tba.length,
-                recently_added: buckets.recently_added.length,
+                upcoming: upcoming.length,
+                live: live.length,
+                closed: closed.length,
+                past: past.length,
+                tba: tba.length,
+                recently_added: recently_added.length,
                 total: all.length,
             },
         });

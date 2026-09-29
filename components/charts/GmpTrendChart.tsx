@@ -1,22 +1,7 @@
 "use client";
 
-/**
- * How the grey-market premium has moved, one point per date.
- *
- * The question this answers is "is GMP going up or down", so the direction is
- * stated in words at the top and the line is the evidence for it, not the other
- * way round. A reader who only looks at the first line has their answer.
- *
- * Three things about the data shape drive the design:
- *
- *   1. One point per IST day, showing that day's latest GMP. The capture runs
- *      hourly and each new quote replaces the day's value. A flat day still
- *      gets its point -- 14 on the 24th and still 14 on the 25th is two points.
- *   2. Dots are coloured by the day-on-day move.
- *   3. GMP in rupees and the estimated gain in percent are two scales. They
- *      share a card but never a plot: the line is rupees, on one axis, and the
- *      percentage lives in the tooltip and the table.
- */
+// How GMP has moved, one point per IST day: the direction in words on top, the line as evidence below.
+// The line is rupees only; the estimated gain percent is a different scale, so it lives in the tooltip.
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -48,21 +33,20 @@ interface ChartPoint extends GmpDay {
   delta: number | null;
 }
 
-interface GmpTrendChartProps {
-  ipoId: string;
-  /** Rendered above the chart so the card explains itself without a legend. */
-  companyName?: string;
-}
-
 const IST = "Asia/Kolkata";
 const DAY_MS = 24 * 60 * 60 * 1000;
+const DIRECTION = {
+  up: { word: "Up", color: "text-score-good", Icon: ArrowUpRight },
+  down: { word: "Down", color: "text-score-bad", Icon: ArrowDownRight },
+  flat: { word: "Flat", color: "text-muted-foreground", Icon: ArrowRight },
+};
 
 function formatDay(ts: number) {
   return new Date(ts).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: IST });
 }
 
-function formatTime(ts: number) {
-  return new Date(ts).toLocaleTimeString("en-IN", {
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("en-IN", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -74,7 +58,7 @@ function formatRupees(value: number) {
   return `₹${value.toLocaleString("en-IN")}`;
 }
 
-/** A signed rupee delta, e.g. "+₹10" / "-₹4" / "₹0". */
+/** A signed rupee change, e.g. "+₹10", "-₹4", "₹0". */
 function formatDelta(value: number) {
   if (value === 0) return "₹0";
   return `${value > 0 ? "+" : "-"}₹${Math.abs(value).toLocaleString("en-IN")}`;
@@ -85,7 +69,12 @@ function deltaClass(delta: number | null) {
   return delta > 0 ? "text-score-good" : "text-score-bad";
 }
 
-export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
+function dotFill(delta: number | null) {
+  if (!delta) return "var(--chart-1)";
+  return delta > 0 ? "var(--score-good)" : "var(--score-bad)";
+}
+
+export function GmpTrendChart({ ipoId, companyName }: { ipoId: string; companyName?: string }) {
   const [points, setPoints] = useState<ChartPoint[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [showTable, setShowTable] = useState(false);
@@ -116,23 +105,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
     };
   }, [ipoId]);
 
-  const summary = useMemo(() => {
-    if (!points || points.length === 0) return null;
-    const first = points[0];
-    const last = points[points.length - 1];
-    const change = last.gmp - first.gmp;
-    return {
-      first,
-      last,
-      change,
-      // "Flat" is a real answer and deserves its own wording. A grey market
-      // that has not moved in three days is telling you something.
-      direction: change > 0 ? "up" : change < 0 ? "down" : "flat",
-    };
-  }, [points]);
-
-  // Ticks have to land on round numbers, so the axis is snapped to a 1/2/5 step
-  // rather than to the padded extremes of the data.
+  // Ticks land on round numbers: the axis snaps to a 1/2/5 step, not the padded data extremes.
   const { yDomain, yTicks } = useMemo(() => {
     const values = points?.map((p) => p.gmp) ?? [];
     const rawMin = values.length ? Math.min(...values) : 0;
@@ -144,8 +117,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
     const magnitude = 10 ** Math.floor(Math.log10(targetStep));
     const step = [1, 2, 5, 10].find((m) => m * magnitude >= targetStep)! * magnitude;
 
-    // GMP floors at zero in practice but can be quoted negative, so the floor is
-    // only held at zero when nothing in the series is below it.
+    // GMP can be quoted negative, so the floor holds at zero only when nothing is below it.
     const floor = Math.floor((rawMin - step / 2) / step) * step;
     const min = rawMin >= 0 ? Math.max(0, floor) : floor;
     const max = Math.ceil((rawMax + step / 2) / step) * step;
@@ -154,15 +126,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
     for (let v = min; v <= max + step / 2; v += step) ticks.push(Number(v.toFixed(4)));
     return { yDomain: [min, max] as [number, number], yTicks: ticks };
   }, [points]);
-
-  // Half a day either side, so the first and last dates sit inside the plot
-  // with room for their labels -- and a single day has an axis at all.
-  const xDomain = useMemo((): [number, number] => {
-    if (!points || points.length === 0) return [0, 1];
-    return [points[0].ts - DAY_MS / 2, points[points.length - 1].ts + DAY_MS / 2];
-  }, [points]);
-
-  const xTicks = useMemo(() => points?.map((p) => p.ts) ?? [], [points]);
 
   const header = (
     <div className="flex items-center justify-between gap-3 mb-3">
@@ -213,46 +176,35 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
     );
   }
 
+  const first = points[0];
   const last = points[points.length - 1];
-
-  const directionColor =
-    summary!.direction === "up"
-      ? "text-score-good"
-      : summary!.direction === "down"
-        ? "text-score-bad"
-        : "text-muted-foreground";
-
-  const DirectionIcon =
-    summary!.direction === "up" ? ArrowUpRight : summary!.direction === "down" ? ArrowDownRight : ArrowRight;
-
-  const directionWord =
-    summary!.direction === "up" ? "Up" : summary!.direction === "down" ? "Down" : "Flat";
+  const change = last.gmp - first.gmp;
+  const direction = DIRECTION[change > 0 ? "up" : change < 0 ? "down" : "flat"];
+  // Half a day either side, so the end dates have room for their labels and a single day still has an axis.
+  const xDomain: [number, number] = [first.ts - DAY_MS / 2, last.ts + DAY_MS / 2];
 
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       {header}
 
-      {/* The answer, in words, before the evidence. */}
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-4">
         <span className="font-mono text-2xl font-semibold text-foreground">
           {formatRupees(last.gmp)}
         </span>
         {points.length === 1 ? (
-          // A direction needs two days. Until there are, the card says what it
-          // has rather than implying a trend it cannot see yet.
           <span className="text-sm text-muted-foreground">First day, {formatDay(last.ts)}</span>
         ) : (
-          <span className={cn("flex items-center gap-1 text-sm font-medium", directionColor)}>
-            <DirectionIcon className="w-4 h-4" aria-hidden="true" />
-            {directionWord}
-            {summary!.change !== 0 && ` ${formatDelta(summary!.change)}`}
-            <span className="text-muted-foreground font-normal">since {formatDay(summary!.first.ts)}</span>
+          <span className={cn("flex items-center gap-1 text-sm font-medium", direction.color)}>
+            <direction.Icon className="w-4 h-4" aria-hidden="true" />
+            {direction.word}
+            {change !== 0 && ` ${formatDelta(change)}`}
+            <span className="text-muted-foreground font-normal">since {formatDay(first.ts)}</span>
           </span>
         )}
         {last.live && (
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <span className="w-1.5 h-1.5 rounded-full bg-score-good animate-pulse" aria-hidden="true" />
-            Live · as of {formatTime(new Date(last.as_of).getTime())} today
+            Live · as of {formatTime(last.as_of)} today
           </span>
         )}
       </div>
@@ -291,8 +243,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
           </table>
         </div>
       ) : (
-        // Height covers the plot AND the x-axis band, so the card never grows a
-        // nested scrollbar to reach its own tick labels.
+        // Height includes the x-axis band, so the card never needs a scrollbar to show its tick labels.
         <div className="h-[220px] -ml-2">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={points} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
@@ -303,7 +254,6 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                 </linearGradient>
               </defs>
 
-              {/* Hairline, solid, one step off the surface. */}
               <CartesianGrid vertical={false} stroke="var(--border)" strokeWidth={1} />
 
               <XAxis
@@ -311,7 +261,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                 type="number"
                 scale="time"
                 domain={xDomain}
-                ticks={xTicks}
+                ticks={points.map((p) => p.ts)}
                 interval="preserveStartEnd"
                 tickFormatter={formatDay}
                 tickLine={false}
@@ -338,7 +288,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                     <div className="rounded-lg border border-border bg-background px-3 py-2 shadow-lg">
                       <p className="text-xs text-muted-foreground">
                         {formatDay(point.ts)}
-                        {point.live && ` · Live, ${formatTime(new Date(point.as_of).getTime())}`}
+                        {point.live && ` · Live, ${formatTime(point.as_of)}`}
                       </p>
                       <p className="font-mono text-sm font-semibold text-foreground">
                         GMP {formatRupees(point.gmp)}
@@ -359,8 +309,7 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
               />
 
               <Area
-                // Straight segments: a quote jumps rather than glides, and a
-                // smoothed curve would overshoot between days.
+                // Straight segments: a smoothed curve would overshoot between days.
                 type="linear"
                 dataKey="gmp"
                 stroke="var(--chart-1)"
@@ -368,17 +317,11 @@ export function GmpTrendChart({ ipoId, companyName }: GmpTrendChartProps) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 fill="url(#gmpWash)"
-                // One dot per date, coloured by the day-on-day move.
-                dot={(props: { cx?: number; cy?: number; index?: number; payload?: ChartPoint }) => {
-                  const { cx, cy, index, payload } = props;
+                // One dot per day, coloured by the day-on-day move.
+                dot={({ cx, cy, index, payload }: { cx?: number; cy?: number; index?: number; payload?: ChartPoint }) => {
                   const key = `gmp-dot-${index}`;
                   if (cx == null || cy == null || !payload) return <g key={key} />;
-                  const fill =
-                    payload.delta && payload.delta > 0
-                      ? "var(--score-good)"
-                      : payload.delta && payload.delta < 0
-                        ? "var(--score-bad)"
-                        : "var(--chart-1)";
+                  const fill = dotFill(payload.delta);
                   return (
                     <g key={key}>
                       {payload.live && <circle cx={cx} cy={cy} r={8} fill={fill} opacity={0.25} />}

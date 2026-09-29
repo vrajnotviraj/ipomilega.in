@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { openGraphBase } from "@/lib/share";
 
-// /analysis is a client page and can't export metadata itself. /analysis/[id] sets every one
-// of these fields, so this only ever shows on the index.
+// Metadata for the /analysis index, which is a client page and cannot export it itself.
 const title = "IPO Analysis - Every Prospectus, Scored";
 const description =
   "Scored analysis of every Indian mainboard and SME IPO: fundamentals, risks, financials, GMP and key dates, read from the RHP/DRHP.";

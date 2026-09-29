@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongo";
+import { getDb } from "@/lib/mongo";
 import { cached } from "@/lib/cache";
 
-// Feeds the /analysis list. The read goes through the shared server cache, which every
-// analysis write purges, so a new analysis still shows up the moment it lands.
+// Feeds the /analysis list. The server cache is purged on every analysis write.
 export const dynamic = "force-dynamic";
 
-// The /analysis table renders these fields and nothing else. Returning the whole document
-// (~10KB each: every section's prose, tables, financials) made the list slow to fill in.
+// Only the fields the /analysis table renders; a full document is ~10KB.
 const LIST_PROJECTION = {
     company_name: 1,
     slug: 1,
@@ -20,7 +18,7 @@ const LIST_PROJECTION = {
 } as const;
 
 const readAnalysisList = cached(async () => {
-    const {db} = await connectToDatabase();
+    const db = await getDb();
     const ipos = await db
         .collection("ipo_comprehensive_analysis")
         .find({}, { projection: LIST_PROJECTION })
@@ -30,16 +28,14 @@ const readAnalysisList = cached(async () => {
 
 export async function GET() {
     try {
-        const ipoList = await readAnalysisList();
-
         return NextResponse.json({
             message: "Data retrieved successfully",
             success: true,
-            ipos_analysis: ipoList
+            ipos_analysis: await readAnalysisList(),
         }, { headers: { "Cache-Control": "no-store" } });
     }
     catch (error) {
-        console.error("Error in /api/admin:", error);
+        console.error("Error in /api/analysis:", error);
         return NextResponse.json({
             message: error instanceof Error ? error.message : "Something went wrong",
             success: false,

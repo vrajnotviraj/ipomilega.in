@@ -1,63 +1,48 @@
 import { NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongo";
+import { getDb } from "@/lib/mongo";
 import { revalidateSite } from "@/lib/revalidate";
 import { ObjectId } from "mongodb";
+import { Blog } from "@/types/ipo";
 
-interface BlogPost {
-    _id: string
-    title: string
-    slug: string
-    content: string
-    excerpt: string
-    tags: string[]
-    category: string
-    status: string
-    meta_description: string
-    image_url?: string
-    author: string
-    ipo_id: string
-    created_at: string
-    updated_at: string
-}
+const serverError = (error: unknown) => {
+    console.error("Error in /api/blogs:", error);
+    return NextResponse.json({
+        message: error instanceof Error ? error.message : "Something went wrong",
+        success: false,
+    }, { status: 500 });
+};
 
 export async function GET() {
     try {
+        const db = await getDb();
+        const publishedIn = (category: string) => db.collection("categories").find({ category, status: "published" }).toArray();
 
-        const {db} = await connectToDatabase();
-        const ipos = await db.collection("blogs").find({ sort: { created_at: -1 }}).toArray();
-        const ipo_analysis = await db.collection("categories").find({category: "IPO Analysis",status: "published"}).toArray();
-        const company_review = await db.collection("categories").find({category: "Company Review",status: "published"}).toArray();
-        const market_news = await db.collection("categories").find({category: "Market News",status: "published"}).toArray();
-        const investment_guide = await db.collection("categories").find({category: "Investment Guide",status: "published"}).toArray();
-
-        const ipoList = ipos || [];
+        const ipos = await db.collection("blogs").find({ sort: { created_at: -1 } }).toArray();
+        const ipo_analysis = await publishedIn("IPO Analysis");
+        const company_review = await publishedIn("Company Review");
+        const market_news = await publishedIn("Market News");
+        const investment_guide = await publishedIn("Investment Guide");
 
         return NextResponse.json({
             message: "Data retrieved successfully",
             success: true,
-            ipos: ipoList,
-            ipo_analysis: ipo_analysis,
-            company_review: company_review,
-            market_news: market_news,
-            investment_guide: investment_guide
+            ipos,
+            ipo_analysis,
+            company_review,
+            market_news,
+            investment_guide,
         });
-    }
-    catch (error) {
-        console.error("Error in /api/admin:", error);
-        return NextResponse.json({
-            message: error instanceof Error ? error.message : "Something went wrong",
-            success: false,
-        }, { status: 500 });
+    } catch (error) {
+        return serverError(error);
     }
 }
 
 export async function POST(request: Request) {
     try {
-        const { db } = await connectToDatabase();
+        const db = await getDb();
+        const body: Blog = await request.json();
+        const now = new Date().toISOString();
 
-        const body: BlogPost = await request.json();
-        body.created_at = new Date().toISOString();
-        body.updated_at = new Date().toISOString();
         await db.collection("blogs").insertOne({
             _id: new ObjectId(body._id),
             title: body.title,
@@ -71,27 +56,14 @@ export async function POST(request: Request) {
             image_url: body.image_url,
             author: body.author,
             ipo_id: body.ipo_id,
-            created_at: body.created_at,
-            updated_at: body.updated_at
+            created_at: now,
+            updated_at: now,
         });
-
-        const slug = body.slug;
-        await db.collection("blogs").updateOne(
-            { _id: new ObjectId(body.ipo_id) },
-            { $set: { slug: slug } }
-        );
+        await db.collection("blogs").updateOne({ _id: new ObjectId(body.ipo_id) }, { $set: { slug: body.slug } });
         revalidateSite();
 
-        return NextResponse.json({
-            message: "Data retrieved successfully",
-            success: true,
-        });
-    }
-    catch (error) {
-        console.error("Error in /api/admin:", error);
-        return NextResponse.json({
-            message: error instanceof Error ? error.message : "Something went wrong",
-            success: false,
-        }, { status: 500 });
+        return NextResponse.json({ message: "Data retrieved successfully", success: true });
+    } catch (error) {
+        return serverError(error);
     }
 }

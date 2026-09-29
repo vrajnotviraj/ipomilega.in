@@ -1,10 +1,7 @@
 import { ImageResponse } from "next/og";
 import { BrandMark, CREAM, INK, OG_SIZE, TEAL } from "@/lib/og";
 
-// Link-preview card for every page (WhatsApp, X, LinkedIn, iMessage). Drawn from the approved
-// ring mark in public/logo/ rather than the old public/og-image.png, which still carried the
-// retired bar-chart logo and weighed 1.5MB -- over WhatsApp's ~600KB cut-off, so shared links
-// often arrived with no image at all. This renders to a PNG of a few tens of KB.
+// Link-preview card for every page. Drawn, not a static PNG, so it stays under WhatsApp's ~600KB image limit.
 export const alt = "IPO Milega - Prospectus analysis for every Indian IPO";
 export const size = OG_SIZE;
 export const contentType = "image/png";

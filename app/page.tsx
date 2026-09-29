@@ -1,26 +1,20 @@
-import { BlogSection } from '@/components/Home/BlogSection';
-import { LiveIposSection } from '@/components/Home/LiveIposSection';
-import { ClosedIposSection } from '@/components/Home/ClosedIposSection';
-import { IpoTicker } from '@/components/Home/IpoTicker';
-import { PastIposSection } from '@/components/Home/PastIposSection';
-import { UpcomingIposSection } from '@/components/Home/UpcomingIpos';
-import { ScoreMethodology } from '@/components/Home/ScoreMethodology';
-import { AnnouncementBanner } from '@/components/Home/AnnouncementBanner';
+import { BlogSection } from '@/components/home/BlogSection';
+import { LiveIposSection } from '@/components/home/LiveIposSection';
+import { ClosedIposSection } from '@/components/home/ClosedIposSection';
+import { IpoTicker } from '@/components/home/IpoTicker';
+import { PastIposSection } from '@/components/home/PastIposSection';
+import { UpcomingIposSection } from '@/components/home/UpcomingIpos';
+import { ScoreMethodology } from '@/components/home/ScoreMethodology';
+import { AnnouncementBanner } from '@/components/home/AnnouncementBanner';
 import { getHomePageData } from '@/lib/data-fetching';
 import { Metadata } from 'next';
-import { HomePageData } from './types/homepage';
-import { Footer } from '@/components/Home/Footer';
-import { Walkthrough } from '@/components/Home/Walkthrough';
-import { AnimatedSection } from '@/components/Home/AnimatedSection';
-import { BoardProvider } from '@/components/Home/BoardContext';
+import { Footer } from '@/components/layout/Footer';
+import { Walkthrough } from '@/components/home/Walkthrough';
+import { AnimatedSection } from '@/components/home/AnimatedSection';
+import { BoardProvider } from '@/components/home/BoardContext';
 import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
 
-// ISR: the page is rendered once and served from cache as static HTML, then re-rendered in
-// the background at most once a minute. Visitors never wait on Mongo. Writes (admin edits,
-// the scraper via /api/revalidate) purge it immediately; this window is only the fallback,
-// and at 5 minutes it was long enough for a stale copy to survive several refreshes.
-// `generateStaticParams` used to be exported here, but it is only meaningful on a dynamic
-// [param] route -- on a static route Next ignores it, so it bought nothing.
+// Served from the ISR cache; admin edits and /api/revalidate purge it sooner.
 export const revalidate = 60;
 
 export const metadata: Metadata = {
@@ -59,7 +53,6 @@ export const metadata: Metadata = {
     url: '/',
     title: 'IPO Milega | Every Indian IPO, Scored',
     description: 'Track live, upcoming and past Indian IPOs, with a scored breakdown of every prospectus.',
-    // Image comes from app/opengraph-image.tsx (the brand mark), not a hardcoded file.
   },
   twitter: {
     card: 'summary_large_image',
@@ -72,7 +65,7 @@ export const metadata: Metadata = {
   },
 };
 
-// Who publishes the site, and what it is -- the entity answer engines cite. Home page only.
+// Who publishes the site and what it is, for search and answer engines.
 const SITE_STRUCTURED_DATA = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -96,49 +89,40 @@ const SITE_STRUCTURED_DATA = {
   ],
 };
 
-// Awaited here rather than behind a <Suspense> skeleton: the page is ISR, so the data is always
-// ready by the time the HTML is built, and a boundary only made that HTML ship a spinner with
-// the real content in a hidden div swapped in by script -- LCP waited on that script.
+// Awaited without a <Suspense> boundary: under ISR the data is ready at build time, and a
+// boundary would ship a spinner that delays LCP.
 export default async function HomePage() {
-  const homeData = await getHomePageData();
+  const { data, counts, blogList } = await getHomePageData();
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_STRUCTURED_DATA) }} />
       <div className="relative z-10">
-        <HomeContent homeData={homeData} />
+        <div className="app-container pt-20 sm:pt-24">
+          <IpoTicker live={data.live} upcoming={data.upcoming} />
+          <AnnouncementBanner />
+          <BoardProvider>
+            <LiveIposSection ipos={data.live} count={counts.live} />
+            <AnimatedSection>
+              <ClosedIposSection ipos={data.closed} count={counts.closed} />
+            </AnimatedSection>
+            <AnimatedSection>
+              <UpcomingIposSection ipos={data.upcoming} count={counts.upcoming} />
+            </AnimatedSection>
+          </BoardProvider>
+          <AnimatedSection>
+            <PastIposSection ipos={data.past} />
+          </AnimatedSection>
+          <AnimatedSection>
+            <ScoreMethodology />
+          </AnimatedSection>
+          <AnimatedSection>
+            <BlogSection blogs={blogList} />
+          </AnimatedSection>
+          <Footer />
+        </div>
+        <Walkthrough />
       </div>
     </div>
-  );
-}
-
-function HomeContent({ homeData }: { homeData: HomePageData }) {
-  return (
-    <>
-      <div className="app-container pt-20 sm:pt-24">
-        <IpoTicker live={homeData.data.live} upcoming={homeData.data.upcoming} />
-        <AnnouncementBanner />
-        <BoardProvider>
-        <LiveIposSection ipos={homeData.data.live} count={homeData.counts.live} />
-        <AnimatedSection>
-          <ClosedIposSection ipos={homeData.data.closed} count={homeData.counts.closed} />
-        </AnimatedSection>
-        <AnimatedSection>
-          <UpcomingIposSection ipos={homeData.data.upcoming} count={homeData.counts.upcoming} />
-        </AnimatedSection>
-        </BoardProvider>
-        <AnimatedSection>
-          <PastIposSection ipos={homeData.data.past} count={homeData.counts.past} />
-        </AnimatedSection>
-        <AnimatedSection>
-          <ScoreMethodology />
-        </AnimatedSection>
-        <AnimatedSection>
-          <BlogSection blogs={homeData.blogList} />
-        </AnimatedSection>
-        <Footer />
-      </div>
-      <Walkthrough />
-    </>
   );
 }

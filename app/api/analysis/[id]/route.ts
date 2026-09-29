@@ -9,8 +9,6 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        // Was: load every IPO document, Array.find the slug, then query the analysis.
-        // Now a single indexed findOne on ipos.slug followed by one on ipo_table_id.
         const result = await getAnalysisBySlug(id);
 
         if (!result) {

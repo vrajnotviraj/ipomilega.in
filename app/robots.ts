@@ -1,9 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/share';
 
-// Everything public is crawlable, AI answer engines included; admin, auth and blog-editor
-// screens are not content. /api stays open: the /analysis index renders its list from
-// /api/analysis in the browser, and Googlebot can't render what robots blocks it from fetching.
+// /api stays crawlable: the /analysis index fetches its list from /api/analysis in the browser.
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {

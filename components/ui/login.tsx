@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator"
 import { signIn, signUp } from "@/lib/auth-client"
 import { toast } from "sonner"
-import { LogoMark } from "@/components/Brand/Logo"
+import { LogoMark } from "@/components/layout/Logo"
 
 interface LoginDialogProps {
   isOpen: boolean

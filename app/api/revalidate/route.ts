@@ -4,10 +4,7 @@ import { revalidateSite } from '@/lib/revalidate';
 export const dynamic = 'force-dynamic';
 
 /**
- * Called by the Python jobs after they write to Mongo (scraper, live subscription, analysis
- * generator). Those write straight to the database, so without this ping the site kept
- * serving the pre-scrape pages until ISR expired and a visitor triggered a rebuild.
- *
+ * Called by the Python jobs after they write straight to Mongo.
  * Auth: `Authorization: Bearer <REVALIDATE_SECRET>` or `?secret=<REVALIDATE_SECRET>`.
  */
 async function handle(req: NextRequest) {

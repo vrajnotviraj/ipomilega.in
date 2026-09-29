@@ -1,40 +1,20 @@
 import { Metadata } from "next";
-import EditBlog from "../EditBlog";
-import { Blog } from "@/app/models/ipo";
+import EditBlog from "./EditBlog";
+import { Blog } from "@/types/ipo";
 
 async function getBlogPost(id: string): Promise<Blog | null> {
   try {
-    if (!id) {
-      console.log("No ID provided");
-      return null;
-    }
-    
-    console.log("Blog ID", id);
-    const url = new URL(`${process.env.NEXTAUTH_URL}/api/blogs/edit-a-blog/${id}`);
-    const slugResponse = await fetch(url, {
-      cache: 'no-store', // For real-time data
-    });
-    
-    if (slugResponse.ok) {
-      const data = await slugResponse.json();
-      console.log("Blog in server", data.blog as Blog);
-      return data.blog as Blog;
-    }
-    return null;
+    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/blogs/edit-a-blog/${id}`, { cache: "no-store" });
+    if (!response.ok) return null;
+    return (await response.json()).blog;
   } catch (error) {
     console.error("Error fetching blog post:", error);
     return null;
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>; // Using id
-}): Promise<Metadata> {
-  const { id } = await params; // Using id
-  const blog = await getBlogPost(id);
-
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const blog = await getBlogPost((await params).id);
   if (!blog) {
     return {
       title: "Blog Not Found",
@@ -67,8 +47,6 @@ export async function generateMetadata({
 }
 
 export default async function BlogPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params; // Using id
-  const blogdata = await getBlogPost(id);
-
-  return <EditBlog blog={blogdata || {} as Blog} />;
+  const blog = await getBlogPost((await params).id);
+  return <EditBlog blog={blog || ({} as Blog)} />;
 }

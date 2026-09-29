@@ -1,18 +1,12 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
-import { connectToDatabase, closeConnection } from "./mongo";
+import { getDb, closeConnection } from "@/lib/mongo";
 
-let db;
 let auth: unknown;
 
 try {
-  // Attempt to connect to the database
-  const connection = await connectToDatabase();
-  db = connection.db;
-
-  // Initialize betterAuth only if the database connection is successful
   auth = betterAuth({
-    database: mongodbAdapter(db),
+    database: mongodbAdapter(await getDb()),
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
@@ -26,25 +20,16 @@ try {
     },
     user: {
       additionalFields: {
-        role: {
-          type: "string",
-          defaultValue: "user",
-        },
+        role: { type: "string", defaultValue: "user" },
       },
     },
   });
-
 } catch (error) {
   console.error("🔴 Failed to initialize database or authentication:", error);
-  // Depending on your needs, you might want to exit the process
-  // if the database connection is critical for the app to run.
-  // process.exit(1);
 }
 
-// Export the initialized auth object
 export { auth };
 
-// Ensure proper cleanup on shutdown
 process.on("SIGTERM", async () => {
   console.log("SIGTERM signal received. Closing MongoDB connection.");
   await closeConnection();

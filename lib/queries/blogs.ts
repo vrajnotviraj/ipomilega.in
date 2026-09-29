@@ -2,45 +2,23 @@ import 'server-only';
 import { cache } from 'react';
 import { getDb } from '@/lib/mongo';
 import { cached } from '@/lib/cache';
-import { Blog } from '@/app/models/ipo';
+import { Blog } from '@/types/ipo';
 
-// NOTE: `content` is deliberately *not* projected away on list queries. The cards derive both
-// the "N min read" estimate and the excerpt fallback from the body text, so dropping it would
-// change what renders. The collection is empty today, so there is no measured payload win to
-// trade that correctness against.
+// List queries keep `content`: the cards derive read time and the excerpt fallback from it.
 
-function toPlain<T>(doc: T): T {
-  return JSON.parse(JSON.stringify(doc));
+const toPlain = <T>(doc: T): T => JSON.parse(JSON.stringify(doc));
+
+async function findBlogs(filter: object, limit = 0): Promise<Blog[]> {
+  const db = await getDb();
+  const blogs = await db.collection('blogs').find(filter).sort({ created_at: -1 }).limit(limit).toArray();
+  return toPlain(blogs) as unknown as Blog[];
 }
 
-/**
- * The three newest published posts for the homepage.
- * Sorting and slicing now happen in Mongo; the old version pulled the whole collection
- * into Node, sorted it in JS and threw away everything past index 2.
- */
-export const getFeaturedBlogs = cache(cached(async (): Promise<Blog[]> => {
-  const db = await getDb();
-  const blogs = await db
-    .collection('blogs')
-    .find({ status: 'published' })
-    .sort({ created_at: -1 })
-    .limit(3)
-    .toArray();
-  return toPlain(blogs) as unknown as Blog[];
-}, 'getFeaturedBlogs'));
+/** The three newest published posts, for the homepage. */
+export const getFeaturedBlogs = cache(cached(() => findBlogs({ status: 'published' }, 3), 'getFeaturedBlogs'));
 
-/** All published posts for the /blogs index. */
-export const getPublishedBlogs = cache(cached(async (): Promise<Blog[]> => {
-  const db = await getDb();
-  const blogs = await db
-    .collection('blogs')
-    .find({ status: 'published' })
-    .sort({ created_at: -1 })
-    .toArray();
-  return toPlain(blogs) as unknown as Blog[];
-}, 'getPublishedBlogs'));
+export const getPublishedBlogs = cache(cached(() => findBlogs({ status: 'published' }), 'getPublishedBlogs'));
 
-/** A single published post by slug, content included. */
 export const getBlogBySlug = cache(cached(async (slug: string): Promise<Blog | null> => {
   const db = await getDb();
   const blog = await db.collection('blogs').findOne({ slug });
@@ -50,7 +28,6 @@ export const getBlogBySlug = cache(cached(async (slug: string): Promise<Blog | n
 
 export const getBlogCategories = cache(cached(async () => {
   const db = await getDb();
-  // One grouped read replaces four near-identical find() calls that ran back to back.
   const docs = await db
     .collection('categories')
     .find({
@@ -69,13 +46,5 @@ export const getBlogCategories = cache(cached(async () => {
   };
 }, 'getBlogCategories'));
 
-/** Every blog, published or draft -- admin only. */
-export const getAllBlogs = cache(async (): Promise<Blog[]> => {
-  const db = await getDb();
-  const blogs = await db
-    .collection('blogs')
-    .find({})
-    .sort({ created_at: -1 })
-    .toArray();
-  return toPlain(blogs) as unknown as Blog[];
-});
+/** Every blog, drafts included, for admin. */
+export const getAllBlogs = cache(() => findBlogs({}));

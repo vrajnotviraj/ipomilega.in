@@ -5,25 +5,8 @@ import Image from "next/image";
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { BookOpen } from "lucide-react";
+import { Blog } from "@/types/ipo";
 
-interface BlogPost {
-  _id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  tags: string[];
-  category: string;
-  status: string;
-  meta_description: string;
-  author: string;
-  ipo_id: string;
-  created_at: string;
-  updated_at: string;
-  image_url?: string;
-}
-
-// Rough reading time estimate from word count (200 wpm)
 const estimateReadTime = (content: string): number => {
   const words = content?.trim().split(/\s+/).filter(Boolean).length || 0;
   return Math.max(1, Math.round(words / 200));
@@ -32,23 +15,22 @@ const estimateReadTime = (content: string): number => {
 const formatDate = (dateString: string): string =>
   new Date(dateString).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
 
-// Posts arrive already resolved from the server component, so there is no fetch, no loading
-// state, and no empty first paint. Search and category filtering stay client-side.
-export default function BlogsClient({ blogs }: { blogs: BlogPost[] }) {
+const excerptOf = (blog: Blog, words: number) =>
+  blog.excerpt || blog.content.trim().split(" ").slice(0, words).join(" ") + "...";
+
+const metaLine = (blog: Blog) => `${blog.category || "IPO Analysis"} · ${estimateReadTime(blog.content)} min read`;
+
+export default function BlogsClient({ blogs }: { blogs: Blog[] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const categories = useMemo(() => {
-    const set = new Set(blogs.map((b) => b.category).filter(Boolean));
-    return ["All", ...Array.from(set)];
-  }, [blogs]);
+  const categories = useMemo(() => ["All", ...new Set(blogs.map((b) => b.category).filter(Boolean))], [blogs]);
 
   const filteredBlogs = useMemo(() => {
-    return blogs.filter((b) => {
-      const matchesCategory = activeCategory === "All" || b.category === activeCategory;
-      const matchesSearch = !searchQuery.trim() || b.title.toLowerCase().includes(searchQuery.trim().toLowerCase());
-      return matchesCategory && matchesSearch;
-    });
+    const query = searchQuery.trim().toLowerCase();
+    return blogs.filter((b) =>
+      (activeCategory === "All" || b.category === activeCategory) && (!query || b.title.toLowerCase().includes(query))
+    );
   }, [blogs, activeCategory, searchQuery]);
 
   const [featured, ...rest] = filteredBlogs;
@@ -100,13 +82,13 @@ export default function BlogsClient({ blogs }: { blogs: BlogPost[] }) {
               >
                 <div>
                   <div className="text-xs text-muted-foreground mb-2">
-                    {featured.category || "IPO Analysis"} · {estimateReadTime(featured.content)} min read
+                    {metaLine(featured)}
                   </div>
                   <h2 className="text-2xl md:text-3xl font-serif font-semibold text-foreground leading-snug mb-3 group-hover:text-primary transition-colors">
                     {featured.title}
                   </h2>
                   <p className="text-muted-foreground mb-4 leading-relaxed">
-                    {featured.excerpt || featured.content.trim().split(" ").slice(0, 40).join(" ") + "..."}
+                    {excerptOf(featured, 40)}
                   </p>
                   <div className="text-sm text-muted-foreground">
                     {featured.author} · {formatDate(featured.created_at)}
@@ -131,13 +113,13 @@ export default function BlogsClient({ blogs }: { blogs: BlogPost[] }) {
                     className="group block pt-6 border-t-2 border-foreground"
                   >
                     <div className="text-xs text-muted-foreground mb-2">
-                      {blog.category || "IPO Analysis"} · {estimateReadTime(blog.content)} min read
+                      {metaLine(blog)}
                     </div>
                     <h3 className="font-serif font-semibold text-foreground text-lg leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
                       {blog.title}
                     </h3>
                     <p className="text-sm text-muted-foreground line-clamp-3 mb-3 leading-relaxed">
-                      {blog.excerpt || blog.content.trim().split(" ").slice(0, 25).join(" ") + "..."}
+                      {excerptOf(blog, 25)}
                     </p>
                     <div className="text-xs text-muted-foreground">
                       {blog.author} · {formatDate(blog.created_at)}

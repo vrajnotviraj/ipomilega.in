@@ -1,3 +1,3 @@
-// X gets the same per-IPO card as Open Graph. Segment config must be declared, not re-exported.
 export { default, alt, size, contentType } from "./opengraph-image";
+// Segment config cannot be re-exported, so it is declared again here.
 export const revalidate = 300;

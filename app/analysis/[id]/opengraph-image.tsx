@@ -4,15 +4,14 @@ import { closingLine, formatDay, gmpLine, overallScoreOf } from "@/lib/share";
 import { BrandMark, CREAM, INK, OG_SIZE, TEAL } from "@/lib/og";
 import RootImage from "@/app/opengraph-image";
 
-// Per-IPO preview card: the company, our score, GMP and where it stands in the calendar -- the
-// facts someone deciding whether to tap a shared link wants. Still our brand, never the issuer's
-// logo, so it doesn't read as if the company published it.
+// Per-IPO preview card: company, score, GMP and dates. Our brand only, never the issuer's logo,
+// so it does not read as if the company published it.
 export const alt = "IPO analysis on IPO Milega";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 export const revalidate = 300;
 
-// "385 to 405 Per Share" -> "385–405", so it fits one line of the fact tile.
+/** "385 to 405 Per Share" becomes "385–405", so it fits one line of the fact tile. */
 const shortPriceBand = (band: string | undefined) =>
   band?.trim() ? band.replace(/\s*per\s+share/i, "").replace(/(\d)\s*(?:to|-)\s*(\d)/i, "$1–$2") : null;
 
@@ -29,8 +28,7 @@ export default async function AnalysisOgImage({ params }: { params: Promise<{ id
   const { ipos_analysis: analysis, ipo } = data;
   const score = overallScoreOf(analysis);
   const gmp = gmpLine(analysis.gmp_price_gain ?? ipo?.gmp_price_gain)?.replace(/^GMP /, "");
-  const status =
-    closingLine(analysis.time?.issue_dates?.closing, analysis.time?.issue_dates?.opening)?.replace(/\.$/, "") ?? null;
+  const status = closingLine(analysis.time?.issue_dates?.closing, analysis.time?.issue_dates?.opening)?.replace(/\.$/, "");
   const listing = formatDay(ipo?.ipo_dates?.ipo_listing_date);
 
   const facts: [string, string][] = [

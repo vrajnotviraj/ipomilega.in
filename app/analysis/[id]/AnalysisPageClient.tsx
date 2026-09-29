@@ -17,11 +17,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis";
-import { Ipo } from "@/app/models/ipo";
-import { useSession } from "@/lib/auth-client";
+import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
+import { Ipo } from "@/types/ipo";
+import { useSession, isAdminEmail } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -55,18 +55,25 @@ import {
   formatAllotmentOdds,
   parseGainValue,
   ALLOTMENT_CATEGORIES,
-} from "@/components/Home/ipoFormat";
-import { AllotmentPredictorModal } from "@/components/Home/AllotmentPredictorModal";
+  type AllotmentCategoryDef,
+} from "@/lib/ipo-format";
+import { AllotmentPredictorModal } from "@/components/ipo/AllotmentPredictorModal";
 import { GmpTrendChart } from "@/components/charts/GmpTrendChart";
 import { buildShareMessage, type ShareFacts } from "@/lib/share";
-import { AllotmentCategoryDef } from "@/components/Home/ipoFormat";
 
-// Same iconography as the home-page card, so the two allotment rows read as the
-// same control in both places.
+// Same icons as the home-page card, so both allotment rows read as one control.
 const ALLOTMENT_ICONS: Record<AllotmentCategoryDef["key"], typeof User> = {
   retail: User,
   shni: Users,
   bhni: Landmark,
+};
+
+
+const RISK_CATEGORY_COLORS: Record<string, string> = {
+  market_risks: "text-score-bad",
+  financial_risks: "text-score-mid",
+  operational_risks: "text-muted-foreground",
+  regulatory_risks: "text-primary",
 };
 
 interface AnalysisPageClientProps {
@@ -74,55 +81,39 @@ interface AnalysisPageClientProps {
   ipo: Ipo;
 }
 
-interface IPOInvestorSplit {
-  application: string;
-  lot_size: string;
-  shares: string;
-  amount: string;
-}
-
-// --- Score color helpers (single consistent scale used across the whole page) ---
-const scoreTextClass = (score: number) => {
-  if (score >= 8) return "text-score-good";
-  if (score >= 6) return "text-score-mid";
-  return "text-score-bad";
+// One color scale for every score on the page.
+const SCORE_STYLES = {
+  good: { text: "text-score-good", badge: "bg-score-good/15 text-score-good border-score-good/30", bar: "bg-score-good", fill: "var(--score-good)" },
+  mid: { text: "text-score-mid", badge: "bg-score-mid/15 text-score-mid border-score-mid/30", bar: "bg-score-mid", fill: "var(--score-mid)" },
+  bad: { text: "text-score-bad", badge: "bg-score-bad/15 text-score-bad border-score-bad/30", bar: "bg-score-bad", fill: "var(--score-bad)" },
 };
 
-const scoreBgClass = (score: number) => {
-  if (score >= 8) return "bg-score-good/15 text-score-good border-score-good/30";
-  if (score >= 6) return "bg-score-mid/15 text-score-mid border-score-mid/30";
-  return "bg-score-bad/15 text-score-bad border-score-bad/30";
-};
+const scoreStyle = (score: number) => SCORE_STYLES[score >= 8 ? "good" : score >= 6 ? "mid" : "bad"];
 
-const scoreBarClass = (score: number) => {
-  if (score >= 8) return "bg-score-good";
-  if (score >= 6) return "bg-score-mid";
-  return "bg-score-bad";
-};
+/** Width of a 0-10 score as a clamped CSS percentage. */
+const scoreWidth = (score: number) => `${Math.max(0, Math.min(100, score * 10))}%`;
 
-// --- Inline Editable Field Component ---
+/** Text that an admin can double-click to edit in place; saves on blur or Enter. */
 interface EditableTextProps {
   value: string | number;
   onSave: (val: string) => void;
-  isAdmin?: boolean;
-  type?: "text" | "textarea" | "number" | "date";
+  isAdmin: boolean;
+  type?: "text" | "textarea" | "number";
   className?: string;
   textClassName?: string;
   inputClassName?: string;
   renderText?: (val: string) => React.ReactNode;
-  placeholder?: string;
 }
 
 const EditableText = ({
   value,
   onSave,
-  isAdmin = false,
+  isAdmin,
   type = "text",
-  className = "",
-  textClassName = "",
-  inputClassName = "",
+  className,
+  textClassName,
+  inputClassName,
   renderText,
-  placeholder = "Double-click to edit...",
 }: EditableTextProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localVal, setLocalVal] = useState(String(value ?? ""));
@@ -183,7 +174,7 @@ const EditableText = ({
 
   const displayContent = renderText
     ? renderText(localVal)
-    : (localVal || <span className="text-muted-foreground italic">{placeholder}</span>);
+    : (localVal || <span className="text-muted-foreground italic">Double-click to edit...</span>);
 
   return (
     <span
@@ -194,9 +185,8 @@ const EditableText = ({
         }
       }}
       className={cn(
-        isAdmin
-          ? "cursor-pointer hover:bg-primary/5 hover:outline-primary/40 hover:outline hover:outline-1 hover:outline-dashed rounded transition-colors duration-150 inline-block px-1"
-          : "",
+        isAdmin &&
+          "cursor-pointer hover:bg-primary/5 hover:outline-primary/40 hover:outline hover:outline-1 hover:outline-dashed rounded transition-colors duration-150 inline-block px-1",
         className
       )}
       title={isAdmin ? "Double-click to edit field" : undefined}
@@ -206,50 +196,47 @@ const EditableText = ({
   );
 };
 
-// --- Horizontal score bar (used for Performance / Flexibility sub-metrics) ---
+/** Labelled horizontal bar for a sub-metric score. */
 const ScoreBar = ({
   label,
   score,
   onSaveScore,
-  isAdmin = false,
+  isAdmin,
 }: {
   label: string;
   score: number;
-  onSaveScore?: (val: string) => void;
-  isAdmin?: boolean;
-}) => {
-  const pct = Math.max(0, Math.min(100, (score / 10) * 100));
-  return (
+  onSaveScore: (val: string) => void;
+  isAdmin: boolean;
+}) => (
     <div>
       <div className="flex items-baseline justify-between mb-1.5">
         <span className="text-sm font-medium text-foreground">{label}</span>
-        {isAdmin && onSaveScore ? (
+        {isAdmin ? (
           <EditableText
             value={score}
             onSave={onSaveScore}
             type="number"
             isAdmin={isAdmin}
             inputClassName="w-14 text-right font-mono font-semibold text-xs p-0.5 rounded border border-primary bg-card"
-            textClassName={cn("font-mono text-sm font-semibold", scoreTextClass(score))}
+            textClassName={cn("font-mono text-sm font-semibold", scoreStyle(score).text)}
             renderText={(val) => <span>{val}</span>}
           />
         ) : (
-          <span className={cn("font-mono text-sm font-semibold", scoreTextClass(score))}>
+          <span className={cn("font-mono text-sm font-semibold", scoreStyle(score).text)}>
             {score.toFixed(1)}
           </span>
         )}
       </div>
       <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
         <div
-          className={cn("h-full rounded-full transition-all duration-700", scoreBarClass(score))}
-          style={{ width: `${pct}%` }}
+          className={cn("h-full rounded-full transition-all duration-700", scoreStyle(score).bar)}
+          style={{ width: scoreWidth(score) }}
         />
       </div>
     </div>
-  );
-};
+);
 
-// --- Small pentagon radar (5 section scores) with overall score + gains-potential ring ---
+/** Pentagon radar of the section scores, with the overall score inside a gains-potential ring. */
 const OverviewRadar = ({
   axes,
   overallScore,
@@ -283,7 +270,6 @@ const OverviewRadar = ({
   return (
     <div className="flex flex-col items-center">
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        {/* gains-potential progress ring */}
         <circle
           cx={cx}
           cy={cy}
@@ -305,7 +291,6 @@ const OverviewRadar = ({
           style={{ transform: "rotate(-90deg)", transformOrigin: `${cx}px ${cy}px` }}
         />
 
-        {/* grid pentagons */}
         {gridLevels.map((lvl) => (
           <polygon
             key={lvl}
@@ -318,7 +303,6 @@ const OverviewRadar = ({
             strokeWidth={1}
           />
         ))}
-        {/* spokes */}
         {axes.map((_, i) => {
           const p = pointFor(i, gridR);
           return (
@@ -326,16 +310,11 @@ const OverviewRadar = ({
           );
         })}
 
-        {/* value polygon */}
         <polygon points={valuePath} fill="var(--primary)" fillOpacity={0.18} stroke="var(--primary)" strokeWidth={2} />
-        {axes.map((a, i) => {
-          const p = valuePoints[i];
-          const color =
-            a.score >= 8 ? "var(--score-good)" : a.score >= 6 ? "var(--score-mid)" : "var(--score-bad)";
-          return <circle key={i} cx={p.x} cy={p.y} r={4} fill={color} stroke="var(--card)" strokeWidth={1.5} />;
-        })}
+        {axes.map((a, i) => (
+          <circle key={i} cx={valuePoints[i].x} cy={valuePoints[i].y} r={4} fill={scoreStyle(a.score).fill} stroke="var(--card)" strokeWidth={1.5} />
+        ))}
 
-        {/* center score */}
         <text x={cx} y={cy - 6} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: 10, letterSpacing: 1, fontFamily: "var(--font-mono)" }}>
           OVERALL
         </text>
@@ -353,13 +332,12 @@ const OverviewRadar = ({
   );
 };
 
-// --- Quota split donut ---
 const QuotaDonut = ({ data }: { data: { name: string; value: number; color: string }[] }) => {
   const total = data.reduce((s, d) => s + d.value, 0);
   if (!total) {
     return <div className="text-sm text-muted-foreground text-center py-8">Quota data unavailable.</div>;
   }
-  // Side by side on mobile (full-width card); stacked when it sits in the narrow column beside the verdict.
+  // Side by side on mobile, stacked in the narrow desktop column beside the verdict.
   return (
     <div className="h-full flex flex-col">
       <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">Quota split</div>
@@ -400,7 +378,7 @@ const QuotaDonut = ({ data }: { data: { name: string; value: number; color: stri
   );
 };
 
-// --- Timeline (proportional to actual dates, dot + line stepper) ---
+/** Open, close, allotment and listing on a rail spaced by date, with a marker for today. */
 const AnalysisTimeline = ({
   opening,
   closing,
@@ -412,10 +390,7 @@ const AnalysisTimeline = ({
   allotment: string;
   listing: string;
 }) => {
-  // "Today" is resolved after mount, never during render: this page is ISR-cached (and
-  // prerendered at build time), so a server-side `new Date()` would be whatever moment filled
-  // the cache, and it would hydrate against a different value in the browser. Until the effect
-  // runs the rail is drawn empty, then the fill animates out to the real position.
+  // Read after mount: the page is ISR-cached, so a server-side date would be stale and break hydration.
   const [today, setToday] = useState<Date | null>(null);
   useEffect(() => setToday(new Date()), []);
 
@@ -425,10 +400,7 @@ const AnalysisTimeline = ({
     return isNaN(d.getTime()) ? null : d;
   };
 
-  // Every position on this rail is measured in whole IST days. The stations are
-  // calendar dates with no time on them, while "today" is the current instant --
-  // comparing the two directly drifts the marker by however far into the day it
-  // is, which on the closing day itself lands it visibly past the Close dot.
+  // Whole IST days, so today's time of day does not push the marker past the station it is on.
   const dayNumber = (d: Date) => {
     const [y, m, day] = d
       .toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })
@@ -456,16 +428,13 @@ const AnalysisTimeline = ({
     return Math.max(0, Math.min(100, ((dayNumber(d) - openDay) / total) * 100));
   };
 
-  // True, date-proportional positions. Kept around because the displayed positions below get
-  // pushed apart for legibility -- "today" has to be mapped through the same distortion, or the
-  // marker would not line up with the stations it sits between.
+  // Date-proportional positions; "today" is mapped through the same spreading as the stations.
   const truePositions = [0, posOf(closing), posOf(allotment), 100];
   for (let i = 1; i < truePositions.length; i++) {
     truePositions[i] = Math.max(truePositions[i], truePositions[i - 1]);
   }
 
-  // Dates can land close together (or coincide), which would overlap the labels below --
-  // spread stations apart with a minimum gap while keeping Open/Listing anchored at the ends.
+  // Spread close dates apart so labels do not overlap, keeping Open and Listing at the ends.
   const MIN_GAP = 20;
   const positions = [...truePositions];
   for (let i = 1; i < positions.length; i++) {
@@ -475,7 +444,7 @@ const AnalysisTimeline = ({
     positions[i] = Math.min(positions[i], positions[i + 1] - MIN_GAP);
   }
 
-  // Piecewise-linear map from a date-proportional position to where it is actually drawn.
+  // Piecewise-linear map from a date-proportional position to its drawn position.
   const toDisplay = (raw: number) => {
     if (raw <= truePositions[0]) return positions[0];
     for (let i = 1; i < truePositions.length; i++) {
@@ -517,8 +486,7 @@ const AnalysisTimeline = ({
 
   return (
     <>
-      {/* Narrow screens: the proportional layout below has no room for four date labels
-          without overlapping, so fall back to a plain vertical list. */}
+      {/* Narrow screens have no room for four date labels on a rail, so use a list. */}
       <div className="sm:hidden space-y-4">
         {stations.map((s) => {
           const reached = isReached(s.date);
@@ -545,7 +513,6 @@ const AnalysisTimeline = ({
       </div>
 
       <div className="hidden sm:block pt-2">
-        {/* Station names */}
         <div className="relative h-5">
           {stations.map((s) => (
             <div
@@ -561,7 +528,7 @@ const AnalysisTimeline = ({
           ))}
         </div>
 
-        {/* The rail: grey track, filled green up to today, one dot per station */}
+        {/* Grey track, filled green up to today, one dot per station */}
         <div className="relative h-4 my-1.5">
           <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[3px] rounded-full bg-border" />
           <div
@@ -581,8 +548,7 @@ const AnalysisTimeline = ({
           ))}
         </div>
 
-        {/* Today marker, pointing back up at the rail. The row keeps its height before the
-            marker resolves so nothing below it shifts. */}
+        {/* Fixed height so nothing shifts when the today marker appears. */}
         <div className="relative h-9">
           {today && (
             <div
@@ -597,7 +563,6 @@ const AnalysisTimeline = ({
           )}
         </div>
 
-        {/* Dates */}
         <div className="relative h-5">
           {stations.map((s) => (
             <div
@@ -617,7 +582,6 @@ const AnalysisTimeline = ({
   );
 };
 
-// --- Section marker heading used for every §NN block ---
 const SectionHeading = ({
   num,
   title,
@@ -627,44 +591,32 @@ const SectionHeading = ({
 }: {
   num: string;
   title: string;
-  score?: number;
-  onSaveScore?: (val: string) => void;
-  isAdmin?: boolean;
+  score: number;
+  onSaveScore: (val: string) => void;
+  isAdmin: boolean;
 }) => (
   <div className="flex items-center justify-between mb-6 gap-3">
     <div className="flex items-baseline gap-3">
       <span className="text-sm italic font-serif text-muted-foreground">{num}</span>
       <h2 className="text-2xl font-semibold font-serif text-foreground">{title}</h2>
     </div>
-    {score !== undefined && (
-      <span className={cn("px-2.5 py-1 rounded-full border text-sm font-mono font-semibold flex items-center gap-1", scoreBgClass(score))}>
-        {isAdmin && onSaveScore ? (
-          <EditableText
-            value={score}
-            onSave={onSaveScore}
-            type="number"
-            isAdmin={isAdmin}
-            inputClassName="w-10 text-center font-bold text-xs p-0.5 rounded border border-primary bg-card"
-            textClassName="font-mono font-semibold"
-            renderText={(val) => <span>{val}/10</span>}
-          />
-        ) : (
-          <>{score.toFixed(1)}/10</>
-        )}
-      </span>
-    )}
+    <span className={cn("px-2.5 py-1 rounded-full border text-sm font-mono font-semibold flex items-center gap-1", scoreStyle(score).badge)}>
+      {isAdmin ? (
+        <EditableText
+          value={score}
+          onSave={onSaveScore}
+          type="number"
+          isAdmin={isAdmin}
+          inputClassName="w-10 text-center font-bold text-xs p-0.5 rounded border border-primary bg-card"
+          textClassName="font-mono font-semibold"
+          renderText={(val) => <span>{val}/10</span>}
+        />
+      ) : (
+        <>{score.toFixed(1)}/10</>
+      )}
+    </span>
   </div>
 );
-
-const getInitials = (name: string) => {
-  if (!name) return "";
-  return name
-    .split(" ")
-    .map((word: string) => word.charAt(0))
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-};
 
 export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClientProps) {
   const [editedAnalysis, setEditedAnalysis] = useState<IpoComprehensiveAnalysis>(analysis);
@@ -672,8 +624,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   const [isEditingTimeline, setIsEditingTimeline] = useState(false);
   const [predictorCategory, setPredictorCategory] = useState<AllotmentCategoryDef["key"] | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
-  // Resolved on the client so a share carries the URL actually in the address
-  // bar; falls back to the canonical analysis URL until it is.
+  // The URL in the address bar, read on the client so a share carries it.
   const [shareUrl, setShareUrl] = useState("");
 
   useEffect(() => {
@@ -682,10 +633,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   const router = useRouter();
 
-  // The page header and the tab bar stack underneath the fixed site header, and
-  // anchors have to clear all three. Measuring beats hardcoded offsets: the
-  // heights differ between breakpoints, and a stale number leaves the tab bar
-  // sitting on top of the header it is supposed to sit below.
+  // Measured, not hardcoded: header heights differ per breakpoint, and anchors must clear
+  // the site header plus this page's sticky header and tab bar.
   const chromeRef = useRef<HTMLDivElement | null>(null);
   const [siteHeaderHeight, setSiteHeaderHeight] = useState(64);
 
@@ -694,8 +643,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     const measure = () => {
       const top = siteHeader?.getBoundingClientRect().height ?? 64;
       setSiteHeaderHeight(top);
-      // scroll-padding on the scroller handles every anchor jump at once,
-      // including scrollIntoView, so sections need no scroll-margin of their own.
+      // scroll-padding covers every anchor jump, including scrollIntoView.
       document.documentElement.style.scrollPaddingTop = `${top + (chromeRef.current?.offsetHeight ?? 0) + 12}px`;
     };
 
@@ -713,21 +661,17 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   }, []);
 
   const session = useSession();
-  const isAdmin = ["admin@gmail.com", "snehshah7634@gmail.com", "shahvraj114@gmail.com", "devanshisoni2004@gmail.com", "devanshisoni2311@gmail.com"].includes(
-    session?.data?.user?.email || ""
-  );
+  const isAdmin = isAdminEmail(session?.data?.user?.email);
 
+  /** Set a dotted-path field on the analysis, copying each object on the way, and save it. */
   const handleInlineSave = (path: string, newValue: unknown) => {
     setEditedAnalysis((prev) => {
       const copy = { ...prev };
       const parts = path.split(".");
       let current = copy as unknown as Record<string, unknown>;
-      for (let i = 0; i < parts.length - 1; i++) {
-        if (!current[parts[i]]) {
-          current[parts[i]] = {};
-        }
-        current[parts[i]] = { ...(current[parts[i]] as Record<string, unknown>) };
-        current = current[parts[i]] as Record<string, unknown>;
+      for (const part of parts.slice(0, -1)) {
+        current[part] = { ...((current[part] as Record<string, unknown>) || {}) };
+        current = current[part] as Record<string, unknown>;
       }
       current[parts[parts.length - 1]] = newValue;
       saveAnalysis(copy);
@@ -735,23 +679,12 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     });
   };
 
-  const handleInlineArraySave = (path: string, newlineString: string) => {
-    const arr = newlineString.split("\n").filter((item) => item.trim() !== "");
-    handleInlineSave(path, arr);
-  };
+  const handleInlineArraySave = (path: string, lines: string) =>
+    handleInlineSave(path, lines.split("\n").filter((item) => item.trim() !== ""));
 
   const saveAnalysis = async (newAnalysis: IpoComprehensiveAnalysis) => {
     setIsSaving(true);
-    const fundamentalsScore = Number(newAnalysis.fundamentals?.score ?? 0);
-    const performanceScore = Number(newAnalysis.performance?.score ?? 0);
-    const riskScore = Number(newAnalysis.risk_meter?.score ?? 0);
-    const flexibilityScore = Number(newAnalysis.flexibility?.score ?? 0);
-    const timeScore = Number(newAnalysis.time?.score ?? 0);
-    const gainsPotential = Number(newAnalysis.ipo_details?.approximate_gains_potential ?? 0);
-    const allotmentScore = Number(newAnalysis.ipo_details?.profitability_of_allotment?.score ?? 0);
-    const totalRevenue = Number(newAnalysis.fundamentals?.revenue_details?.total_revenue ?? 0);
-    const netProfit = Number(newAnalysis.fundamentals?.profit_analysis?.net_profit ?? 0);
-    const totalAssets = Number(newAnalysis.fundamentals?.assets_and_liabilities?.total_assets ?? 0);
+    const { fundamentals, ipo_details } = newAnalysis;
 
     const payload = {
       ipo_table_id: newAnalysis.ipo_table_id,
@@ -761,23 +694,23 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
       investorSplit: newAnalysis.investorSplit || [],
       financialReport: newAnalysis.financialReport || [],
       gmp_price_gain: newAnalysis.gmp_price_gain || ipo.gmp_price_gain || "",
-      fundamentals: newAnalysis.fundamentals,
+      fundamentals,
       risk_meter: newAnalysis.risk_meter,
       flexibility: newAnalysis.flexibility,
       time: newAnalysis.time,
       performance: newAnalysis.performance,
-      ipo_details: newAnalysis.ipo_details,
+      ipo_details,
       summary_metrics: {
-        fundamentals_score: fundamentalsScore,
-        risk_meter: riskScore,
-        flexibility_score: flexibilityScore,
-        time_score: timeScore,
-        performance_score: performanceScore,
-        approximate_gains_potential: gainsPotential,
-        profitability_of_allotment: allotmentScore,
-        total_revenue: totalRevenue,
-        net_profit: netProfit,
-        total_assets: totalAssets,
+        fundamentals_score: Number(fundamentals?.score ?? 0),
+        risk_meter: Number(newAnalysis.risk_meter?.score ?? 0),
+        flexibility_score: Number(newAnalysis.flexibility?.score ?? 0),
+        time_score: Number(newAnalysis.time?.score ?? 0),
+        performance_score: Number(newAnalysis.performance?.score ?? 0),
+        approximate_gains_potential: Number(ipo_details?.approximate_gains_potential ?? 0),
+        profitability_of_allotment: Number(ipo_details?.profitability_of_allotment?.score ?? 0),
+        total_revenue: Number(fundamentals?.revenue_details?.total_revenue ?? 0),
+        net_profit: Number(fundamentals?.profit_analysis?.net_profit ?? 0),
+        total_assets: Number(fundamentals?.assets_and_liabilities?.total_assets ?? 0),
       },
     };
 
@@ -802,13 +735,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   };
 
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
-
-  const riskCategoryColors: { [key: string]: string } = {
-    market_risks: "text-score-bad",
-    financial_risks: "text-score-mid",
-    operational_risks: "text-muted-foreground",
-    regulatory_risks: "text-primary",
-    default: "text-muted-foreground",
+  const sectionRef = (key: string) => (el: HTMLElement | null) => {
+    sectionRefs.current[key] = el;
   };
 
   const fundamentalsScore = editedAnalysis.fundamentals?.score ?? 0;
@@ -830,32 +758,24 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     { label: "Risk", score: riskScore },
   ];
 
-  // Bands are stored in several shapes -- "130 - 140", "₹130 to 140 Per Share",
-  // or a single "140". The cut-off price is always the last number in the string.
-  const getUpperPrice = () => {
-    const priceBand = editedAnalysis.ipo_details?.price_band;
-    if (!priceBand || typeof priceBand !== "string") return null;
-    const numbers = priceBand.replace(/,/g, "").match(/\d+(?:\.\d+)?/g);
-    if (!numbers?.length) return null;
-    const upperPrice = parseFloat(numbers[numbers.length - 1]);
-    return isNaN(upperPrice) ? null : upperPrice;
-  };
+  const priceBand = editedAnalysis.ipo_details?.price_band;
 
-  const formatPriceBand = () => {
-    const priceBand = editedAnalysis.ipo_details?.price_band;
-    if (!priceBand) return "N/A";
-    // The same RHP placeholder the issue size carries. A band that has not been
-    // fixed prints as "[●] to [●] Per Share", and a rupee sign in front of it
-    // makes it read like a price rather than a blank.
-    if (isUnfixedValue(priceBand)) return "Price TBA";
-    return priceBand.includes("₹") ? priceBand : `₹${priceBand}`;
-  };
+  // Bands come as "130 - 140", "₹130 to 140 Per Share" or "140"; the cut-off is the last number.
+  const priceBandNumbers =
+    typeof priceBand === "string" ? priceBand.replace(/,/g, "").match(/\d+(?:\.\d+)?/g) : null;
+  const upperPrice = priceBandNumbers?.length ? parseFloat(priceBandNumbers[priceBandNumbers.length - 1]) : null;
 
-  const upperPrice = getUpperPrice();
-  const lotSize = editedAnalysis.ipo_details?.lot_size;
-  // `shares` is shares per lot and `lot_size` the lot count (1 for a retail
-  // minimum), so one lot costs cut-off price x shares -- not x lot_size.
-  const lotShares = editedAnalysis.ipo_details?.shares || lotSize;
+  // An unfixed band reads "[●] to [●] Per Share"; a rupee sign would make it look like a price.
+  const formattedPriceBand = !priceBand
+    ? "N/A"
+    : isUnfixedValue(priceBand)
+      ? "Price TBA"
+      : priceBand.includes("₹")
+        ? priceBand
+        : `₹${priceBand}`;
+
+  // `shares` is shares per lot and `lot_size` the lot count, so one lot costs price x shares.
+  const lotShares = editedAnalysis.ipo_details?.shares || editedAnalysis.ipo_details?.lot_size;
   const minInvestment = upperPrice && lotShares ? upperPrice * lotShares : null;
 
   const timelineData = {
@@ -865,11 +785,16 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     listing: editedAnalysis.time?.listing_details?.expected_date || "",
   };
 
+  const timelineInputs = [
+    { label: "Opening", value: timelineData.opening, path: "time.issue_dates.opening" },
+    { label: "Closing", value: timelineData.closing, path: "time.issue_dates.closing" },
+    { label: "Allotment", value: timelineData.allotment, path: "time.allotment_timeline.date" },
+    { label: "Listing", value: timelineData.listing, path: "time.listing_details.expected_date" },
+  ];
+
   const ipoType = getIpoType(ipo);
 
-  // The same odds the home-page card leads with. They were only reachable here
-  // through a button two screens down, so someone who arrived from a card lost
-  // the one number they came for.
+  // The same odds the home-page card leads with.
   const allotmentCategories = ALLOTMENT_CATEGORIES.map((cat) => {
     const ratio = parseGainValue(ipo?.[cat.ratioField]);
     return {
@@ -889,46 +814,47 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     open.setHours(0, 0, 0, 0);
     close.setHours(0, 0, 0, 0);
     if (today > close) return { label: "CLOSED", cls: "bg-muted text-muted-foreground border-border" };
-    if (today >= open && today <= close) return { label: "OPEN", cls: "bg-score-good text-primary-foreground border-transparent" };
+    if (today >= open) return { label: "OPEN", cls: "bg-score-good text-primary-foreground border-transparent" };
     return { label: "UPCOMING", cls: "bg-score-mid/15 text-score-mid border-score-mid/30" };
   };
   const statusInfo = getStatusInfo();
 
-  const parsePercentage = (value: string): number => {
-    if (!value) return 0;
+  const parsePercentage = (value: string) => {
     const match = value.match(/(\d+(?:\.\d+)?)/);
     return match ? parseFloat(match[1]) : 0;
   };
 
+  const allocation = editedAnalysis.ipo_details?.allocation_details;
   const quotaData = [
-    {
-      name: "QIB",
-      value: editedAnalysis.ipo_details?.allocation_details?.qib || parsePercentage(ipo.ipo_details?.qib_quota || "50"),
-      color: "var(--chart-1)",
-    },
-    {
-      name: "NII",
-      value: editedAnalysis.ipo_details?.allocation_details?.nii || parsePercentage(ipo.ipo_details?.nii_quota || "15"),
-      color: "var(--chart-3)",
-    },
-    {
-      name: "Retail",
-      value: editedAnalysis.ipo_details?.allocation_details?.retail || parsePercentage(ipo.ipo_details?.retail_quota || "35"),
-      color: "var(--chart-2)",
-    },
+    { name: "QIB", value: allocation?.qib || parsePercentage(ipo.ipo_details?.qib_quota || "50"), color: "var(--chart-1)" },
+    { name: "NII", value: allocation?.nii || parsePercentage(ipo.ipo_details?.nii_quota || "15"), color: "var(--chart-3)" },
+    { name: "Retail", value: allocation?.retail || parsePercentage(ipo.ipo_details?.retail_quota || "35"), color: "var(--chart-2)" },
   ];
 
   const investorTableData =
     editedAnalysis.investorSplit?.filter((row) => row.application.toLowerCase() !== "application") || [];
 
-  const strengths = (editedAnalysis.performance?.key_achievements || []).filter((s) => s.trim() !== "");
-  const concerns = (editedAnalysis.risk_meter?.key_risks || []).filter((s) => s.trim() !== "");
+  const strengthsAndConcerns = [
+    {
+      title: "Strengths",
+      items: (editedAnalysis.performance?.key_achievements || []).filter((s) => s.trim() !== ""),
+      color: "text-score-good",
+      Icon: Plus,
+      empty: "No highlighted strengths yet.",
+    },
+    {
+      title: "Concerns",
+      items: (editedAnalysis.risk_meter?.key_risks || []).filter((s) => s.trim() !== ""),
+      color: "text-score-bad",
+      Icon: Minus,
+      empty: "No flagged concerns yet.",
+    },
+  ];
 
   const gmpValue = editedAnalysis.gmp_price_gain || ipo.gmp_price_gain || "";
   const hasGmp = gmpValue && gmpValue !== "N/A" && gmpValue !== "TBD" && gmpValue !== "TBA";
 
-  // What the share message carries, read off the same values this page renders,
-  // so a forwarded IPO and the page never drift apart.
+  // Built from the values this page renders, so a shared message never drifts from the page.
   const shareFacts: ShareFacts = {
     companyName: editedAnalysis.company_name,
     slug: editedAnalysis.slug || ipo.slug || "",
@@ -939,32 +865,27 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     url: shareUrl,
   };
 
-  // One tap, one message. The system share sheet is the only step, and picking
-  // the recipient there is the only decision the sharer makes -- there is no
-  // channel list to work through and no draft to edit.
+  /** Open the system share sheet, or copy the message where there is none. */
   const handleShare = async () => {
     const message = buildShareMessage(shareFacts);
 
-    // `url` is deliberately left off: the message already ends with the link, and
-    // passing both makes WhatsApp and friends paste it twice.
+    // No `url` field: the message already ends with the link, and WhatsApp would paste it twice.
     if (navigator.share) {
       try {
         await navigator.share({ title: `${editedAnalysis.company_name} IPO`, text: message });
       } catch {
-        // The person dismissed the share sheet; nothing to report.
+        // Share sheet dismissed.
       }
       return;
     }
 
-    // Desktop browsers without a share sheet: hand them the same text to paste.
     await navigator.clipboard.writeText(message);
     toast.success("IPO details copied", { description: "Paste it to whoever you want to send it to." });
   };
 
+  // Timing comes right after the overview: whether to apply now is the first question people bring.
   const sections = [
     { key: "overview", num: "§00", label: "Overview" },
-    // Timing sits right after the overview: whether to apply now is the first
-    // question people bring here, ahead of the deeper financials.
     { key: "timing", num: "§01", label: "Timing", score: timeScore },
     { key: "financials", num: "§02", label: "Financials", score: fundamentalsScore },
     { key: "risk", num: "§03", label: "Risk", score: riskScore },
@@ -972,19 +893,16 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     { key: "flexibility", num: "§05", label: "Flexibility", score: flexibilityScore },
   ];
 
-  // While a tab's smooth scroll is in flight the spy would light up every section
-  // it passes on the way, so it stands down until the scroll settles.
+  // The scroll spy pauses during a tab's smooth scroll so it does not light up every section it passes.
   const spyPausedUntil = useRef(0);
 
   const handleTabClick = (key: string) => {
     setActiveTab(key);
     spyPausedUntil.current = Date.now() + 900;
-    const section = sectionRefs.current[key];
-    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+    sectionRefs.current[key]?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Scroll-spy: the active tab follows whichever section is under the sticky
-  // chrome. The line sits just below the tab bar -- the same offset anchors use.
+  // Scroll spy: the active tab follows the section under the sticky header.
   useEffect(() => {
     let frame = 0;
     let resume = 0;
@@ -992,8 +910,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
       frame = 0;
       const wait = spyPausedUntil.current - Date.now();
       if (wait > 0) {
-        // A long jump can outlast the pause; hold it until scrolling goes quiet,
-        // then take one reading where the scroll landed.
+        // A long jump can outlast the pause; wait for scrolling to go quiet, then read once.
         spyPausedUntil.current = Math.max(spyPausedUntil.current, Date.now() + 150);
         window.clearTimeout(resume);
         resume = window.setTimeout(update, spyPausedUntil.current - Date.now() + 10);
@@ -1014,7 +931,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           if (sectionRefs.current[s.key]!.getBoundingClientRect().top <= line) current = s.key;
         }
       }
-      setActiveTab((prev) => (prev === current ? prev : current));
+      setActiveTab(current);
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -1032,8 +949,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep the active tab visible in the horizontally scrolling bar. Scrolls only
-  // the bar -- scrollIntoView would also yank the page.
+  // Keep the active tab visible by scrolling only the tab bar; scrollIntoView would move the page too.
   const tabBarRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const bar = tabBarRef.current;
@@ -1043,14 +959,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     bar.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
   }, [activeTab]);
 
-  // A shared analysis usually opens in a fresh tab, where history.back() lands on
-  // about:blank or walks straight out of the site -- which is what people were
-  // hitting. Step back only when there is provably an IPO Milega page behind us.
-  //
-  // Two ways that is true: we arrived by client-side navigation (the tab's entry
-  // document is some other URL, so the router pushed an entry to get here), or
-  // this page was loaded outright from another page of ours. Anything else --
-  // opened from WhatsApp, pasted into the address bar -- goes home instead.
+  // A shared link often opens in a fresh tab, where history.back() leaves the site.
+  // Go back only if we arrived by in-app navigation or from another page of ours; otherwise go home.
   const handleBack = () => {
     const entry = performance.getEntriesByType("navigation")[0] as
       | PerformanceNavigationTiming
@@ -1064,7 +974,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
       cameFromOurSite =
         !!document.referrer && new URL(document.referrer).origin === window.location.origin;
     } catch {
-      cameFromOurSite = false;
+      // Unparseable referrer.
     }
 
     if (arrivedInApp || cameFromOurSite) router.back();
@@ -1073,8 +983,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   return (
     <div className="min-h-screen font-sans bg-background pt-16">
-      {/* Page header and tab bar travel as one sticky block: separate offsets drift
-          apart whenever the site header's height changes with the breakpoint. */}
+      {/* Page header and tab bar share one sticky block so their offsets cannot drift apart. */}
       <div ref={chromeRef} className="sticky z-40" style={{ top: siteHeaderHeight }}>
       <header className="bg-background/90 backdrop-blur border-b border-border">
         <div className="app-container py-3 flex items-center justify-between gap-4">
@@ -1114,7 +1023,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         </div>
       </header>
 
-      {/* Section tab nav */}
       <div className="bg-background/95 backdrop-blur border-b border-border">
         <div ref={tabBarRef} className="app-container overflow-x-auto">
           <div className="relative flex items-center gap-1 py-2 min-w-max">
@@ -1137,7 +1045,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   <span
                     className={cn(
                       "text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded-full",
-                      activeTab === s.key ? "bg-primary-foreground/15 text-primary-foreground" : scoreBgClass(s.score)
+                      activeTab === s.key ? "bg-primary-foreground/15 text-primary-foreground" : scoreStyle(s.score).badge
                     )}
                   >
                     {s.score.toFixed(1)}
@@ -1154,9 +1062,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
       <div className="app-container py-8 space-y-10">
         {/* §00 Overview */}
         <section
-          ref={(el) => {
-            sectionRefs.current["overview"] = el;
-          }}
+          ref={sectionRef("overview")}
           id="overview"
           className="scroll-mt-40 space-y-8"
         >
@@ -1183,7 +1089,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               <div>
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Price band</div>
                 <EditableText
-                  value={formatPriceBand()}
+                  value={formattedPriceBand}
                   onSave={(val) => handleInlineSave("ipo_details.price_band", val)}
                   isAdmin={isAdmin}
                   textClassName="text-lg font-mono font-semibold text-foreground"
@@ -1269,9 +1175,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               )}
             </div>
 
-            {/* The trend behind the single GMP figure above: which way it has
-                been moving, and how far. Reads its own series client-side, so
-                it is not frozen by this page's five-minute ISR cache. */}
+            {/* Fetches its own series client-side, so the ISR cache does not freeze it. */}
             <div className="mt-4">
               <GmpTrendChart ipoId={ipo._id} companyName={editedAnalysis.company_name} />
             </div>
@@ -1298,42 +1202,17 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 className="bg-accent border border-border p-4 rounded-lg mb-4 grid grid-cols-2 md:grid-cols-5 gap-4"
                 onMouseLeave={() => setIsEditingTimeline(false)}
               >
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-mono text-muted-foreground">Opening</label>
-                  <input
-                    type="date"
-                    value={timelineData.opening ? timelineData.opening.split("T")[0] : ""}
-                    onChange={(e) => handleInlineSave("time.issue_dates.opening", e.target.value)}
-                    className="bg-card border border-border rounded px-2 py-1 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-mono text-muted-foreground">Closing</label>
-                  <input
-                    type="date"
-                    value={timelineData.closing ? timelineData.closing.split("T")[0] : ""}
-                    onChange={(e) => handleInlineSave("time.issue_dates.closing", e.target.value)}
-                    className="bg-card border border-border rounded px-2 py-1 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-mono text-muted-foreground">Allotment</label>
-                  <input
-                    type="date"
-                    value={timelineData.allotment ? timelineData.allotment.split("T")[0] : ""}
-                    onChange={(e) => handleInlineSave("time.allotment_timeline.date", e.target.value)}
-                    className="bg-card border border-border rounded px-2 py-1 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-mono text-muted-foreground">Listing</label>
-                  <input
-                    type="date"
-                    value={timelineData.listing ? timelineData.listing.split("T")[0] : ""}
-                    onChange={(e) => handleInlineSave("time.listing_details.expected_date", e.target.value)}
-                    className="bg-card border border-border rounded px-2 py-1 text-sm outline-none focus:border-primary"
-                  />
-                </div>
+                {timelineInputs.map(({ label, value, path }) => (
+                  <div key={label} className="flex flex-col gap-1">
+                    <label className="text-xs font-mono text-muted-foreground">{label}</label>
+                    <input
+                      type="date"
+                      value={value ? value.split("T")[0] : ""}
+                      onChange={(e) => handleInlineSave(path, e.target.value)}
+                      className="bg-card border border-border rounded px-2 py-1 text-sm outline-none focus:border-primary"
+                    />
+                  </div>
+                ))}
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-mono text-muted-foreground">Timing score</label>
                   <input
@@ -1355,9 +1234,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             />
           </div>
 
-          {/* Verdict: the aggregate score next to the per-section breakdown behind it.
-              These used to sit four blocks apart, so the radar read as decoration rather
-              than as the working behind the number. */}
+          {/* Verdict: the overall score next to the section scores behind it. */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 sm:gap-6">
           <div className="rounded-xl border border-border bg-card p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 sm:gap-8 items-center">
             <div className="flex justify-center">
@@ -1367,10 +1244,10 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               <div className="flex items-baseline justify-between mb-3 gap-3">
                 <span className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Overall score</span>
                 <span className="flex items-baseline gap-2">
-                  <span className={cn("font-mono text-sm font-semibold uppercase tracking-wide", scoreTextClass(overallScore))}>
+                  <span className={cn("font-mono text-sm font-semibold uppercase tracking-wide", scoreStyle(overallScore).text)}>
                     {getScoreTrustLabel(overallScore)}
                   </span>
-                  <span className={cn("font-serif text-3xl font-semibold", scoreTextClass(overallScore))}>
+                  <span className={cn("font-serif text-3xl font-semibold", scoreStyle(overallScore).text)}>
                     {overallScore.toFixed(1)}
                   </span>
                   <span className="text-sm text-muted-foreground font-mono">/10</span>
@@ -1378,8 +1255,8 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </div>
               <div className="h-2 w-full rounded-full bg-muted overflow-hidden mb-5">
                 <div
-                  className={cn("h-full rounded-full transition-all duration-700", scoreBarClass(overallScore))}
-                  style={{ width: `${Math.max(0, Math.min(100, (overallScore / 10) * 100))}%` }}
+                  className={cn("h-full rounded-full transition-all duration-700", scoreStyle(overallScore).bar)}
+                  style={{ width: scoreWidth(overallScore) }}
                 />
               </div>
               {/* The radar has no axis labels, so spell out the scores behind it. */}
@@ -1389,11 +1266,11 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                     <span className="text-muted-foreground">{a.label}</span>
                     <span className="h-1.5 rounded-full bg-muted overflow-hidden">
                       <span
-                        className={cn("block h-full rounded-full", scoreBarClass(a.score))}
-                        style={{ width: `${Math.max(0, Math.min(100, a.score * 10))}%` }}
+                        className={cn("block h-full rounded-full", scoreStyle(a.score).bar)}
+                        style={{ width: scoreWidth(a.score) }}
                       />
                     </span>
-                    <span className={cn("font-mono text-right font-semibold", scoreTextClass(a.score))}>{a.score.toFixed(1)}</span>
+                    <span className={cn("font-mono text-right font-semibold", scoreStyle(a.score).text)}>{a.score.toFixed(1)}</span>
                   </li>
                 ))}
               </ul>
@@ -1404,38 +1281,24 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             </div>
           </div>
 
-          {/* Strengths / Concerns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-xs font-mono uppercase tracking-wide text-score-good mb-3">Strengths</h3>
-              {strengths.length > 0 ? (
-                <ul className="space-y-3">
-                  {strengths.slice(0, 5).map((s, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                      <Plus className="h-3.5 w-3.5 text-score-good mt-0.5 flex-shrink-0" />
-                      <span>{s}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No highlighted strengths yet.</p>
-              )}
-            </div>
-            <div>
-              <h3 className="text-xs font-mono uppercase tracking-wide text-score-bad mb-3">Concerns</h3>
-              {concerns.length > 0 ? (
-                <ul className="space-y-3">
-                  {concerns.slice(0, 5).map((s, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                      <Minus className="h-3.5 w-3.5 text-score-bad mt-0.5 flex-shrink-0" />
-                      <span>{s}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No flagged concerns yet.</p>
-              )}
-            </div>
+            {strengthsAndConcerns.map(({ title, items, color, Icon, empty }) => (
+              <div key={title}>
+                <h3 className={cn("text-xs font-mono uppercase tracking-wide mb-3", color)}>{title}</h3>
+                {items.length > 0 ? (
+                  <ul className="space-y-3">
+                    {items.slice(0, 5).map((s, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+                        <Icon className={cn("h-3.5 w-3.5 mt-0.5 flex-shrink-0", color)} />
+                        <span>{s}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">{empty}</p>
+                )}
+              </div>
+            ))}
           </div>
 
           {investorTableData.length > 0 && (
@@ -1452,7 +1315,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {investorTableData.map((row: IPOInvestorSplit, index: number) => (
+                    {investorTableData.map((row, index) => (
                       <TableRow key={index}>
                         <TableCell className="font-medium">{row.application || "-"}</TableCell>
                         <TableCell>{row.lot_size || "-"}</TableCell>
@@ -1470,9 +1333,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         {/* §01 Timing */}
         {editedAnalysis.time && (
           <section
-            ref={(el) => {
-              sectionRefs.current["timing"] = el;
-            }}
+            ref={sectionRef("timing")}
             id="timing"
           >
             <SectionHeading
@@ -1494,7 +1355,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Market timing</div>
-                <div className={cn("text-lg font-serif font-semibold", scoreTextClass(timeScore))}>
+                <div className={cn("text-lg font-serif font-semibold", scoreStyle(timeScore).text)}>
                   {timeScore >= 6 ? "Favourable" : timeScore >= 4 ? "Neutral" : "Unfavourable"}
                 </div>
               </div>
@@ -1515,9 +1376,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         {/* §02 Financials */}
         {editedAnalysis.fundamentals && (
           <section
-            ref={(el) => {
-              sectionRefs.current["financials"] = el;
-            }}
+            ref={sectionRef("financials")}
             id="financials"
           >
             <SectionHeading
@@ -1535,8 +1394,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
             />
 
-            {/* The three questions testers asked first: how much debt, who is
-                selling, and why. Older analyses don't carry these fields. */}
+            {/* Debt and offer structure; older analyses do not carry these fields. */}
             {(editedAnalysis.fundamentals.debt || editedAnalysis.fundamentals.offer_structure) && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
                 {editedAnalysis.fundamentals.debt && (
@@ -1648,7 +1506,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   onSave={(val) => handleInlineSave("ipo_details.profitability_of_allotment.score", parseInt(val) || 0)}
                   type="number"
                   isAdmin={isAdmin}
-                  textClassName={cn("font-serif text-3xl font-semibold", scoreTextClass(editedAnalysis.ipo_details?.profitability_of_allotment?.score ?? 0))}
+                  textClassName={cn("font-serif text-3xl font-semibold", scoreStyle(editedAnalysis.ipo_details?.profitability_of_allotment?.score ?? 0).text)}
                   renderText={(val) => <span>{val}/10</span>}
                 />
                 <EditableText
@@ -1666,9 +1524,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         {/* §03 Risk */}
         {editedAnalysis.risk_meter && (
           <section
-            ref={(el) => {
-              sectionRefs.current["risk"] = el;
-            }}
+            ref={sectionRef("risk")}
             id="risk"
           >
             <SectionHeading
@@ -1694,7 +1550,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 {Object.entries(editedAnalysis.risk_meter.risk_categories).map(([category, risks]) => (
                   <Card key={category}>
                     <CardHeader>
-                      <CardTitle className={cn("capitalize text-base font-serif font-semibold", riskCategoryColors[category] || riskCategoryColors.default)}>
+                      <CardTitle className={cn("capitalize text-base font-serif font-semibold", RISK_CATEGORY_COLORS[category] || "text-muted-foreground")}>
                         {category.replace(/_/g, " ")}
                       </CardTitle>
                     </CardHeader>
@@ -1723,9 +1579,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         {/* §04 Performance */}
         {editedAnalysis.performance && (
           <section
-            ref={(el) => {
-              sectionRefs.current["performance"] = el;
-            }}
+            ref={sectionRef("performance")}
             id="performance"
           >
             <SectionHeading
@@ -1844,9 +1698,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         {/* §05 Flexibility */}
         {editedAnalysis.flexibility && (
           <section
-            ref={(el) => {
-              sectionRefs.current["flexibility"] = el;
-            }}
+            ref={sectionRef("flexibility")}
             id="flexibility"
           >
             <SectionHeading
@@ -1931,7 +1783,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         onClose={() => setPredictorCategory(null)}
       />
 
-      {/* Floating Admin Status Bar */}
       {isAdmin && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4 bg-card border border-border p-4 rounded-xl shadow-2xl">
           <div className="flex items-center gap-3">

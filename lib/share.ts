@@ -1,25 +1,12 @@
-// Share copy for one IPO analysis.
-//
-// Used in two places that must agree: the client-side "Share" dialog (what a person pastes into
-// WhatsApp) and `generateMetadata` on the analysis page (what WhatsApp/X/Slack render when that
-// link is unfurled). Keeping the wording in one module means the preview card and the pasted
-// message never drift apart.
-//
-// Everything here is pure and timezone-explicit, so it produces the same string on the server
-// (where the page is ISR-rendered) as in the browser.
-
-import type { IpoComprehensiveAnalysis } from "@/app/models/ipo_comprehensive_analysis";
+// Share copy for one IPO: the Share dialog message and the link-preview metadata both read from here,
+// so the pasted message and the unfurled card say the same thing.
+import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 
 export const SITE_URL = "https://ipomilega.in";
 export const SITE_NAME = "IPO Milega";
 
-/**
- * Shared by every page's `openGraph`. Next replaces the whole object per page rather than merging
- * it, and a page that sets its own also drops the root app/opengraph-image, so the image is named
- * here. Config images beat file-based ones, so a page with its own card names it explicitly.
- * A function, not a constant: Next mutates the `images` it resolves, so a shared array came back
- * empty on every page after the first.
- */
+// A function, not a constant: Next mutates the `images` it resolves, so a shared array came back
+// empty on every page after the first.
 export const openGraphBase = () => ({
   siteName: SITE_NAME,
   locale: "en_IN",
@@ -27,28 +14,17 @@ export const openGraphBase = () => ({
   images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${SITE_NAME} - Prospectus analysis for every Indian IPO` }],
 });
 
-// Every date in an Indian IPO calendar is an IST date. The server may run anywhere, so "today"
-// is always resolved against Asia/Kolkata rather than the host clock's local day.
+// IPO calendar dates are IST dates, and the server may run in any timezone.
 const IST = "Asia/Kolkata";
 
-/** The YYYY-MM-DD an instant falls on in India. */
-function istDayKey(d: Date): string {
-  return d.toLocaleDateString("en-CA", { timeZone: IST });
-}
-
-/** Whole days from `now` to `dateStr`, counted in IST calendar days. Null if unparseable. */
-export function daysUntil(dateStr: string | null | undefined, now: Date = new Date()): number | null {
+/** Whole IST calendar days from today to `dateStr`, or null if it does not parse. */
+function daysUntil(dateStr: string | null | undefined): number | null {
   if (!dateStr) return null;
   const target = new Date(dateStr);
   if (isNaN(target.getTime())) return null;
 
-  const toUtcMidnight = (key: string) => {
-    const [y, m, d] = key.split("-").map(Number);
-    return Date.UTC(y, m - 1, d);
-  };
-
-  const diff = toUtcMidnight(istDayKey(target)) - toUtcMidnight(istDayKey(now));
-  return Math.round(diff / 86_400_000);
+  const istMidnight = (d: Date) => Date.parse(d.toLocaleDateString("en-CA", { timeZone: IST }));
+  return Math.round((istMidnight(target) - istMidnight(new Date())) / 86_400_000);
 }
 
 export function formatDay(dateStr: string | null | undefined): string | null {
@@ -58,21 +34,12 @@ export function formatDay(dateStr: string | null | undefined): string | null {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: IST });
 }
 
-/**
- * The urgency line — the whole reason someone forwards one of these links.
- * "Today is the last date to apply" beats any amount of analysis prose.
- */
-export function closingLine(
-  closing: string | null | undefined,
-  opening: string | null | undefined,
-  now: Date = new Date()
-): string | null {
-  const toClose = daysUntil(closing, now);
-  const toOpen = daysUntil(opening, now);
+/** How long is left to apply, e.g. "Today is the last date to apply." */
+export function closingLine(closing: string | null | undefined, opening: string | null | undefined): string | null {
+  const toOpen = daysUntil(opening);
+  if (toOpen !== null && toOpen > 0) return toOpen === 1 ? "Opens tomorrow." : `Opens ${formatDay(opening)}.`;
 
-  if (toOpen !== null && toOpen > 0) {
-    return toOpen === 1 ? "Opens tomorrow." : `Opens ${formatDay(opening)}.`;
-  }
+  const toClose = daysUntil(closing);
   if (toClose === null) return null;
   if (toClose < 0) return "Bidding has closed.";
   if (toClose === 0) return "Today is the last date to apply.";
@@ -80,36 +47,23 @@ export function closingLine(
   return `${toClose} days left to apply — closes ${formatDay(closing)}.`;
 }
 
-/**
- * "GMP ₹25 (+6.17%)" for a premium amount, "GMP +6.17%" for an estimated-listing string.
- */
-export function gmpLine(
-  gmp: string | number | null | undefined,
-  gainPercent?: string | number | null
-): string | null {
-  const raw = gmp === null || gmp === undefined ? "" : String(gmp).trim();
+/** "GMP ₹25" for a premium amount, "GMP +6.17%" for an estimated-listing string like "430 (6.17%)". */
+export function gmpLine(gmp: string | number | null | undefined): string | null {
+  const raw = gmp == null ? "" : String(gmp).trim();
   if (!raw || ["n/a", "na", "tba", "tbd", "-", "0"].includes(raw.toLowerCase())) return null;
 
-  // `gmp_price_gain` is the *estimated listing price* with the gain in brackets ("430 (6.17%)" on
-  // a ₹405 issue), so the amount is not the premium. Only the percentage is, so show that alone.
+  // In "430 (6.17%)" the amount is the estimated listing price, not the premium, so show only the gain.
   const estListing = raw.match(/^₹?\s*[\d,.]+\s*\(\s*([+-]?[\d.]+)\s*%\s*\)$/);
   if (estListing) {
     const pct = estListing[1];
-    return `GMP ${pct.startsWith("-") || pct.startsWith("+") ? pct : `+${pct}`}%`;
+    return `GMP ${/^[+-]/.test(pct) ? pct : `+${pct}`}%`;
   }
 
-  const amount = raw.startsWith("₹") ? raw : `₹${raw}`;
-  if (raw.includes("%")) return `GMP ${amount}`;
-
-  const pct = gainPercent === null || gainPercent === undefined ? "" : String(gainPercent).trim();
-  if (!pct || pct === "0") return `GMP ${amount}`;
-
-  const signed = pct.startsWith("-") || pct.startsWith("+") ? pct : `+${pct}`;
-  return `GMP ${amount} (${signed}${pct.endsWith("%") ? "" : "%"})`;
+  return `GMP ${raw.startsWith("₹") ? raw : `₹${raw}`}`;
 }
 
-/** First sentence of the business model, capped so it stays a one-liner in a preview card. */
-export function oneLiner(text: string | null | undefined, max = 150): string | null {
+/** First sentence of the text, capped at `max` characters so it stays a one-liner. */
+function oneLiner(text: string | null | undefined, max = 150): string | null {
   const clean = (text || "").replace(/\s+/g, " ").trim();
   if (!clean) return null;
 
@@ -120,83 +74,50 @@ export function oneLiner(text: string | null | undefined, max = 150): string | n
   return candidate.slice(0, candidate.lastIndexOf(" ", max) + 1).trim().replace(/[,.;:]$/, "") + "…";
 }
 
-export function analysisUrl(slug: string): string {
-  return `${SITE_URL}/analysis/${slug}`;
-}
-
 export interface ShareFacts {
   companyName: string;
   slug: string;
   score?: number;
   gmp?: string | number | null;
-  gainPercent?: string | number | null;
   opening?: string | null;
   closing?: string | null;
   businessModel?: string | null;
-  /** Overridable so the page can share the URL actually in the address bar. */
+  /** The URL in the address bar, when the page knows it. */
   url?: string;
-  now?: Date;
 }
 
 /**
- * The message that goes out when someone shares an IPO.
- *
- * Four things, and nothing else: the GMP, how long is left to apply, one line
- * on what the company does, and the link. A forwarded message is read on a lock
- * screen -- the full details are one tap away on the page, so repeating them
- * here only buries the part that makes someone act.
- *
- * It opens in the sharer's voice, but the line is written for them rather than
- * by them: tapping Share hands this exact text to the system share sheet, and
- * the only decision left is who receives it. There is no draft to edit, which
- * is why the opener states they are applying -- forwarding an issue you are
- * putting money into is the case this button exists for.
- *
- * Plain text, no markup: it has to read the same in WhatsApp, Telegram, email
- * and notes, and only WhatsApp would render `*bold*` rather than print it.
+ * The message a Share tap hands to the share sheet: GMP and deadline, one line on the business, the link.
+ * Plain text on purpose: only WhatsApp renders `*bold*`; Telegram, email and notes print the asterisks.
  */
-export function buildShareMessage(facts: ShareFacts): string {
-  const { companyName, slug, gmp, gainPercent, opening, closing, businessModel, url, now } = facts;
-
-  // Blocks are separated by a blank line; GMP and the deadline stay together
-  // because they are read as one thought -- worth this much, this long left.
-  const blocks = [
+export function buildShareMessage({ companyName, slug, gmp, opening, closing, businessModel, url }: ShareFacts): string {
+  return [
     `Hey, I'm applying to the ${companyName} IPO.`,
-    [gmpLine(gmp, gainPercent), closingLine(closing, opening, now)].filter(Boolean).join("\n"),
+    [gmpLine(gmp), closingLine(closing, opening)].filter(Boolean).join("\n"),
     oneLiner(businessModel),
-    `Full analysis → ${url || analysisUrl(slug)}`,
-  ].filter((b) => !!b);
-
-  return blocks.join("\n\n");
+    `Full analysis → ${url || `${SITE_URL}/analysis/${slug}`}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
-/** The single-paragraph version used for og:description and twitter:description. */
-export function buildShareDescription(facts: ShareFacts): string {
-  const { companyName, score, gmp, gainPercent, opening, closing, businessModel, now } = facts;
-
-  const parts = [
-    gmpLine(gmp, gainPercent),
-    closingLine(closing, opening, now),
+/** The one-paragraph version for og:description and twitter:description. */
+export function buildShareDescription({ companyName, score, gmp, opening, closing, businessModel }: ShareFacts): string {
+  return [
+    gmpLine(gmp),
+    closingLine(closing, opening),
     oneLiner(businessModel, 110),
     score !== undefined && score > 0 ? `Scored ${score.toFixed(1)}/10 from the RHP.` : null,
     `Read the full ${companyName} IPO analysis on ${SITE_NAME}.`,
-  ].filter(Boolean);
-
-  return parts.join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
-// The page body scores an issue as the mean of its five section scores. The metadata and
-// structured data once reimplemented that from `summary_metrics` with misplaced parentheses,
-// which is how a share card ended up advertising "12.0/10". The metadata, JSON-LD and preview
-// image all compute it here, the same way the page does.
-export function overallScoreOf(analysis: Pick<IpoComprehensiveAnalysis, 'fundamentals' | 'risk_meter' | 'performance' | 'flexibility' | 'time'>): number {
-  const sections = [
-    analysis.fundamentals?.score,
-    analysis.risk_meter?.score,
-    analysis.performance?.score,
-    analysis.flexibility?.score,
-    analysis.time?.score,
-  ].map((n) => n ?? 0)
-
-  return sections.reduce((sum, n) => sum + n, 0) / sections.length
+/** The overall score: the mean of the five section scores, the same way the page body computes it. */
+export function overallScoreOf(
+  analysis: Pick<IpoComprehensiveAnalysis, "fundamentals" | "risk_meter" | "performance" | "flexibility" | "time">
+): number {
+  const sections = [analysis.fundamentals, analysis.risk_meter, analysis.performance, analysis.flexibility, analysis.time];
+  return sections.reduce((sum, section) => sum + (section?.score ?? 0), 0) / sections.length;
 }

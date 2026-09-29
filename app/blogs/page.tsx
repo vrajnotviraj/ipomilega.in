@@ -15,12 +15,6 @@ export const metadata: Metadata = {
   openGraph: { ...openGraphBase(), title, description, url: "/blogs" },
 };
 
-/**
- * Server component. Previously the whole page was `"use client"` and fetched
- * /api/blogs/published on mount -- a route that issued five sequential Mongo round-trips
- * (all blogs, then four near-identical category reads) before returning anything.
- */
 export default async function BlogsPage() {
-  const blogs = await getPublishedBlogs();
-  return <BlogsClient blogs={JSON.parse(JSON.stringify(blogs))} />;
+  return <BlogsClient blogs={await getPublishedBlogs()} />;
 }

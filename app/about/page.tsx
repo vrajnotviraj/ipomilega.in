@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { openGraphBase } from "@/lib/share";
-import { Footer } from "@/components/Home/Footer";
-import { ScoreMethodology } from "@/components/Home/ScoreMethodology";
+import { Footer } from "@/components/layout/Footer";
+import { ScoreMethodology } from "@/components/home/ScoreMethodology";
 
 const title = "About";
 const description = "What IPO Milega is, where its IPO data comes from, and how we score every RHP/DRHP by the same rules.";

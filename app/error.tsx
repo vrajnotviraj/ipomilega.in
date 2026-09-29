@@ -5,19 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PageLoader } from "@/components/ui/loader";
 
-// Module-level so it survives the boundary remounting after reset(); a ref would reset and
-// turn one failure into an endless retry loop.
+// Module-level so it survives the remount after reset(); a ref would reset and retry forever.
 let lastAutoRetry = 0;
 const AUTO_RETRY_COOLDOWN_MS = 30_000;
 
-/**
- * Route-level error boundary.
- *
- * Data loaders now throw instead of returning empty lists (an empty fallback got ISR-cached as
- * the real page). The usual cause is a transient Mongo hiccup, so retry once on our own --
- * the user shouldn't have to be the one mashing refresh -- and only show a button if that
- * retry fails too.
- */
+/** Retries a failed load once on its own, then shows a retry button. */
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter();
   const [autoRetrying] = useState(() => Date.now() - lastAutoRetry > AUTO_RETRY_COOLDOWN_MS);
@@ -31,8 +23,8 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
     console.error(error);
     if (!autoRetrying) return;
     lastAutoRetry = Date.now();
-    const t = setTimeout(retry, 1200);
-    return () => clearTimeout(t);
+    const timer = setTimeout(retry, 1200);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, autoRetrying]);
 

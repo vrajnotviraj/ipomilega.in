@@ -1,14 +1,14 @@
 "use client";
-import { useEffect, useState, useMemo, useRef, Suspense } from "react";
+import { useEffect, useState, useMemo, Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, ChevronLeft, ChevronRight, Building2 } from "lucide-react";
-import { HomePageIpoProps } from "../types/homepage";
-import { useProgressRouter } from "@/components/Progressbar/useProgressRouter";
+import { HomePageIpoProps } from "@/types/homepage";
+import { useProgressRouter } from "@/hooks/useProgressRouter";
 import { useSearchParams } from "next/navigation";
-import { getIpoType, getPriceBand, getRiskTextColor, formatShortDate, formatIssueSize } from "@/components/Home/ipoFormat";
-import { IpoTitleLink } from "@/components/Home/IpoTitleLink";
-import { IpoLogo } from "@/components/Home/IpoLogo";
+import { getIpoType, getPriceBand, getRiskTextColor, formatShortDate, formatIssueSize } from "@/lib/ipo-format";
+import { IpoTitleLink } from "@/components/ipo/IpoTitleLink";
+import { IpoLogo } from "@/components/ipo/IpoLogo";
 
 type Status = "Upcoming" | "Open" | "Listed";
 type Row = HomePageIpoProps & { status: Status };
@@ -27,8 +27,7 @@ function StatusBadge({ status }: { status: Status }) {
   );
 }
 
-// Allotment / listing dates as small chips under the name. Skipped when the date isn't known
-// yet, so an upcoming IPO with nothing scheduled doesn't grow a row of "TBA"s.
+// Hidden when the date is unknown, so an unscheduled IPO does not show a row of "TBA"s.
 function DateBadge({ label, date }: { label: string; date: string | undefined }) {
   const value = formatShortDate(date);
   if (value === "TBA") return null;
@@ -39,41 +38,47 @@ function DateBadge({ label, date }: { label: string; date: string | undefined })
   );
 }
 
-export type IposClientProps = {
+const STATUS_BY_FILTER_PARAM: Record<string, Status> = { live: "Open", upcoming: "Upcoming", past: "Listed" };
+
+// Lives behind its own <Suspense> because useSearchParams would otherwise drop the table out of the prerendered HTML.
+function FilterFromQuery({ onFilter }: { onFilter: (status: Status) => void }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const status = STATUS_BY_FILTER_PARAM[searchParams.get("filter") ?? ""];
+    if (status) onFilter(status);
+  }, [searchParams, onFilter]);
+  return null;
+}
+
+type SortKey = "score-desc" | "score-asc" | "closing" | "name";
+
+const score = (row: Row) => row.analysis?.risk_meter?.score || 0;
+const companyName = (row: Row) => row.ipo?.upcoming_ipo_2025 || "";
+const closeTime = (row: Row) =>
+  row.ipo?.ipo_dates?.ipo_close_date ? new Date(row.ipo.ipo_dates.ipo_close_date).getTime() : Infinity;
+
+const COMPARE: Record<SortKey, (a: Row, b: Row) => number> = {
+  "score-desc": (a, b) => score(b) - score(a),
+  "score-asc": (a, b) => score(a) - score(b),
+  name: (a, b) => companyName(a).localeCompare(companyName(b)),
+  closing: (a, b) => closeTime(a) - closeTime(b),
+};
+
+const ITEMS_PER_PAGE = 10;
+const TH = "text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3";
+
+export default function IposClient({ upcoming, live, past }: {
   upcoming: HomePageIpoProps[];
   live: HomePageIpoProps[];
   past: HomePageIpoProps[];
-};
-
-/**
- * Applies the ?filter= deep link. Kept in its own component behind <Suspense> because
- * `useSearchParams` bails its nearest boundary out of server rendering -- inlining it in the
- * table component would mean the rows never appear in the prerendered HTML.
- */
-const FilterFromQuery = ({ onFilter }: { onFilter: (status: Status) => void }) => {
-  const searchParams = useSearchParams();
-  const handler = useRef(onFilter);
-  handler.current = onFilter;
-
-  useEffect(() => {
-    const filterParam = searchParams.get("filter");
-    if (filterParam === "live") handler.current("Open");
-    else if (filterParam === "upcoming") handler.current("Upcoming");
-    else if (filterParam === "past") handler.current("Listed");
-  }, [searchParams]);
-
-  return null;
-};
-
-function IPOsContent({ upcoming, live, past }: IposClientProps) {
+}) {
   const router = useProgressRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
   const [typeFilter, setTypeFilter] = useState<"all" | "Mainboard" | "SME">("all");
-  const [sortBy, setSortBy] = useState<"score-desc" | "score-asc" | "closing" | "name">("score-desc");
+  const [sortBy, setSortBy] = useState<SortKey>("score-desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   const allRows: Row[] = useMemo(() => [
     ...live.map((item) => ({ ...item, status: "Open" as const })),
@@ -82,48 +87,21 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
   ], [live, upcoming, past]);
 
   const filteredRows = useMemo(() => {
-    let rows = allRows;
-
-    if (statusFilter !== "all") {
-      rows = rows.filter((r) => r.status === statusFilter);
-    }
-    if (typeFilter !== "all") {
-      rows = rows.filter((r) => getIpoType(r.ipo) === typeFilter);
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      rows = rows.filter((r) => r.ipo?.upcoming_ipo_2025?.toLowerCase().includes(q));
-    }
-
-    const sorted = [...rows];
-    switch (sortBy) {
-      case "score-desc":
-        sorted.sort((a, b) => (b.analysis?.risk_meter?.score || 0) - (a.analysis?.risk_meter?.score || 0));
-        break;
-      case "score-asc":
-        sorted.sort((a, b) => (a.analysis?.risk_meter?.score || 0) - (b.analysis?.risk_meter?.score || 0));
-        break;
-      case "name":
-        sorted.sort((a, b) => (a.ipo?.upcoming_ipo_2025 || "").localeCompare(b.ipo?.upcoming_ipo_2025 || ""));
-        break;
-      case "closing":
-        sorted.sort((a, b) => {
-          const dateA = a.ipo?.ipo_dates?.ipo_close_date ? new Date(a.ipo.ipo_dates.ipo_close_date).getTime() : Infinity;
-          const dateB = b.ipo?.ipo_dates?.ipo_close_date ? new Date(b.ipo.ipo_dates.ipo_close_date).getTime() : Infinity;
-          return dateA - dateB;
-        });
-        break;
-    }
-    return sorted;
+    const query = searchQuery.trim().toLowerCase();
+    return allRows
+      .filter((r) => statusFilter === "all" || r.status === statusFilter)
+      .filter((r) => typeFilter === "all" || getIpoType(r.ipo) === typeFilter)
+      .filter((r) => !query || r.ipo?.upcoming_ipo_2025?.toLowerCase().includes(query))
+      .sort(COMPARE[sortBy]);
   }, [allRows, statusFilter, typeFilter, searchQuery, sortBy]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter, typeFilter, searchQuery, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const pageRows = filteredRows.slice(startIndex, startIndex + itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / ITEMS_PER_PAGE));
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pageRows = filteredRows.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const dateCell = (row: Row) => {
     if (row.status === "Upcoming") {
@@ -174,7 +152,7 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
               <SelectItem value="SME">SME</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>
             <SelectTrigger className="bg-card border-border text-sm w-full sm:w-[200px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="score-desc">Sort: score, high to low</SelectItem>
@@ -197,12 +175,12 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
               <table className="w-full min-w-[900px]">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Company</th>
-                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Type</th>
-                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Price band</th>
-                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Issue size</th>
-                    <th className="text-left text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Dates</th>
-                    <th className="text-right text-xs font-mono uppercase tracking-wide text-muted-foreground font-medium px-4 py-3">Score</th>
+                    <th className={`text-left ${TH}`}>Company</th>
+                    <th className={`text-left ${TH}`}>Type</th>
+                    <th className={`text-left ${TH}`}>Price band</th>
+                    <th className={`text-left ${TH}`}>Issue size</th>
+                    <th className={`text-left ${TH}`}>Dates</th>
+                    <th className={`text-right ${TH}`}>Score</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -210,9 +188,7 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
                     const riskScore = row.analysis?.risk_meter?.score || 0;
                     const priceBand = getPriceBand(row.ipo);
                     const issueSizeValue = formatIssueSize(row.ipo?.ipo_size);
-                    // This column prefixes ₹ because ipo_size is normally a bare amount ("500 Cr").
-                    // Once an unfixed clause is dropped, what remains can be a share count instead,
-                    // which must not be given a rupee sign.
+                    // ipo_size can be a share count instead of an amount, and a share count gets no ₹.
                     const issueSize =
                       issueSizeValue && /^[\d.]/.test(issueSizeValue) && !/share/i.test(issueSizeValue)
                         ? `₹${issueSizeValue}`
@@ -266,7 +242,7 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
 
             <div className="flex items-center justify-between gap-4 px-4 py-3 border-t border-border">
               <div className="text-sm text-muted-foreground">
-                Showing {startIndex + 1}–{Math.min(startIndex + itemsPerPage, filteredRows.length)} of {filteredRows.length}
+                Showing {startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, filteredRows.length)} of {filteredRows.length}
               </div>
               <div className="flex items-center gap-2">
                 <button
@@ -295,10 +271,4 @@ function IPOsContent({ upcoming, live, past }: IposClientProps) {
       </div>
     </div>
   );
-}
-
-// The table renders from props the server already resolved, so the HTML ships complete --
-// no outer Suspense, no spinner, no client fetch of /api/ipo/upcoming on mount.
-export default function IposClient(props: IposClientProps) {
-  return <IPOsContent {...props} />;
 }

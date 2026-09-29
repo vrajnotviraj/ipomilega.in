@@ -69,24 +69,28 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ## 📂 Project Structure
 
 ```
-├── app/
-│   ├── admin/                # Admin Management Dashboard
-│   ├── analysis/             # IPO Analysis Directory & [id] Client Pages
-│   ├── api/                  # API Routes (IPO, Analysis, Blogs, Auth)
-│   ├── models/               # TypeScript Data Models
-│   ├── styles/               # Global & Component Style Sheets
-│   ├── layout.tsx            # Main Application Layout
-│   └── page.tsx              # Home Page (Live/Upcoming/Past IPOs)
+├── app/                      # Routes only (pages, layouts, API routes, OG images)
+│   ├── admin/                # Admin dashboard
+│   ├── analysis/             # Analysis list and [id] detail pages
+│   ├── api/                  # API routes (IPO, analysis, blogs, auth)
+│   ├── blogs/                # Blog list, detail, create and edit pages
+│   ├── ipos/                 # All IPOs list
+│   ├── layout.tsx            # Root layout
+│   └── page.tsx              # Home page
 ├── components/
-│   ├── Admin/                # Admin Modals & Parser Controls
-│   ├── Home/                 # Home Sections, Cards, and Footer
-│   ├── ui/                   # Reusable UI Primitives (Button, Dialog, Card)
-│   └── charts/               # Recharts Visualization Components
-├── lib/
-│   ├── auth-client.ts        # Better Auth Client Initialization
-│   ├── dbConnect.ts          # Cached MongoDB Mongoose Connector
-│   └── data-fetching.ts      # Server-Side Data Fetching Helpers
-└── public/                   # Static Assets & Icons
+│   ├── admin/                # Admin modal and status widgets
+│   ├── blog/                 # Markdown renderer
+│   ├── charts/               # Recharts components
+│   ├── home/                 # Home page sections
+│   ├── ipo/                  # IPO pieces shared across pages
+│   ├── layout/               # Site chrome, footer, logo
+│   ├── progress/             # Route progress bar
+│   └── ui/                   # shadcn primitives
+├── hooks/                    # Standalone React hooks
+├── lib/                      # Server, data and formatting helpers
+├── types/                    # Data models and shared types
+├── scripts/                  # One-off maintenance scripts
+└── public/                   # Static assets
 ```
 
 ---

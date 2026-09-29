@@ -1,6 +1,5 @@
 "use client";
 
-// app/blogs/[id]/BlogDisplay.tsx
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -8,64 +7,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Calendar,
-  User,
-  ArrowLeft,
-  Share2,
-  Building2,
-  TrendingUp,
-  Clock,
-} from "lucide-react";
-import MarkdownRenderer from "@/components/MarkDown";
-import { Ipo } from "@/app/models/ipo";
+import { Calendar, User, ArrowLeft, Share2, Building2, TrendingUp, Clock } from "lucide-react";
+import MarkdownRenderer from "@/components/blog/MarkDown";
+import { Blog, Ipo } from "@/types/ipo";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useProgressRouter } from "@/components/Progressbar/useProgressRouter";
-import { getIpoType, formatIssueSize } from "@/components/Home/ipoFormat";
+import { useProgressRouter } from "@/hooks/useProgressRouter";
+import { getIpoType, formatIssueSize } from "@/lib/ipo-format";
 import Image from "next/image";
 
-interface BlogPost {
-  title: string;
-  slug: string;
-  ipo_id: string;
-  content: string;
-  excerpt: string;
-  tags: string[];
-  category: string;
-  status: "draft" | "published";
-  image_url?: string;
-  meta_description: string;
-  created_at: string;
-  updated_at: string;
-  author: string;
-}
-
-
-export default function BlogDisplay({ blog }: { blog: BlogPost }) {
+export default function BlogDisplay({ blog }: { blog: Blog }) {
   const [ipoData, setIpoData] = useState<Ipo | null>(null);
   const [isLoadingIpo, setIsLoadingIpo] = useState(false);
-  // const [isBookmarked, setIsBookmarked] = useState(false);
-  // const [isLiked, setIsLiked] = useState(false);
   const router = useProgressRouter();
 
   useEffect(() => {
-    if (blog.ipo_id) {
-      const fetchIpoData = async () => {
-        setIsLoadingIpo(true);
-        try {
-          const response = await fetch(`/api/ipo/${blog.ipo_id}`);
-          if (response.ok) {
-            const data = await response.json();
-            setIpoData(data.ipos);
-          }
-        } catch (error) {
-          console.error("Error fetching IPO data:", error);
-        } finally {
-          setIsLoadingIpo(false);
-        }
-      };
-      fetchIpoData();
-    }
+    if (!blog.ipo_id) return;
+    const fetchIpoData = async () => {
+      setIsLoadingIpo(true);
+      try {
+        const response = await fetch(`/api/ipo/${blog.ipo_id}`);
+        if (response.ok) setIpoData((await response.json()).ipos);
+      } catch (error) {
+        console.error("Error fetching IPO data:", error);
+      } finally {
+        setIsLoadingIpo(false);
+      }
+    };
+    fetchIpoData();
   }, [blog.ipo_id]);
 
   const formattedDate = new Date(blog.created_at).toLocaleDateString("en-IN", {
@@ -77,25 +45,19 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
   const readingTime = Math.ceil(blog.content.split(" ").length / 200);
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: blog.title,
-          text: blog.excerpt,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.error("Error sharing:", error);
-      }
-    } else {
-      // Fallback: copy to clipboard
+    if (!navigator.share) {
       navigator.clipboard.writeText(window.location.href);
+      return;
+    }
+    try {
+      await navigator.share({ title: blog.title, text: blog.excerpt, url: window.location.href });
+    } catch (error) {
+      console.error("Error sharing:", error);
     }
   };
 
   return (
     <div className="min-h-screen bg-background pt-20">
-      {/* Navigation Header */}
       <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
         <div className="app-container py-4">
           <div className="flex items-center justify-between">
@@ -107,22 +69,6 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
             </Button>
 
             <div className="flex items-center space-x-2">
-              {/* <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsLiked(!isLiked)}
-                className={isLiked ? "text-red-500" : "text-muted-foreground"}
-              >
-                <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsBookmarked(!isBookmarked)}
-                className={isBookmarked ? "text-primary" : "text-muted-foreground"}
-              >
-                <BookmarkPlus className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
-              </Button> */}
               <Button variant="ghost" size="sm" onClick={handleShare} className="text-muted-foreground">
                 <Share2 className="h-4 w-4" />
               </Button>
@@ -133,9 +79,7 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
 
       <div className="app-container py-8">
         <div>
-          {/* Article Header */}
           <header className="mb-12">
-            {/* Featured Image */}
             {blog.image_url && (
               <div className="relative mb-8 rounded-xl overflow-hidden shadow-lg">
                 <Image
@@ -149,7 +93,6 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
               </div>
             )}
 
-            {/* Category and Tags */}
             <div className="flex items-center gap-2 mb-6 flex-wrap">
               <Badge variant="default" className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground">
                 {blog.category}
@@ -161,17 +104,14 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
               ))}
             </div>
 
-            {/* Title */}
             <h1 className="text-4xl md:text-5xl font-semibold font-serif mb-6 text-foreground leading-tight">
               {blog.title}
             </h1>
 
-            {/* Excerpt */}
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
               {blog.excerpt}
             </p>
 
-            {/* Meta Info */}
             <div className="flex items-center justify-between flex-wrap gap-4 pb-8">
               <div className="flex items-center space-x-6 text-sm text-muted-foreground">
                 <div className="flex items-center">
@@ -186,10 +126,6 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
                   <Clock className="h-4 w-4 mr-2" />
                   <span>{readingTime} min read</span>
                 </div>
-                {/* <div className="flex items-center">
-                  <Eye className="h-4 w-4 mr-2" />
-                  <span>1.2k views</span>
-                </div> */}
               </div>
 
               <div className="flex items-center space-x-2">
@@ -197,17 +133,12 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
-                {/* <Button variant="outline" size="sm">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Comment
-                </Button> */}
               </div>
             </div>
 
             <Separator className="border-t" />
           </header>
 
-          {/* IPO Reference Card */}
           {blog.ipo_id && (
             <Card className="mb-12 bg-card border-border">
               <CardContent className="pt-6">
@@ -264,7 +195,6 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
             </Card>
           )}
 
-          {/* Article Content */}
           <article className="mb-12">
             <MarkdownRenderer
               content={blog.content}
@@ -274,7 +204,6 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
 
           <Separator className="my-12" />
 
-          {/* Article Footer */}
           <footer className="mb-12">
             <div className="flex items-center justify-between flex-wrap gap-6">
               <div className="flex flex-wrap gap-2">
@@ -291,23 +220,12 @@ export default function BlogDisplay({ blog }: { blog: BlogPost }) {
                   <Share2 className="h-4 w-4 mr-2" />
                   Share Article
                 </Button>
-                {/* <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsBookmarked(!isBookmarked)}
-                  className={isBookmarked ? "bg-muted" : ""}
-                >
-                  <BookmarkPlus className="h-4 w-4 mr-2" />
-                  {isBookmarked ? "Saved" : "Save"}
-                </Button> */}
               </div>
             </div>
           </footer>
 
-          {/* Related Articles Section */}
           <section>
             <div className="text-center">
-
               <Card className="bg-card border-border group hover:bg-accent/40 transition-all duration-300">
                 <CardContent className="pt-6 text-center" onClick={() => router.push("/ipos")}>
                   <div className="text-muted-foreground mb-4">
