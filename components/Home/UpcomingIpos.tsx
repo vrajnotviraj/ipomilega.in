@@ -8,6 +8,7 @@ import { Badge } from '../ui/badge';
 import { IpoTitleLink } from './IpoTitleLink';
 import { IpoLogo } from './IpoLogo';
 import { formatShortDateOrToday, getRiskTextColor, getIpoType, getPriceBand } from './ipoFormat';
+import { useBoard } from './BoardContext';
 
 function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
   const { ipo, analysis } = item;
@@ -48,7 +49,8 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
 }
 
 export function UpcomingIposSection({ ipos, count }: IpoSectionProps) {
-  const visibleIpos = (ipos || []).slice(0, 6);
+  const { board } = useBoard();
+  const visibleIpos = (ipos || []).filter((item) => getIpoType(item.ipo) === board).slice(0, 6);
 
   return (
     <section className="py-15">
@@ -68,7 +70,7 @@ export function UpcomingIposSection({ ipos, count }: IpoSectionProps) {
           <div className="flex items-center justify-center py-8">
             <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
               <CalendarDays className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground text-base font-medium font-sans">No upcoming IPOs at the moment</p>
+              <p className="text-muted-foreground text-base font-medium font-sans">No upcoming {board} IPOs at the moment</p>
               <p className="text-muted-foreground/70 text-sm mt-2 font-sans">Check back soon for new opportunities!</p>
             </div>
           </div>

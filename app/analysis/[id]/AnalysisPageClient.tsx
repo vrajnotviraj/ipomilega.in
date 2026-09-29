@@ -359,41 +359,42 @@ const QuotaDonut = ({ data }: { data: { name: string; value: number; color: stri
   if (!total) {
     return <div className="text-sm text-muted-foreground text-center py-8">Quota data unavailable.</div>;
   }
+  // Side by side on mobile (full-width card); stacked when it sits in the narrow column beside the verdict.
   return (
-    <div className="flex items-center gap-4">
-      <div className="w-[120px] h-[120px] flex-shrink-0">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              innerRadius={38}
-              outerRadius={58}
-              stroke="var(--card)"
-              strokeWidth={2}
-              isAnimationActive
-            >
-              {data.map((d, i) => (
-                <Cell key={i} fill={d.color} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="space-y-1.5">
-        <div className="text-[10px] font-mono uppercase tracking-wide text-muted-foreground mb-1">
-          Quota split
+    <div className="h-full flex flex-col">
+      <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">Quota split</div>
+      <div className="flex-1 flex items-center justify-center gap-6 lg:flex-col lg:gap-4">
+        <div className="w-[130px] h-[130px] flex-shrink-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius={42}
+                outerRadius={63}
+                stroke="var(--card)"
+                strokeWidth={2}
+                isAnimationActive
+              >
+                {data.map((d, i) => (
+                  <Cell key={i} fill={d.color} />
+                ))}
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
         </div>
-        {data.map((d) => (
-          <div key={d.name} className="flex items-center gap-2 text-sm">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: d.color }} />
-            <span className="text-foreground font-medium">{d.name}</span>
-            <span className="font-mono text-muted-foreground">{d.value}%</span>
-          </div>
-        ))}
+        <div className="space-y-1.5 lg:space-y-0 lg:flex lg:gap-4">
+          {data.map((d) => (
+            <div key={d.name} className="flex items-center gap-2 text-sm">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: d.color }} />
+              <span className="text-foreground font-medium">{d.name}</span>
+              <span className="font-mono text-muted-foreground">{d.value}%</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -1249,10 +1250,10 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </p>
             </div>
 
-            <div className="rounded-xl border border-border bg-card p-5">
-              <h3 className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-2">Estimated listing</h3>
+            <div className={cn("rounded-xl border border-border bg-card px-4 py-3 sm:px-5", hasGmp && "flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1")}>
+              <h3 className={cn("text-xs font-mono uppercase tracking-wide text-muted-foreground", !hasGmp && "mb-2")}>Estimated listing</h3>
               {hasGmp ? (
-                <p className="font-mono text-2xl font-semibold text-score-good">
+                <p className="font-mono text-xl sm:text-2xl font-semibold text-score-good">
                   <EditableText
                     value={gmpValue}
                     onSave={(val) => handleInlineSave("gmp_price_gain", val)}
@@ -1357,29 +1358,49 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
           {/* Verdict: the aggregate score next to the per-section breakdown behind it.
               These used to sit four blocks apart, so the radar read as decoration rather
               than as the working behind the number. */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-stretch">
-          <div className="rounded-xl border border-border bg-card p-5 sm:p-6 flex flex-col justify-center">
-            <div className="flex items-baseline justify-between mb-3 gap-3">
-              <span className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Overall score</span>
-              <span className="flex items-baseline gap-2">
-                <span className={cn("font-mono text-sm font-semibold uppercase tracking-wide", scoreTextClass(overallScore))}>
-                  {getScoreTrustLabel(overallScore)}
-                </span>
-                <span className={cn("font-serif text-3xl font-semibold", scoreTextClass(overallScore))}>
-                  {overallScore.toFixed(1)}
-                </span>
-                <span className="text-sm text-muted-foreground font-mono">/10</span>
-              </span>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 sm:gap-6">
+          <div className="rounded-xl border border-border bg-card p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 sm:gap-8 items-center">
+            <div className="flex justify-center">
+              <OverviewRadar axes={radarAxes} overallScore={overallScore} gainsPotential={gainsPotential} />
             </div>
-            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className={cn("h-full rounded-full transition-all duration-700", scoreBarClass(overallScore))}
-                style={{ width: `${Math.max(0, Math.min(100, (overallScore / 10) * 100))}%` }}
-              />
+            <div className="min-w-0">
+              <div className="flex items-baseline justify-between mb-3 gap-3">
+                <span className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Overall score</span>
+                <span className="flex items-baseline gap-2">
+                  <span className={cn("font-mono text-sm font-semibold uppercase tracking-wide", scoreTextClass(overallScore))}>
+                    {getScoreTrustLabel(overallScore)}
+                  </span>
+                  <span className={cn("font-serif text-3xl font-semibold", scoreTextClass(overallScore))}>
+                    {overallScore.toFixed(1)}
+                  </span>
+                  <span className="text-sm text-muted-foreground font-mono">/10</span>
+                </span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-muted overflow-hidden mb-5">
+                <div
+                  className={cn("h-full rounded-full transition-all duration-700", scoreBarClass(overallScore))}
+                  style={{ width: `${Math.max(0, Math.min(100, (overallScore / 10) * 100))}%` }}
+                />
+              </div>
+              {/* The radar has no axis labels, so spell out the scores behind it. */}
+              <ul className="space-y-2.5">
+                {radarAxes.map((a) => (
+                  <li key={a.label} className="grid grid-cols-[6.5rem_1fr_2.5rem] items-center gap-3 text-sm">
+                    <span className="text-muted-foreground">{a.label}</span>
+                    <span className="h-1.5 rounded-full bg-muted overflow-hidden">
+                      <span
+                        className={cn("block h-full rounded-full", scoreBarClass(a.score))}
+                        style={{ width: `${Math.max(0, Math.min(100, a.score * 10))}%` }}
+                      />
+                    </span>
+                    <span className={cn("font-mono text-right font-semibold", scoreTextClass(a.score))}>{a.score.toFixed(1)}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-            <div className="rounded-xl border border-border bg-card p-5 flex items-center justify-center">
-              <OverviewRadar axes={radarAxes} overallScore={overallScore} gainsPotential={gainsPotential} />
+            <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
+              <QuotaDonut data={quotaData} />
             </div>
           </div>
 
@@ -1415,10 +1436,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                 <p className="text-sm text-muted-foreground italic">No flagged concerns yet.</p>
               )}
             </div>
-          </div>
-
-          <div className="rounded-xl border border-border bg-card p-5">
-            <QuotaDonut data={quotaData} />
           </div>
 
           {investorTableData.length > 0 && (

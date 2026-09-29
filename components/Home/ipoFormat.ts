@@ -1,5 +1,6 @@
 // Shared formatting/parsing helpers for IPO cards and list rows
 import { IpoMarketLot } from '@/app/models/ipo';
+import { HomePageIpoProps } from '@/app/types/homepage';
 
 // ipo_type is frequently missing/"N/A" from the scraper. Subscription only exists once bidding
 // opens, so genuinely-upcoming IPOs need earlier-available signals too: the exchange listing
@@ -143,6 +144,9 @@ export const parseEstListingPercent = (raw: string | undefined): number | null =
   if (!match) return null;
   return parseFloat(match[1]);
 };
+
+// GMP gain % for sorting highest first; no GMP sorts last.
+export const gmpOf = (item: HomePageIpoProps) => parseEstListingPercent(item.ipo?.gmp_price_gain) ?? -Infinity;
 
 // Qualitative read on the risk score so a bare number ("6.9") isn't the only signal of trust
 export const getScoreTrustLabel = (score: number): string => {

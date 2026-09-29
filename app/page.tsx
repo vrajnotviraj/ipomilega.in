@@ -15,6 +15,7 @@ import { Footer } from '@/components/Home/Footer';
 import { Walkthrough } from '@/components/Home/Walkthrough';
 import { AnimatedWrapper } from '@/components/Home/AnimatedWrapper';
 import { AnimatedSection } from '@/components/Home/AnimatedSection';
+import { BoardProvider } from '@/components/Home/BoardContext';
 import { PageLoader } from '@/components/ui/loader';
 import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
 
@@ -124,6 +125,7 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
       <div className="app-container pt-20 sm:pt-24">
         <IpoTicker live={homeData.data.live} upcoming={homeData.data.upcoming} />
         <AnnouncementBanner />
+        <BoardProvider>
         <LiveIposSection ipos={homeData.data.live} count={homeData.counts.live} />
         <AnimatedSection>
           <ClosedIposSection ipos={homeData.data.closed} count={homeData.counts.closed} />
@@ -131,6 +133,7 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
         <AnimatedSection>
           <UpcomingIposSection ipos={homeData.data.upcoming} count={homeData.counts.upcoming} />
         </AnimatedSection>
+        </BoardProvider>
         <AnimatedSection>
           <PastIposSection ipos={homeData.data.past} count={homeData.counts.past} />
         </AnimatedSection>

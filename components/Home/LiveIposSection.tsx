@@ -1,21 +1,19 @@
 // LiveIposSection.tsx
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Clock } from 'lucide-react';
 import { IpoSectionProps, HomePageIpoProps } from '@/app/types/homepage'; // Assuming this path
 import { LiveIpoCard } from './IpoCard'; // Assuming this path
-import { getDaysUntilClosing, getIpoType, parseEstListingPercent } from './ipoFormat';
+import { getDaysUntilClosing, getIpoType, gmpOf } from './ipoFormat';
+import { BOARD_TABS, useBoard } from './BoardContext';
 
 const closingGroupLabel = (days: number) =>
   days < 0 ? 'Close date TBA' : days === 0 ? 'Closes today' : days === 1 ? 'Closes tomorrow' : `Closes in ${days} days`;
 
-const BOARD_TABS = ['Mainboard', 'SME'] as const;
-
 export function LiveIposSection({ ipos, count }: IpoSectionProps) {
-  const [activeTab, setActiveTab] = useState<typeof BOARD_TABS[number]>('Mainboard');
+  const { board: activeTab, setBoard: setActiveTab } = useBoard();
 
   const filteredIpos = (ipos || []).filter(
     (item) => getIpoType(item.ipo) === activeTab
@@ -23,7 +21,6 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
 
   // Group by days left to bid, soonest first; unknown close dates go last.
   // Within a group, highest GMP first; no GMP goes last.
-  const gmpOf = (item: HomePageIpoProps) => parseEstListingPercent(item.ipo?.gmp_price_gain) ?? -Infinity;
   const groups = new Map<number, HomePageIpoProps[]>();
   for (const item of [...filteredIpos].sort((a, b) => gmpOf(b) - gmpOf(a))) {
     const days = getDaysUntilClosing(item.ipo);

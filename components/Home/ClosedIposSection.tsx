@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { ArrowRight, Lock } from 'lucide-react';
 import { IpoSectionProps, HomePageIpoProps } from '@/app/types/homepage';
 import { ClosedIpoCard } from './IpoCard';
-import { daysFromToday } from './ipoFormat';
+import { daysFromToday, getIpoType, gmpOf } from './ipoFormat';
+import { useBoard } from './BoardContext';
 
 // Stages by allotment day: already out (waiting to list), then days until allotment, unknown
 // dates last. Every past allotment day collapses into the one "out" stage.
@@ -18,13 +19,16 @@ const stageLabel = (days: number) =>
         : days === 1 ? 'Allotment tomorrow'
           : `Allotment in ${days} days`;
 
-export function ClosedIposSection({ ipos, count }: IpoSectionProps) {
-  if (!ipos || ipos.length === 0) {
+export function ClosedIposSection({ ipos: allIpos, count }: IpoSectionProps) {
+  const { board } = useBoard();
+  const ipos = (allIpos || []).filter((item) => getIpoType(item.ipo) === board);
+  if (ipos.length === 0) {
     return null;
   }
 
   const stages = new Map<number, HomePageIpoProps[]>();
-  for (const item of ipos) {
+  // Within a stage, highest GMP first.
+  for (const item of [...ipos].sort((a, b) => gmpOf(b) - gmpOf(a))) {
     const days = daysFromToday(item.ipo?.ipo_dates?.basis_of_allotment);
     const stage = days === null ? TBA : Math.max(days, OUT);
     stages.set(stage, [...(stages.get(stage) || []), item]);
