@@ -7,7 +7,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Clock } from 'lucide-react';
 import { IpoSectionProps, HomePageIpoProps } from '@/app/types/homepage'; // Assuming this path
 import { LiveIpoCard } from './IpoCard'; // Assuming this path
-import { getIpoType } from './ipoFormat';
+import { getDaysUntilClosing, getIpoType, parseEstListingPercent } from './ipoFormat';
+
+const closingGroupLabel = (days: number) =>
+  days < 0 ? 'Close date TBA' : days === 0 ? 'Closes today' : days === 1 ? 'Closes tomorrow' : `Closes in ${days} days`;
 
 const BOARD_TABS = ['Mainboard', 'SME'] as const;
 
@@ -17,6 +20,16 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
   const filteredIpos = (ipos || []).filter(
     (item) => getIpoType(item.ipo) === activeTab
   );
+
+  // Group by days left to bid, soonest first; unknown close dates go last.
+  // Within a group, highest GMP first; no GMP goes last.
+  const gmpOf = (item: HomePageIpoProps) => parseEstListingPercent(item.ipo?.gmp_price_gain) ?? -Infinity;
+  const groups = new Map<number, HomePageIpoProps[]>();
+  for (const item of [...filteredIpos].sort((a, b) => gmpOf(b) - gmpOf(a))) {
+    const days = getDaysUntilClosing(item.ipo);
+    groups.set(days, [...(groups.get(days) || []), item]);
+  }
+  const sortedGroups = [...groups].sort(([a], [b]) => (a < 0 ? Infinity : a) - (b < 0 ? Infinity : b));
 
   return (
     <section className='py-6 sm:py-15'>
@@ -78,10 +91,21 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+              className="space-y-8"
             >
-              {filteredIpos.map((ipo: HomePageIpoProps) => (
-                <LiveIpoCard key={ipo._id} ipo={ipo.ipo} analysis={ipo.analysis} />
+              {sortedGroups.map(([days, items]) => (
+                <div key={days}>
+                  <h3 className={`flex items-center gap-2 text-sm font-medium font-sans mb-3 ${days === 0 ? 'text-score-bad' : 'text-muted-foreground'}`}>
+                    <Clock className="w-4 h-4" />
+                    {closingGroupLabel(days)}
+                    <span className="font-mono text-xs text-muted-foreground">({items.length})</span>
+                  </h3>
+                  <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    {items.map((ipo) => (
+                      <LiveIpoCard key={ipo._id} ipo={ipo.ipo} analysis={ipo.analysis} />
+                    ))}
+                  </div>
+                </div>
               ))}
             </motion.div>
           )}

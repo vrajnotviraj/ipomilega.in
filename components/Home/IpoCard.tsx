@@ -11,6 +11,7 @@ import { IpoTitleLink } from './IpoTitleLink';
 import { IpoLogo } from './IpoLogo';
 import { AllotmentPredictorModal } from './AllotmentPredictorModal';
 import {
+  getDaysUntilClosing,
   getRiskBorderColor,
   getRiskTextColor,
   parseCardDate,
@@ -62,20 +63,7 @@ const getInitials = (name: string) => {
 export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   const [predictorCategory, setPredictorCategory] = useState<AllotmentCategoryDef['key'] | null>(null);
 
-  const getDaysUntilClosing = () => {
-    const dateStr = ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date;
-    const closingDate = parseCardDate(dateStr);
-    if (!closingDate) return -1;
-
-    closingDate.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diffTime = closingDate.getTime() - today.getTime();
-    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
-
-  const daysUntilClosing = getDaysUntilClosing();
+  const daysUntilClosing = getDaysUntilClosing(ipo);
   const riskScore = analysis?.risk_meter?.score || 0;
   const closesInLabel =
     daysUntilClosing < 0 ? 'TBA' : daysUntilClosing === 0 ? 'Today' : `${daysUntilClosing} day${daysUntilClosing === 1 ? '' : 's'}`;
@@ -153,7 +141,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
               key={cat.key}
               onClick={() => setPredictorCategory(cat.key)}
               className={TAPPABLE_TILE}
-              aria-label={`${cat.label} allotment odds ${cat.odds} — tap for details`}
+              aria-label={`${cat.label} allotment odds ${cat.odds}, tap for details`}
             >
               <ChevronRight className="absolute top-1 right-1 w-3 h-3 text-primary/60 group-hover:text-primary transition-colors" />
               <cat.icon className="w-3.5 h-3.5 text-muted-foreground" />

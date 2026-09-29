@@ -83,6 +83,16 @@ export const parseCardDate = (dateString: string | undefined): Date | null => {
 };
 
 // Utility function to format a date string as "18 Aug"
+// Whole days from today until the IPO closes: 0 = closes today, -1 = no usable close date.
+export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string }; closing_date?: string } | null | undefined): number => {
+  const closingDate = parseCardDate(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date);
+  if (!closingDate) return -1;
+  closingDate.setHours(0, 0, 0, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((closingDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+};
+
 export const formatShortDate = (dateString: string | undefined): string => {
   const date = parseCardDate(dateString);
   if (!date) return 'TBA';
@@ -159,7 +169,7 @@ export const formatAllotmentPercent = (subscriptionRatio: number | null): string
 // Plain-language sentence under the odds, for the predictor modal.
 export const describeAllotmentOdds = (subscriptionRatio: number | null): string | null => {
   if (subscriptionRatio === null || isNaN(subscriptionRatio) || subscriptionRatio < 0) return null;
-  if (subscriptionRatio <= 1) return 'Not fully subscribed yet — every valid application should get shares.';
+  if (subscriptionRatio <= 1) return 'Not fully subscribed yet, so every valid application should get shares.';
   return `Roughly 1 out of every ${formatAllotmentOdds(subscriptionRatio).slice(5)} applicants gets shares.`;
 };
 
@@ -191,14 +201,14 @@ export const ALLOTMENT_CATEGORIES: AllotmentCategoryDef[] = [
     label: 'S-HNI',
     matchKeyword: 's[- ]?hni',
     ratioField: 'nii_sr',
-    ratioNote: "S-HNI and B-HNI subscription isn't tracked separately — this uses the combined NII subscription ratio.",
+    ratioNote: "S-HNI and B-HNI subscription isn't tracked separately, so this uses the combined NII ratio.",
   },
   {
     key: 'bhni',
     label: 'B-HNI',
     matchKeyword: 'b[- ]?hni',
     ratioField: 'nii_sr',
-    ratioNote: "S-HNI and B-HNI subscription isn't tracked separately — this uses the combined NII subscription ratio.",
+    ratioNote: "S-HNI and B-HNI subscription isn't tracked separately, so this uses the combined NII ratio.",
   },
 ];
 
