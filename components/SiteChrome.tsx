@@ -8,7 +8,7 @@
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useSession, signOut } from "@/lib/auth-client";
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import { LoginDialog } from "@/components/ui/login";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -30,10 +30,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PageLoader } from "@/components/ui/loader";
 import { ProgressProvider } from "@/components/Progressbar/ProgressProvider";
 import { ProgressLink } from "@/components/Progressbar/ProgressLink";
-import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/Brand/Logo";
 
@@ -61,25 +59,18 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
   }
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
+    // Always mounted and slid with CSS transitions; framer-motion was ~37KB on every page for this.
+    <>
           {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 sm:hidden"
+          <div
+            className={`fixed inset-0 bg-black/50 z-40 sm:hidden transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             onClick={onClose}
           />
 
           {/* Sidebar */}
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed left-0 top-0 h-full w-80 bg-card shadow-2xl z-50 sm:hidden"
+          <div
+            inert={!isOpen}
+            className={`fixed left-0 top-0 h-full w-80 bg-card shadow-2xl z-50 sm:hidden transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
           >
             <div className="flex flex-col h-full">
               {/* Header */}
@@ -151,10 +142,8 @@ function MobileSidebar({ isOpen, onClose, isAdmin }: {
                 )}
               </div>
             </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+          </div>
+    </>
   );
 }
 
@@ -305,9 +294,9 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
       />
 
       <main>
-        <Suspense fallback={<PageLoader />}>
-          {children}
-        </Suspense>
+        {/* No <Suspense> spinner here: it made even static pages ship a loader with the real
+            content hidden until an inline script swapped it in, which delayed LCP. */}
+        {children}
         <Toaster position="top-right" richColors />
       </main>
       <LoginDialog isOpen={showLoginDialog} onClose={() => setShowLoginDialog(false)} />

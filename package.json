@@ -24,7 +24,6 @@
     "better-auth": "^1.2.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.23.9",
     "geist": "^1.4.2",
     "lucide-react": "^0.511.0",
     "mongodb": "^6.16.0",
@@ -54,5 +53,11 @@
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.0",
     "typescript": "^5"
-  }
+  },
+  "browserslist": [
+    "chrome 111",
+    "edge 111",
+    "firefox 128",
+    "safari 16.4"
+  ]
 }

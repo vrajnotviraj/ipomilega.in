@@ -14,7 +14,7 @@
 
 /* Apply the base font and scope all styles to this page component */
 .ipo-analysis-page {
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Scoped Typography Classes */

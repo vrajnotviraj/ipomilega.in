@@ -6,11 +6,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
-  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
-  --font-ibm-plex: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-dm-serif: 'Newsreader', ui-serif, Georgia, serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-ibm-plex: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-dm-serif: var(--font-newsreader), ui-serif, Georgia, serif;
   --color-score-good: var(--score-good);
   --color-score-mid: var(--score-mid);
   --color-score-bad: var(--score-bad);

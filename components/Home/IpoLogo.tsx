@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 
 const SIZES = {
@@ -7,6 +8,9 @@ const SIZES = {
   md: 'w-9 h-9 text-xs',
   lg: 'w-11 h-11 text-sm',
 } as const;
+
+// Only the scraper's bucket is whitelisted in next.config; anything else is shown as-is.
+const OPTIMIZABLE = 'https://ipomilega-assests.s3.ap-south-1.amazonaws.com/';
 
 const initials = (name: string) =>
   name
@@ -46,8 +50,17 @@ export function IpoLogo({
       aria-hidden="true"
     >
       {showImage ? (
-        // eslint-disable-next-line @next/next/no-img-element -- tiny S3 logos; next/image would need every bucket host whitelisted
-        <img src={url} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} className="w-full h-full object-contain p-0.5" />
+        // Through the optimizer rather than straight from S3: the bucket sends no Cache-Control,
+        // speaks only HTTP/1.1, and some extracted logos are full-size PNGs for a 44px tile.
+        <Image
+          src={url}
+          alt=""
+          width={44}
+          height={44}
+          unoptimized={!url.startsWith(OPTIMIZABLE)}
+          onError={() => setFailed(true)}
+          className="w-full h-full object-contain p-0.5"
+        />
       ) : (
         initials(name || '') || '?'
       )}

@@ -336,13 +336,13 @@ const OverviewRadar = ({
         })}
 
         {/* center score */}
-        <text x={cx} y={cy - 6} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: 10, letterSpacing: 1, fontFamily: "IBM Plex Mono, monospace" }}>
+        <text x={cx} y={cy - 6} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: 10, letterSpacing: 1, fontFamily: "var(--font-mono)" }}>
           OVERALL
         </text>
-        <text x={cx} y={cy + 22} textAnchor="middle" fill="var(--foreground)" style={{ fontSize: 34, fontWeight: 600, fontFamily: "Newsreader, serif" }}>
+        <text x={cx} y={cy + 22} textAnchor="middle" fill="var(--foreground)" style={{ fontSize: 34, fontWeight: 600, fontFamily: "var(--font-serif)" }}>
           {overallScore.toFixed(1)}
         </text>
-        <text x={cx} y={cy + 36} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: 10, fontFamily: "IBM Plex Mono, monospace" }}>
+        <text x={cx} y={cy + 36} textAnchor="middle" className="fill-muted-foreground" style={{ fontSize: 10, fontFamily: "var(--font-mono)" }}>
           / 10
         </text>
       </svg>
@@ -1626,10 +1626,10 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                         margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis dataKey="year" tick={{ fontSize: 12, fontFamily: "IBM Plex Mono, monospace" }} stroke="var(--muted-foreground)" />
-                        <YAxis tick={{ fontSize: 12, fontFamily: "IBM Plex Mono, monospace" }} stroke="var(--muted-foreground)" />
-                        <Tooltip contentStyle={{ backgroundColor: "var(--card)", borderRadius: 8, border: "1px solid var(--border)", fontFamily: "IBM Plex Sans, sans-serif" }} />
-                        <Legend wrapperStyle={{ fontFamily: "IBM Plex Sans, sans-serif", fontSize: 13 }} />
+                        <XAxis dataKey="year" tick={{ fontSize: 12, style: { fontFamily: "var(--font-mono)" } }} stroke="var(--muted-foreground)" />
+                        <YAxis tick={{ fontSize: 12, style: { fontFamily: "var(--font-mono)" } }} stroke="var(--muted-foreground)" />
+                        <Tooltip contentStyle={{ backgroundColor: "var(--card)", borderRadius: 8, border: "1px solid var(--border)", fontFamily: "var(--font-sans)" }} />
+                        <Legend wrapperStyle={{ fontFamily: "var(--font-sans)", fontSize: 13 }} />
                         <Bar dataKey="Revenue" fill="var(--chart-1)" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={1000} />
                         <Bar dataKey="Expense" fill="var(--chart-4)" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={1200} />
                         <Bar dataKey="Profit After Tax" fill="var(--chart-2)" radius={[4, 4, 0, 0]} isAnimationActive animationDuration={1400} />

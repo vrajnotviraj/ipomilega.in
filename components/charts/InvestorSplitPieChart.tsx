@@ -42,7 +42,7 @@ export function InvestorSplitPieChart({ data }: InvestorSplitPieChartProps) {
           iconType="circle"
           wrapperStyle={{
             paddingTop: '20px',
-            fontFamily: 'IBM Plex Sans, sans-serif',
+            fontFamily: 'var(--font-sans)',
           }}
         />
         <Pie

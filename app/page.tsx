@@ -1,5 +1,3 @@
-import { Suspense } from 'react';
-
 import { BlogSection } from '@/components/Home/BlogSection';
 import { LiveIposSection } from '@/components/Home/LiveIposSection';
 import { ClosedIposSection } from '@/components/Home/ClosedIposSection';
@@ -13,10 +11,8 @@ import { Metadata } from 'next';
 import { HomePageData } from './types/homepage';
 import { Footer } from '@/components/Home/Footer';
 import { Walkthrough } from '@/components/Home/Walkthrough';
-import { AnimatedWrapper } from '@/components/Home/AnimatedWrapper';
 import { AnimatedSection } from '@/components/Home/AnimatedSection';
 import { BoardProvider } from '@/components/Home/BoardContext';
-import { PageLoader } from '@/components/ui/loader';
 import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
 
 // ISR: the page is rendered once and served from cache as static HTML, then re-rendered in
@@ -100,28 +96,25 @@ const SITE_STRUCTURED_DATA = {
   ],
 };
 
+// Awaited here rather than behind a <Suspense> skeleton: the page is ISR, so the data is always
+// ready by the time the HTML is built, and a boundary only made that HTML ship a spinner with
+// the real content in a hidden div swapped in by script -- LCP waited on that script.
 export default async function HomePage() {
-  const homeDataPromise = getHomePageData();
+  const homeData = await getHomePageData();
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_STRUCTURED_DATA) }} />
       <div className="relative z-10">
-        <Suspense fallback={<HomePageSkeleton />}>
-          <HomeContent dataPromise={homeDataPromise} />
-        </Suspense>
+        <HomeContent homeData={homeData} />
       </div>
     </div>
   );
 }
 
-// Server Component - fetches data
-// Remove the space-y-20 and just use app-container
-async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData> }) {
-  const homeData = await dataPromise;
-
+function HomeContent({ homeData }: { homeData: HomePageData }) {
   return (
-    <AnimatedWrapper>
+    <>
       <div className="app-container pt-20 sm:pt-24">
         <IpoTicker live={homeData.data.live} upcoming={homeData.data.upcoming} />
         <AnnouncementBanner />
@@ -146,14 +139,6 @@ async function HomeContent({ dataPromise }: { dataPromise: Promise<HomePageData>
         <Footer />
       </div>
       <Walkthrough />
-    </AnimatedWrapper>
-  );
-}
-
-function HomePageSkeleton() {
-  return (
-    <div className="app-container pt-24 pb-16">
-      <PageLoader label="Loading IPOs" />
-    </div>
+    </>
   );
 }

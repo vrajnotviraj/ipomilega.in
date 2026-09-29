@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import { ArrowRight, Clock } from 'lucide-react';
 import { IpoSectionProps, HomePageIpoProps } from '@/app/types/homepage'; // Assuming this path
 import { LiveIpoCard } from './IpoCard'; // Assuming this path
@@ -14,6 +14,11 @@ const closingGroupLabel = (days: number) =>
 
 export function LiveIposSection({ ipos, count }: IpoSectionProps) {
   const { board: activeTab, setBoard: setActiveTab } = useBoard();
+  // Fade only on tab switches, not the first paint (these cards sit right under the LCP).
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+  }, []);
 
   const filteredIpos = (ipos || []).filter(
     (item) => getIpoType(item.ipo) === activeTab
@@ -64,32 +69,18 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
           ))}
         </div>
       </div>
-      <motion.div layout transition={{ duration: 0.25, ease: 'easeInOut' }} className="overflow-hidden">
-        <AnimatePresence mode="wait">
+      {/* Keyed so a tab switch remounts and replays the CSS fade-in (tw-animate-css). */}
+      <div key={activeTab} className={mounted.current ? 'animate-in fade-in duration-150' : undefined}>
           {filteredIpos.length === 0 ? (
-            <motion.div
-              key={`empty-${activeTab}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center justify-center py-8"
-            >
+            <div className="flex items-center justify-center py-8">
               <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
                 <Clock className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
                 <p className="text-muted-foreground text-base font-medium font-sans">No live {activeTab} IPOs at the moment</p>
                 <p className="text-muted-foreground/70 text-sm mt-2 font-sans">Check back soon for new opportunities!</p>
               </div>
-            </motion.div>
+            </div>
           ) : (
-            <motion.div
-              key={`grid-${activeTab}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="space-y-8"
-            >
+            <div className="space-y-8">
               {sortedGroups.map(([days, items]) => (
                 <div key={days}>
                   <h3 className={`flex items-center gap-2 text-sm font-medium font-sans mb-3 ${days === 0 ? 'text-score-bad' : 'text-muted-foreground'}`}>
@@ -104,10 +95,9 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
                   </div>
                 </div>
               ))}
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
-      </motion.div>
+      </div>
     </section>
   );
 }

@@ -2,7 +2,7 @@
 
 /* --- Font & Text Styles --- */
 .font-ibm-plex {
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* Headings */
@@ -27,7 +27,7 @@
 }
 
 .heading-card-title {
-  font-family: "IBM Plex Sans";
+  font-family: var(--font-sans);
   font-weight: 600;
   font-style: SemiBold;
   line-height: 100%;
@@ -78,14 +78,14 @@
   font-weight: 600;
   color: #212121;
   font-size: 16px;
-  font-family: "IBM Plex Sans";
+  font-family: var(--font-sans);
   line-height: 1;
   letter-spacing: 0;
 }
 
 .summary-score-label {
   color: #4f4c4c;
-  font-family: "IBM Plex Sans";
+  font-family: var(--font-sans);
   font-weight: 500;
   font-size: 18px;
   line-height: 16px;

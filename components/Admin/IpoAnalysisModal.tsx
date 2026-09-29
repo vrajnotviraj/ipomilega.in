@@ -531,7 +531,7 @@ const ProgressCircle = ({
                         fill="var(--primary-foreground)"
                         fontSize="7"
                         fontWeight="bold"
-                        fontFamily="IBM Plex Sans, sans-serif"
+                        style={{ fontFamily: "var(--font-sans)" }}
                     >
                         {cappedValue.toFixed(0)}
                     </text>

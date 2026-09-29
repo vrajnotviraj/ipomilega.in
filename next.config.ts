@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
   // updates symptom. Cap staleness at an hour; nothing on the site should be older than that.
   expireTime: 3600,
   images: {
+    // Upstream S3 objects carry no Cache-Control, so the optimizer's default of 60s applied.
+    // Logos and blog covers are keyed by id and effectively immutable.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       {
         protocol: 'https',
