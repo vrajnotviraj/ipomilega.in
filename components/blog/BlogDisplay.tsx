@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Blog } from "@/types/ipo";
-import type { getIpoLink } from "@/lib/queries/ipos";
+import type { IpoLink } from "@/lib/queries/ipos";
+import { publishedAtOf } from "@/lib/seo/news-sitemap";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { IpoArticleLinks } from "@/components/blog/IpoArticleLinks";
 import { ArrowLink } from "@/components/ui/ArrowLink";
@@ -35,7 +36,7 @@ function PostHeader({ blog }: { blog: Blog }) {
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
         <span className="font-medium text-foreground">{blog.author}</span>
         <span aria-hidden>·</span>
-        <time dateTime={blog.created_at} className="font-mono tabular-nums">{formatBlogDate(blog.created_at)}</time>
+        <time dateTime={publishedAtOf(blog)} className="font-mono tabular-nums">{formatBlogDate(publishedAtOf(blog))}</time>
         {blog.updated_at && blog.updated_at !== blog.created_at && (
           <>
             <span aria-hidden>·</span>
@@ -64,8 +65,6 @@ function PostFooter({ blog }: { blog: Blog }) {
     </footer>
   );
 }
-
-type IpoLink = NonNullable<Awaited<ReturnType<typeof getIpoLink>>>;
 
 /** The IPO's entity page, or the IPO list until it has one. */
 const entityLink = (ipo: IpoLink) =>

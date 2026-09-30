@@ -142,7 +142,9 @@ export const getAnalysisSlugs = cache(cached(async (): Promise<AnalysisSlug[]> =
 }, 'analysis-slugs'));
 
 /** An IPO's name and its entity-page slug, which is null until the IPO has an analysis page. */
-export const getIpoLink = cache(cached(async (ipoId: string) => {
+export type IpoLink = { name: string; slug: string | null };
+
+export const getIpoLink = cache(cached(async (ipoId: string): Promise<IpoLink | null> => {
   const db = await getDb();
   const analysis = await db.collection('ipo_comprehensive_analysis').findOne({ ipo_table_id: ipoId }, { projection: { company_name: 1, slug: 1 } });
   if (analysis?.slug) return { name: analysis.company_name as string, slug: analysis.slug as string };

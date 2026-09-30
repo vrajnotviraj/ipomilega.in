@@ -70,7 +70,7 @@ export function getLotShares(analysis: IpoComprehensiveAnalysis): number | undef
 
 /** The estimated listing ("360 (31.25%)") when there is one, and the premium shown in the GMP figure. */
 export function getGmp(analysis: IpoComprehensiveAnalysis, ipo: Ipo) {
-  const raw = analysis.gmp_price_gain || ipo.gmp_price_gain || "";
+  const raw = ipo.gmp_price_gain || analysis.gmp_price_gain || "";
   const estimatedListing = raw && !["N/A", "TBD", "TBA"].includes(raw) ? raw : null;
 
   const premium = parseFloat(ipo.gmp_ipo_gmp);

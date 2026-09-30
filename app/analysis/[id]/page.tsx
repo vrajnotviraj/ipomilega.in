@@ -91,7 +91,7 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | u
   const allotment = formatIpoDate(ipo?.ipo_dates?.basis_of_allotment || analysis.time?.allotment_timeline?.date)
   const listing = formatIpoDate(ipo?.ipo_dates?.ipo_listing_date || analysis.time?.listing_details?.expected_date)
   const exchanges = analysis.time?.listing_details?.exchanges?.filter(Boolean).join(' and ')
-  const gmp = gmpLine(analysis.gmp_price_gain ?? ipo?.gmp_price_gain)
+  const gmp = gmpLine(ipo?.gmp_price_gain || analysis.gmp_price_gain)
   const gmpUpdatedAt = formatIstTimestamp(ipo?.gmp_scraped_at)
   const priceBand = analysis.ipo_details?.price_band
 

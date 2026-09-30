@@ -45,7 +45,10 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
           <div>
             <HeadlineFigures figures={getHeadlineFigures(analysis, ipo)} />
             <p className="mt-2 text-xs text-muted-foreground">
-              {`GMP is an unofficial grey market indication.${gmpUpdatedAt ? ` Updated ${gmpUpdatedAt}.` : ""}`}
+              GMP is an unofficial grey market indication.
+              {gmpUpdatedAt && (
+                <> Updated <span className="font-mono tabular-nums">{gmpUpdatedAt}</span>.</>
+              )}
             </p>
           </div>
           <KeyFacts analysis={analysis} />

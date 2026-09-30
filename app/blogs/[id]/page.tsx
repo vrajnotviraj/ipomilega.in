@@ -5,6 +5,7 @@ import BlogDisplay from "@/components/blog/BlogDisplay";
 import { getBlogBySlug, getIpoArticles } from "@/lib/queries/blogs";
 import { getIpoLink } from "@/lib/queries/ipos";
 import { articleJsonLd, JsonLd } from "@/lib/seo/json-ld";
+import { publishedAtOf } from "@/lib/seo/news-sitemap";
 
 export const revalidate = 600;
 
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       title: blog.title,
       description: blog.meta_description,
       type: "article",
-      publishedTime: blog.created_at,
+      publishedTime: publishedAtOf(blog),
       modifiedTime: blog.updated_at,
       authors: [blog.author],
       tags: blog.tags,
