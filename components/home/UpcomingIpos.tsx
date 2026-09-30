@@ -46,7 +46,7 @@ export function UpcomingIposSection({ ipos }: IpoSectionProps) {
   const visibleIpos = ipos.filter((item) => getIpoType(item.ipo) === board).slice(0, MAX_ROWS);
 
   return (
-    <section className="py-16 sm:py-24">
+    <section className="py-8 sm:py-12">
       <SectionHeading title="Upcoming" href="/ipos?filter=upcoming" linkLabel={`View all ${ipos.length} upcoming IPOs`} />
       {visibleIpos.length === 0 ? (
         <EmptyState icon={CalendarDays} title={`No ${board} IPOs announced yet`} hint="New issues show up here as soon as their dates are out." />

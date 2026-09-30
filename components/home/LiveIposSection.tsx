@@ -41,7 +41,7 @@ export function LiveIposSection({ ipos }: IpoSectionProps) {
   const boardIpos = ipos.filter((item) => getIpoType(item.ipo) === board);
 
   return (
-    <section id="live" className="scroll-mt-24 pb-16 pt-8 sm:pb-24 sm:pt-12">
+    <section id="live" className="scroll-mt-24 pb-8 pt-8 sm:pb-12 sm:pt-12">
       <SectionHeading
         title="IPOs open now"
         badge={<LiveLabel />}

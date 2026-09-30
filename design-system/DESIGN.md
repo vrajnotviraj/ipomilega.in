@@ -107,7 +107,7 @@ Load all three with `next/font/google` in `app/layout.tsx`. Preload only Figtree
 ## 5. Space, shape and depth
 
 - **Container:** `.app-container`, max 1280px, gutters 16 / 24 / 32px.
-- **Spacing scale:** Tailwind's 4px scale. Card padding is 16–20px, the gap between cards is 16–24px, and sections are `py-16 sm:py-24`.
+- **Spacing scale:** Tailwind's 4px scale. Card padding is 16–20px, the gap between cards is 16–24px, and home sections are `py-8 sm:py-12`, so stacked sections sit 64px apart on phones and 96px from sm.
 - **Radius:** chips and buttons are full pills, cards 12px (`rounded-xl`), large panels 18px, inner tiles 8px. Nested radii shrink from the outside in.
 - **Borders:** 1px `--border`. Cards have a border or a surface fill, never both plus a shadow.
 - **Depth:** cards rest with `--shadow-card` and lift to `--shadow-lift` on hover (the `card-lift` utility).

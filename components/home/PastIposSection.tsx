@@ -103,7 +103,7 @@ export function PastIposSection({ ipos }: { ipos: HomePageIpoProps[] }) {
   const visibleIpos = ipos.slice(0, 4);
 
   return (
-    <section className="py-16 sm:py-24">
+    <section className="py-8 sm:py-12">
       <SectionHeading
         title="Recently listed"
         subtitle="What GMP predicted vs what happened"

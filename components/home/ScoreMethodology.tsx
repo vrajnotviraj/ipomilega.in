@@ -20,7 +20,7 @@ const SCORE_BANDS = [
 /** Ink panel explaining the six analysis modules and what each score range means. */
 export function ScoreMethodology() {
   return (
-    <section className="py-16 sm:py-24">
+    <section className="py-8 sm:py-12">
       <div className="grid gap-10 rounded-[18px] bg-primary p-6 text-primary-foreground sm:p-10 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
         <div>
           <h2 className="type-h2">How the score is built</h2>

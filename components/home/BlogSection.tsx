@@ -10,7 +10,7 @@ import { SectionHeading } from '@/components/home/SectionHeading';
 /** Latest three blog posts, the analysis disclaimer and the newsletter signup. */
 export function BlogSection({ blogs }: { blogs: Blog[] }) {
   return (
-    <section className="py-16 sm:py-24">
+    <section className="py-8 sm:py-12">
       <SectionHeading title="From the blog" href="/blogs" linkText="All posts" />
 
       {blogs.length === 0 ? (

@@ -38,7 +38,7 @@ export function ClosedIposSection({ ipos }: IpoSectionProps) {
   if (boardIpos.length === 0) return null;
 
   return (
-    <section className="py-16 sm:py-24">
+    <section className="py-8 sm:py-12">
       <SectionHeading title="Bidding closed" href="/ipos?filter=closed" linkLabel={`View all ${ipos.length} closed IPOs`} />
       <div className="mt-8 space-y-10">
         {groupByAllotmentStage(boardIpos).map(([stage, items]) => (
