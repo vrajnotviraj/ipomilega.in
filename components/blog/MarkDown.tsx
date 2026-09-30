@@ -2,30 +2,51 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
+import type { Element, ElementContent } from "hast";
+import { headingIds } from "@/components/blog/headings";
+
+const textOf = (node: Element | ElementContent): string =>
+  node.type === "text" ? node.value : "children" in node ? node.children.map(textOf).join("") : "";
+
+/** Site-relative or ipomilega.in links stay in the tab; everything else opens a new one. */
+const isInternal = (href?: string) => !!href && /^(\/(?!\/)|#|https:\/\/(www\.)?ipomilega\.in(\/|$))/.test(href);
+
+type HeadingProps = { children?: React.ReactNode; node?: Element };
 
 /** Renders a blog post's markdown with the site's type styles, at a readable line length. */
 export default function MarkdownRenderer({ content }: { content: string }) {
+  // One id counter per render, in document order, so the ids match `headingsOf` in headings.ts.
+  const idFor = headingIds();
+  const idOf = (node?: Element) => (node ? idFor(textOf(node)) : undefined);
+  const sectionHeading = ({ children, node }: HeadingProps) => (
+    <h2 id={idOf(node)} className="mt-12 mb-4 scroll-mt-24 font-display text-2xl font-bold leading-[1.15] tracking-[-0.03em] text-balance sm:text-3xl">
+      {children}
+    </h2>
+  );
+
   return (
-    <div className="max-w-[65ch] text-base leading-[1.55] text-foreground [&_img]:max-w-full [&_img]:rounded-lg">
+    <div className="text-base leading-[1.55] text-foreground [&_img]:max-w-full [&_img]:rounded-lg [&>*:first-child]:mt-0 [&>:is(p,ul,ol,blockquote,h2,h3)]:max-w-[70ch]">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         // Raw HTML is allowed but sanitized: no scripts, handlers or iframes.
         rehypePlugins={[rehypeRaw, rehypeSanitize]}
         components={{
-          h1: ({ children }) => <h1 className="mb-6 scroll-mt-24 border-b border-border pb-4 text-4xl font-bold tracking-[-0.03em]">{children}</h1>,
-          h2: ({ children }) => <h2 className="mt-10 mb-4 scroll-mt-24 text-3xl font-bold tracking-[-0.03em] leading-[1.1]">{children}</h2>,
-          h3: ({ children }) => <h3 className="mt-8 mb-3 scroll-mt-24 text-xl font-bold tracking-[-0.015em]">{children}</h3>,
-          p: ({ children }) => <p className="mb-4">{children}</p>,
-          ul: ({ children }) => <ul className="mb-4 list-inside list-disc space-y-2">{children}</ul>,
-          ol: ({ children }) => <ol className="mb-4 list-inside list-decimal space-y-2">{children}</ol>,
+          // The page title is the only h1, so an h1 inside the post body becomes a section heading.
+          h1: sectionHeading,
+          h2: sectionHeading,
+          h3: ({ children, node }) => (
+            <h3 id={idOf(node)} className="mt-8 mb-3 scroll-mt-24 font-display text-lg font-bold tracking-[-0.015em] text-balance sm:text-xl">{children}</h3>
+          ),
+          p: ({ children }) => <p className="mb-5 text-pretty">{children}</p>,
+          ul: ({ children }) => <ul className="mb-5 list-disc space-y-2 pl-5 marker:text-muted-foreground">{children}</ul>,
+          ol: ({ children }) => <ol className="mb-5 list-decimal space-y-2 pl-5 marker:font-mono marker:text-muted-foreground">{children}</ol>,
           blockquote: ({ children }) => (
             <blockquote className="my-6 rounded-lg bg-secondary px-5 py-3 text-muted-foreground">{children}</blockquote>
           ),
           a: ({ children, href }) => (
             <a
               href={href}
-              target="_blank"
-              rel="noopener noreferrer"
+              {...(isInternal(href) ? {} : { target: "_blank", rel: "noopener noreferrer" })}
               className="text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary"
             >
               {children}

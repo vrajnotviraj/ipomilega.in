@@ -7,7 +7,7 @@ import { Ipo } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { HomePageIpoProps } from '@/types/homepage';
 import { stripCitations } from '@/lib/queries/citations';
-import { daysFromToday, parseIpoDate } from '@/lib/ipo-format';
+import { daysFromToday, formatIssueSize, getIpoType, parseIpoDate } from '@/lib/ipo-format';
 
 // Card and list views never read these fields; `tables_raw` alone is most of each document.
 const IPO_CARD_PROJECTION = {
@@ -141,15 +141,28 @@ export const getAnalysisSlugs = cache(cached(async (): Promise<AnalysisSlug[]> =
   return toPlain(docs) as unknown as AnalysisSlug[];
 }, 'analysis-slugs'));
 
-/** An IPO's name and its entity-page slug, which is null until the IPO has an analysis page. */
-export type IpoLink = { name: string; slug: string | null };
+/** An IPO's name, its entity-page slug (null until the IPO has an analysis page) and the facts its summary card shows. */
+export type IpoLink = { name: string; slug: string | null; logo: string | null; board: string | null; issueSize: string | null };
 
 export const getIpoLink = cache(cached(async (ipoId: string): Promise<IpoLink | null> => {
   const db = await getDb();
-  const analysis = await db.collection('ipo_comprehensive_analysis').findOne({ ipo_table_id: ipoId }, { projection: { company_name: 1, slug: 1 } });
-  if (analysis?.slug) return { name: analysis.company_name as string, slug: analysis.slug as string };
-  if (!ObjectId.isValid(ipoId)) return null;
-  const ipo = await db.collection('ipos').findOne({ _id: new ObjectId(ipoId) }, { projection: { upcoming_ipo_2025: 1, slug: 1 } });
-  // An analysis whose slug has not been synced yet still lives at the IPO's own slug.
-  return ipo ? { name: ipo.upcoming_ipo_2025 as string, slug: analysis ? (ipo.slug as string) || null : null } : null;
+  const [analysis, ipo] = await Promise.all([
+    db.collection('ipo_comprehensive_analysis').findOne({ ipo_table_id: ipoId }, { projection: { company_name: 1, slug: 1 } }),
+    ObjectId.isValid(ipoId)
+      ? db.collection('ipos').findOne(
+          { _id: new ObjectId(ipoId) },
+          { projection: { upcoming_ipo_2025: 1, slug: 1, image_url: 1, ipo_type: 1, subscription_date_range: 1, detail_url: 1, 'ipo_details.ipo_listing': 1, 'ipo_details.issue_size': 1 } }
+        )
+      : null,
+  ]);
+  const name = (analysis?.slug && analysis.company_name) || ipo?.upcoming_ipo_2025;
+  if (!name) return null;
+  return {
+    name: name as string,
+    // An analysis whose slug has not been synced yet still lives at the IPO's own slug.
+    slug: (analysis?.slug as string) || (analysis ? ipo?.slug : null) || null,
+    logo: ipo?.image_url || null,
+    board: ipo ? getIpoType(ipo as unknown as Ipo) : null,
+    issueSize: formatIssueSize(ipo?.ipo_details?.issue_size),
+  };
 }, 'ipo-link'));

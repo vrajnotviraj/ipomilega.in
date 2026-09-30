@@ -18,7 +18,6 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     return { title: "Post not found", description: "We couldn't find this blog post." };
   }
 
-  const image = blog.image_url;
   return {
     title: blog.title,
     description: blog.meta_description,
@@ -26,6 +25,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     alternates: { canonical: `/blogs/${id}` },
     openGraph: {
       ...openGraphBase(),
+      // Names the per-article card explicitly, since openGraphBase's site card would otherwise win.
+      images: [{ url: `/blogs/${id}/opengraph-image`, width: 1200, height: 630, alt: blog.title }],
       url: `/blogs/${id}`,
       title: blog.title,
       description: blog.meta_description,
@@ -34,13 +35,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       modifiedTime: blog.updated_at,
       authors: [blog.author],
       tags: blog.tags,
-      images: image ? [{ url: image }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: blog.title,
       description: blog.meta_description,
-      images: image ? [image] : undefined,
     },
   };
 }
