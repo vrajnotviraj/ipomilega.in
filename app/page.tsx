@@ -10,7 +10,6 @@ import { getHomePageData } from '@/lib/data-fetching';
 import { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
 import { Walkthrough } from '@/components/home/Walkthrough';
-import { AnimatedSection } from '@/components/home/AnimatedSection';
 import { BoardProvider } from '@/components/home/BoardContext';
 import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
 
@@ -103,22 +102,22 @@ export default async function HomePage() {
           <AnnouncementBanner />
           <BoardProvider>
             <LiveIposSection ipos={data.live} count={counts.live} />
-            <AnimatedSection>
+            <div className="reveal">
               <ClosedIposSection ipos={data.closed} count={counts.closed} />
-            </AnimatedSection>
-            <AnimatedSection>
+            </div>
+            <div className="reveal">
               <UpcomingIposSection ipos={data.upcoming} count={counts.upcoming} />
-            </AnimatedSection>
+            </div>
           </BoardProvider>
-          <AnimatedSection>
+          <div className="reveal">
             <PastIposSection ipos={data.past} />
-          </AnimatedSection>
-          <AnimatedSection>
+          </div>
+          <div className="reveal">
             <ScoreMethodology />
-          </AnimatedSection>
-          <AnimatedSection>
+          </div>
+          <div className="reveal">
             <BlogSection blogs={blogList} />
-          </AnimatedSection>
+          </div>
           <Footer />
         </div>
         <Walkthrough />

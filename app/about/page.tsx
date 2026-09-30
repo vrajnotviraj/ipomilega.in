@@ -59,7 +59,7 @@ export default function AboutPage() {
           {WHAT_WE_DO.map((item) => (
             <div
               key={item.title}
-              className="rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary/40"
+              className="rounded-xl border border-border bg-card p-6 transition-colors duration-300 hover:border-primary/40"
             >
               <h3 className="font-serif font-semibold text-foreground mb-2">{item.title}</h3>
               <p className="text-sm text-muted-foreground">{item.body}</p>

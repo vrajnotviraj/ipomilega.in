@@ -7,6 +7,7 @@ import { IpoSectionProps, HomePageIpoProps } from '@/types/homepage';
 import { LiveIpoCard } from '@/components/home/IpoCard';
 import { getDaysUntilClosing, getIpoType, gmpOf } from '@/lib/ipo-format';
 import { BOARD_TABS, useBoard } from '@/components/home/BoardContext';
+import { EmptyState } from '@/components/home/EmptyState';
 
 const closingGroupLabel = (days: number) =>
   days < 0 ? 'Close date TBA' : days === 0 ? 'Closes today' : days === 1 ? 'Closes tomorrow' : `Closes in ${days} days`;
@@ -37,14 +38,14 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
           <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground flex items-center gap-3">
             <span>IPOs open now</span>
             <span className="inline-flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wide text-destructive">
-              <span className="w-1.5 h-1.5 bg-destructive rounded-full animate-pulse" />
+              <span className="live-dot bg-destructive" />
               Live
             </span>
           </h2>
           <Link
             href="/ipos?filter=live"
             aria-label={`View all ${count} live IPOs`}
-            className="text-foreground font-sans hover:text-primary font-medium flex items-center space-x-1.5 group text-sm sm:text-base transition-colors duration-200 flex-shrink-0"
+            className="text-primary font-sans hover:text-primary/80 font-medium flex items-center space-x-1.5 group text-sm sm:text-base transition-colors duration-200 flex-shrink-0"
           >
             <span>View all</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -55,11 +56,8 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
             <button
               key={tab}
               onClick={() => setBoard(tab)}
-              className={`pb-2.5 -mb-px text-sm font-medium font-sans border-b-2 transition-colors ${
-                board === tab
-                  ? 'border-foreground text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
+              aria-pressed={board === tab}
+              className="underline-grow pb-2.5 text-sm font-medium font-sans text-muted-foreground hover:text-foreground aria-pressed:text-foreground transition-colors"
             >
               {tab}
             </button>
@@ -69,13 +67,7 @@ export function LiveIposSection({ ipos, count }: IpoSectionProps) {
       {/* Keyed so a tab switch remounts and replays the fade-in. */}
       <div key={board} className={mounted.current ? 'animate-in fade-in duration-150' : undefined}>
           {boardIpos.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
-                <Clock className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-muted-foreground text-base font-medium font-sans">No live {board} IPOs at the moment</p>
-                <p className="text-muted-foreground/70 text-sm mt-2 font-sans">Check back soon for new opportunities!</p>
-              </div>
-            </div>
+            <EmptyState icon={Clock} title={`No ${board} IPOs open for bidding`} hint="Check Upcoming below for what opens next." />
           ) : (
             <div className="space-y-8">
               {sortedGroups.map(([days, items]) => (

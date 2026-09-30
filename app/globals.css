@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Agent skill docs are full of example class names; keep them out of the shipped CSS. */
+@source not "../.agents";
+@source not "../.claude";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -106,10 +110,10 @@
   @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
 }
 
-/* Slim green scrollbars: Firefox reads the two properties, WebKit/Blink the pseudo-elements. */
+/* Slim ink-tinted scrollbars: Firefox reads the two properties, WebKit/Blink the pseudo-elements. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--score-good) transparent;
+  scrollbar-color: color-mix(in srgb, var(--primary) 45%, transparent) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -122,7 +126,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--score-good);
+  background-color: color-mix(in srgb, var(--primary) 45%, transparent);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
@@ -159,6 +163,180 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+/*
+ * Motion. Everything here animates only transform, opacity or clip-path, runs in CSS with no JS,
+ * and is switched off for people who ask for reduced motion.
+ */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Shadows carry the ink hue, not black, so cards look lifted off the paper. */
+  --shadow-lift: 0 1px 2px rgb(32 28 22 / 0.04), 0 12px 28px -14px rgb(31 78 92 / 0.28);
+}
+
+/* Cards you act on rise a little under the cursor. Phones skip it since they have no hover. */
+@utility card-lift {
+  transition: transform 250ms var(--ease-out), box-shadow 250ms var(--ease-out), border-color 250ms var(--ease-out);
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lift);
+      border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+    }
+  }
+}
+
+/* An underline that grows in from the left on hover, and stays for the current tab or page. */
+@utility underline-grow {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 -1px;
+    height: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 300ms var(--ease-out);
+  }
+  &:hover::after,
+  &[aria-pressed="true"]::after,
+  &[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+}
+
+/* List rows get a soft tint under the cursor that reaches a little past the text. */
+@utility row-hover {
+  position: relative;
+  isolation: isolate;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 4px -12px;
+    z-index: -1;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--primary) 4%, transparent);
+    opacity: 0;
+    transition: opacity 200ms;
+  }
+  &:hover::before {
+    opacity: 1;
+  }
+}
+
+/* A band of light that sweeps across a dark panel on hover. The panel needs overflow: hidden. */
+@utility sheen {
+  position: relative;
+  overflow: hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 33%;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.1), transparent);
+    transform: translateX(-100%) skewX(-12deg);
+    transition: transform 1s var(--ease-out);
+  }
+  &:hover::before {
+    transform: translateX(400%) skewX(-12deg);
+  }
+}
+
+@utility skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 1rem;
+  z-index: 60;
+  padding: 0.5rem 1rem;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transform: translateY(-200%);
+  &:focus {
+    transform: none;
+  }
+}
+
+/* A dot with a ring that ripples out of it, for things happening right now. Color comes from bg-*. */
+@utility live-dot {
+  position: relative;
+  display: inline-block;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: live-ping 1.6s var(--ease-out) infinite;
+  }
+}
+
+@keyframes live-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/*
+ * Sections below the fold rise in as they scroll into view. Scroll-driven, so there is no
+ * IntersectionObserver and no hidden-until-hydrated content; browsers without support just show it.
+ */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheen::before {
+    display: none;
+  }
+  .live-dot::after {
+    animation: none;
+  }
 }
 
 /*
@@ -174,14 +352,14 @@
   z-index: 0;
 }
 
-/* Soft shading patches for uneven ink absorption, plus grain whose alpha averages ~8% (max 16%). */
+/* Soft brand-tinted patches (teal, green, amber) for uneven ink, plus grain whose alpha averages ~5% (max 10%). */
 .paper-texture::before {
   inset: 0;
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0 0.12 0.16 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 60% 40% at 15% 10%, rgb(120 95 50 / 0.13), transparent 70%),
-    radial-gradient(ellipse 50% 35% at 85% 35%, rgb(120 95 50 / 0.1), transparent 70%),
-    radial-gradient(ellipse 70% 45% at 40% 80%, rgb(120 95 50 / 0.12), transparent 70%);
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0 0.12 0.1 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 60% 40% at 12% 8%, rgb(31 78 92 / 0.1), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 88% 30%, rgb(61 107 79 / 0.08), transparent 70%),
+    radial-gradient(ellipse 70% 45% at 40% 82%, rgb(184 134 58 / 0.1), transparent 70%);
   background-size: 200px, 100% 100%, 100% 100%, 100% 100%;
 }
 

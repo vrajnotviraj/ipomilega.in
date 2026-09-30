@@ -35,7 +35,7 @@ export function ClosedIposSection({ ipos, count }: IpoSectionProps) {
   return (
     <section className="py-15">
       <div className="flex justify-between items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold font-serif text-foreground flex items-center gap-2 sm:gap-3 min-w-0">
+        <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground flex items-center gap-2 sm:gap-3 min-w-0">
           <span className="truncate">Bidding closed</span>
           <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wide text-chart-5 flex-shrink-0">
             <Lock className="w-3 h-3" />
@@ -55,6 +55,7 @@ export function ClosedIposSection({ ipos, count }: IpoSectionProps) {
         {sortedStages.map(([stage, items]) => (
           <div key={stage}>
             <h3 className={`flex items-center gap-2 text-sm font-medium font-sans mb-3 ${stage === 0 ? 'text-primary' : 'text-muted-foreground'}`}>
+              {stage === 0 && <span className="live-dot bg-primary" />}
               {stageLabel(stage)}
               <span className="font-mono text-xs text-muted-foreground">({items.length})</span>
             </h3>

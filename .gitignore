@@ -42,3 +42,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 scripts/make-ipos-live.mongo.js
+
+# Claude Code and agent skills (local tooling)
+.claude/
+.agents/
+skills-lock.json

@@ -23,7 +23,7 @@ const MOBILE_LINKS = [
   { href: "/analysis", label: "Analysis", icon: BarChart },
 ];
 
-function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function MobileSidebar({ isOpen, onClose, pathname }: { isOpen: boolean; onClose: () => void; pathname: string }) {
   return (
     <>
       <div
@@ -37,7 +37,7 @@ function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-6 border-b border-border">
             <Logo size="lg" />
-            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0" aria-label="Close menu">
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -49,7 +49,8 @@ function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => vo
                   key={link.href}
                   href={link.href}
                   onClick={onClose}
-                  className="flex items-center space-x-3 px-4 py-3 text-foreground/80 rounded-lg hover:bg-accent transition-colors font-medium"
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  className="flex items-center space-x-3 px-4 py-3 text-foreground/80 rounded-lg hover:bg-accent aria-[current=page]:bg-accent aria-[current=page]:text-foreground transition-colors font-medium"
                 >
                   <link.icon className="h-5 w-5" />
                   <span>{link.label}</span>
@@ -69,6 +70,12 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
 
   return (
     <ProgressProvider>
+      <a
+        href="#main"
+        className="skip-link"
+      >
+        Skip to content
+      </a>
       <header className="fixed font-sans top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border">
         <div className="app-container flex items-center h-16 justify-between">
           <div className="flex items-center space-x-4">
@@ -76,6 +83,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
               variant="ghost"
               size="sm"
               onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open menu"
               className="sm:hidden h-8 w-8 p-0 text-foreground hover:bg-accent"
             >
               <Menu className="h-5 w-5" />
@@ -91,7 +99,8 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
                 <ProgressLink
                   key={link.href}
                   href={link.href}
-                  className={`text-sm transition-colors ${pathname === link.href ? "font-semibold text-foreground" : "font-normal text-muted-foreground hover:text-foreground"}`}
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  className="underline-grow py-1 text-sm text-muted-foreground hover:text-foreground aria-[current=page]:font-semibold aria-[current=page]:text-foreground transition-colors"
                 >
                   {link.label}
                 </ProgressLink>
@@ -101,9 +110,9 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
         </div>
       </header>
 
-      <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} pathname={pathname} />
 
-      <main>
+      <main id="main">
         {children}
         <Toaster position="top-right" richColors />
       </main>

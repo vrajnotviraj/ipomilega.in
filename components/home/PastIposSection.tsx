@@ -5,6 +5,7 @@ import { HomePageIpoProps } from '@/types/homepage';
 import { IpoTitleLink } from '@/components/ipo/IpoTitleLink';
 import { IpoLogo } from '@/components/ipo/IpoLogo';
 import { formatShortDateOrToday, parseEstListingPercent, parseGainValue } from '@/lib/ipo-format';
+import { EmptyState } from '@/components/home/EmptyState';
 
 function PriceFigure({ price, gain, align = 'left' }: { price: number | null; gain: number | null; align?: 'left' | 'right' }) {
   if (price === null && gain === null) {
@@ -63,7 +64,7 @@ function RecentlyListedCard({ item }: { item: HomePageIpoProps }) {
   const actual = actualListing(ipo);
 
   return (
-    <div className="text-left rounded-lg border border-border bg-card p-5 w-full">
+    <div className="card-lift text-left rounded-xl border border-border bg-card p-5 w-full">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3 min-w-0">
           <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} />
@@ -109,13 +110,7 @@ export function PastIposSection({ ipos }: { ipos: HomePageIpoProps[] }) {
           <span className="text-muted-foreground italic text-sm font-sans flex-shrink-0 hidden sm:inline">what we predicted vs. what happened</span>
         </div>
         {visibleIpos.length === 0 ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
-              <CalendarDays className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground text-base font-medium font-sans">No past IPOs at the moment</p>
-              <p className="text-muted-foreground/70 text-sm mt-2 font-sans">Check back soon for new opportunities!</p>
-            </div>
-          </div>
+          <EmptyState icon={CalendarDays} title="No recent listings yet" hint="Listed IPOs land here with our call next to how they actually did." />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
             {visibleIpos.map((item) => (

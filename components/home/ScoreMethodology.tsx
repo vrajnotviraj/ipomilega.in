@@ -50,9 +50,9 @@ export function ScoreMethodology() {
           {MODULES.map((module) => (
             <div
               key={module.num}
-              className="rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary/40"
+              className="group rounded-xl border border-border bg-card p-6 transition-colors duration-300 hover:border-primary/40"
             >
-              <div className="text-xs italic font-serif text-muted-foreground mb-2">{module.num}</div>
+              <div className="text-xs italic font-serif text-muted-foreground mb-2 transition-colors duration-300 group-hover:text-primary">{module.num}</div>
               <h3 className="font-serif font-semibold text-foreground mb-2">{module.title}</h3>
               <p className="text-sm text-muted-foreground">{module.body}</p>
             </div>

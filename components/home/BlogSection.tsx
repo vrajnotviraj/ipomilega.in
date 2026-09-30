@@ -7,6 +7,7 @@ import { ProgressLink } from "@/components/progress/ProgressLink";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/home/EmptyState";
 
 // Minutes to read at 200 words a minute.
 const estimateReadTime = (content: string): number => {
@@ -17,7 +18,8 @@ const estimateReadTime = (content: string): number => {
 export function BlogSection({ blogs }: { blogs: Blog[] }) {
   const [email, setEmail] = useState('');
 
-  const subscribeToNewsletter = async () => {
+  const subscribeToNewsletter = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!/\S+@\S+\.\S+/.test(email)) {
       toast.error("Please enter a valid email address.");
       return;
@@ -33,14 +35,14 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(data.message || "Successfully subscribed!");
+        toast.success(data.message || "Subscribed. The next analysis lands in your inbox.");
         setEmail('');
       } else {
-        toast.error(data.message || "Subscription failed.");
+        toast.error(data.message || "We couldn't subscribe you. Please try again.");
       }
     } catch (error) {
       console.error('Failed to subscribe:', error);
-      toast.error('An unexpected error occurred. Please try again.');
+      toast.error('Connection failed. Please try again.');
     }
   };
 
@@ -60,17 +62,11 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
           </div>
 
           {blogs.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
-                <PenBox className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
-                <p className="text-muted-foreground text-base font-medium">No blogs available at the moment</p>
-                <p className="text-muted-foreground/70 text-sm mt-2">Check back soon for new insights!</p>
-              </div>
-            </div>
+            <EmptyState icon={PenBox} title="No posts yet" hint="Explainers on GMP, allotment and reading a prospectus are on the way." />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
               {blogs.slice(0, 3).map((blog) => (
-                <ProgressLink key={blog._id} href={`/blogs/${blog.slug}`} className="group block">
+                <ProgressLink key={blog._id} href={`/blogs/${blog.slug}`} className="group block rounded-lg transition-transform duration-300 hover:-translate-y-0.5">
                   <div className="text-xs text-muted-foreground font-sans mb-1.5">
                     {blog.category || 'IPO Analysis'} · {estimateReadTime(blog.content)} min read
                   </div>
@@ -105,18 +101,20 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
               </h2>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row mt-4 gap-2 items-center w-full max-w-lg mx-auto sm:mx-0">
+          <form onSubmit={subscribeToNewsletter} className="flex flex-col sm:flex-row mt-4 gap-2 items-center w-full max-w-lg mx-auto sm:mx-0">
             <Input
               type="email"
+              required
+              aria-label="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address"
               className="bg-card text-foreground font-sans font-normal border-border"
             />
-            <Button onClick={subscribeToNewsletter} variant="default" className="font-sans font-medium w-full sm:w-auto">
+            <Button type="submit" variant="default" className="font-sans font-medium w-full sm:w-auto">
               Subscribe
             </Button>
-          </div>
+          </form>
         </div>
       </section>
     </div>

@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import { ArrowRight, CalendarDays } from 'lucide-react';
 import { HomePageIpoProps, IpoSectionProps } from '@/types/homepage';
-import { Badge } from '@/components/ui/badge';
 import { IpoTitleLink } from '@/components/ipo/IpoTitleLink';
 import { IpoLogo } from '@/components/ipo/IpoLogo';
 import { formatShortDateOrToday, getRiskTextColor, getIpoType, getPriceBand } from '@/lib/ipo-format';
+import { EmptyState } from '@/components/home/EmptyState';
 import { useBoard } from '@/components/home/BoardContext';
 
 function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
@@ -15,12 +15,9 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
   const priceBand = getPriceBand(ipo);
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-4 border-b border-border">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-4 border-b border-border row-hover">
       <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
         <CalendarDays className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-        <Badge variant="outline" className="rounded-md border-border bg-transparent text-foreground text-[11px] font-mono font-medium uppercase tracking-wide px-2 py-1 sm:w-[92px] sm:justify-center flex-shrink-0">
-          {getIpoType(ipo)}
-        </Badge>
         <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} />
         <div className="min-w-0 flex-1">
           <div className="font-serif font-semibold text-foreground truncate">
@@ -64,13 +61,7 @@ export function UpcomingIposSection({ ipos, count }: IpoSectionProps) {
           </Link>
         </div>
         {visibleIpos.length === 0 ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center py-6 bg-card rounded-xl shadow-sm border border-border max-w-sm w-full mx-4">
-              <CalendarDays className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground text-base font-medium font-sans">No upcoming {board} IPOs at the moment</p>
-              <p className="text-muted-foreground/70 text-sm mt-2 font-sans">Check back soon for new opportunities!</p>
-            </div>
-          </div>
+          <EmptyState icon={CalendarDays} title={`No ${board} IPOs announced yet`} hint="New issues show up here as soon as their dates are out." />
         ) : (
           <div className="border-t border-border">
             {visibleIpos.map((item) => (
