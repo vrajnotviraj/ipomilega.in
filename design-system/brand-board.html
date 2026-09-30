@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IPO Milega Brand Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Familjen+Grotesk:wght@500;600;700&family=Onest:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&family=Schibsted+Grotesk:wght@500;700;900&family=Figtree:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a dark presentation canvas holding three brand boards, each a 3×2 grid of panels with wide gutters. */
+:root {
+  color-scheme: dark;
+  --canvas: #141416;
+  --canvas-2: #1C1C1F;
+  --chrome: #8C8C93;
+  --chrome-hi: #E9E9EC;
+  --rule: #2A2A2F;
+  --label: "JetBrains Mono", ui-monospace, monospace;
+  --text: "Hanken Grotesk", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body { background: var(--canvas); color: var(--chrome-hi); font-family: var(--text); margin: 0; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 24px; padding-block: 56px 80px; }
+.top { display: grid; gap: 28px; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: end; padding-bottom: 40px; border-bottom: 1px solid var(--rule); }
+.kicker { font: 500 11px/1 var(--label); letter-spacing: .18em; text-transform: uppercase; color: var(--chrome); }
+h1 { font: 700 clamp(34px, 5vw, 60px)/1 "Bricolage Grotesque", system-ui, sans-serif; letter-spacing: -.035em; margin: 14px 0 0; text-wrap: balance; }
+.strategy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; margin: 0; }
+.strategy dt { font: 500 10px/1 var(--label); letter-spacing: .16em; text-transform: uppercase; color: var(--chrome); }
+.strategy dd { margin: 6px 0 0; font-size: 14px; line-height: 1.45; color: var(--chrome-hi); }
+
+.board { margin-top: 64px; }
+.board-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; margin-bottom: 18px; }
+.board-head h2 { margin: 0; font: 600 22px/1.2 var(--text); letter-spacing: -.01em; }
+.board-head h2 span { color: var(--chrome); font-weight: 400; }
+.board-head p { margin: 0; font-size: 14px; color: var(--chrome); max-width: 62ch; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.panel { position: relative; border-radius: 18px; overflow: hidden; min-height: 300px; padding: 24px; display: flex; flex-direction: column; background: var(--base); color: var(--ink); min-width: 0; }
+.panel.alt { background: var(--base-2); }
+.panel.inv { background: var(--ink); color: var(--base); }
+.panel .tag { font: 500 10px/1 var(--label); letter-spacing: .16em; text-transform: uppercase; opacity: .55; display: flex; justify-content: space-between; }
+.panel .body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 16px; min-width: 0; }
+
+/* Direction tokens */
+.dir-a { --base: #F4F6F8; --base-2: #E7ECF1; --ink: #0F1B2D; --muted: #5A6778; --acc: #E8890C; --up: #178A5A; --down: #C8412F; --display: "Bricolage Grotesque", system-ui, sans-serif; --body: "Hanken Grotesk", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace; }
+.dir-b { --base: #0E1320; --base-2: #151C2E; --ink: #EDE6D6; --muted: #8E93A3; --acc: #D4A24C; --up: #57C08A; --down: #E26D5A; --display: "Familjen Grotesk", system-ui, sans-serif; --body: "Onest", system-ui, sans-serif; --mono: "Spline Sans Mono", ui-monospace, monospace; }
+.dir-b .panel.inv { background: #EDE6D6; color: #0E1320; }
+
+/* Logo cover */
+.cover .body { align-items: flex-start; }
+.wordmark { display: flex; align-items: center; gap: 14px; }
+.wordmark svg { width: 64px; height: 64px; flex-shrink: 0; }
+.wordmark b { font: 800 40px/1 var(--display); letter-spacing: -.04em; }
+.dir-b .wordmark b { font-weight: 700; letter-spacing: -.03em; }
+.dir-c .wordmark b { font-weight: 900; letter-spacing: -.045em; }
+.wordmark b i { font-style: normal; color: var(--acc); }
+.dir-c .wordmark b i { color: var(--ink); opacity: .55; }
+.cover small { font: 400 13px/1.4 var(--body); color: var(--muted); }
+
+/* Construction */
+.construct .body { align-items: center; }
+.construct svg { width: min(220px, 100%); height: auto; }
+.construct p { margin: 0; font: 400 13px/1.45 var(--body); color: var(--muted); text-align: center; max-width: 34ch; }
+
+/* Homepage mockup */
+.mock { padding: 14px; }
+.browser { flex: 1; border-radius: 12px; background: var(--base); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent), 0 20px 40px -24px color-mix(in srgb, var(--ink) 50%, transparent); overflow: hidden; display: flex; flex-direction: column; min-width: 0; }
+.bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; background: color-mix(in srgb, var(--ink) 5%, var(--base)); }
+.bar i { width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 20%, transparent); }
+.bar span { margin-left: 8px; flex: 1; font: 400 10px/1 var(--mono); color: var(--muted); background: color-mix(in srgb, var(--ink) 6%, transparent); padding: 5px 8px; border-radius: 999px; }
+.page { padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.page .nav { display: flex; align-items: center; justify-content: space-between; }
+.page .nav .mini { display: flex; align-items: center; gap: 6px; font: 700 12px/1 var(--display); color: var(--ink); }
+.page .nav .mini svg { width: 18px; height: 18px; }
+.page .nav em { font: 500 9px/1 var(--body); font-style: normal; color: var(--muted); }
+.page h3 { margin: 4px 0 0; font: 800 26px/1 var(--display); letter-spacing: -.035em; color: var(--ink); text-wrap: balance; }
+.dir-b .page h3 { font-weight: 700; }
+.dir-c .page h3 { font-weight: 900; }
+.page h3 span { color: var(--acc); }
+.dir-c .page h3 span { color: var(--up); }
+.ipo { border-radius: 10px; padding: 11px 12px; background: color-mix(in srgb, var(--ink) 4%, var(--base)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 9%, transparent); display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; }
+.ipo .name { font: 600 13px/1.2 var(--body); color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.live { width: 6px; height: 6px; border-radius: 50%; background: var(--down); box-shadow: 0 0 0 3px color-mix(in srgb, var(--down) 22%, transparent); }
+.ipo .score { font: 500 18px/1 var(--mono); color: var(--up); text-align: right; }
+.ipo .stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.ipo .stats div { font: 400 9px/1.3 var(--body); color: var(--muted); }
+.ipo .stats b { display: block; font: 500 12px/1.2 var(--mono); color: var(--ink); }
+.ipo .stats b.up { color: var(--up); }
+.cta { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 4px 4px 4px 12px; border-radius: 999px; background: var(--ink); color: var(--base); font: 500 10px/1 var(--body); }
+.cta i { width: 20px; height: 20px; border-radius: 50%; background: var(--acc); color: var(--ink); display: grid; place-items: center; font-style: normal; font-size: 11px; }
+
+/* Colour */
+.swatches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.sw { border-radius: 12px; padding: 12px; min-height: 76px; display: flex; flex-direction: column; justify-content: flex-end; font: 400 10px/1.35 var(--mono); }
+.sw strong { font: 600 12px/1.2 var(--body); display: block; }
+.sw.wide { grid-column: 1 / -1; min-height: 64px; }
+
+/* Type */
+.type .body { justify-content: space-between; }
+.specimen { font: 800 88px/.85 var(--display); letter-spacing: -.05em; }
+.dir-b .specimen { font-weight: 700; }
+.dir-c .specimen { font-weight: 900; }
+.type-rows { display: grid; gap: 10px; }
+.type-rows div { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); padding-top: 8px; min-width: 0; }
+.type-rows span { font: 400 10px/1 var(--mono); opacity: .6; letter-spacing: .06em; flex-shrink: 0; }
+.type-rows p { margin: 0; font-size: 14px; text-align: right; min-width: 0; }
+.type-rows .d { font-family: var(--display); font-weight: 700; }
+.type-rows .b { font-family: var(--body); }
+.type-rows .m { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* Icon + tagline */
+.essence .body { align-items: flex-start; justify-content: space-between; }
+.icons { display: flex; gap: 12px; align-items: flex-end; }
+.icons svg { border-radius: 22%; }
+.tagline { font: 800 34px/1 var(--display); letter-spacing: -.035em; text-wrap: balance; }
+.dir-b .tagline { font-weight: 700; }
+.dir-c .tagline { font-weight: 900; }
+.tagline span { color: var(--acc); }
+.dir-c .tagline span { color: var(--up); }
+.essence small { font: 400 12px/1.45 var(--body); opacity: .7; max-width: 38ch; }
+
+.fit { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.fit span { font: 400 11px/1 var(--label); color: var(--chrome); padding: 7px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--rule); }
+.fit span b { color: var(--chrome-hi); font-weight: 500; }
+
+footer { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font: 400 12px/1.5 var(--label); color: var(--chrome); }
+
+.dir-cg { --c2-icon: #5B7FC4; --base: #F6F7FA; --base-2: #E3E8F2; --ink: #0B1B3F; --leaf: #5B7FC4; --muted: #596378; --acc: #F0A92E; --up: #1F8A55; --down: #B8452F; --display: "Schibsted Grotesk", system-ui, sans-serif; --body: "Figtree", system-ui, sans-serif; --mono: "DM Mono", ui-monospace, monospace; --c1: var(--ink); --c2: var(--leaf); --c3: var(--acc); --soft: #D2D9E7; }
+.dir-cg .wordmark b i { color: var(--leaf); opacity: 1; }
+.dir-cg .page h3 span, .dir-cg .tagline span { color: var(--leaf); }
+.dir-cg .panel.alt .sw.leaf { background: var(--leaf); }
+
+.dir-c { --base: #FAFAF6; --base-2: #EEF1EA; --ink: #0F3B2E; --muted: #5E6B63; --acc: #F0A92E; --up: #1C7A4E; --down: #B8452F; --leaf: #0F3B2E; --c1: var(--ink); --c2: var(--ink); --c3: var(--acc); --c2-icon: var(--base); --soft: #DCE2D8; }
+.dir-ce { --base: #F9FAF7; --base-2: #E6F0EC; --ink: #0A5A4A; --muted: #56675F; --acc: #F0A92E; --up: #2F7A26; --down: #B8452F; --leaf: #0A5A4A; --c1: var(--ink); --c2: var(--ink); --c3: var(--acc); --c2-icon: var(--base); --soft: #D4E3DC; }
+.dir-cm { --base: #F7F7F5; --base-2: #E9EBF0; --ink: #0B1B3F; --muted: #5A6275; --acc: #F0A92E; --up: #1F8A55; --down: #B8452F; --leaf: #0B1B3F; --c1: var(--ink); --c2: var(--ink); --c3: var(--acc); --c2-icon: var(--base); --soft: #D8DBE3; }
+.dir-c, .dir-ce, .dir-cm { --display: "Schibsted Grotesk", system-ui, sans-serif; --body: "Figtree", system-ui, sans-serif; --mono: "DM Mono", ui-monospace, monospace; }
+.dir-c .wordmark b i, .dir-ce .wordmark b i, .dir-cm .wordmark b i { color: var(--ink); opacity: .55; }
+.dir-c .page h3 span, .dir-c .tagline span, .dir-ce .page h3 span, .dir-ce .tagline span { color: var(--up); opacity: 1; }
+.dir-cm .page h3 span, .dir-cm .tagline span { color: var(--ink); opacity: .55; }
+.dir-ce .wordmark b, .dir-cm .wordmark b, .dir-ce .page h3, .dir-cm .page h3, .dir-ce .specimen, .dir-cm .specimen, .dir-ce .tagline, .dir-cm .tagline { font-weight: 900; }
+.theory { margin-top: 48px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.theory article { background: var(--canvas-2); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.theory h3 { margin: 0; font: 600 15px/1.25 var(--text); }
+.theory cite { font: 400 10px/1.4 var(--label); letter-spacing: .08em; text-transform: uppercase; color: var(--chrome); font-style: normal; }
+.theory p { margin: 0; font-size: 13px; line-height: 1.5; color: #C9C9CF; }
+.theory p b { color: var(--chrome-hi); font-weight: 600; }
+@media (max-width: 1100px) { .theory { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .theory { grid-template-columns: 1fr; } }
+
+/* On the dark ink panels, the highlighted words take the accent so they stay readable, and icons get a hairline so an ink tile on an ink panel keeps its edge. */
+.board .panel.inv .tagline span { color: var(--acc); opacity: 1; }
+.board .panel.inv .icons svg { box-shadow: 0 0 0 1px rgb(255 255 255 / .18); }
+
+/* Every colour on a board comes from its own palette: "Milega" differs from "IPO" by weight, not a tint, and highlighted words keep the ink with a marigold underline. */
+.dir-c .wordmark b i, .dir-ce .wordmark b i, .dir-cm .wordmark b i { color: var(--ink); opacity: 1; font-weight: 500; }
+.dir-c .page h3 span, .dir-ce .page h3 span, .dir-cm .page h3 span { color: var(--ink); opacity: 1; text-decoration: underline; text-decoration-color: var(--acc); text-decoration-thickness: .14em; text-underline-offset: .1em; }
+.dir-cg .page h3 span { color: var(--leaf); }
+
+@media (max-width: 980px) {
+  .top { grid-template-columns: 1fr; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .wrap { padding-inline: 16px; }
+  .grid { grid-template-columns: 1fr; }
+  .strategy { grid-template-columns: 1fr; }
+  .panel { min-height: 260px; }
+  .specimen { font-size: 72px; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="kicker">ipomilega.in · Direction C · Sep 2026</div>
+      <h1>Green Candle, final palettes</h1>
+    </div>
+    <dl class="strategy">
+      <div><dt>Audience</dt><dd>Indian retail investors, mostly on phones, bidding through their broker's UPI flow.</dd></div>
+      <div><dt>Promise</dt><dd>You know whether the IPO is worth it, and your odds, before you bid.</dd></div>
+      <div><dt>Core idea</dt><dd>"Milega?" The one question every applicant asks: will I get it?</dd></div>
+      <div><dt>Avoid</dt><dd>Tip-channel hype, casino energy, crypto neon, and paper-and-serif nostalgia.</dd></div>
+    </dl>
+  </header>
+
+  <section class="theory" aria-label="What the books say">
+    <article><cite>Josef Albers · Interaction of Color (1963)</cite><h3>Colour is relative</h3><p>The same colour changes with what sits next to it. So <b>brand green must not sit near gain green</b>; C1b pulls them apart in hue, and the blue options remove the clash entirely.</p></article>
+    <article><cite>Johannes Itten · The Art of Color (1961)</cite><h3>Complements and extension</h3><p>Blue and orange are complements, the strongest pairing on his wheel. His contrast of extension says a strong colour needs <b>only a small area</b>, so marigold is kept to one candle and "today" states.</p></article>
+    <article><cite>Eva Heller · Psychology of Color</cite><h3>What people feel</h3><p>In her survey of about 2,000 people, blue was the one colour with <b>no dominant negative feeling</b>, tied to trust and lasting values. Green read as life and freshness, and also as immaturity.</p></article>
+    <article><cite>Alina Wheeler · Designing Brand Identity</cite><h3>Consistency builds trust</h3><p>Her ideals include clarity, consistency, differentiation and authenticity. <b>One mark, one ink, one accent</b>, repeated in the favicon, nav, cards and share images, so every touchpoint reads as the same source.</p></article>
+    <article><cite>Marty Neumeier · The Brand Gap, Zag</cite><h3>Be the only one</h3><p>A brand should finish the sentence "the only ___ that ___". <b>The only IPO tracker whose mark is a listing-day chart</b>: the candle M and the marigold breakout carry the difference, not the ink colour.</p></article>
+  </section>
+
+  <section class="board dir-c" aria-labelledby="c-title">
+    <div class="board-head">
+      <h2 id="c-title">C1. Market green <span>· the original</span></h2>
+      <p>Deep forest green carries everything; marigold is kept for what needs attention today.</p>
+    </div>
+    <div class="grid">
+      <div class="panel cover">
+        <div class="tag"><span>Logo</span><span>01</span></div>
+        <div class="body">
+          <div class="wordmark"><svg viewBox="0 0 64 64" aria-hidden="true"><g style="stroke:var(--ink)" stroke-width="2.5" stroke-linecap="round"><line x1="14" y1="10" x2="14" y2="54"/><line x1="32" y1="26" x2="32" y2="50"/><line x1="50" y1="5" x2="50" y2="54"/></g><rect x="8" y="16" width="12" height="32" rx="3" style="fill:var(--c1)"/><rect x="26" y="30" width="12" height="14" rx="3" style="fill:var(--c2)"/><rect x="44" y="11" width="12" height="37" rx="3" style="fill:var(--c3)"/></svg><b>IPO <i>Milega</i></b></div>
+          <small>Wordmark in Schibsted Grotesk: "IPO" in Black, "Milega" in Medium, both in the ink colour.</small>
+        </div>
+      </div>
+      <div class="panel alt construct">
+        <div class="tag"><span>Construction</span><span>02</span></div>
+        <div class="body">
+          <svg viewBox="0 0 220 150" aria-hidden="true"><g style="stroke:var(--muted)" stroke-width=".75" stroke-dasharray="3 3"><line x1="0" y1="40" x2="220" y2="40"/><line x1="0" y1="116" x2="220" y2="116"/><polyline points="50,40 110,86 170,26" fill="none"/></g><g style="stroke:var(--ink)" stroke-width="5" stroke-linecap="round"><line x1="50" y1="24" x2="50" y2="134"/><line x1="110" y1="64" x2="110" y2="124"/><line x1="170" y1="12" x2="170" y2="134"/></g><rect x="34" y="40" width="32" height="76" rx="7" style="fill:var(--c1)"/><rect x="94" y="76" width="32" height="34" rx="7" style="fill:var(--c2)"/><rect x="154" y="26" width="32" height="90" rx="7" style="fill:var(--c3)"/></svg>
+          <p>Three candles on a shared base read as an M. The last one closes above where the first opened: the listing-day breakout.</p>
+        </div>
+      </div>
+      <div class="panel inv mock">
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i><span>ipomilega.in</span></div>
+          <div class="page">
+            <div class="nav"><span class="mini"><svg viewBox="0 0 64 64"><rect x="8" y="16" width="12" height="32" rx="3" style="fill:var(--c1)"/><rect x="26" y="30" width="12" height="14" rx="3" style="fill:var(--c2)"/><rect x="44" y="11" width="12" height="37" rx="3" style="fill:var(--c3)"/></svg>IPO Milega</span><em>IPOs · Analysis · Blog</em></div>
+            <h3>Milega? <span>Check first.</span></h3>
+            <div class="ipo">
+              <div class="name"><span class="live"></span>Moneyview</div>
+              <div class="score">7.5</div>
+              <div class="stats"><div>GMP<b class="up">+38.23%</b></div><div>Subscribed<b>101.86x</b></div><div>Retail odds<b>17%</b></div></div>
+            </div>
+            <span class="cta">See a full analysis <i>↗</i></span>
+          </div>
+        </div>
+      </div>
+      <div class="panel alt">
+        <div class="tag"><span>Colour</span><span>04</span></div>
+        <div class="body"><div class="swatches"><div class="sw wide" style="background:#0F3B2E;color:#FAFAF6"><strong>Market green</strong>#0F3B2E · ink, headings, logo</div><div class="sw" style="background:#F0A92E;color:#0F3B2E"><strong>Marigold</strong>#F0A92E · today, breakout</div><div class="sw" style="background:#FAFAF6;color:#0F3B2E;box-shadow:inset 0 0 0 1px var(--soft)"><strong>Chalk</strong>#FAFAF6 · page</div><div class="sw" style="background:#5E6B63;color:#FAFAF6"><strong>Muted</strong>#5E6B63 · secondary text</div><div class="sw" style="background:linear-gradient(90deg,#1C7A4E 50%,#B8452F 50%);color:#FAFAF6"><strong>Gain / Loss</strong>#1C7A4E / #B8452F · data only</div></div></div>
+      </div>
+      <div class="panel type">
+        <div class="tag"><span>Type</span><span>05</span></div>
+        <div class="body">
+          <div class="specimen" style="font-family:var(--display)">Aa</div>
+          <div class="type-rows">
+            <div><span>DISPLAY</span><p class="d">Schibsted Grotesk</p></div>
+            <div><span>BODY</span><p class="b">Figtree, 400 to 600</p></div>
+            <div><span>FIGURES</span><p class="m">+38.23%  101.86x  ₹1,24,500</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel inv essence">
+        <div class="tag"><span>Icon · Tagline</span><span>06</span></div>
+        <div class="body">
+          <div class="icons">
+            <svg width="72" height="72" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" style="fill:var(--ink)"/><rect x="12" y="20" width="10" height="26" rx="2.5" style="fill:var(--base)"/><rect x="27" y="31" width="10" height="11" rx="2.5" style="fill:var(--c2-icon, var(--base))"/><rect x="42" y="15" width="10" height="31" rx="2.5" style="fill:var(--acc)"/></svg>
+            <svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" style="fill:var(--acc)"/><rect x="12" y="20" width="10" height="26" rx="2.5" style="fill:var(--ink)"/><rect x="27" y="31" width="10" height="11" rx="2.5" style="fill:var(--ink)"/><rect x="42" y="15" width="10" height="31" rx="2.5" style="fill:var(--ink)"/></svg>
+          </div>
+          <div class="tagline">Milega? <span>Check first.</span></div>
+          <small>Reference. Brand green and gain green sit close together, which C1b fixes.</small>
+        </div>
+      </div>
+    </div>
+    <div class="fit"><span>Mood <b>bold, plain-spoken</b></span><span>Page <b>light</b></span><span>Fonts <b>2 variable + DM Mono 400/500</b></span></div>
+  </section>
+
+  <section class="board dir-ce" aria-labelledby="ce-title">
+    <div class="board-head">
+      <h2 id="ce-title">C1b. Emerald <span>· a clearer, richer green</span></h2>
+      <p>A blue-leaning emerald with more life than the forest green, set far enough from the yellow-leaning gain green that the two never blur (Albers: a colour is read through its neighbours).</p>
+    </div>
+    <div class="grid">
+      <div class="panel cover">
+        <div class="tag"><span>Logo</span><span>01</span></div>
+        <div class="body">
+          <div class="wordmark"><svg viewBox="0 0 64 64" aria-hidden="true"><g style="stroke:var(--ink)" stroke-width="2.5" stroke-linecap="round"><line x1="14" y1="10" x2="14" y2="54"/><line x1="32" y1="26" x2="32" y2="50"/><line x1="50" y1="5" x2="50" y2="54"/></g><rect x="8" y="16" width="12" height="32" rx="3" style="fill:var(--c1)"/><rect x="26" y="30" width="12" height="14" rx="3" style="fill:var(--c2)"/><rect x="44" y="11" width="12" height="37" rx="3" style="fill:var(--c3)"/></svg><b>IPO <i>Milega</i></b></div>
+          <small>Wordmark in Schibsted Grotesk: "IPO" in Black, "Milega" in Medium, both in the ink colour.</small>
+        </div>
+      </div>
+      <div class="panel alt construct">
+        <div class="tag"><span>Construction</span><span>02</span></div>
+        <div class="body">
+          <svg viewBox="0 0 220 150" aria-hidden="true"><g style="stroke:var(--muted)" stroke-width=".75" stroke-dasharray="3 3"><line x1="0" y1="40" x2="220" y2="40"/><line x1="0" y1="116" x2="220" y2="116"/><polyline points="50,40 110,86 170,26" fill="none"/></g><g style="stroke:var(--ink)" stroke-width="5" stroke-linecap="round"><line x1="50" y1="24" x2="50" y2="134"/><line x1="110" y1="64" x2="110" y2="124"/><line x1="170" y1="12" x2="170" y2="134"/></g><rect x="34" y="40" width="32" height="76" rx="7" style="fill:var(--c1)"/><rect x="94" y="76" width="32" height="34" rx="7" style="fill:var(--c2)"/><rect x="154" y="26" width="32" height="90" rx="7" style="fill:var(--c3)"/></svg>
+          <p>Three candles on a shared base read as an M. The last one closes above where the first opened: the listing-day breakout.</p>
+        </div>
+      </div>
+      <div class="panel inv mock">
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i><span>ipomilega.in</span></div>
+          <div class="page">
+            <div class="nav"><span class="mini"><svg viewBox="0 0 64 64"><rect x="8" y="16" width="12" height="32" rx="3" style="fill:var(--c1)"/><rect x="26" y="30" width="12" height="14" rx="3" style="fill:var(--c2)"/><rect x="44" y="11" width="12" height="37" rx="3" style="fill:var(--c3)"/></svg>IPO Milega</span><em>IPOs · Analysis · Blog</em></div>
+            <h3>Milega? <span>Check first.</span></h3>
+            <div class="ipo">
+              <div class="name"><span class="live"></span>Moneyview</div>
+              <div class="score">7.5</div>
+              <div class="stats"><div>GMP<b class="up">+38.23%</b></div><div>Subscribed<b>101.86x</b></div><div>Retail odds<b>17%</b></div></div>
+            </div>
+            <span class="cta">See a full analysis <i>↗</i></span>
+          </div>
+        </div>
+      </div>
+      <div class="panel alt">
+        <div class="tag"><span>Colour</span><span>04</span></div>
+        <div class="body"><div class="swatches"><div class="sw wide" style="background:#0A5A4A;color:#F9FAF7"><strong>Emerald ink</strong>#0A5A4A · ink, headings, logo</div><div class="sw" style="background:#F0A92E;color:#0A5A4A"><strong>Marigold</strong>#F0A92E · today, breakout</div><div class="sw" style="background:#F9FAF7;color:#0A5A4A;box-shadow:inset 0 0 0 1px var(--soft)"><strong>Chalk</strong>#F9FAF7 · page</div><div class="sw" style="background:#56675F;color:#F9FAF7"><strong>Muted</strong>#56675F · secondary text</div><div class="sw" style="background:linear-gradient(90deg,#2F7A26 50%,#B8452F 50%);color:#F9FAF7"><strong>Gain / Loss</strong>#2F7A26 / #B8452F · data only</div></div></div>
+      </div>
+      <div class="panel type">
+        <div class="tag"><span>Type</span><span>05</span></div>
+        <div class="body">
+          <div class="specimen" style="font-family:var(--display)">Aa</div>
+          <div class="type-rows">
+            <div><span>DISPLAY</span><p class="d">Schibsted Grotesk</p></div>
+            <div><span>BODY</span><p class="b">Figtree, 400 to 600</p></div>
+            <div><span>FIGURES</span><p class="m">+38.23%  101.86x  ₹1,24,500</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel inv essence">
+        <div class="tag"><span>Icon · Tagline</span><span>06</span></div>
+        <div class="body">
+          <div class="icons">
+            <svg width="72" height="72" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" style="fill:var(--ink)"/><rect x="12" y="20" width="10" height="26" rx="2.5" style="fill:var(--base)"/><rect x="27" y="31" width="10" height="11" rx="2.5" style="fill:var(--c2-icon, var(--base))"/><rect x="42" y="15" width="10" height="31" rx="2.5" style="fill:var(--acc)"/></svg>
+            <svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" style="fill:var(--acc)"/><rect x="12" y="20" width="10" height="26" rx="2.5" style="fill:var(--ink)"/><rect x="27" y="31" width="10" height="11" rx="2.5" style="fill:var(--ink)"/><rect x="42" y="15" width="10" height="31" rx="2.5" style="fill:var(--ink)"/></svg>
+          </div>
+          <div class="tagline">Milega? <span>Check first.</span></div>
+          <small>Healthier and brighter than C1, still dark enough for body text at 7:1 contrast.</small>
+        </div>
+      </div>
+    </div>
+    <div class="fit"><span>Mood <b>fresh, confident</b></span><span>Page <b>light</b></span><span>Fonts <b>2 variable + DM Mono 400/500</b></span></div>
+  </section>
+
+  <section class="board dir-cg" aria-labelledby="cg-title">
+    <div class="board-head">
+      <h2 id="cg-title">C3. Midnight + steel <span>· two blues</span></h2>
+      <p>A near-black midnight blue carries the weight, with a steel blue for the middle candle, "Milega" and soft surfaces. Marigold still marks today.</p>
+    </div>
+    <div class="grid">
+      <div class="panel cover">
+        <div class="tag"><span>Logo</span><span>01</span></div>
+        <div class="body">
+          <div class="wordmark"><svg viewBox="0 0 64 64" aria-hidden="true"><g style="stroke:var(--ink)" stroke-width="2.5" stroke-linecap="round"><line x1="14" y1="10" x2="14" y2="54"/><line x1="32" y1="26" x2="32" y2="50"/><line x1="50" y1="5" x2="50" y2="54"/></g><rect x="8" y="16" width="12" height="32" rx="3" style="fill:var(--c1)"/><rect x="26" y="30" width="12" height="14" rx="3" style="fill:var(--c2)"/><rect x="44" y="11" width="12" height="37" rx="3" style="fill:var(--c3)"/></svg><b>IPO <i>Milega</i></b></div>
+          <small>Wordmark in Schibsted Grotesk Black; "Milega" in steel blue.</small>
+        </div>
+      </div>
+      <div class="panel alt construct">
+        <div class="tag"><span>Construction</span><span>02</span></div>
+        <div class="body">
+          <svg viewBox="0 0 220 150" aria-hidden="true"><g style="stroke:var(--muted)" stroke-width=".75" stroke-dasharray="3 3"><line x1="0" y1="40" x2="220" y2="40"/><line x1="0" y1="116" x2="220" y2="116"/><polyline points="50,40 110,86 170,26" fill="none"/></g><g style="stroke:var(--ink)" stroke-width="5" stroke-linecap="round"><line x1="50" y1="24" x2="50" y2="134"/><line x1="110" y1="64" x2="110" y2="124"/><line x1="170" y1="12" x2="170" y2="134"/></g><rect x="34" y="40" width="32" height="76" rx="7" style="fill:var(--c1)"/><rect x="94" y="76" width="32" height="34" rx="7" style="fill:var(--c2)"/><rect x="154" y="26" width="32" height="90" rx="7" style="fill:var(--c3)"/></svg>
+          <p>Three candles on a shared base read as an M. The last one closes above where the first opened: the listing-day breakout.</p>
+        </div>
+      </div>
+      <div class="panel inv mock">
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i><span>ipomilega.in</span></div>
+          <div class="page">
+            <div class="nav"><span class="mini"><svg viewBox="0 0 64 64"><rect x="8" y="16" width="12" height="32" rx="3" style="fill:var(--c1)"/><rect x="26" y="30" width="12" height="14" rx="3" style="fill:var(--c2)"/><rect x="44" y="11" width="12" height="37" rx="3" style="fill:var(--c3)"/></svg>IPO Milega</span><em>IPOs · Analysis · Blog</em></div>
+            <h3>Milega? <span>Check first.</span></h3>
+            <div class="ipo">
+              <div class="name"><span class="live"></span>Moneyview</div>
+              <div class="score">7.5</div>
+              <div class="stats"><div>GMP<b class="up">+38.23%</b></div><div>Subscribed<b>101.86x</b></div><div>Retail odds<b>17%</b></div></div>
+            </div>
+            <span class="cta">See a full analysis <i>↗</i></span>
+          </div>
+        </div>
+      </div>
+      <div class="panel alt">
+        <div class="tag"><span>Colour</span><span>04</span></div>
+        <div class="body"><div class="swatches"><div class="sw wide" style="background:#0B1B3F;color:#F6F7FA"><strong>Midnight</strong>#0B1B3F · ink, headings, logo</div><div class="sw" style="background:#5B7FC4;color:#F6F7FA"><strong>Steel blue</strong>#5B7FC4 · second tone, "Milega"</div><div class="sw" style="background:#F0A92E;color:#0B1B3F"><strong>Marigold</strong>#F0A92E · today, breakout</div><div class="sw" style="background:#E3E8F2;color:#0B1B3F;box-shadow:inset 0 0 0 1px var(--soft)"><strong>Blue wash</strong>#E3E8F2 · surfaces</div><div class="sw" style="background:#596378;color:#F6F7FA"><strong>Muted</strong>#596378 · secondary text</div><div class="sw wide" style="background:linear-gradient(90deg,#1F8A55 50%,#B8452F 50%);color:#F6F7FA"><strong>Gain / Loss</strong>#1F8A55 / #B8452F · data only</div></div></div>
+      </div>
+      <div class="panel type">
+        <div class="tag"><span>Type</span><span>05</span></div>
+        <div class="body">
+          <div class="specimen" style="font-family:var(--display)">Aa</div>
+          <div class="type-rows">
+            <div><span>DISPLAY</span><p class="d">Schibsted Grotesk</p></div>
+            <div><span>BODY</span><p class="b">Figtree, 400 to 600</p></div>
+            <div><span>FIGURES</span><p class="m">+38.23%  101.86x  ₹1,24,500</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel inv essence">
+        <div class="tag"><span>Icon · Tagline</span><span>06</span></div>
+        <div class="body">
+          <div class="icons">
+            <svg width="72" height="72" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" style="fill:var(--ink)"/><rect x="12" y="20" width="10" height="26" rx="2.5" style="fill:var(--base)"/><rect x="27" y="31" width="10" height="11" rx="2.5" style="fill:var(--c2-icon, var(--base))"/><rect x="42" y="15" width="10" height="31" rx="2.5" style="fill:var(--acc)"/></svg>
+            <svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" style="fill:var(--acc)"/><rect x="12" y="20" width="10" height="26" rx="2.5" style="fill:var(--ink)"/><rect x="27" y="31" width="10" height="11" rx="2.5" style="fill:var(--ink)"/><rect x="42" y="15" width="10" height="31" rx="2.5" style="fill:var(--ink)"/></svg>
+          </div>
+          <div class="tagline">Milega? <span>Check first.</span></div>
+          <small>Two blues give sections a second tone without adding a new hue.</small>
+        </div>
+      </div>
+    </div>
+    <div class="fit"><span>Mood <b>serious, premium</b></span><span>Page <b>light</b></span><span>Fonts <b>2 variable + DM Mono 400/500</b></span></div>
+  </section>
+
+  <section class="board dir-cm" aria-labelledby="cm-title">
+    <div class="board-head">
+      <h2 id="cm-title">C3b. Midnight only <span>· one blue, one accent</span></h2>
+      <p>The same midnight ink with no lighter blue: every candle is midnight except the marigold breakout. Blue against orange is Itten's complementary pair, so the accent needs only a small area to carry.</p>
+    </div>
+    <div class="grid">
+      <div class="panel cover">
+        <div class="tag"><span>Logo</span><span>01</span></div>
+        <div class="body">
+          <div class="wordmark"><svg viewBox="0 0 64 64" aria-hidden="true"><g style="stroke:var(--ink)" stroke-width="2.5" stroke-linecap="round"><line x1="14" y1="10" x2="14" y2="54"/><line x1="32" y1="26" x2="32" y2="50"/><line x1="50" y1="5" x2="50" y2="54"/></g><rect x="8" y="16" width="12" height="32" rx="3" style="fill:var(--c1)"/><rect x="26" y="30" width="12" height="14" rx="3" style="fill:var(--c2)"/><rect x="44" y="11" width="12" height="37" rx="3" style="fill:var(--c3)"/></svg><b>IPO <i>Milega</i></b></div>
+          <small>Wordmark in Schibsted Grotesk: "IPO" in Black, "Milega" in Medium, both in the ink colour.</small>
+        </div>
+      </div>
+      <div class="panel alt construct">
+        <div class="tag"><span>Construction</span><span>02</span></div>
+        <div class="body">
+          <svg viewBox="0 0 220 150" aria-hidden="true"><g style="stroke:var(--muted)" stroke-width=".75" stroke-dasharray="3 3"><line x1="0" y1="40" x2="220" y2="40"/><line x1="0" y1="116" x2="220" y2="116"/><polyline points="50,40 110,86 170,26" fill="none"/></g><g style="stroke:var(--ink)" stroke-width="5" stroke-linecap="round"><line x1="50" y1="24" x2="50" y2="134"/><line x1="110" y1="64" x2="110" y2="124"/><line x1="170" y1="12" x2="170" y2="134"/></g><rect x="34" y="40" width="32" height="76" rx="7" style="fill:var(--c1)"/><rect x="94" y="76" width="32" height="34" rx="7" style="fill:var(--c2)"/><rect x="154" y="26" width="32" height="90" rx="7" style="fill:var(--c3)"/></svg>
+          <p>Three candles on a shared base read as an M. The last one closes above where the first opened: the listing-day breakout.</p>
+        </div>
+      </div>
+      <div class="panel inv mock">
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i><span>ipomilega.in</span></div>
+          <div class="page">
+            <div class="nav"><span class="mini"><svg viewBox="0 0 64 64"><rect x="8" y="16" width="12" height="32" rx="3" style="fill:var(--c1)"/><rect x="26" y="30" width="12" height="14" rx="3" style="fill:var(--c2)"/><rect x="44" y="11" width="12" height="37" rx="3" style="fill:var(--c3)"/></svg>IPO Milega</span><em>IPOs · Analysis · Blog</em></div>
+            <h3>Milega? <span>Check first.</span></h3>
+            <div class="ipo">
+              <div class="name"><span class="live"></span>Moneyview</div>
+              <div class="score">7.5</div>
+              <div class="stats"><div>GMP<b class="up">+38.23%</b></div><div>Subscribed<b>101.86x</b></div><div>Retail odds<b>17%</b></div></div>
+            </div>
+            <span class="cta">See a full analysis <i>↗</i></span>
+          </div>
+        </div>
+      </div>
+      <div class="panel alt">
+        <div class="tag"><span>Colour</span><span>04</span></div>
+        <div class="body"><div class="swatches"><div class="sw wide" style="background:#0B1B3F;color:#F7F7F5"><strong>Midnight</strong>#0B1B3F · ink, headings, all marks</div><div class="sw" style="background:#F0A92E;color:#0B1B3F"><strong>Marigold</strong>#F0A92E · today, breakout</div><div class="sw" style="background:#F7F7F5;color:#0B1B3F;box-shadow:inset 0 0 0 1px var(--soft)"><strong>Paper</strong>#F7F7F5 · page</div><div class="sw" style="background:#5A6275;color:#F7F7F5"><strong>Muted</strong>#5A6275 · secondary text</div><div class="sw" style="background:linear-gradient(90deg,#1F8A55 50%,#B8452F 50%);color:#F7F7F5"><strong>Gain / Loss</strong>#1F8A55 / #B8452F · data only</div></div></div>
+      </div>
+      <div class="panel type">
+        <div class="tag"><span>Type</span><span>05</span></div>
+        <div class="body">
+          <div class="specimen" style="font-family:var(--display)">Aa</div>
+          <div class="type-rows">
+            <div><span>DISPLAY</span><p class="d">Schibsted Grotesk</p></div>
+            <div><span>BODY</span><p class="b">Figtree, 400 to 600</p></div>
+            <div><span>FIGURES</span><p class="m">+38.23%  101.86x  ₹1,24,500</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel inv essence">
+        <div class="tag"><span>Icon · Tagline</span><span>06</span></div>
+        <div class="body">
+          <div class="icons">
+            <svg width="72" height="72" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" style="fill:var(--ink)"/><rect x="12" y="20" width="10" height="26" rx="2.5" style="fill:var(--base)"/><rect x="27" y="31" width="10" height="11" rx="2.5" style="fill:var(--c2-icon, var(--base))"/><rect x="42" y="15" width="10" height="31" rx="2.5" style="fill:var(--acc)"/></svg>
+            <svg width="44" height="44" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" style="fill:var(--acc)"/><rect x="12" y="20" width="10" height="26" rx="2.5" style="fill:var(--ink)"/><rect x="27" y="31" width="10" height="11" rx="2.5" style="fill:var(--ink)"/><rect x="42" y="15" width="10" height="31" rx="2.5" style="fill:var(--ink)"/></svg>
+          </div>
+          <div class="tagline">Milega? <span>Check first.</span></div>
+          <small>The most disciplined option: one ink, one accent, data colours only for data.</small>
+        </div>
+      </div>
+    </div>
+    <div class="fit"><span>Mood <b>strict, authoritative</b></span><span>Page <b>light</b></span><span>Fonts <b>2 variable + DM Mono 400/500</b></span></div>
+  </section>
+
+  <footer>
+    <span>Pick one of the four and I'll build it into the site with the taste skill, then run Lighthouse against master.</span>
+    <span>Current site fonts: about 190 KB across 12 files</span>
+  </footer>
+</div>
+</html>

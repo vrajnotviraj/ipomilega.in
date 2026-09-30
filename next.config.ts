@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
   // PostHog reverse proxy. Its API paths end in a slash (`/e/`), so Next must not redirect them.
   skipTrailingSlashRedirect: true,
   poweredByHeader: false,
+  // The whole stylesheet is ~12 KB gzipped, so it ships inside the HTML instead of as a render-blocking request.
+  experimental: { inlineCss: true },
   async headers() {
     return [
       {
@@ -27,6 +29,10 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  async redirects() {
+    // The analysis index was folded into /ipos; each IPO still has its page at /analysis/[slug].
+    return [{ source: "/analysis", destination: "/ipos", permanent: true }];
   },
   async rewrites() {
     return [

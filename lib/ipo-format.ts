@@ -1,8 +1,15 @@
-import { IpoMarketLot } from '@/types/ipo';
-import { HomePageIpoProps } from '@/types/homepage';
+import type { IpoMarketLot } from '@/types/ipo';
+import type { HomePageIpoProps } from '@/types/homepage';
 
-// ipo_type is often missing or "N/A", so fall back to signals known from the DRHP stage on:
-// the subscription range, the exchange listing ("NSE SME" vs "NSE"), and the "/sme-ipo/" detail URL.
+// ---------- Board and price band ----------
+
+export const BOARDS = ['Mainboard', 'SME'] as const;
+export type Board = (typeof BOARDS)[number];
+
+/**
+ * "Mainboard", "SME" or "N/A". ipo_type is often missing, so it falls back to the subscription range,
+ * the exchange listing ("NSE SME" vs "NSE") and the "/sme-ipo/" detail URL.
+ */
 export const getIpoType = (ipo: {
   ipo_type?: string;
   subscription_date_range?: string;
@@ -24,112 +31,221 @@ export const getIpoType = (ipo: {
   return 'N/A';
 };
 
+// An RHP prints a figure not fixed yet as "[●]"; the scraper stores it verbatim and it is cleaned here.
+const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
+
+export const isUnfixedValue = (raw: string | undefined | null): boolean =>
+  UNFIXED_VALUE_RE.test(raw ?? '');
+
 const isKnownValue = (value: string | undefined): value is string =>
   !!value && value.toLowerCase() !== 'n/a' && !isUnfixedValue(value);
 
-// Top-level price_band, else ipo_details.ipo_price_band, which a different scrape pass fills.
+/** The issue price band as "93-99", or null when the feed has none. */
 export const getPriceBand = (ipo: {
   price_band?: string;
   ipo_details?: { ipo_price_band?: string };
 } | null | undefined): string | null => {
-  const primary = ipo?.price_band?.trim();
-  if (isKnownValue(primary)) return primary;
-  const fallback = ipo?.ipo_details?.ipo_price_band?.trim();
-  return isKnownValue(fallback) ? fallback : null;
+  const band = [ipo?.price_band, ipo?.ipo_details?.ipo_price_band].map((value) => value?.trim()).find(isKnownValue);
+  return band ? tidyPriceBand(band) : null;
 };
 
-export const getRiskTextColor = (riskScore: number) => {
-  if (riskScore <= 3) return 'text-score-bad';
-  if (riskScore <= 6) return 'text-score-mid';
-  return 'text-score-good';
+/** "₹93 to 99 Per Share" as "93-99": no currency sign, no unit, a hyphen for the range. */
+const tidyPriceBand = (band: string): string =>
+  band
+    .replace(/₹|rs\.?|inr/gi, '')
+    .replace(/per\s+(equity\s+)?shares?/i, '')
+    .replace(/\s*(?:to|-|\u2013|\u2014)\s*/i, '-')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+/** A price band with a rupee sign, "Price TBA" while it is still "[●] to [●]", or "N/A". */
+export const formatPriceBand = (priceBand: string | undefined): string => {
+  if (!priceBand || priceBand.toLowerCase() === 'n/a') return 'N/A';
+  if (isUnfixedValue(priceBand)) return 'Price TBA';
+  return `₹${tidyPriceBand(priceBand)}`;
 };
 
-// Reads "June 18, 2026" as is, and "18 June" as this year. Null for TBA or blank.
-export const parseCardDate = (dateString: string | undefined): Date | null => {
-  const clean = dateString?.trim();
-  if (!clean || clean.toLowerCase() === 'tba' || clean === '-') return null;
+/**
+ * The issue size without clauses that are still "[●]" ("Approx [●] Crores, 1,43,00,000 Equity Shares"
+ * keeps the share count). Null when nothing real is left, so the card shows "TBA".
+ */
+export const formatIssueSize = (raw: string | undefined | null): string | null => {
+  const text = raw?.trim();
+  if (!text) return null;
+  if (['n/a', 'tba', 'tbd', '-'].includes(text.toLowerCase())) return null;
 
-  const direct = new Date(clean);
-  if (!isNaN(direct.getTime())) return direct;
+  // Comma plus whitespace: the commas inside "1,43,00,000" have none, so numbers stay whole.
+  const kept = text
+    .split(/,\s+/)
+    .map((clause) => clause.trim())
+    .filter((clause) => clause && !UNFIXED_VALUE_RE.test(clause));
 
-  const withYear = new Date(`${clean} ${new Date().getFullYear()}`);
-  return isNaN(withYear.getTime()) ? null : withYear;
+  return kept.length ? kept.join(', ') : null;
 };
 
-// Whole days from today to the date (negative once it has passed), or null when the date is unknown.
-export const daysFromToday = (dateString: string | undefined): number | null => {
-  const date = parseCardDate(dateString);
+// ---------- Scores ----------
+
+export type ScoreBand = 'good' | 'mid' | 'bad';
+
+/** Which band a 0-10 score falls in: above 6 good, above 3 mid, else bad. */
+export const scoreBand = (score: number): ScoreBand => {
+  if (score > 6) return 'good';
+  if (score > 3) return 'mid';
+  return 'bad';
+};
+
+const SCORE_TEXT_COLOR: Record<ScoreBand, string> = { good: 'text-score-good', mid: 'text-score-mid', bad: 'text-score-bad' };
+const SCORE_WORD: Record<ScoreBand, string> = { good: 'Strong', mid: 'Mixed', bad: 'Weak' };
+
+/** Text colour for a score, by band. */
+export const getRiskTextColor = (score: number) => SCORE_TEXT_COLOR[scoreBand(score)];
+
+/** Word for a score, on the same bands as its colour. */
+export const getScoreTrustLabel = (score: number): string => SCORE_WORD[scoreBand(score)];
+
+/** An IPO's analysis score, or 0 when it has no analysis yet. */
+export const scoreOf = (item: Pick<HomePageIpoProps, 'analysis'>): number => item.analysis?.risk_meter?.score || 0;
+
+// ---------- Dates ----------
+// IPO dates are Indian calendar days, and this code runs on servers and in browsers in any time zone.
+
+export const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Reads the loose dates the scraper and the analysis engine write: "June 12, 2026", "2026-06-12",
+ * "12/06/2026" (day first) and "12 June" (this year). Null for TBA, "-", blank, a bare year or a month with no day.
+ */
+export function parseIpoDate(raw: string | null | undefined): Date | null {
+  const text = raw?.trim() ?? '';
+  if (!text || ['tba', 'tbd', 'n/a', '-'].includes(text.toLowerCase())) return null;
+  if (/^\d{4}$/.test(text) || /^(?:\d{4}\s+[a-z]+|[a-z]+\s+\d{4})$/i.test(text)) return null;
+
+  // Built by hand: Date reads "12/06/2026" as 6 December, and "2026-06-12" as UTC rather than local midnight.
+  const dayFirst = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (dayFirst) return new Date(Number(dayFirst[3]), Number(dayFirst[2]) - 1, Number(dayFirst[1]));
+  const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+
+  const hasYear = /\b\d{4}\b/.test(text);
+  // Without a day of month, "June" alone would silently become the 1st.
+  if (!hasYear && !/\b([1-9]|[12]\d|3[01])\b/.test(text)) return null;
+  // Date fills a missing year with 2001, so this year is added first.
+  const date = new Date(hasYear ? text : `${text} ${new Date().getFullYear()}`);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * The date's calendar day in India, as a whole day count.
+ * ponytail: a date without a time is read at local midnight, which is the same Indian day anywhere west of India.
+ */
+export const dayNumberInIndia = (date: Date): number =>
+  Date.parse(date.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })) / DAY_MS;
+
+/** Whole days from today in India to the date: 0 is today, negative once passed. Null when the date is unknown. */
+export const daysFromToday = (raw: string | null | undefined): number | null => {
+  const date = parseIpoDate(raw);
+  return date ? dayNumberInIndia(date) - dayNumberInIndia(new Date()) : null;
+};
+
+/** Days until bidding closes (0 is today), or null without a usable close date. */
+export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string }; closing_date?: string } | null | undefined): number | null =>
+  daysFromToday(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date);
+
+export type IssueStage = 'upcoming' | 'live' | 'past';
+
+/** Where an issue is in its bidding window, with whole days to the next date. Stage is null without both dates. */
+export const getIssueStage = (
+  opening: string | null | undefined,
+  closing: string | null | undefined
+): { stage: IssueStage | null; days: number } => {
+  const toOpen = daysFromToday(opening);
+  const toClose = daysFromToday(closing);
+  if (toOpen === null || toClose === null) return { stage: null, days: 0 };
+  if (toClose < 0) return { stage: 'past', days: 0 };
+  if (toOpen > 0) return { stage: 'upcoming', days: toOpen };
+  return { stage: 'live', days: toClose };
+};
+
+/** "18 Aug", or "18 Aug 2026" with the year. Null when the date doesn't parse. */
+export const formatIpoDate = (raw: string | null | undefined, withYear = false): string | null => {
+  const date = parseIpoDate(raw);
   if (!date) return null;
-  return Math.round((date.setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / (1000 * 60 * 60 * 24));
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: withYear ? 'numeric' : undefined });
 };
 
-// Days until bidding closes: 0 is today, -1 means no usable close date.
-export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string }; closing_date?: string } | null | undefined): number =>
-  daysFromToday(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date) ?? -1;
+/** "18 Aug" (or "18 Aug 2026" with the year), or "TBA". */
+export const formatShortDate = (raw: string | undefined, withYear = false): string => formatIpoDate(raw, withYear) ?? 'TBA';
 
-// "18 Aug", or "TBA".
-export const formatShortDate = (dateString: string | undefined): string => {
-  const date = parseCardDate(dateString);
-  if (!date) return 'TBA';
-  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-};
+/** "Today", "18 Aug" or "TBA". */
+export const formatShortDateOrToday = (raw: string | undefined): string =>
+  daysFromToday(raw) === 0 ? 'Today' : formatShortDate(raw);
 
-export const formatShortDateOrToday = (dateString: string | undefined): string =>
-  daysFromToday(dateString) === 0 ? 'Today' : formatShortDate(dateString);
-
-// The exchange's allotment checker once the basis of allotment is out, else null.
-// BSE covers mainboard (listed on both) and BSE SME; NSE-only issues need NSE's.
+/**
+ * The exchange's allotment checker once the basis of allotment is out, else null.
+ * BSE covers mainboard (listed on both) and BSE SME; NSE-only issues need NSE's.
+ */
 export const getAllotmentCheckUrl = (ipo: {
   ipo_dates?: { basis_of_allotment?: string };
   ipo_details?: { ipo_listing?: string };
 } | null | undefined): string | null => {
   const days = daysFromToday(ipo?.ipo_dates?.basis_of_allotment);
   if (days === null || days > 0) return null;
+
   const listing = ipo?.ipo_details?.ipo_listing || '';
-  return /nse/i.test(listing) && !/bse/i.test(listing)
+  const isNseOnly = /nse/i.test(listing) && !/bse/i.test(listing);
+  return isNseOnly
     ? 'https://www.nseindia.com/invest/check-trades-bids-verify-ipo-bids'
     : 'https://www.bseindia.com/investors/appli_check.aspx';
 };
 
-// First signed number in a loose string: "▲ 21.4%" is 21.4, "-4.2%" is -4.2.
+// ---------- GMP ----------
+
+/** First signed number in a loose string: "▲ 21.4%" is 21.4, "-4.2%" is -4.2. */
 export const parseGainValue = (raw: string | undefined): number | null => {
   const match = raw?.replace(/,/g, '').match(/-?\d+(\.\d+)?/);
   return match ? parseFloat(match[0]) : null;
 };
 
-// The percentage in an est. listing string: "104 (11.83%)" is 11.83.
+/** The percentage in an est. listing string: "104 (11.83%)" is 11.83. */
 export const parseEstListingPercent = (raw: string | undefined): number | null => {
   const match = raw?.match(/\(?\s*(-?\d+(?:\.\d+)?)\s*%\s*\)?/);
   return match ? parseFloat(match[1]) : null;
 };
 
-// GMP gain % for sorting highest first; no GMP sorts last.
+/** Gain green or loss red for a signed figure, muted for zero or none. */
+export const gainColor = (value: number | null): string => {
+  if (!value) return 'text-muted-foreground';
+  return value > 0 ? 'text-score-good' : 'text-score-bad';
+};
+
+/** GMP gain % for sorting highest first; no GMP sorts last. */
 export const gmpOf = (item: HomePageIpoProps) => parseEstListingPercent(item.ipo?.gmp_price_gain) ?? -Infinity;
 
-export const getScoreTrustLabel = (score: number): string => {
-  if (score >= 7) return 'Strong';
-  if (score >= 4) return 'Moderate';
-  return 'Weak';
-};
+// ---------- Allotment odds ----------
 
 const isValidRatio = (ratio: number | null): ratio is number => ratio !== null && !isNaN(ratio) && ratio >= 0;
 
-// Allotment chance in %: 100 up to fully subscribed, then roughly 1/ratio (the lottery approximation).
+/** Allotment chance in %: 100 up to fully subscribed, then roughly 1/ratio. */
 export const getAllotmentProbability = (subscriptionRatio: number | null): number | null => {
   if (!isValidRatio(subscriptionRatio)) return null;
   if (subscriptionRatio <= 1) return 100;
   return Math.max(1, Math.round(100 / subscriptionRatio));
 };
 
-// "1 in 40": the lottery ratio (see getAllotmentRatio) is the N. One decimal below 10x so small books don't all read "1 in 1".
+/** The N in "1 in N": one decimal below 10, whole above. */
+const oddsN = (r: number) => (r < 10 ? Math.round(r * 10) / 10 : Math.round(r)).toLocaleString('en-IN');
+
+/** A percent with its sign: "+38.2%", "-4%", "+0%". */
+export const signedPercent = (value: number) => `${value >= 0 ? '+' : ''}${value}%`;
+
+/** "1 in 40". One decimal below 10x so small books don't all read "1 in 1". */
 export const formatAllotmentOdds = (subscriptionRatio: number | null): string => {
   if (!isValidRatio(subscriptionRatio)) return 'N/A';
   if (subscriptionRatio <= 1) return '1 in 1';
-  const n = subscriptionRatio < 10 ? Math.round(subscriptionRatio * 10) / 10 : Math.round(subscriptionRatio);
-  return `1 in ${n.toLocaleString('en-IN')}`;
+  return `1 in ${oddsN(subscriptionRatio)}`;
 };
 
-// "2.5%" for the home card grid. More decimals at the low end so big books don't all read "0%".
+/** "2.5%". More decimals at the low end so big books don't all read "0%". */
 export const formatAllotmentPercent = (subscriptionRatio: number | null): string => {
   if (!isValidRatio(subscriptionRatio)) return 'N/A';
   if (subscriptionRatio <= 1) return '100%';
@@ -139,12 +255,14 @@ export const formatAllotmentPercent = (subscriptionRatio: number | null): string
   return `${Number(pct.toFixed(decimals))}%`;
 };
 
+/** One plain sentence explaining the odds, or null without a ratio. */
 export const describeAllotmentOdds = (subscriptionRatio: number | null): string | null => {
   if (!isValidRatio(subscriptionRatio)) return null;
   if (subscriptionRatio <= 1) return 'Not fully subscribed yet, so every valid application should get shares.';
-  return `Roughly 1 out of every ${formatAllotmentOdds(subscriptionRatio).slice(5)} applicants gets allotment.`;
+  return `Roughly 1 out of every ${oddsN(subscriptionRatio)} applicants gets allotment.`;
 };
 
+/** Odds colour: 60% and up good, 25% and up mid, else bad. */
 export const getProbabilityColor = (probability: number | null): string => {
   if (probability === null) return 'text-muted-foreground';
   if (probability >= 60) return 'text-score-good';
@@ -168,36 +286,9 @@ export const ALLOTMENT_CATEGORIES: AllotmentCategoryDef[] = [
   { key: 'bhni', label: 'B-HNI', matchKeyword: 'b[- ]?hni', ratioField: 'bnii_sr' },
 ];
 
-/**
- * A category's subscription, and `lottery`: applicants per winning slot, the N in "1 in N".
- *
- * Retail winners get one lot. Since April 2022 (SEBI ICDR) every NII winner, S-HNI or B-HNI, gets
- * the S-HNI minimum application (just over ₹2L) by draw of lots, from that tier's own pool. If
- * everyone applies at their tier's minimum, N = subscription × slot ÷ minimum application. That's
- * 1× for retail and S-HNI, and about ⅕ for B-HNI (₹2L slot, ₹10L minimum), so B-HNI odds run
- * about 5x better than the same subscription in S-HNI. Bigger applications mean fewer applicants,
- * so real odds are a little better than this for retail and S-HNI.
- */
-export const getAllotmentRatio = (
-  ipo: Partial<Record<RatioField | 'nii_sr', string>> & { ipo_market_lot?: IpoMarketLot[] } | null | undefined,
-  cat: AllotmentCategoryDef
-): { subscription: number | null; lottery: number | null; usesCombinedNii: boolean } => {
-  const tierRatio = parseGainValue(ipo?.[cat.ratioField]);
-  // IPOs captured before the split, or from ipowatch, only have the combined NII figure.
-  const usesCombinedNii = tierRatio === null && cat.key !== 'retail';
-  const subscription = usesCombinedNii ? parseGainValue(ipo?.nii_sr) : tierRatio;
-  if (subscription === null || cat.key !== 'bhni') return { subscription, lottery: subscription, usesCombinedNii };
-
-  const slot = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, 's[- ]?hni').min?.shares);
-  const minApp = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, cat.matchKeyword).min?.shares);
-  // No lot table: fall back to the ₹2L/₹10L thresholds the rows would give.
-  const lottery = subscription * (slot && minApp ? slot / minApp : 0.2);
-  return { subscription, lottery, usesCombinedNii };
-};
-
 export const COMBINED_NII_NOTE = "This IPO's S-HNI and B-HNI subscription isn't split yet, so this uses the combined NII figure.";
 
-// The Minimum and Maximum application-size rows for one category.
+/** The Minimum and Maximum application-size rows for one category. */
 export const getMarketLotRows = (
   marketLot: IpoMarketLot[] | undefined,
   matchKeyword: string
@@ -207,33 +298,35 @@ export const getMarketLotRows = (
   return { min: findRow(/minimum/i), max: findRow(/maximum/i) };
 };
 
-// An RHP prints a figure not fixed yet as "[●]", and the scraper stores the text verbatim.
-// Cleaned at display time so the stored copy stays faithful to the prospectus.
-const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
+/**
+ * A category's subscription, and `lottery`: applicants per winning slot, the N in "1 in N".
+ *
+ * Retail winners get one lot. Under SEBI ICDR every NII winner gets the S-HNI minimum application
+ * (just over ₹2L) by draw of lots from its own tier's pool. With everyone at their tier's minimum,
+ * N = subscription × slot ÷ minimum application: 1× for retail and S-HNI, about ⅕ for B-HNI
+ * (₹2L slot, ₹10L minimum). Bigger applications mean fewer applicants, so real odds run a little better.
+ */
+export const getAllotmentRatio = (
+  ipo: Partial<Record<RatioField | 'nii_sr', string>> & { ipo_market_lot?: IpoMarketLot[] } | null | undefined,
+  cat: AllotmentCategoryDef
+): { subscription: number | null; lottery: number | null; usesCombinedNii: boolean } => {
+  const tierRatio = parseGainValue(ipo?.[cat.ratioField]);
+  // Older captures and ipowatch rows only have the combined NII figure.
+  const usesCombinedNii = tierRatio === null && cat.key !== 'retail';
+  const subscription = usesCombinedNii ? parseGainValue(ipo?.nii_sr) : tierRatio;
+  if (subscription === null || cat.key !== 'bhni') return { subscription, lottery: subscription, usesCombinedNii };
 
-export const isUnfixedValue = (raw: string | undefined | null): boolean =>
-  UNFIXED_VALUE_RE.test(raw ?? '');
-
-// Drops clauses that are still "[●]" ("Approx [●] Crores, 1,43,00,000 Equity Shares" keeps the
-// share count); null when nothing real is left, so the card shows "TBA".
-export const formatIssueSize = (raw: string | undefined | null): string | null => {
-  const text = raw?.trim();
-  if (!text) return null;
-  if (['n/a', 'tba', 'tbd', '-'].includes(text.toLowerCase())) return null;
-
-  // Split on comma plus whitespace: commas inside "1,43,00,000" have none, so numbers stay whole.
-  const kept = text
-    .split(/,\s+/)
-    .map((clause) => clause.trim())
-    .filter((clause) => clause && !UNFIXED_VALUE_RE.test(clause));
-
-  return kept.length ? kept.join(', ') : null;
+  const slot = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, 's[- ]?hni').min?.shares);
+  const minApp = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, cat.matchKeyword).min?.shares);
+  // Without a lot table, use the ₹2L/₹10L thresholds the rows would give.
+  const lottery = subscription * (slot && minApp ? slot / minApp : 0.2);
+  return { subscription, lottery, usesCombinedNii };
 };
 
-// QIB demand nudges the score by up to 1.5 points. Institutions bid on the closing day, so before
-// it the figure is ignored; on the closing day only a bonus applies (a low figure may just be early);
-// once bidding has closed it counts both ways. SME books often have no QIB portion, and the feed
-// prints 0 for both "no portion" and "no demand", so a 0x SME QIB is treated as absent.
+// ---------- QIB signal ----------
+// QIB demand nudges the score by up to 1.5 points. Institutions bid on the closing day, so before it
+// the figure is ignored; on the closing day only a bonus applies; after close it counts both ways.
+// The feed prints 0 for both "no QIB portion" and "no demand", so a 0x SME QIB is treated as absent.
 
 type QibTier = 'weak' | 'neutral' | 'good' | 'strong';
 
@@ -253,21 +346,7 @@ const QIB_TIERS: { min: number; tier: QibTier; delta: number }[] = [
   { min: -Infinity, tier: 'weak', delta: -1.5 },
 ];
 
-// Today's Indian calendar date as yyyymmdd, whatever the server's time zone.
-const indiaDayKey = (): number => {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Kolkata',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date());
-  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-  return get('year') * 10000 + get('month') * 100 + get('day');
-};
-
-// parseCardDate builds the date at local midnight, so its local fields are the calendar date.
-const dayKey = (date: Date): number => date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
-
+/** The QIB signal from the closing day on, or null before it or without a QIB figure. */
 export const getQibSignal = (
   ipo: {
     qib_sr?: string;
@@ -284,32 +363,28 @@ export const getQibSignal = (
   if (qib === null || qib < 0) return null;
   if (qib === 0 && /sme/i.test(getIpoType(ipo))) return null;
 
-  const close = parseCardDate(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date);
-  if (!close) return null;
+  const daysToClose = getDaysUntilClosing(ipo);
+  if (daysToClose === null || daysToClose > 0) return null;
 
-  const today = indiaDayKey();
-  const closeKey = dayKey(close);
-  if (today < closeKey) return null;
-
-  // Final once past the close date, or once the capture service marks the book final.
-  const final = today > closeKey || ipo?.subscription_is_provisional === false;
+  const final = daysToClose < 0 || ipo?.subscription_is_provisional === false;
   const { tier, delta } = QIB_TIERS.find((t) => qib >= t.min)!;
   return { qib, tier, delta: final ? delta : Math.max(0, delta), final };
 };
 
-// The score with the QIB nudge applied. An IPO with no analysis stays at 0.
+/** The score with the QIB nudge applied, clamped to 0-10. An IPO with no analysis stays at 0. */
 export const applyQibAdjustment = (baseScore: number, signal: QibSignal | null): number => {
   if (!baseScore || !signal || signal.delta === 0) return baseScore;
   return Math.round(Math.min(10, Math.max(0, baseScore + signal.delta)) * 10) / 10;
 };
 
-// Color for the QIB figure. A low closing-day figure may just be early, so it stays neutral.
+/** Colour for the QIB figure. A low closing-day figure may just be early, so it stays neutral. */
 export const getQibColor = (signal: QibSignal | null): string => {
   if (signal?.tier === 'strong' || signal?.tier === 'good') return 'text-score-good';
   if (signal?.tier === 'weak' && signal.final) return 'text-score-bad';
   return 'text-foreground';
 };
 
+/** Tooltip text: "Analysis score 6.2 +1 for 24x QIB subscription". */
 export const describeQibAdjustment = (baseScore: number, signal: QibSignal | null): string => {
   if (!baseScore || !signal || signal.delta === 0) return 'Analysis score';
   const sign = signal.delta > 0 ? '+' : '';

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { cn, getInitials } from '@/lib/utils';
 
 const SIZES = {
   sm: 'w-7 h-7 text-[10px]',
@@ -12,17 +13,7 @@ const SIZES = {
 // Only the scraper's bucket is allowed in next.config; other hosts skip the optimizer.
 const OPTIMIZABLE = 'https://ipomilega-assests.s3.ap-south-1.amazonaws.com/';
 
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => word.charAt(0))
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
-
-// Company logo tile, falling back to initials when there is no logo or it fails to load.
-// White in both themes because most extracted logos are JPEGs drawn on white.
+/** Company logo tile on white (most logos are JPEGs drawn on white), falling back to initials when there is no logo or it fails to load. */
 export function IpoLogo({
   src,
   name,
@@ -38,9 +29,11 @@ export function IpoLogo({
 
   return (
     <span
-      className={`${SIZES[size]} flex-shrink-0 inline-flex items-center justify-center rounded-md border border-border overflow-hidden font-mono font-semibold ${
-        showImage ? 'bg-white' : 'bg-secondary text-foreground/70'
-      }`}
+      className={cn(
+        SIZES[size],
+        'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border font-mono font-medium',
+        showImage ? 'bg-card' : 'bg-secondary text-muted-foreground'
+      )}
       aria-hidden="true"
     >
       {showImage ? (
@@ -52,10 +45,10 @@ export function IpoLogo({
           height={44}
           unoptimized={!url.startsWith(OPTIMIZABLE)}
           onError={() => setFailed(true)}
-          className="w-full h-full object-contain p-0.5"
+          className="h-full w-full object-contain p-0.5"
         />
       ) : (
-        initials(name || '') || '?'
+        getInitials(name || '') || '?'
       )}
     </span>
   );

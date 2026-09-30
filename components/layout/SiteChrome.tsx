@@ -3,118 +3,72 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
-import { LineChart, Menu, X, Home, BookOpen, BarChart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 import { ProgressProvider } from "@/components/progress/ProgressProvider";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { Logo } from "@/components/layout/Logo";
+import { MobileMenu } from "@/components/layout/MobileMenu";
+import { NAV_LINKS } from "@/components/layout/nav-links";
 
-const DESKTOP_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/ipos", label: "IPO list" },
-  { href: "/blogs", label: "Blogs" },
-  { href: "/analysis", label: "Analysis" },
-];
+// Toasts on the card surface in the design tokens, with the icon in the data colour.
+const TOAST_COLORS = { "--normal-bg": "var(--card)", "--normal-border": "var(--border)", "--normal-text": "var(--foreground)" } as React.CSSProperties;
+const TOAST_CLASSES = {
+  toast: "shadow-(--shadow-lift)!",
+  success: "[&_[data-icon]]:text-score-good",
+  error: "[&_[data-icon]]:text-score-bad",
+};
 
-const MOBILE_LINKS = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/blogs", label: "Blogs", icon: BookOpen },
-  { href: "/ipos", label: "IPOs", icon: LineChart },
-  { href: "/analysis", label: "Analysis", icon: BarChart },
-];
-
-function MobileSidebar({ isOpen, onClose, pathname }: { isOpen: boolean; onClose: () => void; pathname: string }) {
+/** Fixed header with the logo and desktop nav. */
+function Header({ pathname, onOpenMenu }: { pathname: string; onOpenMenu: () => void }) {
   return (
-    <>
-      <div
-        className={`fixed inset-0 bg-black/50 z-40 sm:hidden transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-        onClick={onClose}
-      />
-      <div
-        inert={!isOpen}
-        className={`fixed left-0 top-0 h-full w-80 bg-card shadow-2xl z-50 sm:hidden transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-6 border-b border-border">
-            <Logo size="lg" />
-            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0" aria-label="Close menu">
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex-1 py-6">
-            <nav className="space-y-2 px-4">
-              {MOBILE_LINKS.map((link) => (
-                <ProgressLink
-                  key={link.href}
-                  href={link.href}
-                  onClick={onClose}
-                  aria-current={pathname === link.href ? "page" : undefined}
-                  className="flex items-center space-x-3 px-4 py-3 text-foreground/80 rounded-lg hover:bg-accent aria-[current=page]:bg-accent aria-[current=page]:text-foreground transition-colors font-medium"
-                >
-                  <link.icon className="h-5 w-5" />
-                  <span>{link.label}</span>
-                </ProgressLink>
-              ))}
-            </nav>
-          </div>
+    <header className="fixed top-0 z-50 w-full border-b border-border bg-background">
+      <div className="app-container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenMenu}
+            aria-label="Open menu"
+            className="-ml-2 grid size-9 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary active:scale-[0.98] sm:hidden"
+          >
+            <Menu className="size-5" strokeWidth={2} />
+          </button>
+          <ProgressLink href="/" aria-label="IPO Milega home" className="rounded-full">
+            <Logo size="sm" />
+          </ProgressLink>
         </div>
+
+        <nav className="hidden items-center gap-7 sm:flex">
+          {NAV_LINKS.map((link) => (
+            <ProgressLink
+              key={link.href}
+              href={link.href}
+              aria-current={pathname === link.href ? "page" : undefined}
+              className="underline-grow whitespace-nowrap py-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground active:text-foreground aria-[current=page]:text-foreground"
+            >
+              {link.label}
+            </ProgressLink>
+          ))}
+        </nav>
       </div>
-    </>
+    </header>
   );
 }
 
+/** Page shell: skip link, header, mobile menu, main content and toasts. */
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
     <ProgressProvider>
-      <a
-        href="#main"
-        className="skip-link"
-      >
+      <a href="#main" className="skip-link">
         Skip to content
       </a>
-      <header className="fixed font-sans top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border">
-        <div className="app-container flex items-center h-16 justify-between">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsMobileMenuOpen(true)}
-              aria-label="Open menu"
-              className="sm:hidden h-8 w-8 p-0 text-foreground hover:bg-accent"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            <ProgressLink href="/" className="flex items-center transition-opacity hover:opacity-80" aria-label="IPO Milega home">
-              <Logo size="sm" showTagline />
-            </ProgressLink>
-          </div>
-
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <nav className="hidden sm:flex items-center gap-6">
-              {DESKTOP_LINKS.map((link) => (
-                <ProgressLink
-                  key={link.href}
-                  href={link.href}
-                  aria-current={pathname === link.href ? "page" : undefined}
-                  className="underline-grow py-1 text-sm text-muted-foreground hover:text-foreground aria-[current=page]:font-semibold aria-[current=page]:text-foreground transition-colors"
-                >
-                  {link.label}
-                </ProgressLink>
-              ))}
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} pathname={pathname} />
-
+      <Header pathname={pathname} onOpenMenu={() => setIsMenuOpen(true)} />
+      <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} pathname={pathname} />
       <main id="main">
         {children}
-        <Toaster position="top-right" richColors />
+        <Toaster position="top-right" style={TOAST_COLORS} toastOptions={{ classNames: TOAST_CLASSES }} />
       </main>
     </ProgressProvider>
   );

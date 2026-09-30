@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Ipo } from '@/types/ipo';
+import { Ipo, IpoMarketLot } from '@/types/ipo';
 import {
   ALLOTMENT_CATEGORIES,
   AllotmentCategoryDef,
@@ -14,8 +14,15 @@ import {
   getAllotmentRatio,
   COMBINED_NII_NOTE,
 } from '@/lib/ipo-format';
+import { cn } from '@/lib/utils';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
-// Opens when initialCategory is set, on that category's tab.
+const BHNI_NOTE =
+  "B-HNI winners get the S-HNI minimum (about ₹2 lakh) by draw of lots, so the odds assume everyone applies at the ₹10 lakh minimum: roughly 5x better than the subscription alone suggests. Applying bigger doesn't raise your chance.";
+const LOTTERY_NOTE =
+  "Estimated with the standard lottery approximation: at 40x subscription, about 1 in 40 applicants wins. Applying bigger doesn't raise your chance. The registrar's draw decides, and it may differ.";
+
+/** Allotment odds and application sizes per investor category. Opens when initialCategory is set, on that category's tab. */
 export function AllotmentPredictorModal({
   ipo,
   companyName,
@@ -27,81 +34,74 @@ export function AllotmentPredictorModal({
   initialCategory: AllotmentCategoryDef['key'] | null;
   onClose: () => void;
 }) {
-  const [activeKey, setActiveKey] = useState<AllotmentCategoryDef['key']>('retail');
+  // The tab the reader picked, else the one the modal opened on.
+  const [picked, setPicked] = useState<AllotmentCategoryDef['key'] | null>(null);
+  const activeKey = picked ?? initialCategory ?? 'retail';
 
-  useEffect(() => {
-    if (initialCategory) setActiveKey(initialCategory);
-  }, [initialCategory]);
+  const close = () => {
+    setPicked(null);
+    onClose();
+  };
 
   const activeCategory = ALLOTMENT_CATEGORIES.find((c) => c.key === activeKey) || ALLOTMENT_CATEGORIES[0];
-  const { subscription: ratio, lottery, usesCombinedNii } = getAllotmentRatio(ipo, activeCategory);
-  const probability = getAllotmentProbability(lottery);
+  const { subscription, lottery, usesCombinedNii } = getAllotmentRatio(ipo, activeCategory);
   const oddsSentence = describeAllotmentOdds(lottery);
   const lots = getMarketLotRows(ipo?.ipo_market_lot, activeCategory.matchKeyword);
 
   return (
-    <Dialog open={!!initialCategory} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="sm:max-w-md font-sans">
+    <Dialog open={!!initialCategory} onOpenChange={(open) => { if (!open) close(); }}>
+      <DialogContent className="rounded-[18px] shadow-(--shadow-lift) sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">Allotment Predictor</DialogTitle>
+          <DialogTitle className="font-display text-xl font-bold tracking-[-0.015em]">Allotment predictor</DialogTitle>
           <DialogDescription>{companyName}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-2">
-          {ALLOTMENT_CATEGORIES.map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => setActiveKey(cat.key)}
-              className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-                activeKey === cat.key
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          label="Investor category"
+          options={ALLOTMENT_CATEGORIES.map((cat) => ({ value: cat.key, label: cat.label }))}
+          value={activeKey}
+          onChange={setPicked}
+          className="[&>button]:flex-1"
+        />
 
         <div className="space-y-4 pt-1">
-          <div className="rounded-lg border border-border bg-card p-4 flex items-center justify-between">
+          <div className="flex items-center justify-between rounded-lg border border-border bg-card p-4">
             <div>
-              <div className="text-xs text-muted-foreground mb-1">Subscription ({activeCategory.label})</div>
-              <div className="font-mono text-sm font-semibold text-foreground">{ratio !== null ? `${ratio}x` : 'N/A'}</div>
+              <div className="mb-1 text-xs text-muted-foreground">Subscription ({activeCategory.label})</div>
+              <div className="font-mono text-sm font-medium tabular-nums text-foreground">{subscription !== null ? `${subscription}x` : 'N/A'}</div>
             </div>
             <div className="text-right">
-              <div className="text-xs text-muted-foreground mb-1">Your odds</div>
-              <div className={`font-serif text-2xl font-semibold ${getProbabilityColor(probability)}`}>
+              <div className="mb-1 text-xs text-muted-foreground">Your odds</div>
+              <div className={cn('font-mono text-2xl font-medium tabular-nums', getProbabilityColor(getAllotmentProbability(lottery)))}>
                 {formatAllotmentOdds(lottery)}
               </div>
             </div>
           </div>
-          {oddsSentence && <p className="text-sm text-foreground/80 -mt-2">{oddsSentence}</p>}
+          {oddsSentence && <p className="-mt-2 text-sm text-foreground">{oddsSentence}</p>}
 
           <div>
-            <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-2">Application size</div>
+            <div className="mb-2 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">Application size</div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg border border-border p-3">
-                <div className="text-xs text-muted-foreground mb-1">Minimum lot</div>
-                <div className="font-mono text-sm font-semibold text-foreground">{lots.min?.shares ? `${lots.min.shares} shares` : 'N/A'}</div>
-                <div className="font-mono text-xs text-muted-foreground">{lots.min?.amount ? `₹${lots.min.amount}` : ''}</div>
-              </div>
-              <div className="rounded-lg border border-border p-3">
-                <div className="text-xs text-muted-foreground mb-1">Maximum lot</div>
-                <div className="font-mono text-sm font-semibold text-foreground">{lots.max?.shares ? `${lots.max.shares} shares` : 'N/A'}</div>
-                <div className="font-mono text-xs text-muted-foreground">{lots.max?.amount ? `₹${lots.max.amount}` : ''}</div>
-              </div>
+              <LotTile label="Minimum lot" lot={lots.min} />
+              <LotTile label="Maximum lot" lot={lots.max} />
             </div>
           </div>
 
-          {usesCombinedNii && <p className="text-xs text-muted-foreground/80 italic">{COMBINED_NII_NOTE}</p>}
-          <p className="text-xs text-muted-foreground/70 border-t border-border pt-3">
-            {activeKey === 'bhni'
-              ? 'B-HNI winners get the S-HNI minimum (about ₹2 lakh) by draw of lots, so the odds assume everyone applies at the ₹10 lakh minimum: roughly 5x better than the subscription alone suggests. Applying bigger doesn\'t raise your chance.'
-              : 'Estimated with the standard lottery approximation: at 40x subscription, about 1 in 40 applicants wins. Applying bigger doesn\'t raise your chance. The registrar\'s draw decides, and it may differ.'}
-          </p>
+          {usesCombinedNii && <p className="text-xs text-muted-foreground">{COMBINED_NII_NOTE}</p>}
+          <p className="border-t border-border pt-3 text-xs text-muted-foreground">{activeKey === 'bhni' ? BHNI_NOTE : LOTTERY_NOTE}</p>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Shares and amount for one application-size row. */
+function LotTile({ label, lot }: { label: string; lot?: IpoMarketLot }) {
+  return (
+    <div className="rounded-lg bg-secondary p-3">
+      <div className="mb-1 text-xs text-muted-foreground">{label}</div>
+      <div className="font-mono text-sm font-medium tabular-nums text-foreground">{lot?.shares ? `${lot.shares} shares` : 'N/A'}</div>
+      <div className="font-mono text-xs tabular-nums text-muted-foreground">{lot?.amount ? `₹${lot.amount}` : ''}</div>
+    </div>
   );
 }

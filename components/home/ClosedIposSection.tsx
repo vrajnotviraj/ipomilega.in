@@ -1,65 +1,57 @@
 'use client';
 
-import Link from 'next/link';
-import { ArrowRight, Lock } from 'lucide-react';
 import { IpoSectionProps, HomePageIpoProps } from '@/types/homepage';
-import { ClosedIpoCard } from '@/components/home/IpoCard';
-import { daysFromToday, getIpoType, gmpOf } from '@/lib/ipo-format';
+import { ClosedIpoCard } from '@/components/home/ipo-card/ClosedIpoCard';
+import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
+import { daysFromToday, getIpoType, gmpOf } from '@/lib/ipo-format';
 
 // Stages by allotment day. Every past allotment day collapses into the one OUT stage.
+const TODAY = 0;
 const OUT = -1;
 const TBA = Infinity;
-const stageLabel = (days: number) =>
-  days === OUT ? 'Allotment out, listing soon'
-    : days === TBA ? 'Allotment date TBA'
-      : days === 0 ? 'Allotment today'
-        : days === 1 ? 'Allotment tomorrow'
-          : `Allotment in ${days} days`;
 
-export function ClosedIposSection({ ipos, count }: IpoSectionProps) {
-  const { board } = useBoard();
-  const boardIpos = ipos.filter((item) => getIpoType(item.ipo) === board);
-  if (boardIpos.length === 0) return null;
+const stageLabel = (stage: number) => {
+  if (stage === OUT) return 'Allotment out, listing soon';
+  if (stage === TBA) return 'Allotment date TBA';
+  if (stage === TODAY) return 'Allotment today';
+  if (stage === 1) return 'Allotment tomorrow';
+  return `Allotment in ${stage} days`;
+};
 
+/** Groups IPOs by allotment stage, allotment today first, the rest in date order; highest GMP first within a stage. */
+function groupByAllotmentStage(ipos: HomePageIpoProps[]) {
   const stages = new Map<number, HomePageIpoProps[]>();
-  for (const item of boardIpos.sort((a, b) => gmpOf(b) - gmpOf(a))) {
+  for (const item of [...ipos].sort((a, b) => gmpOf(b) - gmpOf(a))) {
     const days = daysFromToday(item.ipo?.ipo_dates?.basis_of_allotment);
     const stage = days === null ? TBA : Math.max(days, OUT);
     stages.set(stage, [...(stages.get(stage) || []), item]);
   }
-  // Allotment today is what people come for, so it leads; the rest stay in date order.
-  const rank = (stage: number) => (stage === 0 ? -Infinity : stage);
-  const sortedStages = [...stages].sort(([a], [b]) => rank(a) - rank(b));
+  const rank = (stage: number) => (stage === TODAY ? -Infinity : stage);
+  return [...stages].sort(([a], [b]) => rank(a) - rank(b));
+}
+
+/** IPOs whose bidding has closed but which have not listed yet, for the chosen board. */
+export function ClosedIposSection({ ipos }: IpoSectionProps) {
+  const { board } = useBoard();
+  const boardIpos = ipos.filter((item) => getIpoType(item.ipo) === board);
+  if (boardIpos.length === 0) return null;
 
   return (
-    <section className="py-15">
-      <div className="flex justify-between items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-        <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground flex items-center gap-2 sm:gap-3 min-w-0">
-          <span className="truncate">Bidding closed</span>
-          <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-mono font-medium uppercase tracking-wide text-chart-5 flex-shrink-0">
-            <Lock className="w-3 h-3" />
-            Closed
-          </span>
-        </h2>
-        <Link
-          href="/ipos?filter=closed"
-          aria-label={`View all ${count} closed IPOs`}
-          className="text-primary font-sans hover:text-primary/80 font-medium flex items-center space-x-1.5 group text-sm sm:text-base transition-colors duration-200 flex-shrink-0"
-        >
-          <span>View all</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </div>
-      <div className="space-y-8">
-        {sortedStages.map(([stage, items]) => (
+    <section className="py-16 sm:py-24">
+      <SectionHeading title="Bidding closed" href="/ipos?filter=closed" linkLabel={`View all ${ipos.length} closed IPOs`} />
+      <div className="mt-8 space-y-10">
+        {groupByAllotmentStage(boardIpos).map(([stage, items]) => (
           <div key={stage}>
-            <h3 className={`flex items-center gap-2 text-sm font-medium font-sans mb-3 ${stage === 0 ? 'text-primary' : 'text-muted-foreground'}`}>
-              {stage === 0 && <span className="live-dot bg-primary" />}
-              {stageLabel(stage)}
-              <span className="font-mono text-xs text-muted-foreground">({items.length})</span>
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              {stage === TODAY ? (
+                <span className="rounded-full bg-brand-accent px-2.5 py-0.5 text-xs font-medium text-primary">{stageLabel(stage)}</span>
+              ) : (
+                stageLabel(stage)
+              )}
+              <span className="font-mono text-xs tabular-nums">({items.length})</span>
             </h3>
-            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (
                 <ClosedIpoCard key={item._id} ipo={item.ipo} analysis={item.analysis} />
               ))}

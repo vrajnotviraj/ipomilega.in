@@ -1,8 +1,6 @@
-'use client';
-
 import { HomePageIpoProps } from '@/types/homepage';
 import { ProgressLink } from '@/components/progress/ProgressLink';
-import { applyQibAdjustment, getQibSignal } from '@/lib/ipo-format';
+import { applyQibAdjustment, getQibSignal, scoreBand, scoreOf } from '@/lib/ipo-format';
 
 interface TickerEntry {
   key: string;
@@ -12,64 +10,57 @@ interface TickerEntry {
   status: 'Open' | 'Upcoming';
 }
 
-// The ticker is dark in both themes, so it uses score colors tuned for a near-black background.
-const tickerScoreColor = (score: number) => {
-  if (score <= 3) return 'text-[#C4574B]';
-  if (score <= 6) return 'text-[#D2A257]';
-  return 'text-[#5C9975]';
-};
+/** Score colour on the ink band: the data colours lifted toward chalk so they stay readable. */
+const SCORE_COLOR_ON_INK = { good: 'text-score-good-on-ink', mid: 'text-score-mid-on-ink', bad: 'text-score-bad-on-ink' };
 
-const tickerStatusColor = (status: TickerEntry['status']) =>
-  status === 'Open' ? 'text-[#5C9975]' : 'text-[#D2A257]';
+function toEntries(live: HomePageIpoProps[], upcoming: HomePageIpoProps[]): TickerEntry[] {
+  const liveEntries = live.map((item) => ({
+    key: item._id,
+    slug: item.ipo?.slug,
+    name: item.ipo?.upcoming_ipo_2025,
+    score: applyQibAdjustment(scoreOf(item), getQibSignal(item.ipo)) || null,
+    status: 'Open' as const,
+  }));
+  const upcomingEntries = upcoming.map((item) => ({
+    key: item._id,
+    slug: item.ipo?.slug,
+    name: item.ipo?.upcoming_ipo_2025,
+    score: scoreOf(item) || null,
+    status: 'Upcoming' as const,
+  }));
+  return [...liveEntries, ...upcomingEntries].filter((entry): entry is TickerEntry => !!entry.slug && !!entry.name);
+}
 
+/** Full-bleed ink band scrolling every live and upcoming IPO with its score. Pauses on hover. */
 export function IpoTicker({ live, upcoming }: { live: HomePageIpoProps[]; upcoming: HomePageIpoProps[] }) {
-  const entries: TickerEntry[] = [
-    ...live.map((item) => ({
-      key: item._id,
-      slug: item.ipo?.slug,
-      name: item.ipo?.upcoming_ipo_2025,
-      score: applyQibAdjustment(item.analysis?.risk_meter?.score || 0, getQibSignal(item.ipo)) || null,
-      status: 'Open' as const,
-    })),
-    ...upcoming.map((item) => ({
-      key: item._id,
-      slug: item.ipo?.slug,
-      name: item.ipo?.upcoming_ipo_2025,
-      score: item.analysis?.risk_meter?.score || null,
-      status: 'Upcoming' as const,
-    })),
-  ].filter((item): item is TickerEntry => !!item.slug && !!item.name);
-
+  const entries = toEntries(live, upcoming);
   if (entries.length === 0) return null;
 
-  const duration = Math.min(90, Math.max(20, entries.length * 5));
+  const durationSeconds = Math.min(90, Math.max(20, entries.length * 5));
 
   return (
-    <div className="relative left-1/2 -translate-x-1/2 -mt-4 sm:-mt-8 mb-4 sm:mb-8 w-screen overflow-hidden bg-[#17140F] border-y border-white/10 [mask-image:linear-gradient(to_right,transparent,#000_6%,#000_94%,transparent)]">
+    <div className="overflow-hidden bg-primary text-primary-foreground motion-reduce:overflow-x-auto [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
       <div
-        className="flex w-max items-center py-2.5 motion-reduce:animate-none hover:[animation-play-state:paused] animate-ticker"
-        style={{ animationDuration: `${duration}s` }}
+        className="animate-ticker flex w-max items-center py-3 hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] motion-reduce:animate-none"
+        style={{ animationDuration: `${durationSeconds}s` }}
       >
-        {[0, 1].map((rep) => (
-          <div key={rep} className="flex items-center flex-shrink-0" aria-hidden={rep === 1 || undefined}>
+        {/* Two copies so the loop is seamless; the second is hidden from assistive tech. */}
+        {[0, 1].map((copy) => (
+          <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1 || undefined}>
             {entries.map((entry) => (
               <ProgressLink
-                key={`${rep}-${entry.key}`}
+                key={`${copy}-${entry.key}`}
                 href={`/analysis/${entry.slug}`}
-                tabIndex={rep === 1 ? -1 : undefined}
-                className="flex items-center gap-2 px-4 whitespace-nowrap text-sm font-sans text-[#F5F2EA]/90 hover:text-[#F5F2EA] transition-colors flex-shrink-0"
+                tabIndex={copy === 1 ? -1 : undefined}
+                className="flex shrink-0 items-center gap-2 whitespace-nowrap border-r border-primary-foreground/15 px-5 text-sm text-primary-foreground/85 transition-colors hover:text-primary-foreground"
               >
-                <span className="font-serif font-medium">{entry.name}</span>
-                <span className="text-[#F5F2EA]/40">•</span>
+                <span className="font-display font-bold">{entry.name}</span>
                 {entry.score !== null && (
-                  <span className={`font-mono font-semibold ${tickerScoreColor(entry.score)}`}>
+                  <span className={`font-mono font-medium tabular-nums ${SCORE_COLOR_ON_INK[scoreBand(entry.score)]}`}>
                     {entry.score.toFixed(1)}
                   </span>
                 )}
-                <span className={`text-xs font-mono uppercase tracking-wide font-semibold ${tickerStatusColor(entry.status)}`}>
-                  {entry.status}
-                </span>
-                <span className="text-[#F5F2EA]/20 ml-4">|</span>
+                <span className="text-xs font-medium uppercase tracking-[0.04em] text-primary-foreground/60">{entry.status}</span>
               </ProgressLink>
             ))}
           </div>

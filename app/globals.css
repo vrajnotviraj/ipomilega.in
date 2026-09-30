@@ -1,108 +1,99 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Agent skill docs are full of example class names; keep them out of the shipped CSS. */
+/* Agent skills and the design docs are full of example class names; keep them out of the shipped CSS. */
 @source not "../.agents";
 @source not "../.claude";
-
-@custom-variant dark (&:is(.dark *));
+@source not "../design-system";
+@source not "../CLAUDE.md";
 
 @theme inline {
+  --font-display: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
-  --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-brand-accent: var(--brand-accent);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --color-score-good: var(--score-good);
   --color-score-mid: var(--score-mid);
   --color-score-bad: var(--score-bad);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
+  --color-score-good-on-ink: var(--score-good-on-ink);
+  --color-score-mid-on-ink: var(--score-mid-on-ink);
+  --color-score-bad-on-ink: var(--score-bad-on-ink);
   --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 6px);
 }
 
+/* C1 "Market green". Values mirror design-system/tokens.css. Light theme only. */
 :root {
-  --radius: 0.625rem;
-  --background: #F5F2EA;
-  --foreground: #201C16;
-  --brand-mark: #1F4E5C;
-  --card: #FBF9F4;
-  --card-foreground: #201C16;
-  --popover: #FBF9F4;
-  --popover-foreground: #201C16;
-  --primary: #1F4E5C;
-  --primary-foreground: #F5F2EA;
-  --secondary: #EAE6DC;
-  --secondary-foreground: #201C16;
-  --muted: #E4DECE;
-  --muted-foreground: #6F6858;
-  --accent: #EAE6DC;
-  --accent-foreground: #201C16;
-  --destructive: #A83B32;
-  --border: #D9D2C1;
-  --input: #D9D2C1;
-  --ring: #1F4E5C;
-  --score-good: #3D6B4F;
-  --score-mid: #B8863A;
-  --score-bad: #A83B32;
-  --chart-1: #1F4E5C;
-  --chart-2: #3D6B4F;
-  --chart-3: #B8863A;
-  --chart-4: #A83B32;
-  --chart-5: #6F6858;
-}
+  --background: #FAFAF6;
+  --card: #FFFFFF;
+  --popover: #FFFFFF;
+  --secondary: #EEF1EA;
+  --muted: #EEF1EA;
+  --accent: #EEF1EA;
 
-.dark {
-  --background: #17140F;
-  --foreground: #F5F2EA;
-  /* Lighter in dark so the logo does not vanish into the page. */
-  --brand-mark: #2E6B7D;
-  --card: #201C16;
-  --card-foreground: #F5F2EA;
-  --popover: #201C16;
-  --popover-foreground: #F5F2EA;
-  --primary: #4C8A9A;
-  --primary-foreground: #17140F;
-  --secondary: #2B261E;
-  --secondary-foreground: #F5F2EA;
-  --muted: #2B261E;
-  --muted-foreground: #A79E8C;
-  --accent: #2B261E;
-  --accent-foreground: #F5F2EA;
-  --destructive: #C4574B;
-  --border: #3A3427;
-  --input: #3A3427;
-  --ring: #4C8A9A;
-  --score-good: #5C9975;
-  --score-mid: #D2A257;
-  --score-bad: #C4574B;
-  --chart-1: #4C8A9A;
-  --chart-2: #5C9975;
-  --chart-3: #D2A257;
-  --chart-4: #C4574B;
-  --chart-5: #A79E8C;
+  --foreground: #0F3B2E;
+  --card-foreground: #0F3B2E;
+  --popover-foreground: #0F3B2E;
+  --secondary-foreground: #0F3B2E;
+  --accent-foreground: #0F3B2E;
+  --muted-foreground: #5E6B63;
+
+  --primary: #0F3B2E;
+  --primary-foreground: #FAFAF6;
+  --brand-mark: #0F3B2E;
+  --brand-accent: #F0A92E;
+  --ring: #0F3B2E;
+
+  --border: #DCE2D8;
+  --input: #DCE2D8;
+
+  --score-good: #1C7A4E;
+  --score-mid: #94620C;
+  --score-bad: #B8452F;
+  --destructive: #B8452F;
+  --score-good-on-ink: color-mix(in srgb, var(--score-good) 45%, var(--background));
+  --score-mid-on-ink: color-mix(in srgb, var(--score-mid) 45%, var(--background));
+  --score-bad-on-ink: color-mix(in srgb, var(--score-bad) 45%, var(--background));
+  --chart-1: #0F3B2E;
+  --chart-2: #1C7A4E;
+  --chart-3: #F0A92E;
+  --chart-4: #B8452F;
+  --chart-5: #5E6B63;
+
+  --radius: 0.75rem;
+
+  --shadow-card: 0 1px 2px rgb(15 59 46 / 0.05);
+  --shadow-lift: 0 1px 2px rgb(15 59 46 / 0.05), 0 14px 32px -16px rgb(15 59 46 / 0.28);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 500ms;
 }
 
 /* Page gutter shared by every page and the header. */
@@ -164,6 +155,7 @@
     @apply bg-background text-foreground font-sans;
   }
   h1, h2, h3 {
+    @apply font-display;
     text-wrap: balance;
   }
   p {
@@ -183,19 +175,30 @@
   }
 }
 
-/*
- * Motion. Everything here animates only transform, opacity or clip-path, runs in CSS with no JS,
- * and is switched off for people who ask for reduced motion.
- */
-:root {
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  /* Shadows carry the ink hue, not black, so cards look lifted off the paper. */
-  --shadow-lift: 0 1px 2px rgb(32 28 22 / 0.04), 0 12px 28px -14px rgb(31 78 92 / 0.28);
+/* Section title (h2): 32px on phones, 44px from sm. */
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  @media (width >= 40rem) {
+    font-size: 2.75rem;
+  }
+}
+
+/* Hero and page title weight, leading and tracking. Each call site sets its own sizes. */
+@utility type-hero {
+  font-family: var(--font-display);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.035em;
 }
 
 /* Cards you act on rise a little under the cursor. Phones skip it since they have no hover. */
 @utility card-lift {
-  transition: transform 250ms var(--ease-out), box-shadow 250ms var(--ease-out), border-color 250ms var(--ease-out);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out);
   @media (hover: hover) {
     &:hover {
       transform: translateY(-2px);
@@ -203,6 +206,15 @@
       border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
     }
   }
+}
+
+/* Ink phrase with a marigold underline: the brand's only emphasis style. */
+@utility highlight {
+  text-decoration-line: underline;
+  text-decoration-color: var(--brand-accent);
+  text-decoration-thickness: 0.14em;
+  text-underline-offset: 0.1em;
+  text-decoration-skip-ink: none;
 }
 
 /* An underline that grows in from the left on hover, and stays for the current tab or page. */
@@ -241,25 +253,6 @@
   }
   &:hover::before {
     opacity: 1;
-  }
-}
-
-/* A band of light that sweeps across a dark panel on hover. The panel needs overflow: hidden. */
-@utility sheen {
-  position: relative;
-  overflow: hidden;
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 33%;
-    pointer-events: none;
-    background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.1), transparent);
-    transform: translateX(-100%) skewX(-12deg);
-    transition: transform 1s var(--ease-out);
-  }
-  &:hover::before {
-    transform: translateX(400%) skewX(-12deg);
   }
 }
 
@@ -331,59 +324,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sheen::before {
-    display: none;
-  }
   .live-dot::after {
     animation: none;
   }
-}
-
-/*
- * Home background, kept close to how print sites do it: a flat paper tone does most of the work,
- * with soft shading patches and a barely-there grain on top. Inline SVGs mean no requests, and there
- * are no blend modes, since a full-page blend repaints on every scroll.
- */
-.paper-texture::before,
-.paper-texture::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Soft brand-tinted patches (teal, green, amber) for uneven ink, plus grain whose alpha averages ~5% (max 10%). */
-.paper-texture::before {
-  inset: 0;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0 0.12 0.1 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 60% 40% at 12% 8%, rgb(31 78 92 / 0.1), transparent 70%),
-    radial-gradient(ellipse 50% 35% at 88% 30%, rgb(61 107 79 / 0.08), transparent 70%),
-    radial-gradient(ellipse 70% 45% at 40% 82%, rgb(184 134 58 / 0.1), transparent 70%);
-  background-size: 200px, 100% 100%, 100% 100%, 100% 100%;
-}
-
-/* One faint dashed GMP-style trend line rising behind the top of the page, fading out downward. */
-.paper-texture::after {
-  inset: 0 0 auto;
-  height: 520px;
-  background-color: var(--primary);
-  opacity: 0.08;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Cpolyline points='18,212 88,233 159,230 229,230 300,249 371,227 441,228 512,208 582,191 653,208 724,183 794,162 865,144 935,160 1006,177 1076,156 1147,142 1200,130' fill='none' stroke='%23000' stroke-width='3' stroke-linejoin='round' stroke-dasharray='10 8' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"), linear-gradient(to bottom, #000 35%, transparent);
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400' preserveAspectRatio='none'%3E%3Cpolyline points='18,212 88,233 159,230 229,230 300,249 371,227 441,228 512,208 582,191 653,208 724,183 794,162 865,144 935,160 1006,177 1076,156 1147,142 1200,130' fill='none' stroke='%23000' stroke-width='3' stroke-linejoin='round' stroke-dasharray='10 8' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"), linear-gradient(to bottom, #000 35%, transparent);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-}
-
-.dark .paper-texture::before {
-  opacity: 0.6;
-}
-
-.dark .paper-texture::after {
-  background-color: var(--brand-mark);
-  opacity: 0.2;
 }

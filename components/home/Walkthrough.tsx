@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-
-// First-visit tour pointing at the home page's interactive parts. Shown once: skipping and
-// finishing both set the flag. Each step targets a `data-tour` element and is dropped when that
-// element is missing; with none present the flag stays unset so the tour can run another day.
+import { Button } from '@/components/ui/button';
 
 const STORAGE_KEY = 'ipomilega:walkthrough';
 const PAD = 6;
@@ -18,7 +15,7 @@ interface Step {
   body: string;
 }
 
-// In page order, so the tour scrolls steadily downward.
+/** Tour steps in page order, each pointing at a `data-tour` element. */
 const STEPS: Step[] = [
   {
     target: 'board-tabs',
@@ -33,7 +30,7 @@ const STEPS: Step[] = [
   {
     target: 'demand',
     title: 'GMP and demand',
-    body: 'GMP is the expected listing gain. QIB is big-institution demand. A high QIB on the last day is a strong sign.',
+    body: 'GMP is the unofficial grey market premium, a rough guide to the listing gain. QIB is big-institution demand. A high QIB on the last day is a strong sign.',
   },
   {
     target: 'odds',
@@ -66,12 +63,16 @@ const writeFlag = (value: string) => {
 const findTarget = (step: Step): HTMLElement | null =>
   document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
 
+/**
+ * First-visit tour of the home page. Steps whose target is missing are dropped; skipping or
+ * finishing stores a flag so it shows once.
+ */
 export function Walkthrough() {
   const [steps, setSteps] = useState<Step[]>([]);
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
 
-  // Waits for the entrance animation to settle so the cards are laid out before measuring.
+  // Waits for layout to settle before measuring targets.
   useEffect(() => {
     if (readFlag()) return;
     const timer = window.setTimeout(() => {
@@ -84,8 +85,7 @@ export function Walkthrough() {
   const step = steps[index];
   const active = !!step;
 
-  // Scrolls the target into view, then keeps the spotlight on it. Measured every frame, not on
-  // scroll events: iOS Safari keeps moving the target after the last event fires.
+  // Measured every frame, not on scroll: iOS Safari keeps moving the target after the last scroll event.
   useLayoutEffect(() => {
     if (!step) return;
     findTarget(step)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -132,7 +132,7 @@ export function Walkthrough() {
   const vh = window.innerHeight;
   const tipWidth = Math.min(TIP_WIDTH, vw - GUTTER * 2);
 
-  // Tooltip sits below the target when there's room, otherwise above it.
+  // Tooltip goes below the target when there's room, otherwise above it.
   let tipTop = vh / 2 - 80;
   let tipLeft = (vw - tipWidth) / 2;
   if (rect) {
@@ -144,48 +144,42 @@ export function Walkthrough() {
   const isLast = index === steps.length - 1;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] font-sans" role="dialog" aria-modal="true" aria-label="Quick tour">
+    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Quick tour">
       {/* Blocks clicks to the page while the tour is up. */}
       <div className="absolute inset-0" onClick={(e) => e.stopPropagation()} />
 
       {rect ? (
         <div
-          className="absolute rounded-xl ring-2 ring-primary pointer-events-none"
+          className="pointer-events-none absolute rounded-xl ring-2 ring-brand-accent"
           style={{
-            top: rect.top - PAD,
-            left: rect.left - PAD,
+            top: 0,
+            left: 0,
+            transform: `translate(${rect.left - PAD}px, ${rect.top - PAD}px)`,
             width: rect.width + PAD * 2,
             height: rect.height + PAD * 2,
-            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)',
+            boxShadow: '0 0 0 9999px color-mix(in srgb, var(--primary) 60%, transparent)',
           }}
         />
       ) : (
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-primary/60" />
       )}
 
       <div
-        className="absolute rounded-xl border border-border bg-card text-card-foreground shadow-xl p-4"
-        style={{ top: tipTop, left: tipLeft, width: tipWidth }}
+        className="absolute rounded-xl border border-border bg-card p-4 text-card-foreground shadow-(--shadow-lift)"
+        style={{ top: 0, left: 0, transform: `translate(${tipLeft}px, ${tipTop}px)`, width: tipWidth }}
       >
-        <div className="text-[11px] font-mono uppercase tracking-wide text-muted-foreground mb-1">
-          Quick tour · {index + 1}/{steps.length}
+        <div className="mb-1 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
+          Quick tour <span className="font-mono tabular-nums">{index + 1}/{steps.length}</span>
         </div>
-        <h3 className="font-serif text-base font-semibold text-foreground mb-1">{step.title}</h3>
-        <p className="text-sm text-foreground/80 leading-relaxed">{step.body}</p>
+        <h3 className="mb-1 font-display text-lg font-bold tracking-[-0.015em]">{step.title}</h3>
+        <p className="text-sm leading-relaxed text-muted-foreground">{step.body}</p>
         <div className="flex items-center justify-between mt-4">
-          <button
-            onClick={() => finish('skipped')}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <Button variant="ghost" onClick={() => finish('skipped')} className="-ml-4 text-muted-foreground hover:text-foreground">
             Skip tour
-          </button>
-          <button
-            onClick={next}
-            autoFocus
-            className="rounded-md bg-primary text-primary-foreground px-4 py-1.5 text-sm font-medium hover:opacity-90 active:scale-[0.97] transition-all"
-          >
+          </Button>
+          <Button onClick={next} autoFocus>
             {isLast ? 'Got it' : 'Next'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>,

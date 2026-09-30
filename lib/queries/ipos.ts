@@ -1,12 +1,12 @@
 import 'server-only';
 import { cache } from 'react';
-import { cached } from '@/lib/cache';
-import { getDb } from '@/lib/mongo';
+import { cached } from '@/lib/db/cache';
+import { getDb, toPlain } from '@/lib/db/mongo';
 import { Ipo } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { HomePageIpoProps } from '@/types/homepage';
-import { stripCitations } from '@/lib/citations';
-import { parseIpoDate, getOpenDateString, getCloseDateString, getListingDateString } from '@/lib/queries/ipo-dates';
+import { stripCitations } from '@/lib/queries/citations';
+import { daysFromToday, parseIpoDate } from '@/lib/ipo-format';
 
 // Card and list views never read these fields; `tables_raw` alone is most of each document.
 const IPO_CARD_PROJECTION = {
@@ -28,79 +28,37 @@ const ANALYSIS_CARD_PROJECTION = {
 
 type RawIpo = Ipo & { _id: { toString(): string } };
 
-/** Mongo ObjectIds and Dates aren't serialisable across the RSC boundary. */
-function toPlain<T>(doc: T): T {
-  return JSON.parse(JSON.stringify(doc));
-}
+const openDateOf = (ipo: RawIpo) => ipo.ipo_dates?.ipo_open_date || ipo.open_date || '';
+const closeDateOf = (ipo: RawIpo) => ipo.ipo_dates?.ipo_close_date || ipo.closing_date || '';
 
-/**
- * Midnight of today's Indian calendar date, in server-local time.
- * The server runs in UTC, and parseIpoDate builds dates at server-local midnight, so both sides must match.
- */
-function todayInIndia(): Date {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Kolkata',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date());
-  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-  return new Date(get('year'), get('month') - 1, get('day'));
-}
-
+/** Splits IPOs into upcoming, live, closed (not listed yet) and past (listed), each sorted. IPOs without both dates are left out. */
 function bucketIpos(ipoList: RawIpo[]) {
-  const today = todayInIndia();
-  const twoDaysAgo = new Date(today);
-  twoDaysAgo.setDate(today.getDate() - 2);
-  const currentYear = today.getFullYear();
-
   const upcoming: RawIpo[] = [];
   const live: RawIpo[] = [];
   const past: RawIpo[] = [];
-  const tba: RawIpo[] = [];
-  const recentlyAdded: RawIpo[] = [];
 
   for (const ipo of ipoList) {
-    if (ipo.scraped_at) {
-      const scrapedDate = new Date(ipo.scraped_at);
-      if (!isNaN(scrapedDate.getTime()) && scrapedDate >= twoDaysAgo) recentlyAdded.push(ipo);
-    }
+    const toOpen = daysFromToday(openDateOf(ipo));
+    const toClose = daysFromToday(closeDateOf(ipo));
+    if (toOpen === null || toClose === null) continue;
 
-    const openDate = parseIpoDate(getOpenDateString(ipo), currentYear);
-    const closeDate = parseIpoDate(getCloseDateString(ipo), currentYear);
-
-    if (!openDate || !closeDate) {
-      tba.push(ipo);
-      continue;
-    }
-
-    openDate.setHours(0, 0, 0, 0);
-    closeDate.setHours(23, 59, 59, 999);
-
-    if (openDate > today) upcoming.push(ipo);
-    else if (closeDate >= today) live.push(ipo);
+    if (toOpen > 0) upcoming.push(ipo);
+    else if (toClose >= 0) live.push(ipo);
     else past.push(ipo);
   }
 
-  const byDateAsc = (dateString: (ipo: RawIpo) => string) => (a: RawIpo, b: RawIpo) => {
-    const da = parseIpoDate(dateString(a), currentYear);
-    const db = parseIpoDate(dateString(b), currentYear);
-    return !da || !db ? 0 : da.getTime() - db.getTime();
-  };
-  const byCloseAsc = byDateAsc(getCloseDateString);
-  const scrapedTime = (ipo: RawIpo) => (ipo.scraped_at ? new Date(ipo.scraped_at).getTime() : 0);
+  const byDate = (dateOf: (ipo: RawIpo) => string) => (a: RawIpo, b: RawIpo) =>
+    (parseIpoDate(dateOf(a))?.getTime() ?? 0) - (parseIpoDate(dateOf(b))?.getTime() ?? 0);
 
-  upcoming.sort(byDateAsc(getOpenDateString));
-  live.sort(byCloseAsc);
-  past.sort((a, b) => -byCloseAsc(a, b));
-  tba.sort((a, b) => (a.upcoming_ipo_2025 || '').localeCompare(b.upcoming_ipo_2025 || ''));
-  recentlyAdded.sort((a, b) => scrapedTime(b) - scrapedTime(a));
+  upcoming.sort(byDate(openDateOf));
+  live.sort(byDate(closeDateOf));
+  past.sort((a, b) => byDate(closeDateOf)(b, a));
 
   // A recorded listing price counts too, for rows whose listing date is missing.
   const isListed = (ipo: RawIpo) => {
     if (ipo.listing_price) return true;
-    const listingDate = parseIpoDate(getListingDateString(ipo), currentYear);
-    return listingDate !== null && listingDate <= today;
+    const toListing = daysFromToday(ipo.ipo_dates?.ipo_listing_date);
+    return toListing !== null && toListing <= 0;
   };
 
   return {
@@ -108,12 +66,10 @@ function bucketIpos(ipoList: RawIpo[]) {
     live,
     past: past.filter(isListed),
     closed: past.filter((ipo) => !isListed(ipo)),
-    tba,
-    recentlyAdded,
   };
 }
 
-// Only raw documents are cached: bucketing depends on today's date.
+/** Raw card documents. Only these are cached, since bucketing depends on today's date. */
 const readCardIpoDocs = cached(async () => {
   const db = await getDb();
   const [ipos, analyses] = await Promise.all([
@@ -123,6 +79,7 @@ const readCardIpoDocs = cached(async () => {
   return toPlain({ ipos, analyses });
 }, 'ipo-card-docs');
 
+/** Buckets the card documents and attaches each IPO's analysis. */
 async function loadIpoBuckets() {
   const { ipos, analyses } = await readCardIpoDocs();
 
@@ -136,7 +93,7 @@ async function loadIpoBuckets() {
   const decorate = (list: RawIpo[]): HomePageIpoProps[] =>
     list.map((ipo) => {
       const id = ipo._id.toString();
-      return toPlain({ _id: id, ipo, analysis: analysisByIpoId.get(id) ?? null }) as HomePageIpoProps;
+      return { _id: id, ipo, analysis: analysisByIpoId.get(id) ?? null } as HomePageIpoProps;
     });
 
   return {
@@ -144,8 +101,6 @@ async function loadIpoBuckets() {
     live: decorate(buckets.live),
     closed: decorate(buckets.closed),
     past: decorate(buckets.past),
-    tba: decorate(buckets.tba),
-    recently_added: decorate(buckets.recentlyAdded),
   };
 }
 
@@ -167,10 +122,8 @@ export const getAnalysisBySlug = cache(cached(
       .findOne({ ipo_table_id: ipo._id.toString() });
     if (!analysis) return null;
 
-    return toPlain({
-      ipos_analysis: stripCitations(toPlain(analysis)),
-      ipo,
-    }) as unknown as AnalysisPage;
+    const plain = toPlain({ analysis, ipo });
+    return { ipos_analysis: stripCitations(plain.analysis), ipo: plain.ipo } as unknown as AnalysisPage;
   },
   'analysis-by-slug'
 ));

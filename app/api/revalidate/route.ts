@@ -1,7 +1,7 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
-import { SITE_DATA_TAG } from '@/lib/cache';
+import { SITE_DATA_TAG } from '@/lib/db/cache';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,5 +1,3 @@
-'use client';
-
 import { Ipo } from '@/types/ipo';
 import { ArrowUpRight } from 'lucide-react';
 import { ProgressLink } from '@/components/progress/ProgressLink';

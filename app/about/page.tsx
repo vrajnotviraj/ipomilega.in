@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { openGraphBase } from "@/lib/share";
+import { openGraphBase } from "@/lib/seo/share";
 import { Footer } from "@/components/layout/Footer";
 import { ScoreMethodology } from "@/components/home/ScoreMethodology";
 
@@ -24,7 +24,7 @@ const WHAT_WE_DO = [
   },
   {
     title: "A score you can pick apart",
-    body: "Each IPO gets an overall score backed by six modules. The breakdown is on the page next to the number, so you can see which parts carried it and which dragged it down.",
+    body: "Each IPO gets an overall score backed by six modules. The breakdown sits next to the number, so you can see which parts carried it and which dragged it down.",
   },
   {
     title: "Context around the numbers",
@@ -32,36 +32,29 @@ const WHAT_WE_DO = [
   },
 ];
 
+/** The /about page: what the site does, how scores work, where data comes from and what it isn't. */
 export default function AboutPage() {
   return (
     <div className="app-container pt-24 sm:pt-28">
-      <section className="py-8 max-w-3xl">
-        <h1 className="text-3xl md:text-4xl font-semibold font-serif text-foreground mb-4">
-          About IPO Milega
+      <section className="max-w-3xl py-8">
+        <h1 className="type-hero mb-5 text-[44px] sm:text-[72px]">
+          About IPO <span className="highlight">Milega</span>
         </h1>
-        <p className="text-muted-foreground font-sans text-base sm:text-lg leading-relaxed">
-          IPO Milega tracks every Indian IPO and turns the filings behind it into
-          something a regular investor can actually read. You get the prospectus, the
-          financials and the risks, laid out the same way for every issue. We don&apos;t
-          give tips or tell you what to buy.
+        <p className="max-w-[65ch] text-lg text-muted-foreground">
+          IPO Milega tracks every Indian IPO and turns the filings behind it into something a regular
+          investor can read. You get the prospectus, the financials and the risks, laid out the same way
+          for every issue. We don&apos;t give tips or tell you what to buy.
         </p>
       </section>
 
-      <section className="py-8">
-        <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground mb-2">
-          What we do
-        </h2>
-        <p className="text-muted-foreground text-sm sm:text-base font-sans max-w-2xl">
-          Four things, done the same way for every issue.
-        </p>
+      <section className="py-16">
+        <h2 className="type-h2">What we do</h2>
+        <p className="mt-3 max-w-2xl text-muted-foreground">Four things, done the same way for every issue.</p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-8">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
           {WHAT_WE_DO.map((item) => (
-            <div
-              key={item.title}
-              className="rounded-xl border border-border bg-card p-6 transition-colors duration-300 hover:border-primary/40"
-            >
-              <h3 className="font-serif font-semibold text-foreground mb-2">{item.title}</h3>
+            <div key={item.title} className="rounded-xl border border-border bg-card p-5 sm:p-6">
+              <h3 className="mb-2 text-lg font-bold tracking-[-0.015em] sm:text-xl">{item.title}</h3>
               <p className="text-sm text-muted-foreground">{item.body}</p>
             </div>
           ))}
@@ -70,25 +63,20 @@ export default function AboutPage() {
 
       <ScoreMethodology />
 
-      <section className="py-8 max-w-3xl">
-        <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground mb-4">
-          Where the data comes from
-        </h2>
-        <p className="text-muted-foreground font-sans text-sm sm:text-base leading-relaxed mb-4">
-          IPO details, subscription figures and listing prices come from public filings
-          and exchange disclosures. We generate the analysis from the RHP/DRHP a company
-          files with SEBI and review it before it goes live. Live numbers (subscription
-          and grey market premium especially) move through the day, so treat what you
-          see as the latest reading.
+      <section className="max-w-3xl py-16">
+        <h2 className="type-h2 mb-4">Where the data comes from</h2>
+        <p className="mb-4 max-w-[65ch] text-muted-foreground">
+          IPO details, subscription figures and listing prices come from public filings and exchange
+          disclosures. We generate the analysis from the RHP/DRHP a company files with SEBI and review it
+          before it goes live. Live numbers, subscription and grey market premium especially, move through
+          the day, so treat what you see as the latest reading.
         </p>
-        <h2 className="text-2xl md:text-3xl font-semibold font-serif text-foreground mb-4 mt-10">
-          A note on what this isn&apos;t
-        </h2>
-        <p className="text-muted-foreground font-sans text-sm sm:text-base leading-relaxed">
-          Nothing on IPO Milega is investment advice, and we aren&apos;t a registered
-          investment adviser. A score sums up what the filing says. It can&apos;t tell you
-          what the stock will do after listing. Read the prospectus, weigh your own position, and speak
-          to a qualified adviser before you apply.
+
+        <h2 className="type-h2 mt-12 mb-4">A note on what this isn&apos;t</h2>
+        <p className="max-w-[65ch] text-muted-foreground">
+          Nothing on IPO Milega is investment advice, and we aren&apos;t a registered investment adviser. A
+          score sums up what the filing says. It can&apos;t tell you what the stock will do after listing.
+          Read the prospectus, weigh your own position, and speak to a qualified adviser before you apply.
         </p>
       </section>
 

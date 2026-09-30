@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import { getDb } from "@/lib/mongo";
+import { getDb } from "@/lib/db/mongo";
+import { DAY_MS } from "@/lib/ipo-format";
 
-// The GMP series for an analysis page's trend chart: one point per IST day, carrying that day's latest figure.
 // Snapshots are captured hourly, so a five-minute cache costs nothing in freshness.
 export const revalidate = 300;
 
-// Guard against a runaway query; no issue produces this many readings.
+// Caps a runaway query; no issue produces this many readings.
 const MAX_ROWS = 500;
 const DEFAULT_DAYS = 45;
 const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 interface GmpSnapshot {
   observed_at: Date;
@@ -68,10 +67,8 @@ function buildDailySeries(rows: GmpSnapshot[]) {
     }));
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+/** The GMP series for an analysis page's trend chart: one point per IST day with that day's latest figure. */
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     if (!ObjectId.isValid(id)) {
@@ -102,12 +99,6 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error in /api/ipo/[id]/gmp-history:", error);
-    return NextResponse.json(
-      {
-        message: "Something went wrong",
-        success: false,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Something went wrong", success: false }, { status: 500 });
   }
 }

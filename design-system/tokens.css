@@ -1,0 +1,75 @@
+/*
+ * IPO Milega design tokens, direction C1 "Market green".
+ * Drop-in values for the :root block in app/globals.css. Token names match the ones the site
+ * already uses, so Tailwind classes (bg-primary, text-muted-foreground, text-score-good...) keep working.
+ * See design-system/DESIGN.md for what each token is for.
+ */
+
+:root {
+  /* Surfaces */
+  --background: #FAFAF6;          /* Chalk: the page */
+  --card: #FFFFFF;                /* Cards and inputs sit one step above the page */
+  --popover: #FFFFFF;
+  --secondary: #EEF1EA;           /* Surface: quiet panels, hover fills, tab strips */
+  --muted: #EEF1EA;
+  --accent: #EEF1EA;
+
+  /* Ink */
+  --foreground: #0F3B2E;          /* Market green: text, headings, logo */
+  --card-foreground: #0F3B2E;
+  --popover-foreground: #0F3B2E;
+  --secondary-foreground: #0F3B2E;
+  --accent-foreground: #0F3B2E;
+  --muted-foreground: #5E6B63;    /* Secondary text, labels, captions */
+
+  /* Brand */
+  --primary: #0F3B2E;             /* Buttons, active tabs, ticker background */
+  --primary-foreground: #FAFAF6;
+  --brand-mark: #0F3B2E;          /* Logo candles and wicks */
+  --brand-accent: #F0A92E;        /* Marigold: fills only (breakout candle, "today" chips). Never text on chalk. */
+  --ring: #0F3B2E;
+
+  /* Lines */
+  --border: #DCE2D8;
+  --input: #DCE2D8;
+
+  /* Data. Only for numbers and states, never for decoration. */
+  --score-good: #1C7A4E;          /* Gains, scores above 6, odds 60% and up */
+  --score-mid: #94620C;           /* Scores above 3 up to 6, odds 25-59%. Text-safe amber, not marigold. */
+  --score-bad: #B8452F;           /* Losses, scores 3 and below, odds under 25%, closing today */
+  --destructive: #B8452F;
+  /* The data colours lifted toward chalk, for text and dots on the ink panel and ticker */
+  --score-good-on-ink: color-mix(in srgb, var(--score-good) 45%, var(--background));
+  --score-mid-on-ink: color-mix(in srgb, var(--score-mid) 45%, var(--background));
+  --score-bad-on-ink: color-mix(in srgb, var(--score-bad) 45%, var(--background));
+  --chart-1: #0F3B2E;
+  --chart-2: #1C7A4E;
+  --chart-3: #F0A92E;
+  --chart-4: #B8452F;
+  --chart-5: #5E6B63;
+
+  /* Shape */
+  --radius: 0.75rem;              /* 12px cards; see DESIGN.md for the full radius scale */
+
+  /* Depth: shadows carry the ink hue, never pure black */
+  --shadow-card: 0 1px 2px rgb(15 59 46 / 0.05);
+  --shadow-lift: 0 1px 2px rgb(15 59 46 / 0.05), 0 14px 32px -16px rgb(15 59 46 / 0.28);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 500ms;
+}
+
+/*
+ * Fonts, loaded with next/font in app/layout.tsx:
+ *   Schibsted_Grotesk -> --font-schibsted  (variable, display)
+ *   Figtree           -> --font-figtree    (variable, body)
+ *   DM_Mono 400, 500  -> --font-dm-mono    (figures)
+ * Map them in the @theme inline block:
+ *   --font-display: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
+ *   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+ *   --font-mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
+ *   --color-brand-accent: var(--brand-accent);
+ */

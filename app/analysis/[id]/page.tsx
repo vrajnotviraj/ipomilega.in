@@ -1,12 +1,14 @@
 import { Metadata } from 'next'
-import AnalysisPageClient from './AnalysisPageClient'
+import { AnalysisDetail } from "@/components/analysis/detail/AnalysisDetail"
+import { getShareFacts } from "@/components/analysis/detail/analysis-facts"
 import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis"
 import { Ipo } from '@/types/ipo';
 import { getAnalysisBySlug, getAnalysisSlugs } from '@/lib/queries/ipos';
-import { buildShareDescription, closingLine, gmpLine, formatDay, overallScoreOf, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
-import { ArrowLeftCircle, Clock, FileSearch } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
+import { buildShareDescription, closingLine, gmpLine, overallScoreOf, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
+import { formatIpoDate } from '@/lib/ipo-format';
+import { FileSearch } from 'lucide-react';
+import { ArrowLink } from '@/components/ui/ArrowLink';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export const revalidate = 60
 // Slugs published after the build still render on first request, then get cached.
@@ -29,8 +31,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   if (!analysis) {
     return {
-      title: 'IPO Analysis Not Found',
-      description: 'The requested IPO analysis could not be found.',
+      title: 'IPO analysis not found',
+      description: "We couldn't find an analysis for this IPO.",
     }
   }
 
@@ -42,13 +44,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     .join(' \u00b7 ')
 
   const description = buildShareDescription({
-    companyName: analysis.company_name,
-    slug: id,
+    ...getShareFacts(analysis, ipo!),
     score: Number(overallScoreOf(analysis).toFixed(1)),
-    gmp: analysis.gmp_price_gain ?? ipo?.gmp_price_gain,
-    opening: analysis.time?.issue_dates?.opening,
-    closing: analysis.time?.issue_dates?.closing,
-    businessModel: analysis.fundamentals?.business_model || analysis.fundamentals?.summary,
   })
 
   const keywords = [
@@ -73,10 +70,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     title,
     description,
     keywords: keywords.join(', '),
-    authors: [{ name: SITE_NAME }],
-    creator: SITE_NAME,
-    publisher: SITE_NAME,
-
     // Names the per-IPO card explicitly, since openGraphBase's site card would otherwise win.
     openGraph: {
       ...openGraphBase(),
@@ -98,18 +91,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       creator: '@ipomilega',
     },
 
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
-
     alternates: {
       canonical: `/analysis/${id}`,
     },
@@ -123,10 +104,10 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | u
   const name = analysis.company_name
   const url = `${SITE_URL}/analysis/${id}`
   const organization = { '@type': 'Organization', name: SITE_NAME, url: SITE_URL }
-  const opening = formatDay(analysis.time?.issue_dates?.opening)
-  const closing = formatDay(analysis.time?.issue_dates?.closing)
-  const allotment = formatDay(ipo?.ipo_dates?.basis_of_allotment || analysis.time?.allotment_timeline?.date)
-  const listing = formatDay(ipo?.ipo_dates?.ipo_listing_date || analysis.time?.listing_details?.expected_date)
+  const opening = formatIpoDate(analysis.time?.issue_dates?.opening)
+  const closing = formatIpoDate(analysis.time?.issue_dates?.closing)
+  const allotment = formatIpoDate(ipo?.ipo_dates?.basis_of_allotment || analysis.time?.allotment_timeline?.date)
+  const listing = formatIpoDate(ipo?.ipo_dates?.ipo_listing_date || analysis.time?.listing_details?.expected_date)
   const exchanges = analysis.time?.listing_details?.exchanges?.filter(Boolean).join(' and ')
   const gmp = gmpLine(analysis.gmp_price_gain ?? ipo?.gmp_price_gain)
   const priceBand = analysis.ipo_details?.price_band
@@ -169,7 +150,7 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | u
         '@type': 'BreadcrumbList',
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-          { '@type': 'ListItem', position: 2, name: 'IPO Analysis', item: `${SITE_URL}/analysis` },
+          { '@type': 'ListItem', position: 2, name: 'All IPOs', item: `${SITE_URL}/ipos` },
           { '@type': 'ListItem', position: 3, name: `${name} IPO analysis`, item: url },
         ],
       },
@@ -177,49 +158,27 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | u
   }
 }
 
+/** Shown for a slug whose prospectus has not been analysed yet. */
+function AnalysisInProgress() {
+  return (
+    <div className="app-container flex min-h-screen flex-col items-start justify-center gap-6 pt-16 sm:items-center">
+      <div className="w-full max-w-md">
+        <EmptyState
+          icon={FileSearch}
+          title="Analysis in progress"
+          hint="We're still working through this IPO's prospectus. The analysis shows up here once we've reviewed it."
+        />
+      </div>
+      <ArrowLink href="/">Back to home</ArrowLink>
+    </div>
+  )
+}
+
 export default async function AnalysisPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const data = await getAnalysisBySlug(id)
 
-  if (!data) {
-    return (
-      <div className="min-h-screen font-sans bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-        <CardContent className="p-8 text-center space-y-6">
-          <div className="space-y-4">
-            <div className="mx-auto w-16 h-16 bg-[#93c5fd] rounded-full flex items-center justify-center">
-              <FileSearch className="h-8 w-8 text-white" />
-            </div>
-
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
-                Analysis in progress
-              </h1>
-              <p className="text-slate-600 leading-relaxed">
-                We&apos;re still working through this IPO&apos;s prospectus. The analysis
-                shows up here once we&apos;ve reviewed it.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center gap-3 p-4 bg-[#93c5fd] rounded-lg border border-[#93c5fd]">
-            <Clock className="h-5 w-5 text-white animate-pulse" />
-            <span className="text-sm font-medium text-white">
-              Should be ready soon
-            </span>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800">
-              <ArrowLeftCircle className="h-5 w-5" />
-              Back to Home
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-    )
-  }
+  if (!data) return <AnalysisInProgress />
 
   return (
     <>
@@ -227,7 +186,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData(data.ipos_analysis, data.ipo, id)).replace(/</g, '\\u003c') }}
       />
-      <AnalysisPageClient analysis={data.ipos_analysis} ipo={data.ipo} />
+      <AnalysisDetail analysis={data.ipos_analysis} ipo={data.ipo} />
     </>
   )
 }

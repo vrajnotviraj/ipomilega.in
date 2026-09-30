@@ -1,7 +1,7 @@
 import { Metadata } from "next";
-import { openGraphBase } from "@/lib/share";
+import { openGraphBase } from "@/lib/seo/share";
 import { notFound } from "next/navigation";
-import BlogDisplay from "./BlogDisplay";
+import BlogDisplay from "@/components/blog/BlogDisplay";
 import { getBlogBySlug } from "@/lib/queries/blogs";
 import { Blog } from "@/types/ipo";
 
@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const blog = await getBlogBySlug(id);
   if (!blog) {
-    return { title: "Blog Not Found", description: "The requested blog post could not be found." };
+    return { title: "Post not found", description: "We couldn't find this blog post." };
   }
 
   const image = (blog as Blog & { featured_image?: string }).featured_image;

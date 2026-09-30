@@ -1,24 +1,22 @@
 import 'server-only';
 import { cache } from 'react';
-import { getDb } from '@/lib/mongo';
-import { cached } from '@/lib/cache';
+import { getDb, toPlain } from '@/lib/db/mongo';
+import { cached } from '@/lib/db/cache';
 import { Blog } from '@/types/ipo';
 
-// List queries keep `content`: the cards derive read time and the excerpt fallback from it.
-
-const toPlain = <T>(doc: T): T => JSON.parse(JSON.stringify(doc));
-
-async function findBlogs(filter: object, limit = 0): Promise<Blog[]> {
+/** Published posts, newest first. Keeps `content`: cards derive read time and the excerpt from it. */
+async function findPublishedBlogs(limit = 0): Promise<Blog[]> {
   const db = await getDb();
-  const blogs = await db.collection('blogs').find(filter).sort({ created_at: -1 }).limit(limit).toArray();
+  const blogs = await db.collection('blogs').find({ status: 'published' }).sort({ created_at: -1 }).limit(limit).toArray();
   return toPlain(blogs) as unknown as Blog[];
 }
 
 /** The three newest published posts, for the homepage. */
-export const getFeaturedBlogs = cache(cached(() => findBlogs({ status: 'published' }, 3), 'getFeaturedBlogs'));
+export const getFeaturedBlogs = cache(cached(() => findPublishedBlogs(3), 'getFeaturedBlogs'));
 
-export const getPublishedBlogs = cache(cached(() => findBlogs({ status: 'published' }), 'getPublishedBlogs'));
+export const getPublishedBlogs = cache(cached(() => findPublishedBlogs(), 'getPublishedBlogs'));
 
+/** One published post by slug, or null for a draft or unknown slug. */
 export const getBlogBySlug = cache(cached(async (slug: string): Promise<Blog | null> => {
   const db = await getDb();
   const blog = await db.collection('blogs').findOne({ slug });

@@ -1,11 +1,12 @@
 import { Metadata } from "next";
-import { openGraphBase } from "@/lib/share";
+import { openGraphBase } from "@/lib/seo/share";
 import { getIpoBuckets } from "@/lib/queries/ipos";
-import IposClient from "./IposClient";
+import IposClient from "@/components/ipos/IposClient";
+import { toRows } from "@/components/ipos/rows";
 
 export const revalidate = 60;
 
-const title = "All IPOs - Live, Upcoming & Listed";
+const title = "All IPOs: live, upcoming and listed";
 const description = "Browse every mainboard and SME IPO: price bands, issue sizes, key dates and analysis scores. Filter by status and type.";
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function IposPage() {
-  const { upcoming, live, past } = await getIpoBuckets();
-  return <IposClient upcoming={upcoming} live={live} past={past} />;
+  // Rows carry "days from today" figures, so they are built here rather than in the client.
+  const rows = toRows(await getIpoBuckets());
+  return <IposClient rows={rows} />;
 }

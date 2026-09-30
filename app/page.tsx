@@ -5,20 +5,21 @@ import { IpoTicker } from '@/components/home/IpoTicker';
 import { PastIposSection } from '@/components/home/PastIposSection';
 import { UpcomingIposSection } from '@/components/home/UpcomingIpos';
 import { ScoreMethodology } from '@/components/home/ScoreMethodology';
-import { AnnouncementBanner } from '@/components/home/AnnouncementBanner';
-import { getHomePageData } from '@/lib/data-fetching';
+import { getIpoBuckets } from '@/lib/queries/ipos';
+import { getFeaturedBlogs } from '@/lib/queries/blogs';
 import { Metadata } from 'next';
 import { Footer } from '@/components/layout/Footer';
 import { Walkthrough } from '@/components/home/Walkthrough';
+import { Hero } from '@/components/home/Hero';
 import { BoardProvider } from '@/components/home/BoardContext';
-import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
+import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
 
 // Served from the ISR cache; /api/revalidate purges it sooner.
 export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'IPO Milega | Live, Upcoming & Past Indian IPOs, Scored',
+    absolute: 'IPO Milega | Live, upcoming and past Indian IPOs, scored',
   },
   description: 'Track live, upcoming and past Indian IPOs. Every prospectus gets a scored breakdown, next to GMP, subscription and your allotment odds.',
   keywords: [
@@ -33,29 +34,15 @@ export const metadata: Metadata = {
     'IPO Milega',
     'India IPO'
   ],
-  authors: [{ name: 'IPO Milega Team' }],
-  creator: 'IPO Milega',
-  publisher: 'IPO Milega',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
   openGraph: {
     ...openGraphBase(),
     url: '/',
-    title: 'IPO Milega | Every Indian IPO, Scored',
+    title: 'IPO Milega | Every Indian IPO, scored',
     description: 'Track live, upcoming and past Indian IPOs, with a scored breakdown of every prospectus.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'IPO Milega | Every Indian IPO, Scored',
+    title: 'IPO Milega | Every Indian IPO, scored',
     description: 'Track live, upcoming and past Indian IPOs, with a scored breakdown of every prospectus.',
     creator: '@ipomilega',
   },
@@ -91,37 +78,37 @@ const SITE_STRUCTURED_DATA = {
 // Awaited without a <Suspense> boundary: under ISR the data is ready at build time, and a
 // boundary would ship a spinner that delays LCP.
 export default async function HomePage() {
-  const { data, counts, blogList } = await getHomePageData();
+  const [{ upcoming, live, closed, past }, blogs] = await Promise.all([getIpoBuckets(), getFeaturedBlogs()]);
 
   return (
-    <div className="min-h-screen relative overflow-hidden paper-texture">
+    <div className="min-h-screen">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_STRUCTURED_DATA) }} />
-      <div className="relative z-10">
-        <div className="app-container pt-20 sm:pt-24">
-          <IpoTicker live={data.live} upcoming={data.upcoming} />
-          <AnnouncementBanner />
-          <BoardProvider>
-            <LiveIposSection ipos={data.live} count={counts.live} />
-            <div className="reveal">
-              <ClosedIposSection ipos={data.closed} count={counts.closed} />
-            </div>
-            <div className="reveal">
-              <UpcomingIposSection ipos={data.upcoming} count={counts.upcoming} />
-            </div>
-          </BoardProvider>
-          <div className="reveal">
-            <PastIposSection ipos={data.past} />
-          </div>
-          <div className="reveal">
-            <ScoreMethodology />
-          </div>
-          <div className="reveal">
-            <BlogSection blogs={blogList} />
-          </div>
-          <Footer />
-        </div>
-        <Walkthrough />
+      <div className="app-container pt-16">
+        <Hero openCount={live.length} upcomingCount={upcoming.length} />
       </div>
+      <IpoTicker live={live} upcoming={upcoming} />
+      <div className="app-container">
+        <BoardProvider>
+          <LiveIposSection ipos={live} />
+          <div className="reveal">
+            <ClosedIposSection ipos={closed} />
+          </div>
+          <div className="reveal">
+            <UpcomingIposSection ipos={upcoming} />
+          </div>
+        </BoardProvider>
+        <div className="reveal">
+          <PastIposSection ipos={past} />
+        </div>
+        <div className="reveal">
+          <ScoreMethodology />
+        </div>
+        <div className="reveal">
+          <BlogSection blogs={blogs} />
+        </div>
+        <Footer />
+      </div>
+      <Walkthrough />
     </div>
   );
 }
