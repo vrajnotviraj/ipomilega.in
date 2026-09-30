@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /** Brand mark: a ring around a rising arrow. Stroke color comes from --brand-mark. */
-export function LogoMark({ className }: { className?: string }) {
+function LogoMark({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 48 48"

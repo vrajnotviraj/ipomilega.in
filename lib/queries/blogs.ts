@@ -25,26 +25,3 @@ export const getBlogBySlug = cache(cached(async (slug: string): Promise<Blog | n
   if (!blog || blog.status !== 'published') return null;
   return toPlain(blog) as unknown as Blog;
 }, 'getBlogBySlug'));
-
-export const getBlogCategories = cache(cached(async () => {
-  const db = await getDb();
-  const docs = await db
-    .collection('categories')
-    .find({
-      status: 'published',
-      category: { $in: ['IPO Analysis', 'Company Review', 'Market News', 'Investment Guide'] },
-    })
-    .toArray();
-
-  const byCategory = (name: string) => toPlain(docs.filter((d) => d.category === name));
-
-  return {
-    ipo_analysis: byCategory('IPO Analysis'),
-    company_review: byCategory('Company Review'),
-    market_news: byCategory('Market News'),
-    investment_guide: byCategory('Investment Guide'),
-  };
-}, 'getBlogCategories'));
-
-/** Every blog, drafts included, for admin. */
-export const getAllBlogs = cache(() => findBlogs({}));

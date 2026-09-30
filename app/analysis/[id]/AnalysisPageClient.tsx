@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ArrowLeft,
   Share2,
-  Loader2,
   TrendingUp,
   Plus,
   Minus,
@@ -19,7 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { Ipo } from "@/types/ipo";
-import { useSession, isAdminEmail } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { cn, getInitials } from "@/lib/utils";
 import {
@@ -94,139 +92,20 @@ const scoreStyle = (score: number) => SCORE_STYLES[score >= 8 ? "good" : score >
 /** Width of a 0-10 score as a clamped CSS percentage. */
 const scoreWidth = (score: number) => `${Math.max(0, Math.min(100, score * 10))}%`;
 
-/** Text that an admin can double-click to edit in place; saves on blur or Enter. */
-interface EditableTextProps {
-  value: string | number;
-  onSave: (val: string) => void;
-  isAdmin: boolean;
-  type?: "text" | "textarea" | "number";
-  className?: string;
-  textClassName?: string;
-  inputClassName?: string;
-  renderText?: (val: string) => React.ReactNode;
-}
-
-const EditableText = ({
-  value,
-  onSave,
-  isAdmin,
-  type = "text",
-  className,
-  textClassName,
-  inputClassName,
-  renderText,
-}: EditableTextProps) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [localVal, setLocalVal] = useState(String(value ?? ""));
-
-  useEffect(() => {
-    setLocalVal(String(value ?? ""));
-  }, [value]);
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    if (localVal !== String(value ?? "")) {
-      onSave(localVal);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && type !== "textarea") {
-      e.preventDefault();
-      handleBlur();
-    }
-    if (e.key === "Escape") {
-      setLocalVal(String(value ?? ""));
-      setIsEditing(false);
-    }
-  };
-
-  if (isAdmin && isEditing) {
-    if (type === "textarea") {
-      return (
-        <textarea
-          value={localVal}
-          onChange={(e) => setLocalVal(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          autoFocus
-          className={cn(
-            "w-full p-2 border-2 border-primary rounded-md text-sm bg-card font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-ring shadow-md min-h-[70px]",
-            inputClassName
-          )}
-        />
-      );
-    }
-    return (
-      <input
-        type={type}
-        value={localVal}
-        onChange={(e) => setLocalVal(e.target.value)}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        autoFocus
-        className={cn(
-          "px-2 py-1 border-2 border-primary rounded-md text-sm bg-card font-sans text-foreground focus:outline-none focus:ring-2 focus:ring-ring shadow-sm w-full",
-          inputClassName
-        )}
-      />
-    );
-  }
-
-  const displayContent = renderText
-    ? renderText(localVal)
-    : (localVal || <span className="text-muted-foreground italic">Double-click to edit...</span>);
-
-  return (
-    <span
-      onDoubleClick={(e) => {
-        if (isAdmin) {
-          e.stopPropagation();
-          setIsEditing(true);
-        }
-      }}
-      className={cn(
-        isAdmin &&
-          "cursor-pointer hover:bg-primary/5 hover:outline-primary/40 hover:outline hover:outline-1 hover:outline-dashed rounded transition-colors duration-150 inline-block px-1",
-        className
-      )}
-      title={isAdmin ? "Double-click to edit field" : undefined}
-    >
-      <span className={textClassName}>{displayContent}</span>
-    </span>
-  );
-};
-
 /** Labelled horizontal bar for a sub-metric score. */
 const ScoreBar = ({
   label,
   score,
-  onSaveScore,
-  isAdmin,
 }: {
   label: string;
   score: number;
-  onSaveScore: (val: string) => void;
-  isAdmin: boolean;
 }) => (
     <div>
       <div className="flex items-baseline justify-between mb-1.5">
         <span className="text-sm font-medium text-foreground">{label}</span>
-        {isAdmin ? (
-          <EditableText
-            value={score}
-            onSave={onSaveScore}
-            type="number"
-            isAdmin={isAdmin}
-            inputClassName="w-14 text-right font-mono font-semibold text-xs p-0.5 rounded border border-primary bg-card"
-            textClassName={cn("font-mono text-sm font-semibold", scoreStyle(score).text)}
-            renderText={(val) => <span>{val}</span>}
-          />
-        ) : (
-          <span className={cn("font-mono text-sm font-semibold", scoreStyle(score).text)}>
-            {score.toFixed(1)}
-          </span>
-        )}
+        <span className={cn("font-mono text-sm font-semibold", scoreStyle(score).text)}>
+          {score.toFixed(1)}
+        </span>
       </div>
       <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
         <div
@@ -587,14 +466,10 @@ const SectionHeading = ({
   num,
   title,
   score,
-  onSaveScore,
-  isAdmin,
 }: {
   num: string;
   title: string;
   score: number;
-  onSaveScore: (val: string) => void;
-  isAdmin: boolean;
 }) => (
   <div className="flex items-center justify-between mb-6 gap-3">
     <div className="flex items-baseline gap-3">
@@ -602,27 +477,12 @@ const SectionHeading = ({
       <h2 className="text-2xl font-semibold font-serif text-foreground">{title}</h2>
     </div>
     <span className={cn("px-2.5 py-1 rounded-full border text-sm font-mono font-semibold flex items-center gap-1", scoreStyle(score).badge)}>
-      {isAdmin ? (
-        <EditableText
-          value={score}
-          onSave={onSaveScore}
-          type="number"
-          isAdmin={isAdmin}
-          inputClassName="w-10 text-center font-bold text-xs p-0.5 rounded border border-primary bg-card"
-          textClassName="font-mono font-semibold"
-          renderText={(val) => <span>{val}/10</span>}
-        />
-      ) : (
-        <>{score.toFixed(1)}/10</>
-      )}
+      {score.toFixed(1)}/10
     </span>
   </div>
 );
 
 export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClientProps) {
-  const [editedAnalysis, setEditedAnalysis] = useState<IpoComprehensiveAnalysis>(analysis);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isEditingTimeline, setIsEditingTimeline] = useState(false);
   const [predictorCategory, setPredictorCategory] = useState<AllotmentCategoryDef["key"] | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   // The URL in the address bar, read on the client so a share carries it.
@@ -661,95 +521,21 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     };
   }, []);
 
-  const session = useSession();
-  const isAdmin = isAdminEmail(session?.data?.user?.email);
-
-  /** Set a dotted-path field on the analysis, copying each object on the way, and save it. */
-  const handleInlineSave = (path: string, newValue: unknown) => {
-    setEditedAnalysis((prev) => {
-      const copy = { ...prev };
-      const parts = path.split(".");
-      let current = copy as unknown as Record<string, unknown>;
-      for (const part of parts.slice(0, -1)) {
-        current[part] = { ...((current[part] as Record<string, unknown>) || {}) };
-        current = current[part] as Record<string, unknown>;
-      }
-      current[parts[parts.length - 1]] = newValue;
-      saveAnalysis(copy);
-      return copy;
-    });
-  };
-
-  const handleInlineArraySave = (path: string, lines: string) =>
-    handleInlineSave(path, lines.split("\n").filter((item) => item.trim() !== ""));
-
-  const saveAnalysis = async (newAnalysis: IpoComprehensiveAnalysis) => {
-    setIsSaving(true);
-    const { fundamentals, ipo_details } = newAnalysis;
-
-    const payload = {
-      ipo_table_id: newAnalysis.ipo_table_id,
-      company_name: newAnalysis.company_name,
-      slug: newAnalysis.slug,
-      image_url: newAnalysis.image_url || ipo.image_url || "",
-      investorSplit: newAnalysis.investorSplit || [],
-      financialReport: newAnalysis.financialReport || [],
-      gmp_price_gain: newAnalysis.gmp_price_gain || ipo.gmp_price_gain || "",
-      fundamentals,
-      risk_meter: newAnalysis.risk_meter,
-      flexibility: newAnalysis.flexibility,
-      time: newAnalysis.time,
-      performance: newAnalysis.performance,
-      ipo_details,
-      summary_metrics: {
-        fundamentals_score: Number(fundamentals?.score ?? 0),
-        risk_meter: Number(newAnalysis.risk_meter?.score ?? 0),
-        flexibility_score: Number(newAnalysis.flexibility?.score ?? 0),
-        time_score: Number(newAnalysis.time?.score ?? 0),
-        performance_score: Number(newAnalysis.performance?.score ?? 0),
-        approximate_gains_potential: Number(ipo_details?.approximate_gains_potential ?? 0),
-        profitability_of_allotment: Number(ipo_details?.profitability_of_allotment?.score ?? 0),
-        total_revenue: Number(fundamentals?.revenue_details?.total_revenue ?? 0),
-        net_profit: Number(fundamentals?.profit_analysis?.net_profit ?? 0),
-        total_assets: Number(fundamentals?.assets_and_liabilities?.total_assets ?? 0),
-      },
-    };
-
-    const toastId = toast.loading("Saving changes...");
-    try {
-      const response = await fetch("/api/analysis/manipulate-analysis", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Failed to save analysis");
-
-      toast.success("Saved successfully!", { id: toastId });
-    } catch (error) {
-      console.error("Save error:", error);
-      toast.error(error instanceof Error ? error.message : "Error saving updates", { id: toastId });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
   const sectionRef = (key: string) => (el: HTMLElement | null) => {
     sectionRefs.current[key] = el;
   };
 
-  const fundamentalsScore = editedAnalysis.fundamentals?.score ?? 0;
-  const riskScore = editedAnalysis.risk_meter?.score ?? 0;
-  const performanceScore = editedAnalysis.performance?.score ?? 0;
-  const flexibilityScore = editedAnalysis.flexibility?.score ?? 0;
-  const timeScore = editedAnalysis.time?.score ?? 0;
+  const fundamentalsScore = analysis.fundamentals?.score ?? 0;
+  const riskScore = analysis.risk_meter?.score ?? 0;
+  const performanceScore = analysis.performance?.score ?? 0;
+  const flexibilityScore = analysis.flexibility?.score ?? 0;
+  const timeScore = analysis.time?.score ?? 0;
 
   const overallScore =
     (fundamentalsScore + riskScore + performanceScore + flexibilityScore + timeScore) / 5;
 
-  const gainsPotential = editedAnalysis.ipo_details?.approximate_gains_potential ?? 0;
+  const gainsPotential = analysis.ipo_details?.approximate_gains_potential ?? 0;
 
   const radarAxes = [
     { label: "Financials", score: fundamentalsScore },
@@ -759,7 +545,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     { label: "Risk", score: riskScore },
   ];
 
-  const priceBand = editedAnalysis.ipo_details?.price_band;
+  const priceBand = analysis.ipo_details?.price_band;
 
   // Bands come as "130 - 140", "₹130 to 140 Per Share" or "140"; the cut-off is the last number.
   const priceBandNumbers =
@@ -776,22 +562,15 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         : `₹${priceBand}`;
 
   // `shares` is shares per lot and `lot_size` the lot count, so one lot costs price x shares.
-  const lotShares = editedAnalysis.ipo_details?.shares || editedAnalysis.ipo_details?.lot_size;
+  const lotShares = analysis.ipo_details?.shares || analysis.ipo_details?.lot_size;
   const minInvestment = upperPrice && lotShares ? upperPrice * lotShares : null;
 
   const timelineData = {
-    opening: editedAnalysis.time?.issue_dates?.opening || "",
-    closing: editedAnalysis.time?.issue_dates?.closing || "",
-    allotment: editedAnalysis.time?.allotment_timeline?.date || "",
-    listing: editedAnalysis.time?.listing_details?.expected_date || "",
+    opening: analysis.time?.issue_dates?.opening || "",
+    closing: analysis.time?.issue_dates?.closing || "",
+    allotment: analysis.time?.allotment_timeline?.date || "",
+    listing: analysis.time?.listing_details?.expected_date || "",
   };
-
-  const timelineInputs = [
-    { label: "Opening", value: timelineData.opening, path: "time.issue_dates.opening" },
-    { label: "Closing", value: timelineData.closing, path: "time.issue_dates.closing" },
-    { label: "Allotment", value: timelineData.allotment, path: "time.allotment_timeline.date" },
-    { label: "Listing", value: timelineData.listing, path: "time.listing_details.expected_date" },
-  ];
 
   const ipoType = getIpoType(ipo);
 
@@ -825,7 +604,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     return match ? parseFloat(match[1]) : 0;
   };
 
-  const allocation = editedAnalysis.ipo_details?.allocation_details;
+  const allocation = analysis.ipo_details?.allocation_details;
   const quotaData = [
     { name: "QIB", value: allocation?.qib || parsePercentage(ipo.ipo_details?.qib_quota || "50"), color: "var(--chart-1)" },
     { name: "NII", value: allocation?.nii || parsePercentage(ipo.ipo_details?.nii_quota || "15"), color: "var(--chart-3)" },
@@ -833,26 +612,26 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
   ];
 
   const investorTableData =
-    editedAnalysis.investorSplit?.filter((row) => row.application.toLowerCase() !== "application") || [];
+    analysis.investorSplit?.filter((row) => row.application.toLowerCase() !== "application") || [];
 
   const strengthsAndConcerns = [
     {
       title: "Strengths",
-      items: (editedAnalysis.performance?.key_achievements || []).filter((s) => s.trim() !== ""),
+      items: (analysis.performance?.key_achievements || []).filter((s) => s.trim() !== ""),
       color: "text-score-good",
       Icon: Plus,
       empty: "No highlighted strengths yet.",
     },
     {
       title: "Concerns",
-      items: (editedAnalysis.risk_meter?.key_risks || []).filter((s) => s.trim() !== ""),
+      items: (analysis.risk_meter?.key_risks || []).filter((s) => s.trim() !== ""),
       color: "text-score-bad",
       Icon: Minus,
       empty: "No flagged concerns yet.",
     },
   ];
 
-  const gmpValue = editedAnalysis.gmp_price_gain || ipo.gmp_price_gain || "";
+  const gmpValue = analysis.gmp_price_gain || ipo.gmp_price_gain || "";
   const hasGmp = gmpValue && gmpValue !== "N/A" && gmpValue !== "TBD" && gmpValue !== "TBA";
   // gmpValue is the estimated listing ("360 (31.25%)"), so the GMP tile shows the premium itself,
   // matching the trend chart, and falls back to just the gain when no premium was scraped.
@@ -863,12 +642,12 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
   // Built from the values this page renders, so a shared message never drifts from the page.
   const shareFacts: ShareFacts = {
-    companyName: editedAnalysis.company_name,
-    slug: editedAnalysis.slug || ipo.slug || "",
+    companyName: analysis.company_name,
+    slug: analysis.slug || ipo.slug || "",
     gmp: hasGmp ? gmpValue : null,
     opening: timelineData.opening,
     closing: timelineData.closing,
-    businessModel: editedAnalysis.fundamentals?.business_model || editedAnalysis.fundamentals?.summary || null,
+    businessModel: analysis.fundamentals?.business_model || analysis.fundamentals?.summary || null,
     url: shareUrl,
   };
 
@@ -879,7 +658,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
     // No `url` field: the message already ends with the link, and WhatsApp would paste it twice.
     if (navigator.share) {
       try {
-        await navigator.share({ title: `${editedAnalysis.company_name} IPO`, text: message });
+        await navigator.share({ title: `${analysis.company_name} IPO`, text: message });
       } catch {
         // Share sheet dismissed.
       }
@@ -1004,24 +783,18 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             </button>
             <Avatar className="w-8 h-8 flex-shrink-0">
               {ipo.image_url?.trim() ? (
-                <AvatarImage src={ipo.image_url} alt={`${editedAnalysis.company_name} logo`} />
+                <AvatarImage src={ipo.image_url} alt={`${analysis.company_name} logo`} />
               ) : (
                 <AvatarFallback className="text-primary-foreground bg-primary text-[10px] font-medium">
-                  {getInitials(editedAnalysis.company_name || "")}
+                  {getInitials(analysis.company_name || "")}
                 </AvatarFallback>
               )}
             </Avatar>
             <span className="text-sm font-semibold font-serif text-foreground truncate">
-              {editedAnalysis.company_name}
+              {analysis.company_name}
             </span>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            {isAdmin && (
-              <div className="hidden sm:flex px-2.5 py-1 rounded-full text-[11px] font-mono font-medium bg-score-good/15 border border-score-good/30 text-score-good items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-score-good animate-pulse" />
-                Admin
-              </div>
-            )}
             <Button variant="outline" size="sm" onClick={handleShare} className="gap-1.5">
               <Share2 className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Share</span>
@@ -1083,24 +856,12 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-semibold font-serif text-foreground mb-6">
-              <EditableText
-                value={editedAnalysis.company_name || ""}
-                onSave={(val) => handleInlineSave("company_name", val)}
-                isAdmin={isAdmin}
-                textClassName="font-serif"
-              />
-            </h1>
+            <h1 className="text-3xl sm:text-4xl font-semibold font-serif text-foreground mb-6">{analysis.company_name}</h1>
 
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-4 mb-8">
               <div>
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Price band</div>
-                <EditableText
-                  value={formattedPriceBand}
-                  onSave={(val) => handleInlineSave("ipo_details.price_band", val)}
-                  isAdmin={isAdmin}
-                  textClassName="text-lg font-mono font-semibold text-foreground"
-                />
+                <span className="text-lg font-mono font-semibold text-foreground">{formattedPriceBand}</span>
               </div>
               <div>
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Lot size</div>
@@ -1116,16 +877,10 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </div>
               <div>
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Issue size</div>
-                <EditableText
-                  value={editedAnalysis.ipo_details?.issue_size || ""}
-                  onSave={(val) => handleInlineSave("ipo_details.issue_size", val)}
-                  isAdmin={isAdmin}
-                  textClassName="text-lg font-mono font-semibold text-foreground"
-                />
+                <span className="text-lg font-mono font-semibold text-foreground">{analysis.ipo_details?.issue_size || ""}</span>
               </div>
               <div>
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">GMP</div>
-                {/* Live scraper value; admins correct the listing estimate below instead. */}
                 <div className="text-lg font-mono font-semibold text-score-good">{gmpTile}</div>
               </div>
             </div>
@@ -1162,13 +917,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               <h3 className={cn("text-xs font-mono uppercase tracking-wide text-muted-foreground", !hasGmp && "mb-2")}>Estimated listing</h3>
               {hasGmp ? (
                 <p className="font-mono text-xl sm:text-2xl font-semibold text-score-good">
-                  <EditableText
-                    value={gmpValue}
-                    onSave={(val) => handleInlineSave("gmp_price_gain", val)}
-                    isAdmin={isAdmin}
-                    textClassName="font-mono"
-                    renderText={(val) => <span>₹{val}</span>}
-                  />
+                  <span className="font-mono">₹{gmpValue}</span>
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">
@@ -1179,55 +928,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
             {/* Fetches its own series client-side, so the ISR cache does not freeze it. */}
             <div className="mt-4">
-              <GmpTrendChart ipoId={ipo._id} companyName={editedAnalysis.company_name} />
+              <GmpTrendChart ipoId={ipo._id} companyName={analysis.company_name} />
             </div>
 
           </div>
 
           {/* Timeline */}
-          <div
-            className="rounded-xl border border-border bg-card p-5 sm:p-6"
-            onDoubleClick={(e) => {
-              if (isAdmin && !isEditingTimeline) {
-                const target = e.target as HTMLElement;
-                if (target.closest("button") || target.closest("a") || target.closest("input")) return;
-                setIsEditingTimeline(true);
-                toast.info("Timeline editor active", { description: "Move the mouse away from the panel to close." });
-              }
-            }}
-          >
-            <h3 className="text-sm font-mono uppercase tracking-wide text-muted-foreground mb-2 select-none">
-              Timeline {isAdmin && <span className="normal-case text-primary">(double-click to edit dates)</span>}
-            </h3>
-            {isAdmin && isEditingTimeline && (
-              <div
-                className="bg-accent border border-border p-4 rounded-lg mb-4 grid grid-cols-2 md:grid-cols-5 gap-4"
-                onMouseLeave={() => setIsEditingTimeline(false)}
-              >
-                {timelineInputs.map(({ label, value, path }) => (
-                  <div key={label} className="flex flex-col gap-1">
-                    <label className="text-xs font-mono text-muted-foreground">{label}</label>
-                    <input
-                      type="date"
-                      value={value ? value.split("T")[0] : ""}
-                      onChange={(e) => handleInlineSave(path, e.target.value)}
-                      className="bg-card border border-border rounded px-2 py-1 text-sm outline-none focus:border-primary"
-                    />
-                  </div>
-                ))}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-mono text-muted-foreground">Timing score</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={10}
-                    value={editedAnalysis.time?.score ?? 5}
-                    onChange={(e) => handleInlineSave("time.score", parseInt(e.target.value) || 0)}
-                    className="bg-card border border-border rounded px-2 py-1 text-sm outline-none focus:border-primary font-bold"
-                  />
-                </div>
-              </div>
-            )}
+          <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+            <h3 className="text-sm font-mono uppercase tracking-wide text-muted-foreground mb-2 select-none">Timeline</h3>
             <AnalysisTimeline
               opening={timelineData.opening}
               closing={timelineData.closing}
@@ -1333,7 +1041,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         </section>
 
         {/* 01 Timing */}
-        {editedAnalysis.time && (
+        {analysis.time && (
           <section
             ref={sectionRef("timing")}
             id="timing"
@@ -1342,8 +1050,6 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               num="01"
               title="Timing"
               score={timeScore}
-              isAdmin={isAdmin}
-              onSaveScore={(val) => handleInlineSave("time.score", parseInt(val) || 0)}
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
@@ -1353,7 +1059,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Issue size</div>
-                <div className="text-lg font-serif font-semibold text-foreground">{formatIssueSize(editedAnalysis.ipo_details?.issue_size) || "Size TBA"}</div>
+                <div className="text-lg font-serif font-semibold text-foreground">{formatIssueSize(analysis.ipo_details?.issue_size) || "Size TBA"}</div>
               </div>
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Market timing</div>
@@ -1363,20 +1069,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               </div>
             </div>
 
-            {editedAnalysis.time.market_timing_assessment && (
-              <EditableText
-                value={editedAnalysis.time.market_timing_assessment}
-                onSave={(val) => handleInlineSave("time.market_timing_assessment", val)}
-                type="textarea"
-                isAdmin={isAdmin}
-                textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
-              />
+            {analysis.time.market_timing_assessment && (
+              <span className="text-base text-foreground whitespace-pre-wrap block leading-relaxed">{analysis.time.market_timing_assessment}</span>
             )}
           </section>
         )}
 
         {/* 02 Financials */}
-        {editedAnalysis.fundamentals && (
+        {analysis.fundamentals && (
           <section
             ref={sectionRef("financials")}
             id="financials"
@@ -1385,41 +1085,21 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               num="02"
               title="Financials"
               score={fundamentalsScore}
-              isAdmin={isAdmin}
-              onSaveScore={(val) => handleInlineSave("fundamentals.score", parseInt(val) || 0)}
             />
-            <EditableText
-              value={editedAnalysis.fundamentals.summary}
-              onSave={(val) => handleInlineSave("fundamentals.summary", val)}
-              type="textarea"
-              isAdmin={isAdmin}
-              textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
-            />
+            <span className="text-base text-foreground whitespace-pre-wrap block leading-relaxed">{analysis.fundamentals.summary}</span>
 
             {/* Debt and offer structure; older analyses do not carry these fields. */}
-            {(editedAnalysis.fundamentals.debt || editedAnalysis.fundamentals.offer_structure) && (
+            {(analysis.fundamentals.debt || analysis.fundamentals.offer_structure) && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-                {editedAnalysis.fundamentals.debt && (
+                {analysis.fundamentals.debt && (
                   <div className="rounded-xl border border-border bg-card p-5">
                     <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Debt on the company</div>
-                    <EditableText
-                      value={editedAnalysis.fundamentals.debt.total_debt || "Not stated"}
-                      onSave={(val) => handleInlineSave("fundamentals.debt.total_debt", val)}
-                      isAdmin={isAdmin}
-                      textClassName="text-lg font-serif font-semibold text-foreground"
-                    />
-                    <EditableText
-                      value={editedAnalysis.fundamentals.debt.summary}
-                      onSave={(val) => handleInlineSave("fundamentals.debt.summary", val)}
-                      type="textarea"
-                      isAdmin={isAdmin}
-                      className="mt-2 block"
-                      textClassName="text-sm text-muted-foreground whitespace-pre-wrap block"
-                    />
+                    <span className="text-lg font-serif font-semibold text-foreground">{analysis.fundamentals.debt.total_debt || "Not stated"}</span>
+                    <span className="mt-2 block text-sm text-muted-foreground whitespace-pre-wrap">{analysis.fundamentals.debt.summary}</span>
                   </div>
                 )}
-                {editedAnalysis.fundamentals.offer_structure && (() => {
-                  const offer = editedAnalysis.fundamentals.offer_structure;
+                {analysis.fundamentals.offer_structure && (() => {
+                  const offer = analysis.fundamentals.offer_structure;
                   return (
                     <div className="rounded-xl border border-border bg-card p-5">
                       <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Who is selling, and why</div>
@@ -1444,30 +1124,16 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                         )}
                       </div>
                       {offer.selling_shareholders && offer.selling_shareholders !== "None" && (
-                        <EditableText
-                          value={offer.selling_shareholders}
-                          onSave={(val) => handleInlineSave("fundamentals.offer_structure.selling_shareholders", val)}
-                          type="textarea"
-                          isAdmin={isAdmin}
-                          className="block mb-2"
-                          textClassName="text-sm text-foreground whitespace-pre-wrap block"
-                        />
+                        <span className="block mb-2 text-sm text-foreground whitespace-pre-wrap">{offer.selling_shareholders}</span>
                       )}
-                      <EditableText
-                        value={offer.why_selling}
-                        onSave={(val) => handleInlineSave("fundamentals.offer_structure.why_selling", val)}
-                        type="textarea"
-                        isAdmin={isAdmin}
-                        className="block"
-                        textClassName="text-sm text-muted-foreground whitespace-pre-wrap block"
-                      />
+                      <span className="block text-sm text-muted-foreground whitespace-pre-wrap">{offer.why_selling}</span>
                     </div>
                   );
                 })()}
               </div>
             )}
 
-            {editedAnalysis.financialReport && editedAnalysis.financialReport.length > 0 && (
+            {analysis.financialReport && analysis.financialReport.length > 0 && (
               <Card className="mt-8">
                 <CardHeader>
                   <CardTitle className="text-lg font-serif font-semibold">Financial Performance Trend</CardTitle>
@@ -1477,7 +1143,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                   <div className="h-80 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart
-                        data={editedAnalysis.financialReport.map((report) => ({
+                        data={analysis.financialReport.map((report) => ({
                           year: `FY ${report.period_ended}`,
                           Revenue: parseFloat(report.revenue || "0"),
                           Expense: parseFloat(report.expense || "0"),
@@ -1503,28 +1169,15 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             <div className="mt-8">
               <h3 className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">Profitability of allotment</h3>
               <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] gap-4 items-start rounded-xl border border-border bg-card p-5">
-                <EditableText
-                  value={editedAnalysis.ipo_details?.profitability_of_allotment?.score ?? 0}
-                  onSave={(val) => handleInlineSave("ipo_details.profitability_of_allotment.score", parseInt(val) || 0)}
-                  type="number"
-                  isAdmin={isAdmin}
-                  textClassName={cn("font-serif text-3xl font-semibold", scoreStyle(editedAnalysis.ipo_details?.profitability_of_allotment?.score ?? 0).text)}
-                  renderText={(val) => <span>{val}/10</span>}
-                />
-                <EditableText
-                  value={editedAnalysis.ipo_details?.profitability_of_allotment?.assessment ?? ""}
-                  onSave={(val) => handleInlineSave("ipo_details.profitability_of_allotment.assessment", val)}
-                  type="textarea"
-                  isAdmin={isAdmin}
-                  textClassName="text-sm text-foreground"
-                />
+                <span className={cn("font-serif text-3xl font-semibold", scoreStyle(analysis.ipo_details?.profitability_of_allotment?.score ?? 0).text)}>{analysis.ipo_details?.profitability_of_allotment?.score ?? 0}/10</span>
+                <span className="text-sm text-foreground">{analysis.ipo_details?.profitability_of_allotment?.assessment ?? ""}</span>
               </div>
             </div>
           </section>
         )}
 
         {/* 03 Risk */}
-        {editedAnalysis.risk_meter && (
+        {analysis.risk_meter && (
           <section
             ref={sectionRef("risk")}
             id="risk"
@@ -1533,23 +1186,14 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               num="03"
               title="Risk"
               score={riskScore}
-              isAdmin={isAdmin}
-              onSaveScore={(val) => handleInlineSave("risk_meter.score", parseInt(val) || 0)}
             />
             <p className="text-xs text-muted-foreground italic mb-4">
               Read this score as a safety rating: 10/10 means the lowest risk, 1/10 the highest.
             </p>
-            <EditableText
-              value={editedAnalysis.risk_meter.summary}
-              onSave={(val) => handleInlineSave("risk_meter.summary", val)}
-              type="textarea"
-              isAdmin={isAdmin}
-              className="mb-8 block"
-              textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
-            />
-            {editedAnalysis.risk_meter.risk_categories && (
+            <span className="mb-8 block text-base text-foreground whitespace-pre-wrap leading-relaxed">{analysis.risk_meter.summary}</span>
+            {analysis.risk_meter.risk_categories && (
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-                {Object.entries(editedAnalysis.risk_meter.risk_categories).map(([category, risks]) => (
+                {Object.entries(analysis.risk_meter.risk_categories).map(([category, risks]) => (
                   <Card key={category}>
                     <CardHeader>
                       <CardTitle className={cn("capitalize text-base font-serif font-semibold", RISK_CATEGORY_COLORS[category] || "text-muted-foreground")}>
@@ -1557,19 +1201,11 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <EditableText
-                        value={(risks as string[]).join("\n")}
-                        onSave={(val) => handleInlineArraySave(`risk_meter.risk_categories.${category}`, val)}
-                        type="textarea"
-                        isAdmin={isAdmin}
-                        renderText={(val) => (
-                          <ul className="list-disc list-outside space-y-2 pl-5 text-sm">
-                            {val.split("\n").filter((a) => a.trim() !== "").map((risk, i) => (
-                              <li key={i} className="text-foreground">{risk}</li>
-                            ))}
-                          </ul>
-                        )}
-                      />
+                      <ul className="list-disc list-outside space-y-2 pl-5 text-sm">
+                        {(risks as string[]).filter((risk) => risk.trim() !== "").map((risk, i) => (
+                          <li key={i} className="text-foreground">{risk}</li>
+                        ))}
+                      </ul>
                     </CardContent>
                   </Card>
                 ))}
@@ -1579,7 +1215,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         )}
 
         {/* 04 Performance */}
-        {editedAnalysis.performance && (
+        {analysis.performance && (
           <section
             ref={sectionRef("performance")}
             id="performance"
@@ -1588,109 +1224,72 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               num="04"
               title="Performance"
               score={performanceScore}
-              isAdmin={isAdmin}
-              onSaveScore={(val) => handleInlineSave("performance.score", parseInt(val) || 0)}
             />
-            <EditableText
-              value={editedAnalysis.performance.summary}
-              onSave={(val) => handleInlineSave("performance.summary", val)}
-              type="textarea"
-              isAdmin={isAdmin}
-              className="mb-8 block"
-              textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
-            />
+            <span className="mb-8 block text-base text-foreground whitespace-pre-wrap leading-relaxed">{analysis.performance.summary}</span>
 
             <div className="space-y-8">
-              {editedAnalysis.performance.management_quality && (
+              {analysis.performance.management_quality && (
                 <div className="rounded-xl border border-border bg-card p-5">
                   <div className="max-w-xs mb-4">
                     <ScoreBar
                       label="Management quality"
-                      score={editedAnalysis.performance.management_quality.score || 0}
-                      isAdmin={isAdmin}
-                      onSaveScore={(val) => handleInlineSave("performance.management_quality.score", parseInt(val) || 0)}
+                      score={analysis.performance.management_quality.score || 0}
                     />
                   </div>
                   <div className="grid sm:grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Experience</div>
-                      <EditableText
-                        value={editedAnalysis.performance.management_quality.experience || ""}
-                        onSave={(val) => handleInlineSave("performance.management_quality.experience", val)}
-                        type="textarea"
-                        isAdmin={isAdmin}
-                        textClassName="text-foreground"
-                      />
+                      <span className="text-foreground">{analysis.performance.management_quality.experience || ""}</span>
                     </div>
                     <div>
                       <div className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-1">Track record</div>
-                      <EditableText
-                        value={editedAnalysis.performance.management_quality.track_record || ""}
-                        onSave={(val) => handleInlineSave("performance.management_quality.track_record", val)}
-                        type="textarea"
-                        isAdmin={isAdmin}
-                        textClassName="text-foreground"
-                      />
+                      <span className="text-foreground">{analysis.performance.management_quality.track_record || ""}</span>
                     </div>
                   </div>
                 </div>
               )}
 
               <div className="grid sm:grid-cols-2 gap-4">
-                {editedAnalysis.performance.historical_growth?.pattern && (
+                {analysis.performance.historical_growth?.pattern && (
                   <div className="rounded-xl border border-border bg-card p-5">
                     <h4 className="font-serif font-semibold text-foreground mb-1.5">Historical growth</h4>
                     <p className="text-sm text-muted-foreground">
-                      {editedAnalysis.performance.historical_growth.pattern}
-                      {editedAnalysis.performance.historical_growth.rate ? ` — ${editedAnalysis.performance.historical_growth.rate}` : ""}
+                      {analysis.performance.historical_growth.pattern}
+                      {analysis.performance.historical_growth.rate ? ` — ${analysis.performance.historical_growth.rate}` : ""}
                     </p>
                   </div>
                 )}
-                {editedAnalysis.performance.market_comparison && (
+                {analysis.performance.market_comparison && (
                   <div className="rounded-xl border border-border bg-card p-5">
                     <h4 className="font-serif font-semibold text-foreground mb-1.5">Market comparison</h4>
-                    <EditableText
-                      value={editedAnalysis.performance.market_comparison}
-                      onSave={(val) => handleInlineSave("performance.market_comparison", val)}
-                      type="textarea"
-                      isAdmin={isAdmin}
-                      textClassName="text-sm text-muted-foreground whitespace-pre-wrap block"
-                    />
+                    <span className="text-sm text-muted-foreground whitespace-pre-wrap block">{analysis.performance.market_comparison}</span>
                   </div>
                 )}
-                {editedAnalysis.performance.future_potential?.growth_forecast && (
+                {analysis.performance.future_potential?.growth_forecast && (
                   <div className="rounded-xl border border-border bg-card p-5">
                     <h4 className="font-serif font-semibold text-foreground mb-1.5">Future potential</h4>
-                    <p className="text-sm text-muted-foreground">{editedAnalysis.performance.future_potential.growth_forecast}</p>
+                    <p className="text-sm text-muted-foreground">{analysis.performance.future_potential.growth_forecast}</p>
                   </div>
                 )}
-                {editedAnalysis.performance.consistency_analysis?.rationale && (
+                {analysis.performance.consistency_analysis?.rationale && (
                   <div className="rounded-xl border border-border bg-card p-5">
                     <h4 className="font-serif font-semibold text-foreground mb-1.5">Operational consistency</h4>
-                    <p className="text-sm text-muted-foreground">{editedAnalysis.performance.consistency_analysis.rationale}</p>
+                    <p className="text-sm text-muted-foreground">{analysis.performance.consistency_analysis.rationale}</p>
                   </div>
                 )}
               </div>
 
-              {editedAnalysis.performance.key_achievements && editedAnalysis.performance.key_achievements.length > 0 && (
+              {analysis.performance.key_achievements && analysis.performance.key_achievements.length > 0 && (
                 <div>
                   <h4 className="text-xs font-mono uppercase tracking-wide text-muted-foreground mb-3">Key achievements</h4>
-                  <EditableText
-                    value={editedAnalysis.performance.key_achievements.join("\n")}
-                    onSave={(val) => handleInlineArraySave("performance.key_achievements", val)}
-                    type="textarea"
-                    isAdmin={isAdmin}
-                    renderText={(val) => (
-                      <ul className="space-y-2 text-sm">
-                        {val.split("\n").filter((a) => a.trim() !== "").map((achievement, index) => (
-                          <li key={index} className="flex items-start gap-2 text-foreground">
-                            <TrendingUp className="h-3.5 w-3.5 text-score-good mt-0.5 flex-shrink-0" />
-                            <span>{achievement}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  />
+                  <ul className="space-y-2 text-sm">
+                    {analysis.performance.key_achievements.filter((a) => a.trim() !== "").map((achievement, index) => (
+                      <li key={index} className="flex items-start gap-2 text-foreground">
+                        <TrendingUp className="h-3.5 w-3.5 text-score-good mt-0.5 flex-shrink-0" />
+                        <span>{achievement}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
             </div>
@@ -1698,7 +1297,7 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
         )}
 
         {/* 05 Flexibility */}
-        {editedAnalysis.flexibility && (
+        {analysis.flexibility && (
           <section
             ref={sectionRef("flexibility")}
             id="flexibility"
@@ -1707,53 +1306,33 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
               num="05"
               title="Flexibility"
               score={flexibilityScore}
-              isAdmin={isAdmin}
-              onSaveScore={(val) => handleInlineSave("flexibility.score", parseInt(val) || 0)}
             />
-            <EditableText
-              value={editedAnalysis.flexibility.summary}
-              onSave={(val) => handleInlineSave("flexibility.summary", val)}
-              type="textarea"
-              isAdmin={isAdmin}
-              className="mb-8 block"
-              textClassName="text-base text-foreground whitespace-pre-wrap block leading-relaxed"
-            />
+            <span className="mb-8 block text-base text-foreground whitespace-pre-wrap leading-relaxed">{analysis.flexibility.summary}</span>
 
             <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5 mb-8">
               {[
                 {
                   label: "Market adaptability",
-                  metric: editedAnalysis.flexibility.market_adaptability,
-                  path: "flexibility.market_adaptability",
+                  metric: analysis.flexibility.market_adaptability,
                 },
                 {
                   label: "Financial stability",
-                  metric: editedAnalysis.flexibility.financial_stability,
-                  path: "flexibility.financial_stability",
+                  metric: analysis.flexibility.financial_stability,
                 },
                 {
                   label: "Operational agility",
-                  metric: editedAnalysis.flexibility.operational_agility,
-                  path: "flexibility.operational_agility",
+                  metric: analysis.flexibility.operational_agility,
                 },
-              ].map(({ label, metric, path }) => {
+              ].map(({ label, metric }) => {
                 if (!metric || metric.score === null || metric.score === undefined) return null;
                 return (
                   <div key={label} className="space-y-1.5">
                     <ScoreBar
                       label={label}
                       score={metric.score}
-                      isAdmin={isAdmin}
-                      onSaveScore={(val) => handleInlineSave(`${path}.score`, parseInt(val) || 0)}
                     />
                     {metric.description && (
-                      <EditableText
-                        value={metric.description}
-                        onSave={(val) => handleInlineSave(`${path}.description`, val)}
-                        type="textarea"
-                        isAdmin={isAdmin}
-                        textClassName="text-sm text-muted-foreground block"
-                      />
+                      <span className="text-sm text-muted-foreground block">{metric.description}</span>
                     )}
                   </div>
                 );
@@ -1761,16 +1340,16 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
             </div>
 
             <div className="grid sm:grid-cols-2 gap-6">
-              {editedAnalysis.flexibility.product_diversification && (
+              {analysis.flexibility.product_diversification && (
                 <div>
                   <h4 className="font-serif font-semibold text-foreground mb-1.5">Product diversification</h4>
-                  <p className="text-sm text-muted-foreground">{editedAnalysis.flexibility.product_diversification}</p>
+                  <p className="text-sm text-muted-foreground">{analysis.flexibility.product_diversification}</p>
                 </div>
               )}
-              {editedAnalysis.flexibility.future_adaptability_potential && (
+              {analysis.flexibility.future_adaptability_potential && (
                 <div>
                   <h4 className="font-serif font-semibold text-foreground mb-1.5">Future adaptability</h4>
-                  <p className="text-sm text-muted-foreground">{editedAnalysis.flexibility.future_adaptability_potential}</p>
+                  <p className="text-sm text-muted-foreground">{analysis.flexibility.future_adaptability_potential}</p>
                 </div>
               )}
             </div>
@@ -1780,33 +1359,10 @@ export default function AnalysisPageClient({ analysis, ipo }: AnalysisPageClient
 
       <AllotmentPredictorModal
         ipo={ipo}
-        companyName={editedAnalysis.company_name}
+        companyName={analysis.company_name}
         initialCategory={predictorCategory}
         onClose={() => setPredictorCategory(null)}
       />
-
-      {isAdmin && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-4 bg-card border border-border p-4 rounded-xl shadow-2xl">
-          <div className="flex items-center gap-3">
-            {isSaving ? (
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                <Loader2 className="h-4 w-4 text-primary animate-spin" />
-              </div>
-            ) : (
-              <div className="h-8 w-8 rounded-full bg-score-good/10 flex items-center justify-center border border-score-good/20">
-                <span className="h-2 w-2 rounded-full bg-score-good animate-pulse" />
-              </div>
-            )}
-            <div className="flex flex-col">
-              <span className="text-xs font-mono uppercase tracking-wide text-muted-foreground">Admin</span>
-              <span className="text-sm font-semibold text-foreground">
-                {isSaving ? "Saving changes..." : "Inline editing active"}
-              </span>
-              <span className="text-[10px] text-muted-foreground mt-0.5">Double-click any field to edit</span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

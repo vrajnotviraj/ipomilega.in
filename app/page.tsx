@@ -14,7 +14,7 @@ import { AnimatedSection } from '@/components/home/AnimatedSection';
 import { BoardProvider } from '@/components/home/BoardContext';
 import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/share';
 
-// Served from the ISR cache; admin edits and /api/revalidate purge it sooner.
+// Served from the ISR cache; /api/revalidate purges it sooner.
 export const revalidate = 60;
 
 export const metadata: Metadata = {

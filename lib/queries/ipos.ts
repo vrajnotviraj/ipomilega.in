@@ -18,8 +18,6 @@ const IPO_CARD_PROJECTION = {
   financial_report: 0,
 } as const;
 
-const IPO_FULL_PROJECTION = { tables_raw: 0 } as const;
-
 // Cards show only risk_meter.score from the analysis document.
 const ANALYSIS_CARD_PROJECTION = {
   ipo_table_id: 1,
@@ -115,27 +113,18 @@ function bucketIpos(ipoList: RawIpo[]) {
   };
 }
 
-/** Reads IPOs and analyses in parallel; `full` returns complete records for admin. */
-async function readIpoDocs(full: boolean) {
+// Only raw documents are cached: bucketing depends on today's date.
+const readCardIpoDocs = cached(async () => {
   const db = await getDb();
   const [ipos, analyses] = await Promise.all([
-    db
-      .collection('ipos')
-      .find({}, { projection: full ? IPO_FULL_PROJECTION : IPO_CARD_PROJECTION })
-      .toArray(),
-    db
-      .collection('ipo_comprehensive_analysis')
-      .find({}, full ? {} : { projection: ANALYSIS_CARD_PROJECTION })
-      .toArray(),
+    db.collection('ipos').find({}, { projection: IPO_CARD_PROJECTION }).toArray(),
+    db.collection('ipo_comprehensive_analysis').find({}, { projection: ANALYSIS_CARD_PROJECTION }).toArray(),
   ]);
   return toPlain({ ipos, analyses });
-}
+}, 'ipo-card-docs');
 
-// Only raw documents are cached: bucketing depends on today's date.
-const readCardIpoDocs = cached(() => readIpoDocs(false), 'ipo-card-docs');
-
-async function loadIpoBuckets(full: boolean) {
-  const { ipos, analyses } = full ? await readIpoDocs(true) : await readCardIpoDocs();
+async function loadIpoBuckets() {
+  const { ipos, analyses } = await readCardIpoDocs();
 
   const analysisByIpoId = new Map<string, IpoComprehensiveAnalysis>();
   for (const analysis of analyses as unknown as IpoComprehensiveAnalysis[]) {
@@ -160,14 +149,8 @@ async function loadIpoBuckets(full: boolean) {
   };
 }
 
-/**
- * Buckets for public pages, with card-sized documents. Under the card projection `analysis`
- * holds only ANALYSIS_CARD_PROJECTION fields; public consumers read just risk_meter.score.
- */
-export const getIpoBuckets = cache(() => loadIpoBuckets(false));
-
-/** Buckets for the admin console: complete IPO and analysis documents. */
-export const getIpoBucketsFull = cache(() => loadIpoBuckets(true));
+/** IPO buckets for public pages. `analysis` holds only ANALYSIS_CARD_PROJECTION fields; consumers read just risk_meter.score. */
+export const getIpoBuckets = cache(loadIpoBuckets);
 
 type AnalysisPage = { ipos_analysis: IpoComprehensiveAnalysis; ipo: Ipo };
 

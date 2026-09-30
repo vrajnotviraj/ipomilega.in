@@ -1,7 +1,7 @@
 import 'server-only';
 import { unstable_cache } from 'next/cache';
 
-/** Tag on every cached public read; revalidateSite() purges it after each write. */
+/** Tag on every cached public read; /api/revalidate purges it after each engine write. */
 export const SITE_DATA_TAG = 'site-data';
 
 /** Caches a public Mongo read for 5 minutes. Results must be JSON-serialisable. */
