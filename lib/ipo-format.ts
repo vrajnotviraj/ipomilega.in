@@ -173,6 +173,16 @@ export const formatIpoDate = (raw: string | null | undefined, withYear = false):
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: withYear ? 'numeric' : undefined });
 };
 
+/** A scrape timestamp as "30 Sep, 15:35 IST". Timestamps without an offset are UTC. Null when it doesn't parse. */
+export const formatIstTimestamp = (raw: string | null | undefined): string | null => {
+  if (!raw) return null;
+  const date = new Date(/Z|[+-]\d\d:?\d\d$/.test(raw) ? raw : `${raw}Z`);
+  if (Number.isNaN(date.getTime())) return null;
+  const day = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
+  const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
+  return `${day}, ${time} IST`;
+};
+
 /** "18 Aug" (or "18 Aug 2026" with the year), or "TBA". */
 export const formatShortDate = (raw: string | undefined, withYear = false): string => formatIpoDate(raw, withYear) ?? 'TBA';
 

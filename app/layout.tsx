@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { DM_Mono, Figtree, Schibsted_Grotesk } from "next/font/google";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { openGraphBase, SITE_NAME } from "@/lib/seo/share";
+import { JsonLd, siteJsonLd } from "@/lib/seo/json-ld";
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
 const schibsted = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibsted", preload: false });
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${figtree.variable} ${schibsted.variable} ${dmMono.variable}`}>
       <body className="min-h-screen">
+        <JsonLd data={siteJsonLd} />
         <SiteChrome>{children}</SiteChrome>
       </body>
     </html>

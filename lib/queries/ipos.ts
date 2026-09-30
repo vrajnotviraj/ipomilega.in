@@ -1,5 +1,6 @@
 import 'server-only';
 import { cache } from 'react';
+import { ObjectId } from 'mongodb';
 import { cached } from '@/lib/db/cache';
 import { getDb, toPlain } from '@/lib/db/mongo';
 import { Ipo } from '@/types/ipo';
@@ -139,3 +140,13 @@ export const getAnalysisSlugs = cache(cached(async (): Promise<AnalysisSlug[]> =
     .toArray();
   return toPlain(docs) as unknown as AnalysisSlug[];
 }, 'analysis-slugs'));
+
+/** An IPO's name and its entity-page slug, which is null until the IPO has an analysis page. */
+export const getIpoLink = cache(cached(async (ipoId: string) => {
+  const db = await getDb();
+  const analysis = await db.collection('ipo_comprehensive_analysis').findOne({ ipo_table_id: ipoId }, { projection: { company_name: 1, slug: 1 } });
+  if (analysis?.slug) return { name: analysis.company_name as string, slug: analysis.slug as string };
+  if (!ObjectId.isValid(ipoId)) return null;
+  const ipo = await db.collection('ipos').findOne({ _id: new ObjectId(ipoId) }, { projection: { upcoming_ipo_2025: 1 } });
+  return ipo ? { name: ipo.upcoming_ipo_2025 as string, slug: null } : null;
+}, 'ipo-link'));

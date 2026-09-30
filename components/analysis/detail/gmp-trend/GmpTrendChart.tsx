@@ -20,7 +20,10 @@ export function GmpTrendChart({ ipoId, companyName }: { ipoId: string; companyNa
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">GMP trend</h3>
+        <div>
+          <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">GMP trend</h3>
+          <p className="text-xs text-muted-foreground">Unofficial grey market quotes, times in IST</p>
+        </div>
         {hasPoints && (
           <button
             type="button"

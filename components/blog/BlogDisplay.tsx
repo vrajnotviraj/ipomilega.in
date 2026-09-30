@@ -1,7 +1,8 @@
-import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
 import { Blog } from "@/types/ipo";
+import type { getIpoLink } from "@/lib/queries/ipos";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { IpoArticleLinks } from "@/components/blog/IpoArticleLinks";
 import { ArrowLink } from "@/components/ui/ArrowLink";
 import MarkdownRenderer from "@/components/blog/MarkDown";
 import { RelatedIpoCard } from "@/components/blog/RelatedIpoCard";
@@ -35,6 +36,14 @@ function PostHeader({ blog }: { blog: Blog }) {
         <span className="font-medium text-foreground">{blog.author}</span>
         <span aria-hidden>·</span>
         <time dateTime={blog.created_at} className="font-mono tabular-nums">{formatBlogDate(blog.created_at)}</time>
+        {blog.updated_at && blog.updated_at !== blog.created_at && (
+          <>
+            <span aria-hidden>·</span>
+            <span>
+              Updated <time dateTime={blog.updated_at} className="font-mono tabular-nums">{formatBlogDate(blog.updated_at)}</time>
+            </span>
+          </>
+        )}
         <span aria-hidden>·</span>
         <span><span className="font-mono tabular-nums">{readTimeOf(blog)}</span> min read</span>
       </p>
@@ -56,18 +65,22 @@ function PostFooter({ blog }: { blog: Blog }) {
   );
 }
 
-/** A single blog post: header, related IPO, the article body and a path back to the IPO list. */
-export default function BlogDisplay({ blog }: { blog: Blog }) {
+type IpoLink = NonNullable<Awaited<ReturnType<typeof getIpoLink>>>;
+
+/** The IPO's entity page, or the IPO list until it has one. */
+const entityLink = (ipo: IpoLink) =>
+  ipo.slug
+    ? { href: `/analysis/${ipo.slug}`, label: `${ipo.name} IPO: GMP, price, dates, lot size and allotment` }
+    : { href: "/ipos", label: "All IPOs: live, upcoming and listed" };
+
+/** A single blog post: breadcrumb, header, related IPO, the article body and links to more on the same IPO. */
+export default function BlogDisplay({ blog, ipo, articles }: { blog: Blog; ipo: IpoLink | null; articles: Blog[] }) {
   return (
     <div className="app-container min-h-screen pt-24 pb-16">
       <div className="mb-8 flex items-center justify-between gap-4">
-        <Link
-          href="/blogs"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground active:text-foreground"
-        >
-          <ArrowLeft className="size-4" strokeWidth={2} />
-          Back to blog
-        </Link>
+        <div className="min-w-0">
+          <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: "Blog", href: "/blogs" }, { name: blog.title, href: `/blogs/${blog.slug}` }]} />
+        </div>
         <ShareButton title={blog.title} text={blog.excerpt} url />
       </div>
 
@@ -79,6 +92,12 @@ export default function BlogDisplay({ blog }: { blog: Blog }) {
       </article>
 
       <PostFooter blog={blog} />
+
+      {ipo && (
+        <div className="mb-12">
+          <IpoArticleLinks title={`More on ${ipo.name} IPO`} lead={entityLink(ipo)} blogs={articles} />
+        </div>
+      )}
 
       <section className="flex flex-col items-start gap-4 rounded-[18px] bg-secondary p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
         <p className="text-lg font-medium text-foreground">See every live, upcoming and listed IPO in one list.</p>

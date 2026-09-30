@@ -3,6 +3,7 @@ import type { Ipo } from "@/types/ipo";
 import { ArrowUpRight } from "lucide-react";
 import {
   formatIssueSize,
+  formatIstTimestamp,
   formatPriceBand,
   getAllotmentCheckUrl,
   getIpoType,
@@ -26,6 +27,7 @@ import { Eyebrow } from "./primitives";
 export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { opening, closing } = getIssueDates(analysis);
   const allotmentUrl = getAllotmentCheckUrl(ipo);
+  const gmpUpdatedAt = formatIstTimestamp(ipo.gmp_scraped_at);
 
   return (
     <div className="rounded-[18px] border border-border bg-card p-5 sm:p-8">
@@ -40,7 +42,12 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12">
         <ScoreVerdict score={overallScoreOf(analysis)} verdict={getVerdict(analysis)} />
         <div className="min-w-0 space-y-6">
-          <HeadlineFigures figures={getHeadlineFigures(analysis, ipo)} />
+          <div>
+            <HeadlineFigures figures={getHeadlineFigures(analysis, ipo)} />
+            <p className="mt-2 text-xs text-muted-foreground">
+              {`GMP is an unofficial grey market indication.${gmpUpdatedAt ? ` Updated ${gmpUpdatedAt}.` : ""}`}
+            </p>
+          </div>
           <KeyFacts analysis={analysis} />
           {allotmentUrl && <AllotmentCheckLink href={allotmentUrl} />}
         </div>

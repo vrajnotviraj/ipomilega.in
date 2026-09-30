@@ -13,6 +13,7 @@ export interface Blog {
   ipo_id: string
   created_at: string
   updated_at: string
+  article_type?: "analysis" | "subscription" | "allotment" | "listing"
 }
 
 export interface Ipo {

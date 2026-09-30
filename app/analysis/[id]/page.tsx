@@ -4,8 +4,10 @@ import { getShareFacts } from "@/components/analysis/detail/analysis-facts"
 import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis"
 import { Ipo } from '@/types/ipo';
 import { getAnalysisBySlug, getAnalysisSlugs } from '@/lib/queries/ipos';
-import { buildShareDescription, closingLine, gmpLine, overallScoreOf, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
-import { formatIpoDate } from '@/lib/ipo-format';
+import { getIpoArticles } from '@/lib/queries/blogs';
+import { buildShareDescription, gmpLine, overallScoreOf, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
+import { JsonLd, ORGANIZATION_ID } from '@/lib/seo/json-ld';
+import { formatIpoDate, formatIstTimestamp } from '@/lib/ipo-format';
 import { FileSearch } from 'lucide-react';
 import { ArrowLink } from '@/components/ui/ArrowLink';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -33,43 +35,20 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     return {
       title: 'IPO analysis not found',
       description: "We couldn't find an analysis for this IPO.",
+      robots: { index: false },
     }
   }
 
-  const gmp = gmpLine(analysis.gmp_price_gain ?? ipo?.gmp_price_gain)
-  const deadline = closingLine(analysis.time?.issue_dates?.closing, analysis.time?.issue_dates?.opening)
-
-  const title = [`${analysis.company_name} IPO`, gmp, deadline?.replace(/\.$/, '')]
-    .filter(Boolean)
-    .join(' \u00b7 ')
+  const title = entityTitle(analysis.company_name)
 
   const description = buildShareDescription({
     ...getShareFacts(analysis, ipo!),
     score: Number(overallScoreOf(analysis).toFixed(1)),
   })
 
-  const keywords = [
-    `${analysis.company_name} IPO`,
-    `${analysis.company_name} IPO analysis`,
-    `${analysis.company_name} IPO review`,
-    'IPO investment analysis',
-    'IPO fundamentals',
-    'IPO risk assessment',
-    'IPO gains potential',
-    'IPO performance analysis',
-    'Stock market IPO',
-    'IPO allotment',
-    'IPO listing gains',
-    `${analysis.company_name} stock analysis`,
-    'IPO investment guide',
-    'IPO rating',
-    'IPO score'
-  ]
-
   return {
     title,
     description,
-    keywords: keywords.join(', '),
     // Names the per-IPO card explicitly, since openGraphBase's site card would otherwise win.
     openGraph: {
       ...openGraphBase(),
@@ -99,22 +78,26 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   }
 }
 
-/** JSON-LD: the analysis as an Article, an FAQ of its key facts, and the breadcrumb trail. An FAQ entry with no fact is left out. */
+/** The entity page's title, shared by its metadata and JSON-LD. */
+const entityTitle = (name: string) => `${name} IPO: GMP, Price, Dates, Lot Size & Allotment`
+
+/** JSON-LD: the analysis as an Article and an FAQ of its key facts. An FAQ entry with no fact is left out. */
 function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | undefined, id: string) {
   const name = analysis.company_name
   const url = `${SITE_URL}/analysis/${id}`
-  const organization = { '@type': 'Organization', name: SITE_NAME, url: SITE_URL }
+  const organization = { '@id': ORGANIZATION_ID }
   const opening = formatIpoDate(analysis.time?.issue_dates?.opening)
   const closing = formatIpoDate(analysis.time?.issue_dates?.closing)
   const allotment = formatIpoDate(ipo?.ipo_dates?.basis_of_allotment || analysis.time?.allotment_timeline?.date)
   const listing = formatIpoDate(ipo?.ipo_dates?.ipo_listing_date || analysis.time?.listing_details?.expected_date)
   const exchanges = analysis.time?.listing_details?.exchanges?.filter(Boolean).join(' and ')
   const gmp = gmpLine(analysis.gmp_price_gain ?? ipo?.gmp_price_gain)
+  const gmpUpdatedAt = formatIstTimestamp(ipo?.gmp_scraped_at)
   const priceBand = analysis.ipo_details?.price_band
 
   const faq: [string, string | null][] = [
     [`What is the price band of the ${name} IPO?`, priceBand ? `The ${name} IPO price band is ${priceBand}.` : null],
-    [`What is the ${name} IPO GMP?`, gmp ? `The latest grey market premium is ${gmp.replace(/^GMP /, '')}. GMP is unofficial and changes daily.` : null],
+    [`What is the ${name} IPO GMP?`, gmp ? `The latest grey market premium is ${gmp.replace(/^GMP /, '')}. GMP is an unofficial grey market indication${gmpUpdatedAt ? `, last updated ${gmpUpdatedAt}` : ''}.` : null],
     [`When does the ${name} IPO open and close?`, opening && closing ? `Bidding opens on ${opening} and closes on ${closing}.` : null],
     [`What is the ${name} IPO allotment date?`, allotment ? `The basis of allotment is expected on ${allotment}.` : null],
     [`When will ${name} shares list?`, listing ? `Listing is expected on ${listing}${exchanges ? ` on ${exchanges}` : ''}.` : null],
@@ -127,8 +110,8 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | u
     '@graph': [
       {
         '@type': 'Article',
-        headline: `${name} IPO analysis`,
-        description: `${name} IPO analysis: financials, risk factors, peer comparison and an overall score.`,
+        headline: entityTitle(name),
+        description: `${name} IPO price band, issue dates, lot size, grey market premium and allotment status.`,
         url,
         datePublished: analysis.created_at,
         dateModified: analysis.updated_at ?? analysis.created_at,
@@ -145,14 +128,6 @@ function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | u
             name: question,
             acceptedAnswer: { '@type': 'Answer', text: answer },
           })),
-      },
-      {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-          { '@type': 'ListItem', position: 2, name: 'All IPOs', item: `${SITE_URL}/ipos` },
-          { '@type': 'ListItem', position: 3, name: `${name} IPO analysis`, item: url },
-        ],
       },
     ],
   }
@@ -180,13 +155,11 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
 
   if (!data) return <AnalysisInProgress />
 
+  const articles = await getIpoArticles(data.ipo._id)
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData(data.ipos_analysis, data.ipo, id)).replace(/</g, '\\u003c') }}
-      />
-      <AnalysisDetail analysis={data.ipos_analysis} ipo={data.ipo} />
+      <JsonLd data={generateStructuredData(data.ipos_analysis, data.ipo, id)} />
+      <AnalysisDetail analysis={data.ipos_analysis} ipo={data.ipo} articles={articles} />
     </>
   )
 }

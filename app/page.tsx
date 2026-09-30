@@ -12,7 +12,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Walkthrough } from '@/components/home/Walkthrough';
 import { Hero } from '@/components/home/Hero';
 import { BoardProvider } from '@/components/home/BoardContext';
-import { openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
+import { openGraphBase } from '@/lib/seo/share';
 
 // Served from the ISR cache; /api/revalidate purges it sooner.
 export const revalidate = 60;
@@ -51,30 +51,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Who publishes the site and what it is, for search and answer engines.
-const SITE_STRUCTURED_DATA = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Organization',
-      '@id': `${SITE_URL}/#organization`,
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: `${SITE_URL}/apple-icon.png`,
-      sameAs: ['https://x.com/ipomilega'],
-    },
-    {
-      '@type': 'WebSite',
-      '@id': `${SITE_URL}/#website`,
-      name: SITE_NAME,
-      url: SITE_URL,
-      description: 'Live, upcoming and past Indian IPOs with GMP, subscription, allotment dates and a scored analysis of every prospectus.',
-      publisher: { '@id': `${SITE_URL}/#organization` },
-      inLanguage: 'en-IN',
-    },
-  ],
-};
-
 // Awaited without a <Suspense> boundary: under ISR the data is ready at build time, and a
 // boundary would ship a spinner that delays LCP.
 export default async function HomePage() {
@@ -82,7 +58,6 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_STRUCTURED_DATA) }} />
       <div className="app-container pt-16">
         <Hero openCount={live.length} upcomingCount={upcoming.length} />
       </div>

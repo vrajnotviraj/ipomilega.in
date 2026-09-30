@@ -60,7 +60,7 @@ function getGmpFigure(analysis: IpoComprehensiveAnalysis, ipo: Ipo): HeadlineFig
   const gmpSign = gmpPercent ?? (hasRupees ? gmpRupees : null);
 
   return {
-    label: "GMP",
+    label: "GMP (unofficial)",
     value: gmpPercent === null ? gmp.premium : signedPercent(gmpPercent),
     caption: hasRupees ? `₹${gmpRupees} a share` : "Grey market premium",
     color: gainColor(gmpSign),

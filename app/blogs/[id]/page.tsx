@@ -2,8 +2,9 @@ import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
 import { notFound } from "next/navigation";
 import BlogDisplay from "@/components/blog/BlogDisplay";
-import { getBlogBySlug } from "@/lib/queries/blogs";
-import { Blog } from "@/types/ipo";
+import { getBlogBySlug, getIpoArticles } from "@/lib/queries/blogs";
+import { getIpoLink } from "@/lib/queries/ipos";
+import { articleJsonLd, JsonLd } from "@/lib/seo/json-ld";
 
 export const revalidate = 600;
 
@@ -16,11 +17,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     return { title: "Post not found", description: "We couldn't find this blog post." };
   }
 
-  const image = (blog as Blog & { featured_image?: string }).featured_image;
+  const image = blog.image_url;
   return {
     title: blog.title,
     description: blog.meta_description,
-    keywords: blog.tags.join(", "),
     authors: [{ name: blog.author }],
     alternates: { canonical: `/blogs/${id}` },
     openGraph: {
@@ -47,5 +47,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function BlogPage({ params }: Params) {
   const blog = await getBlogBySlug((await params).id);
   if (!blog) notFound();
-  return <BlogDisplay blog={blog} />;
+  const [ipo, articles] = blog.ipo_id ? await Promise.all([getIpoLink(blog.ipo_id), getIpoArticles(blog.ipo_id)]) : [null, []];
+  return (
+    <>
+      <JsonLd data={articleJsonLd(blog)} />
+      <BlogDisplay blog={blog} ipo={ipo} articles={articles.filter((article) => article.slug !== blog.slug)} />
+    </>
+  );
 }

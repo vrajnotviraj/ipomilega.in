@@ -23,3 +23,9 @@ export const getBlogBySlug = cache(cached(async (slug: string): Promise<Blog | n
   if (!blog || blog.status !== 'published') return null;
   return toPlain(blog) as unknown as Blog;
 }, 'getBlogBySlug'));
+
+/** Published posts about one IPO, oldest first. ponytail: filters the cached full list; query by ipo_id once posts number in the thousands. */
+export async function getIpoArticles(ipoId: string): Promise<Blog[]> {
+  const blogs = await getPublishedBlogs();
+  return blogs.filter((blog) => blog.ipo_id === ipoId).reverse();
+}
