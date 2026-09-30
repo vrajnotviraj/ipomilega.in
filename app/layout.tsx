@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import SiteChrome from "@/components/layout/SiteChrome";
 import { openGraphBase, SITE_NAME } from "@/lib/share";
 
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       {/* No <Suspense> around the body: it would hide the whole page until hydration. */}
       <body className="min-h-screen items-center">
         <SiteChrome>{children}</SiteChrome>
+        <Analytics />
       </body>
     </html>
   );
