@@ -149,6 +149,7 @@ export const getIpoLink = cache(cached(async (ipoId: string): Promise<IpoLink | 
   const analysis = await db.collection('ipo_comprehensive_analysis').findOne({ ipo_table_id: ipoId }, { projection: { company_name: 1, slug: 1 } });
   if (analysis?.slug) return { name: analysis.company_name as string, slug: analysis.slug as string };
   if (!ObjectId.isValid(ipoId)) return null;
-  const ipo = await db.collection('ipos').findOne({ _id: new ObjectId(ipoId) }, { projection: { upcoming_ipo_2025: 1 } });
-  return ipo ? { name: ipo.upcoming_ipo_2025 as string, slug: null } : null;
+  const ipo = await db.collection('ipos').findOne({ _id: new ObjectId(ipoId) }, { projection: { upcoming_ipo_2025: 1, slug: 1 } });
+  // An analysis whose slug has not been synced yet still lives at the IPO's own slug.
+  return ipo ? { name: ipo.upcoming_ipo_2025 as string, slug: analysis ? (ipo.slug as string) || null : null } : null;
 }, 'ipo-link'));
