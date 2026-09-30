@@ -3,7 +3,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/seo/share";
 import { publishedAtOf } from "@/lib/seo/news-sitemap";
 
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
-const RESEARCH_AUTHOR = "IPO Milega Research";
+export const RESEARCH_AUTHOR = "IPO Milega Research";
 
 /** A JSON-LD script tag, with `<` escaped so the data can't close the tag. */
 export function JsonLd({ data }: { data: object }) {
@@ -50,6 +50,31 @@ export function breadcrumbJsonLd(crumbs: Crumb[]) {
   };
 }
 
+/** The blog index as a CollectionPage whose ItemList is the posts shown on it, newest first. */
+export function blogIndexJsonLd({ name, description, posts }: { name: string; description: string; posts: { slug: string; title: string }[] }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url: `${SITE_URL}/blogs`,
+    inLanguage: "en-IN",
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+    publisher: { "@id": ORGANIZATION_ID },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListOrder: "https://schema.org/ItemListOrderDescending",
+      numberOfItems: posts.length,
+      itemListElement: posts.map((post, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${SITE_URL}/blogs/${post.slug}`,
+        name: post.title,
+      })),
+    },
+  };
+}
+
 /** A BlogPosting for one post; the research desk is an Organization, anyone else a Person. */
 export function articleJsonLd(blog: Blog) {
   const url = `${SITE_URL}/blogs/${blog.slug}`;
@@ -63,7 +88,7 @@ export function articleJsonLd(blog: Blog) {
     "@type": "BlogPosting",
     headline: blog.title,
     description: blog.meta_description,
-    image: blog.image_url ? [blog.image_url] : [`${SITE_URL}/opengraph-image`],
+    image: blog.image_url ? [blog.image_url] : [`${url}/opengraph-image`],
     datePublished: publishedAtOf(blog),
     dateModified: blog.updated_at || blog.created_at,
     author,

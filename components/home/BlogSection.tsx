@@ -3,6 +3,7 @@ import { Blog } from '@/types/ipo';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AiDisclaimer } from '@/components/ui/AiDisclaimer';
 import { PostCard } from '@/components/blog/PostCard';
+import { toSummary } from '@/components/blog/blog-format';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import { SectionHeading } from '@/components/home/SectionHeading';
 
@@ -17,7 +18,7 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 sm:gap-6">
           {blogs.slice(0, 3).map((blog) => (
-            <PostCard key={blog._id} blog={blog} />
+            <PostCard key={blog._id} post={toSummary(blog)} />
           ))}
         </div>
       )}
