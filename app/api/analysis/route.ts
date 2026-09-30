@@ -37,7 +37,7 @@ export async function GET() {
     catch (error) {
         console.error("Error in /api/analysis:", error);
         return NextResponse.json({
-            message: error instanceof Error ? error.message : "Something went wrong",
+            message: "Something went wrong",
             success: false,
         }, { status: 500 });
     }

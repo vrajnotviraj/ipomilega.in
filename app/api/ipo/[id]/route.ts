@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongo";
 
 export async function GET(
@@ -7,20 +8,23 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
+        if (!ObjectId.isValid(id)) {
+            return NextResponse.json({ message: "Invalid IPO id", success: false }, { status: 400 });
+        }
         const db = await getDb();
-        const ipos = await db.collection("ipos").find({}).toArray();
+        const ipo = await db.collection("ipos").findOne({ _id: new ObjectId(id) });
+        if (!ipo) {
+            return NextResponse.json({ message: "IPO not found", success: false }, { status: 404 });
+        }
 
         return NextResponse.json({
             message: "Data retrieved successfully",
             success: true,
-            ipos: ipos.find((ipo) => ipo._id.toString() === id),
+            ipos: ipo,
         });
     }
     catch (error) {
         console.error("Error in /api/ipo/[id]:", error);
-        return NextResponse.json({
-            message: error instanceof Error ? error.message : "Something went wrong",
-            success: false,
-        }, { status: 500 });
+        return NextResponse.json({ message: "Something went wrong", success: false }, { status: 500 });
     }
 }

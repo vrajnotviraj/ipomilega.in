@@ -104,7 +104,7 @@ export async function GET(
     console.error("Error in /api/ipo/[id]/gmp-history:", error);
     return NextResponse.json(
       {
-        message: error instanceof Error ? error.message : "Something went wrong",
+        message: "Something went wrong",
         success: false,
       },
       { status: 500 }

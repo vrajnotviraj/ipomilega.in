@@ -2,6 +2,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
 import 'highlight.js/styles/github-dark.css';
 
 export default function MarkdownRenderer({ content, className = '' }: { content: string; className?: string }) {
@@ -9,7 +10,8 @@ export default function MarkdownRenderer({ content, className = '' }: { content:
     <div className={`prose prose-lg max-w-none dark:prose-invert ${className}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight, rehypeRaw]}
+        // Raw HTML is allowed but sanitized (no scripts, handlers or iframes); highlight runs after so its classes survive.
+        rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeHighlight]}
         components={{
           h1: ({ children }) => <h1 className="text-4xl font-bold mb-6 text-foreground border-b pb-4">{children}</h1>,
           h2: ({ children }) => <h2 className="text-3xl font-semibold mb-4 mt-8 text-foreground">{children}</h2>,

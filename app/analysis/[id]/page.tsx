@@ -225,7 +225,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData(data.ipos_analysis, data.ipo, id)) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateStructuredData(data.ipos_analysis, data.ipo, id)).replace(/</g, '\\u003c') }}
       />
       <AnalysisPageClient analysis={data.ipos_analysis} ipo={data.ipo} />
     </>
