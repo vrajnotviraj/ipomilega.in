@@ -9,5 +9,6 @@ Data is refreshed several times a day. GMP (grey market premium) is unofficial a
 - [Home](https://ipomilega.in/): IPOs open for bidding, bidding closed (grouped by allotment day), upcoming and recently listed
 - [All IPOs](https://ipomilega.in/ipos): every IPO, with filters for status and board
 - [IPO analysis](https://ipomilega.in/analysis/{slug}): one IPO's price band, dates, GMP, subscription, fundamentals, risks, financials and score
+- [Blog](https://ipomilega.in/blogs): articles per IPO, an analysis before bidding, then subscription, allotment and listing updates
 - [About](https://ipomilega.in/about): where the data comes from and how scoring works
-- [Sitemap](https://ipomilega.in/sitemap.xml): every analysis URL
+- [Sitemap](https://ipomilega.in/sitemap.xml): every analysis and article URL

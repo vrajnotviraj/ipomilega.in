@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
   // PostHog reverse proxy. Its API paths end in a slash (`/e/`), so Next must not redirect them.
   skipTrailingSlashRedirect: true,
   poweredByHeader: false,
+  // Metadata goes in <head> for every visitor, not just known bots. Streamed into <body>, AI crawlers, link unfurlers
+  // and Lighthouse can miss the description and canonical. The pages await the same cached reads anyway.
+  htmlLimitedBots: /.*/,
   // The whole stylesheet is ~12 KB gzipped, so it ships inside the HTML instead of as a render-blocking request.
   experimental: { inlineCss: true },
   async headers() {

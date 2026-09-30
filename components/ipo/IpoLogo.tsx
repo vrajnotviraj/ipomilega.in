@@ -40,7 +40,8 @@ export function IpoLogo({
         // Through the optimizer: the bucket sends no Cache-Control and some logos are full-size PNGs.
         <Image
           src={url}
-          alt=""
+          // The tile is aria-hidden, so screen readers skip this; image search and SEO tools read it.
+          alt={name ? `${name} logo` : ""}
           width={44}
           height={44}
           unoptimized={!url.startsWith(OPTIMIZABLE)}
