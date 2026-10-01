@@ -19,7 +19,7 @@ type Heading = { id: string; text: string };
 
 const LABEL = "mb-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground";
 
-/** Author, publish and update dates and read time. The research desk links to /about, which explains the method. */
+/** Author, publish and update dates and read time. A writer links to their page, the research desk to /about. */
 function Byline({ blog }: { blog: Blog }) {
   const published = publishedAtOf(blog);
   const updated = blog.updated_at && formatBlogDate(blog.updated_at) !== formatBlogDate(published) ? blog.updated_at : null;
@@ -28,8 +28,11 @@ function Byline({ blog }: { blog: Blog }) {
       <div className="text-sm text-muted-foreground">
         <p className="font-medium text-foreground">
           By{" "}
-          {blog.author === RESEARCH_AUTHOR ? (
-            <ProgressLink href="/about" className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground">
+          {blog.author_slug || blog.author === RESEARCH_AUTHOR ? (
+            <ProgressLink
+              href={blog.author_slug ? `/authors/${blog.author_slug}` : "/about"}
+              className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+            >
               {blog.author}
             </ProgressLink>
           ) : (

@@ -10,11 +10,18 @@ export interface Blog {
   meta_description: string
   image_url?: string
   author: string
+  author_slug?: string | null
   ipo_id: string
   created_at: string
   published_at?: string
   updated_at: string
   article_type?: "analysis" | "subscription" | "allotment" | "listing"
+}
+
+export interface Author {
+  slug: string
+  name: string
+  bio?: string
 }
 
 export interface Ipo {

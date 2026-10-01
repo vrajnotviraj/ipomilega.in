@@ -1,4 +1,4 @@
-import type { Blog } from "@/types/ipo";
+import type { Author, Blog } from "@/types/ipo";
 import { SITE_NAME, SITE_URL } from "@/lib/seo/share";
 import { publishedAtOf } from "@/lib/seo/news-sitemap";
 
@@ -75,13 +75,13 @@ export function blogIndexJsonLd({ name, description, posts }: { name: string; de
   };
 }
 
-/** A BlogPosting for one post; the research desk is an Organization, anyone else a Person. */
+/** A BlogPosting for one post. The research desk is an Organization; a writer is a Person, linked to their page when they have one. */
 export function articleJsonLd(blog: Blog) {
   const url = `${SITE_URL}/blogs/${blog.slug}`;
   const author =
     blog.author === RESEARCH_AUTHOR
       ? { "@type": "Organization", name: RESEARCH_AUTHOR, url: `${SITE_URL}/about` }
-      : { "@type": "Person", name: blog.author };
+      : { "@type": "Person", name: blog.author, ...(blog.author_slug && { url: `${SITE_URL}/authors/${blog.author_slug}` }) };
 
   return {
     "@context": "https://schema.org",
@@ -94,5 +94,24 @@ export function articleJsonLd(blog: Blog) {
     author,
     publisher: { "@id": ORGANIZATION_ID },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
+  };
+}
+
+/** A ProfilePage for a writer. */
+export function authorJsonLd(author: Author) {
+  const url = `${SITE_URL}/authors/${author.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    url,
+    inLanguage: "en-IN",
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+    mainEntity: {
+      "@type": "Person",
+      name: author.name,
+      url,
+      ...(author.bio && { description: author.bio }),
+      worksFor: { "@id": ORGANIZATION_ID },
+    },
   };
 }

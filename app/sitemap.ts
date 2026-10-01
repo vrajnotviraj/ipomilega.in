@@ -2,11 +2,13 @@ import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo/share';
 import { getAnalysisSlugs } from '@/lib/queries/ipos';
 import { getPublishedBlogs } from '@/lib/queries/blogs';
+import { getAuthors } from '@/lib/queries/authors';
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [analyses, blogs] = await Promise.all([getAnalysisSlugs(), getPublishedBlogs()]);
+  const [analyses, blogs, authors] = await Promise.all([getAnalysisSlugs(), getPublishedBlogs(), getAuthors()]);
+  const authorsWithPosts = new Set(blogs.map((blog) => blog.author_slug));
 
   return [
     { url: SITE_URL, changeFrequency: 'hourly', priority: 1 },
@@ -24,6 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: blog.updated_at || blog.created_at,
       changeFrequency: 'monthly' as const,
       priority: 0.5,
+    })),
+    // Only writers with a live post; an empty profile is noindex.
+    ...authors.filter((author) => authorsWithPosts.has(author.slug)).map((author) => ({
+      url: `${SITE_URL}/authors/${author.slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.3,
     })),
   ];
 }
