@@ -33,8 +33,8 @@ export default async function BlogsPage() {
       <header className="mt-6 mb-8 max-w-[65ch]">
         <h1 className="type-hero text-[44px] text-balance sm:text-[60px]">IPO analysis and news</h1>
         <p className="mt-4 text-lg text-pretty text-muted-foreground">
-          Plain-English articles on Indian IPOs, mainboard and SME. Each IPO can get four articles: an analysis of the business, financials,
-          valuation and GMP before you bid, then its subscription, allotment and listing updates.
+          Plain-English articles on Indian IPOs, mainboard and SME. Each IPO can get up to five articles: an analysis of the business, financials,
+          valuation and GMP before you bid, a GMP update on the closing day, then its subscription, allotment and listing updates.
         </p>
         {latest && (
           <p className="mt-3 text-sm text-muted-foreground">

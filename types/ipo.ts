@@ -15,7 +15,7 @@ export interface Blog {
   created_at: string
   published_at?: string
   updated_at: string
-  article_type?: "analysis" | "subscription" | "allotment" | "listing"
+  article_type?: "analysis" | "gmp" | "subscription" | "allotment" | "listing"
 }
 
 export interface Author {

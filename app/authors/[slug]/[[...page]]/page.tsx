@@ -49,7 +49,7 @@ export async function generateMetadata(props: Params): Promise<Metadata> {
   if (!data) return { title: "Author not found" };
   const { author, page, total } = data;
   const title = `${author.name}, IPO articles${page > 1 ? `, page ${page}` : ""}`;
-  const description = author.bio || `IPO analysis, subscription, allotment and listing articles by ${author.name} on IPO Milega.`;
+  const description = author.bio || `IPO analysis, GMP, subscription, allotment and listing articles by ${author.name} on IPO Milega.`;
   const url = pathOf(author.slug, page);
   return {
     title,
