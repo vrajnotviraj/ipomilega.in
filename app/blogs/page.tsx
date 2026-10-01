@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 /** The /blogs page: an answer-first intro, then every published post with search and category filters. */
 export default async function BlogsPage() {
-  // Newest first by first publication, the date every card and the ItemList show; the query sorts by created_at.
+  // Newest first by first publication, the date every card and the ItemList show; older posts without published_at fall back to created_at.
   const posts = (await getPublishedBlogs()).map(toSummary).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
   const latest = posts[0]?.publishedAt;
 
