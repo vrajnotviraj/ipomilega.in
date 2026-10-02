@@ -32,7 +32,7 @@ export const siteJsonLd = {
       "@type": "WebSite",
       "@id": `${SITE_URL}/#website`,
       name: SITE_NAME,
-      alternateName: ["IPOMilega", "ipomilega.in"],
+      alternateName: "IPOMilega",
       url: SITE_URL,
       description: SITE_DESCRIPTION,
       publisher: { "@id": ORGANIZATION_ID },
