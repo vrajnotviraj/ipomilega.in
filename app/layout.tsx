@@ -2,7 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { DM_Mono, Figtree, Schibsted_Grotesk } from "next/font/google";
 import SiteChrome from "@/components/layout/SiteChrome";
-import { openGraphBase, SITE_NAME } from "@/lib/seo/share";
+import { openGraphBase, SITE_NAME, SITE_URL } from "@/lib/seo/share";
 import { JsonLd, siteJsonLd } from "@/lib/seo/json-ld";
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-figtree" });
@@ -10,7 +10,7 @@ const schibsted = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schi
 const dmMono = DM_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-dm-mono", preload: false });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ipomilega.in"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "IPO Milega | Every Indian IPO, scored",
     template: "%s | IPO Milega",

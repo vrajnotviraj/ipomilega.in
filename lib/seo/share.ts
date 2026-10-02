@@ -2,7 +2,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { daysFromToday, formatIpoDate } from "@/lib/ipo-format";
 
-export const SITE_URL = "https://ipomilega.in";
+export const SITE_URL = "https://www.ipomilega.in";
 export const SITE_NAME = "IPO Milega";
 
 /** Base Open Graph fields. A function because Next mutates the `images` array it resolves. */
