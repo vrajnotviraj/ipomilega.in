@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Blog } from "@/types/ipo";
 import type { IpoLink } from "@/lib/queries/ipos";
-import { publishedAtOf } from "@/lib/seo/news-sitemap";
+import { modifiedAtOf, publishedAtOf } from "@/lib/seo/news-sitemap";
 import { RESEARCH_AUTHOR } from "@/lib/seo/json-ld";
 import { SITE_URL } from "@/lib/seo/share";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
@@ -29,7 +29,8 @@ function authorHrefOf(blog: Blog): string | null {
 /** Author, publish and update dates and read time. A writer links to their page, the research desk to /about. */
 function Byline({ blog }: { blog: Blog }) {
   const published = publishedAtOf(blog);
-  const updated = blog.updated_at && formatBlogDate(blog.updated_at) !== formatBlogDate(published) ? blog.updated_at : null;
+  const modified = modifiedAtOf(blog);
+  const updated = formatBlogDate(modified) !== formatBlogDate(published) ? modified : null;
   const href = authorHrefOf(blog);
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-y border-border py-4">

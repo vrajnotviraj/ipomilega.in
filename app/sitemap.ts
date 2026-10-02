@@ -3,6 +3,7 @@ import { SITE_URL } from '@/lib/seo/share';
 import { getAnalysisSlugs } from '@/lib/queries/ipos';
 import { getPublishedBlogs } from '@/lib/queries/blogs';
 import { getAuthors } from '@/lib/queries/authors';
+import { modifiedAtOf } from '@/lib/seo/news-sitemap';
 
 export const revalidate = 3600;
 
@@ -23,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...blogs.map((blog) => ({
       url: `${SITE_URL}/blogs/${blog.slug}`,
-      lastModified: blog.updated_at || blog.created_at,
+      lastModified: modifiedAtOf(blog),
       changeFrequency: 'monthly' as const,
       priority: 0.5,
     })),

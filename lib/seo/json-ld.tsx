@@ -1,6 +1,6 @@
 import type { Author, Blog } from "@/types/ipo";
 import { SITE_NAME, SITE_URL } from "@/lib/seo/share";
-import { publishedAtOf } from "@/lib/seo/news-sitemap";
+import { modifiedAtOf, publishedAtOf } from "@/lib/seo/news-sitemap";
 
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 export const RESEARCH_AUTHOR = "IPO Milega Research";
@@ -97,7 +97,7 @@ export function articleJsonLd(blog: Blog) {
     description: blog.meta_description,
     image: blog.image_url ? [blog.image_url] : [`${url}/opengraph-image`],
     datePublished: publishedAtOf(blog),
-    dateModified: blog.updated_at || blog.created_at,
+    dateModified: modifiedAtOf(blog),
     author,
     publisher: { "@id": ORGANIZATION_ID },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
