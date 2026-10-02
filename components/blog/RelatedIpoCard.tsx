@@ -1,11 +1,11 @@
 import type { IpoLink } from "@/lib/queries/ipos";
 import { ArrowLink } from "@/components/ui/ArrowLink";
-import { IpoLogo } from "@/components/ipo/IpoLogo";
+import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 
 /** The IPO a post is about: logo, board and issue size, with a link to its analysis once it has one. */
 export function RelatedIpoCard({ ipo }: { ipo: IpoLink }) {
   return (
-    // A container query, not a breakpoint: the card sits in the article column on phones and in the narrow sidebar from lg.
+    // Sized by container query because the card sits in the article column on phones and in the narrow sidebar from lg.
     <aside aria-label={`About the ${ipo.name} IPO`} className="@container rounded-xl border border-border bg-card p-5">
       <div className="flex flex-col gap-4 @md:flex-row @md:items-center @md:justify-between">
         <div className="flex items-center gap-4">

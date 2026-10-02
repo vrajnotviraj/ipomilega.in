@@ -1,6 +1,7 @@
-import { HomePageIpoProps } from '@/types/homepage';
+import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { ProgressLink } from '@/components/progress/ProgressLink';
-import { applyQibAdjustment, getQibSignal, scoreBand, scoreOf } from '@/lib/ipo-format';
+import { applyQibAdjustment, getQibSignal, scoreOf } from '@/lib/ipo-format';
+import { scoreColorOnInk } from '@/components/analysis/primitives';
 
 interface TickerEntry {
   key: string;
@@ -10,25 +11,19 @@ interface TickerEntry {
   status: 'Open' | 'Upcoming';
 }
 
-/** Score colour on the ink band: the data colours lifted toward chalk so they stay readable. */
-const SCORE_COLOR_ON_INK = { good: 'text-score-good-on-ink', mid: 'text-score-mid-on-ink', bad: 'text-score-bad-on-ink' };
+const entry = (item: HomePageIpoProps, status: TickerEntry['status'], score: number) => ({
+  key: item._id,
+  slug: item.ipo?.slug,
+  name: item.ipo?.upcoming_ipo_2025,
+  score: score || null,
+  status,
+});
 
 function toEntries(live: HomePageIpoProps[], upcoming: HomePageIpoProps[]): TickerEntry[] {
-  const liveEntries = live.map((item) => ({
-    key: item._id,
-    slug: item.ipo?.slug,
-    name: item.ipo?.upcoming_ipo_2025,
-    score: applyQibAdjustment(scoreOf(item), getQibSignal(item.ipo)) || null,
-    status: 'Open' as const,
-  }));
-  const upcomingEntries = upcoming.map((item) => ({
-    key: item._id,
-    slug: item.ipo?.slug,
-    name: item.ipo?.upcoming_ipo_2025,
-    score: scoreOf(item) || null,
-    status: 'Upcoming' as const,
-  }));
-  return [...liveEntries, ...upcomingEntries].filter((entry): entry is TickerEntry => !!entry.slug && !!entry.name);
+  return [
+    ...live.map((item) => entry(item, 'Open', applyQibAdjustment(scoreOf(item), getQibSignal(item.ipo)))),
+    ...upcoming.map((item) => entry(item, 'Upcoming', scoreOf(item))),
+  ].filter((entry): entry is TickerEntry => !!entry.slug && !!entry.name);
 }
 
 /** Full-bleed ink band scrolling every live and upcoming IPO with its score. Pauses on hover. */
@@ -44,7 +39,7 @@ export function IpoTicker({ live, upcoming }: { live: HomePageIpoProps[]; upcomi
         className="animate-ticker flex w-max items-center py-3 hover:[animation-play-state:paused] focus-within:[animation-play-state:paused] motion-reduce:animate-none"
         style={{ animationDuration: `${durationSeconds}s` }}
       >
-        {/* Two copies so the loop is seamless; the second is hidden from assistive tech. */}
+        {/* Two copies so the loop never shows a gap; the second is hidden from assistive tech. */}
         {[0, 1].map((copy) => (
           <div key={copy} className="flex shrink-0 items-center" aria-hidden={copy === 1 || undefined}>
             {entries.map((entry) => (
@@ -56,7 +51,7 @@ export function IpoTicker({ live, upcoming }: { live: HomePageIpoProps[]; upcomi
               >
                 <span className="font-display font-bold">{entry.name}</span>
                 {entry.score !== null && (
-                  <span className={`font-mono font-medium tabular-nums ${SCORE_COLOR_ON_INK[scoreBand(entry.score)]}`}>
+                  <span className={`font-mono font-medium tabular-nums ${scoreColorOnInk(entry.score)}`}>
                     {entry.score.toFixed(1)}
                   </span>
                 )}

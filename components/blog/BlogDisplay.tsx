@@ -12,25 +12,33 @@ import MarkdownRenderer from "@/components/blog/MarkDown";
 import { RelatedIpoCard } from "@/components/blog/RelatedIpoCard";
 import { ShareLinks } from "@/components/blog/ShareLinks";
 import { ShareButton } from "@/components/ui/ShareButton";
-import { formatBlogDate, readTimeOf } from "@/components/blog/blog-format";
+import { formatBlogDate, readTimeOf } from "@/lib/blog-format";
 import { headingsOf } from "@/components/blog/headings";
 
 type Heading = { id: string; text: string };
 
 const LABEL = "mb-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground";
 
+/** A writer's own page, the research desk's /about, or null for a byline with no page. */
+function authorHrefOf(blog: Blog): string | null {
+  if (blog.author_slug) return `/authors/${blog.author_slug}`;
+  if (blog.author === RESEARCH_AUTHOR) return "/about";
+  return null;
+}
+
 /** Author, publish and update dates and read time. A writer links to their page, the research desk to /about. */
 function Byline({ blog }: { blog: Blog }) {
   const published = publishedAtOf(blog);
   const updated = blog.updated_at && formatBlogDate(blog.updated_at) !== formatBlogDate(published) ? blog.updated_at : null;
+  const href = authorHrefOf(blog);
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-y border-border py-4">
       <div className="text-sm text-muted-foreground">
         <p className="font-medium text-foreground">
           By{" "}
-          {blog.author_slug || blog.author === RESEARCH_AUTHOR ? (
+          {href ? (
             <ProgressLink
-              href={blog.author_slug ? `/authors/${blog.author_slug}` : "/about"}
+              href={href}
               className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
             >
               {blog.author}
@@ -143,6 +151,16 @@ export default function BlogDisplay({ blog, ipo, articles }: { blog: Blog; ipo: 
               <h1 className="mb-4 max-w-[24ch] font-display text-[32px] font-bold leading-[1.05] tracking-[-0.03em] text-balance sm:text-5xl">{blog.title}</h1>
               {blog.excerpt && <p className="mb-6 max-w-[70ch] text-lg text-pretty text-muted-foreground">{blog.excerpt}</p>}
               <Byline blog={blog} />
+              {/* Shows the AI note only on engine articles; an admin save sets generated_by to "admin" and those skip the figure checks. */}
+              {blog.generated_by === "engine" && (
+                <p className="mt-3 max-w-[70ch] text-xs text-muted-foreground">
+                  AI wrote this article from prospectus and exchange data, and software checked its figures against that data before
+                  publishing.{" "}
+                  <ProgressLink href="/about#how-content-is-made" className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground">
+                    How our content is made
+                  </ProgressLink>
+                </p>
+              )}
             </header>
 
             {blog.image_url && (

@@ -1,10 +1,9 @@
 "use client";
 
-import { IpoLogo } from "@/components/ipo/IpoLogo";
-import { IpoTitleLink } from "@/components/ipo/IpoTitleLink";
-import { formatGmp } from "@/components/home/ipo-card/CardParts";
+import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
+import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
-import { gainColor, getIpoType, getPriceBand, scoreOf } from "@/lib/ipo-format";
+import { formatGmp, gainColor, getIpoType, getPriceBand, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { LifecycleTrack } from "@/components/ipos/LifecycleTrack";
 import { ScorePill } from "@/components/ipos/ScorePill";

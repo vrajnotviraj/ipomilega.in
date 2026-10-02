@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
 
-export interface GmpDay {
+interface GmpDay {
   t: string;
   date: string;
   gmp: number;
@@ -30,8 +30,6 @@ export const formatDay = (ts: number) => new Date(ts).toLocaleDateString("en-IN"
 
 export const formatTime = (iso: string) =>
   new Date(iso).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: IST });
-
-export const formatRupees = (value: number) => `₹${value.toLocaleString("en-IN")}`;
 
 /** A signed rupee change: "+₹10", "-₹4", "₹0". */
 export function formatDelta(value: number) {

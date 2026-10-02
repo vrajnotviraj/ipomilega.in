@@ -8,7 +8,7 @@ export function readTimeOf(blog: Pick<Blog, "content">): number {
 }
 
 /** The post's excerpt, or its first `words` words. */
-export function excerptOf(blog: Pick<Blog, "excerpt" | "content">, words: number): string {
+function excerptOf(blog: Pick<Blog, "excerpt" | "content">, words: number): string {
   return blog.excerpt || blog.content.trim().split(" ").slice(0, words).join(" ") + "...";
 }
 

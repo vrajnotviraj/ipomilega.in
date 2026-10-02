@@ -1,7 +1,7 @@
 import { CalendarDays } from 'lucide-react';
-import { HomePageIpoProps } from '@/types/homepage';
-import { IpoTitleLink } from '@/components/ipo/IpoTitleLink';
-import { IpoLogo } from '@/components/ipo/IpoLogo';
+import { HomePageIpoProps } from '@/types/ipo-with-analysis';
+import { IpoTitleLink } from '@/components/ipo-shared/IpoTitleLink';
+import { IpoLogo } from '@/components/ipo-shared/IpoLogo';
 import { formatShortDateOrToday, parseEstListingPercent, parseGainValue, scoreOf } from '@/lib/ipo-format';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SectionHeading } from '@/components/home/SectionHeading';

@@ -1,8 +1,7 @@
-import { IpoLogo } from "@/components/ipo/IpoLogo";
-import { IpoTitleLink } from "@/components/ipo/IpoTitleLink";
-import { formatGmp, formatTimes } from "@/components/home/ipo-card/CardParts";
+import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
+import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { LiveLabel } from "@/components/ui/LiveLabel";
-import { gainColor, parseEstListingPercent, parseGainValue, scoreOf } from "@/lib/ipo-format";
+import { formatGmp, formatTimes, gainColor, parseEstListingPercent, parseGainValue, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { ScorePill } from "@/components/ipos/ScorePill";
 import { Row, daysToCloseOf, hasAnalysis } from "@/components/ipos/rows";

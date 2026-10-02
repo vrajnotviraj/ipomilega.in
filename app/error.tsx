@@ -31,7 +31,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   if (autoRetrying) {
     return (
       <div className="app-container pt-24 pb-16">
-        <PageLoader label="Loading" />
+        <PageLoader />
       </div>
     );
   }

@@ -5,11 +5,12 @@ import {
   formatAllotmentOdds,
   getAllotmentRatio,
   parseEstListingPercent,
+  formatRupees,
   signedPercent,
 } from "@/lib/ipo-format";
 import { gmpFigure, type ShareFacts } from "@/lib/seo/share";
 
-export type SectionKey = "overview" | "timing" | "financials" | "risk" | "performance" | "flexibility";
+type SectionKey = "overview" | "timing" | "financials" | "risk" | "performance" | "flexibility";
 
 export interface SectionTab {
   key: SectionKey;
@@ -62,6 +63,12 @@ export function getMinInvestment(analysis: IpoComprehensiveAnalysis): number | n
   const lotShares = getLotShares(analysis);
   return cutOffPrice && lotShares ? cutOffPrice * lotShares : null;
 }
+
+/** The cost of one lot as "₹1,49,760", or "N/A". */
+export const formatMinInvestment = (analysis: IpoComprehensiveAnalysis) => {
+  const value = getMinInvestment(analysis);
+  return value ? formatRupees(value) : "N/A";
+};
 
 /** Shares per lot, from ipo_details.shares or else lot_size. */
 export function getLotShares(analysis: IpoComprehensiveAnalysis): number | undefined {

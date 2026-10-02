@@ -2,7 +2,7 @@ import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysi
 import type { Ipo } from "@/types/ipo";
 import { gainColor, parseEstListingPercent } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { AllotmentOddsTiles } from "@/components/ipo/AllotmentOddsTiles";
+import { AllotmentOddsTiles } from "@/components/ipo-shared/AllotmentOddsTiles";
 import { GmpTrendChart } from "./gmp-trend/GmpTrendChart";
 import { getGmp, getIssueDates, getQuotaSplit, hasAllotmentOdds, nonBlank } from "./analysis-facts";
 import { IssueTimeline } from "./IssueTimeline";

@@ -2,11 +2,10 @@ import { ImageResponse } from "next/og";
 import { getBlogBySlug } from "@/lib/queries/blogs";
 import { publishedAtOf } from "@/lib/seo/news-sitemap";
 import { BrandMark, CHALK, INK, MARIGOLD, MUTED, OG_SIZE } from "@/lib/seo/og";
-import { formatBlogDate, readTimeOf } from "@/components/blog/blog-format";
+import { formatBlogDate, readTimeOf } from "@/lib/blog-format";
 import RootImage from "@/app/opengraph-image";
 
-// Per-article preview card: category, title, date and read time on the C1 chalk. WhatsApp, X and LinkedIn
-// show it as the large link preview. Engine articles have no cover image, so this is their only picture.
+// Per-article preview card: category, title, date and read time on the C1 chalk. Engine articles have no cover image, so this is their only picture.
 export const alt = "Article on IPO Milega";
 export const size = OG_SIZE;
 export const contentType = "image/png";

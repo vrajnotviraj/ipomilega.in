@@ -1,9 +1,9 @@
 'use client';
 
 import { CalendarDays } from 'lucide-react';
-import { HomePageIpoProps, IpoSectionProps } from '@/types/homepage';
-import { IpoTitleLink } from '@/components/ipo/IpoTitleLink';
-import { IpoLogo } from '@/components/ipo/IpoLogo';
+import { HomePageIpoProps, IpoSectionProps } from '@/types/ipo-with-analysis';
+import { IpoTitleLink } from '@/components/ipo-shared/IpoTitleLink';
+import { IpoLogo } from '@/components/ipo-shared/IpoLogo';
 import { Score } from '@/components/ui/Score';
 import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';

@@ -6,9 +6,9 @@ const CANDLES = [
   { x: 44, y: 11, h: 37, wick: [5, 54] },
 ];
 
-/** Candle M: three candles on a shared base, the marigold one breaking out. `reversed` is for ink backgrounds. */
-export function LogoMark({ className, reversed = false }: { className?: string; reversed?: boolean }) {
-  const ink = reversed ? "var(--background)" : "var(--brand-mark)";
+/** Candle M: three candles on a shared base, the marigold one breaking out. */
+function LogoMark({ className }: { className?: string }) {
+  const ink = "var(--brand-mark)";
   return (
     <svg viewBox="0 0 64 64" aria-hidden="true" className={className}>
       {CANDLES.map(({ x, y, h, wick }, i) => (

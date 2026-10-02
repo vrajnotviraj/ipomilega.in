@@ -1,21 +1,15 @@
 import { Ipo } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
-import { IpoLogo } from '@/components/ipo/IpoLogo';
-import { IpoTitleLink } from '@/components/ipo/IpoTitleLink';
+import { IpoLogo } from '@/components/ipo-shared/IpoLogo';
+import { IpoTitleLink } from '@/components/ipo-shared/IpoTitleLink';
 import { Score } from '@/components/ui/Score';
-import { applyQibAdjustment, describeQibAdjustment, getQibSignal, scoreOf, signedPercent } from '@/lib/ipo-format';
+import { applyQibAdjustment, describeQibAdjustment, getQibSignal, scoreOf } from '@/lib/ipo-format';
 import { cn } from '@/lib/utils';
 
 export interface IpoCardProps {
   ipo: Ipo | null;
   analysis: IpoComprehensiveAnalysis | null;
 }
-
-/** GMP with its sign ("+38.23%"), or "N/A" when there is none. */
-export const formatGmp = (percent: number | null) => (percent === null ? 'N/A' : signedPercent(percent));
-
-/** A subscription ratio as "101.86x", or "–" when unknown. */
-export const formatTimes = (ratio: number | null) => (ratio === null ? '–' : `${ratio}x`);
 
 /** One labelled figure in a card's stats row. */
 export function Stat({

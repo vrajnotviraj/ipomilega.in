@@ -1,20 +1,17 @@
 import { Metadata } from 'next'
-import { AnalysisDetail } from "@/components/analysis/detail/AnalysisDetail"
-import { getShareFacts } from "@/components/analysis/detail/analysis-facts"
+import { notFound } from 'next/navigation'
+import { AnalysisDetail } from "@/components/analysis/AnalysisDetail"
+import { getShareFacts } from "@/components/analysis/analysis-facts"
 import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis"
-import { Ipo } from '@/types/ipo';
-import { getAnalysisBySlug, getAnalysisSlugs } from '@/lib/queries/ipos';
+import { getAnalysisBySlug, getAnalysisSlugs, getIpoNameBySlug } from '@/lib/queries/ipos';
 import { getIpoArticles } from '@/lib/queries/blogs';
-import { buildShareDescription, gmpLine, overallScoreOf, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
-import { JsonLd, ORGANIZATION_ID } from '@/lib/seo/json-ld';
-import { formatIpoDate, formatIstTimestamp } from '@/lib/ipo-format';
+import { buildShareDescription, overallScoreOf, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
+import { JsonLd, ORGANIZATION_ID, researchAuthor } from '@/lib/seo/json-ld';
 import { FileSearch } from 'lucide-react';
 import { ArrowLink } from '@/components/ui/ArrowLink';
 import { EmptyState } from '@/components/ui/EmptyState';
 
 export const revalidate = 60
-// Slugs published after the build still render on first request, then get cached.
-export const dynamicParams = true
 
 export async function generateStaticParams() {
   try {
@@ -32,9 +29,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const ipo = data?.ipo
 
   if (!analysis) {
+    const name = await getIpoNameBySlug(id)
+    if (name === null) notFound()
     return {
-      title: 'IPO analysis not found',
-      description: "We couldn't find an analysis for this IPO.",
+      title: name ? `${name} IPO analysis in progress` : 'IPO analysis in progress',
+      description: "We're still working through this IPO's prospectus.",
       robots: { index: false },
     }
   }
@@ -81,55 +80,23 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 /** The entity page's title, shared by its metadata and JSON-LD. */
 const entityTitle = (name: string) => `${name} IPO: GMP, Price, Dates, Lot Size & Allotment`
 
-/** JSON-LD: the analysis as an Article and an FAQ of its key facts. An FAQ entry with no fact is left out. */
-function generateStructuredData(analysis: IpoComprehensiveAnalysis, ipo: Ipo | undefined, id: string) {
+/** JSON-LD: the analysis as an Article, credited to the research desk as the page's byline shows. */
+function generateStructuredData(analysis: IpoComprehensiveAnalysis, id: string) {
   const name = analysis.company_name
   const url = `${SITE_URL}/analysis/${id}`
-  const organization = { '@id': ORGANIZATION_ID }
-  const opening = formatIpoDate(analysis.time?.issue_dates?.opening)
-  const closing = formatIpoDate(analysis.time?.issue_dates?.closing)
-  const allotment = formatIpoDate(ipo?.ipo_dates?.basis_of_allotment || analysis.time?.allotment_timeline?.date)
-  const listing = formatIpoDate(ipo?.ipo_dates?.ipo_listing_date || analysis.time?.listing_details?.expected_date)
-  const exchanges = analysis.time?.listing_details?.exchanges?.filter(Boolean).join(' and ')
-  const gmp = gmpLine(ipo?.gmp_price_gain || analysis.gmp_price_gain)
-  const gmpUpdatedAt = formatIstTimestamp(ipo?.gmp_scraped_at)
-  const priceBand = analysis.ipo_details?.price_band
-
-  const faq: [string, string | null][] = [
-    [`What is the price band of the ${name} IPO?`, priceBand ? `The ${name} IPO price band is ${priceBand}.` : null],
-    [`What is the ${name} IPO GMP?`, gmp ? `The latest grey market premium is ${gmp.replace(/^GMP /, '')}. GMP is an unofficial grey market indication${gmpUpdatedAt ? `, last updated ${gmpUpdatedAt}` : ''}.` : null],
-    [`When does the ${name} IPO open and close?`, opening && closing ? `Bidding opens on ${opening} and closes on ${closing}.` : null],
-    [`What is the ${name} IPO allotment date?`, allotment ? `The basis of allotment is expected on ${allotment}.` : null],
-    [`When will ${name} shares list?`, listing ? `Listing is expected on ${listing}${exchanges ? ` on ${exchanges}` : ''}.` : null],
-    [`Where can I check ${name} IPO allotment status?`, `Once allotment is out, check it on the registrar's website or on the BSE or NSE allotment status page, using your PAN or application number.`],
-    [`What is IPO Milega's score for the ${name} IPO?`, `${overallScoreOf(analysis).toFixed(1)}/10, the average of its fundamentals, risk, performance, flexibility and timing scores.${analysis.fundamentals?.summary ? ` ${analysis.fundamentals.summary}` : ''}`],
-  ]
 
   return {
     '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': 'Article',
-        headline: entityTitle(name),
-        description: `${name} IPO price band, issue dates, lot size, grey market premium and allotment status.`,
-        url,
-        datePublished: analysis.created_at,
-        dateModified: analysis.updated_at ?? analysis.created_at,
-        author: organization,
-        publisher: organization,
-        about: { '@type': 'Corporation', name, description: analysis.fundamentals?.business_model },
-      },
-      {
-        '@type': 'FAQPage',
-        mainEntity: faq
-          .filter((qa): qa is [string, string] => Boolean(qa[1]))
-          .map(([question, answer]) => ({
-            '@type': 'Question',
-            name: question,
-            acceptedAnswer: { '@type': 'Answer', text: answer },
-          })),
-      },
-    ],
+    '@type': 'Article',
+    headline: entityTitle(name),
+    description: `${name} IPO price band, issue dates, lot size, grey market premium and allotment status.`,
+    url,
+    image: [{ '@type': 'ImageObject', url: `${url}/opengraph-image`, width: 1200, height: 630 }],
+    datePublished: analysis.created_at,
+    dateModified: analysis.updated_at ?? analysis.created_at,
+    author: researchAuthor,
+    publisher: { '@id': ORGANIZATION_ID },
+    about: { '@type': 'Corporation', name, description: analysis.fundamentals?.business_model },
   }
 }
 
@@ -153,12 +120,16 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
   const { id } = await params;
   const data = await getAnalysisBySlug(id)
 
-  if (!data) return <AnalysisInProgress />
+  if (!data) {
+    // A slug no IPO has is a real 404; an IPO whose analysis is pending gets the noindexed placeholder.
+    if ((await getIpoNameBySlug(id)) === null) notFound()
+    return <AnalysisInProgress />
+  }
 
   const articles = await getIpoArticles(data.ipo._id)
   return (
     <>
-      <JsonLd data={generateStructuredData(data.ipos_analysis, data.ipo, id)} />
+      <JsonLd data={generateStructuredData(data.ipos_analysis, id)} />
       <AnalysisDetail analysis={data.ipos_analysis} ipo={data.ipo} articles={articles} />
     </>
   )

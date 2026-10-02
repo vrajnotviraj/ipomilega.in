@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ScoreMethodology } from "@/components/home/ScoreMethodology";
 
 const title = "About";
-const description = "What IPO Milega is, where its IPO data comes from, and how we score every RHP/DRHP by the same rules.";
+const description = "What IPO Milega is, where its IPO data comes from, how AI writes and software checks its content, and how we score every RHP/DRHP by the same rules.";
 
 export const metadata: Metadata = {
   title,
@@ -32,7 +32,7 @@ const WHAT_WE_DO = [
   },
 ];
 
-/** The /about page: what the site does, how scores work, where data comes from and what it isn't. */
+/** The /about page: what the site does, how scores work, where data comes from, how content is made, corrections and what it isn't. */
 export default function AboutPage() {
   return (
     <div className="app-container pt-24 sm:pt-28">
@@ -67,9 +67,39 @@ export default function AboutPage() {
         <h2 className="type-h2 mb-4">Where the data comes from</h2>
         <p className="mb-4 max-w-[65ch] text-muted-foreground">
           IPO details, subscription figures and listing prices come from public filings and exchange
-          disclosures. We generate the analysis from the RHP/DRHP a company files with SEBI and review it
-          before it goes live. Live numbers, subscription and grey market premium especially, move through
+          disclosures. The analysis is generated from the RHP/DRHP a company files with SEBI, and grey market
+          premium (GMP) comes from ipowatch. Live numbers, subscription and grey market premium especially, move through
           the day, so treat what you see as the latest reading.
+        </p>
+
+        <h2 id="how-content-is-made" className="type-h2 mt-12 mb-4 scroll-mt-24">How this site&apos;s content is made</h2>
+        <p className="mb-4 max-w-[65ch] text-muted-foreground">
+          AI writes the IPO analyses and the blog articles. Analyses come from the company&apos;s RHP/DRHP. Articles
+          come from a fact sheet built from our IPO data, which holds the prospectus figures, exchange data and GMP.
+        </p>
+        <p className="mb-4 max-w-[65ch] text-muted-foreground">
+          Software checks every AI-written article before it goes live. Each number and date has to match the fact
+          sheet, links can only point to the sources we supply, and the article must end with a Sources section. It
+          also can&apos;t call GMP official or call anything guaranteed. If an article fails, the site doesn&apos;t
+          publish it automatically.
+        </p>
+        <p className="mb-4 max-w-[65ch] text-muted-foreground">
+          GMP is an unofficial grey market figure. NSE and BSE don&apos;t publish it, and it doesn&apos;t predict the
+          listing price. Nothing on the site is investment advice.
+        </p>
+
+        <h2 className="type-h2 mt-12 mb-4">Corrections</h2>
+        <p className="mb-4 max-w-[65ch] text-muted-foreground">
+          Spotted a wrong number or date? Tell us on X at{" "}
+          <a
+            href="https://x.com/ipomilega"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+          >
+            @ipomilega
+          </a>{" "}
+          with a link to the page. When we fix an article, it shows the date it was updated under the byline.
         </p>
 
         <h2 className="type-h2 mt-12 mb-4">A note on what this isn&apos;t</h2>

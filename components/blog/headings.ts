@@ -2,7 +2,7 @@
 // (from the rendered heading text) must produce the same ids; headings.check.mjs guards that. No imports, so the check runs under plain node.
 
 /** "Risks to watch" -> "risks-to-watch". Emphasis markers and punctuation collapse into the dashes, so raw and rendered text agree. */
-export const slugify = (text: string) =>
+const slugify = (text: string) =>
   text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 /** Hands out heading ids in document order; a repeated heading gets "-2", "-3". */

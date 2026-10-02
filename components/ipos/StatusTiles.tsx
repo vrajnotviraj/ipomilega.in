@@ -1,6 +1,6 @@
 import { getIpoType, parseEstListingPercent } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { Filters, Row, Status, Step, StepName, daysToCloseOf, whenText } from "@/components/ipos/rows";
+import { Filters, Row, Step, StepName, matchesStatus, whenText } from "@/components/ipos/rows";
 
 type TileValue = Filters["status"];
 
@@ -16,16 +16,9 @@ const TILES: { value: TileValue; label: string }[] = [
 function nearestStep(rows: Row[], step: StepName, pick: "soonest" | "latest") {
   const dated = rows
     .map((row) => row.steps.find((s) => s.name === step))
-    .filter((s): s is Step & { days: number } => s?.days != null)
-    .filter((s) => pick === "latest" || s.days >= 0);
-  dated.sort((a, b) => (pick === "soonest" ? a.days - b.days : b.days - a.days));
-  return dated.at(0);
-}
-
-/** Fewest days left to close among the rows. */
-function soonestClose(rows: Row[]): number | null {
-  const days = rows.map(daysToCloseOf).filter((d): d is number => d !== null);
-  return days.length ? Math.min(...days) : null;
+    .filter((s): s is Step & { days: number } => s?.days != null);
+  if (pick === "latest") return dated.sort((a, b) => b.days - a.days)[0];
+  return dated.filter((s) => s.days >= 0).sort((a, b) => a.days - b.days)[0];
 }
 
 /** One line of context under each count. */
@@ -36,7 +29,7 @@ function subtitleFor(value: TileValue, rows: Row[]): string {
   }
   if (rows.length === 0) return "None right now";
   if (value === "Open") {
-    const days = soonestClose(rows);
+    const days = nearestStep(rows, "Close", "soonest")?.days ?? null;
     if (days === null) return "Close dates to be announced";
     return days > 7 ? `Closing soonest in ${days} days` : `Closing soonest ${whenText(days, "")}`;
   }
@@ -74,7 +67,7 @@ export function StatusTiles({ rows, value, onChange }: { rows: Row[]; value: Til
   return (
     <div role="group" aria-label="IPO status" className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
       {TILES.map((tile) => {
-        const tileRows = tile.value === "all" ? rows : rows.filter((row) => row.status === (tile.value as Status));
+        const tileRows = rows.filter((row) => matchesStatus(row, tile.value));
         return (
           <Tile
             key={tile.value}

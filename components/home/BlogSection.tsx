@@ -3,7 +3,7 @@ import { Blog } from '@/types/ipo';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { AiDisclaimer } from '@/components/ui/AiDisclaimer';
 import { PostCard } from '@/components/blog/PostCard';
-import { toSummary } from '@/components/blog/blog-format';
+import { toSummary } from '@/lib/blog-format';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import { SectionHeading } from '@/components/home/SectionHeading';
 

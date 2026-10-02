@@ -43,16 +43,16 @@ export function AllotmentPredictorModal({
     onClose();
   };
 
-  const activeCategory = ALLOTMENT_CATEGORIES.find((c) => c.key === activeKey) || ALLOTMENT_CATEGORIES[0];
+  const activeCategory = ALLOTMENT_CATEGORIES.find((c) => c.key === activeKey)!;
   const { subscription, lottery, usesCombinedNii } = getAllotmentRatio(ipo, activeCategory);
   const oddsSentence = describeAllotmentOdds(lottery);
   const lots = getMarketLotRows(ipo?.ipo_market_lot, activeCategory.matchKeyword);
 
   return (
     <Dialog open={!!initialCategory} onOpenChange={(open) => { if (!open) close(); }}>
-      <DialogContent className="rounded-[18px] shadow-(--shadow-lift) sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl font-bold tracking-[-0.015em]">Allotment predictor</DialogTitle>
+          <DialogTitle className="text-xl tracking-[-0.015em]">Allotment predictor</DialogTitle>
           <DialogDescription>{companyName}</DialogDescription>
         </DialogHeader>
 

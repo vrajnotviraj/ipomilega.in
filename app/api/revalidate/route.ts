@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // The root layout, not per-path calls: revalidatePath('/analysis') misses the dynamic /analysis/[slug] pages.
+    // Purges from the root layout down, which covers the dynamic /analysis/[slug] pages that revalidatePath('/analysis') misses.
     revalidatePath('/', 'layout');
     revalidateTag(SITE_DATA_TAG);
   } catch (error) {

@@ -25,28 +25,26 @@ interface GmpSnapshot {
 const istDay = (ms: number) => Math.floor((ms + IST_OFFSET_MS) / DAY_MS);
 const istDayStart = (day: number) => day * DAY_MS - IST_OFFSET_MS;
 
+type Reading = { day: number; ms: number; row: GmpSnapshot };
+
+/** The IST days one snapshot covers: its own day, each later day it was still quoted up to the next snapshot, and for the newest one its latest confirmation. */
+function readingsOf(row: GmpSnapshot, next: GmpSnapshot | undefined): Reading[] {
+  const start = (row.captured_at ?? row.observed_at).getTime();
+  const seen = (row.last_seen_at ?? row.observed_at).getTime();
+  const end = next ? Math.min(seen, next.observed_at.getTime()) : seen;
+  const readings: Reading[] = [{ day: istDay(start), ms: start, row }];
+  // The last covered day was confirmed at `end`; days in between only held, so they sit at the day's start.
+  for (let day = istDay(start) + 1; day <= istDay(end); day += 1) {
+    readings.push({ day, ms: day === istDay(end) ? end : istDayStart(day), row });
+  }
+  // The newest snapshot's latest confirmation, so today's "as of" is current.
+  if (!next && istDay(seen) === istDay(start) && seen > start) readings.push({ day: istDay(seen), ms: seen, row });
+  return readings;
+}
+
 /** Oldest-first snapshots in, one point per IST day out. */
 function buildDailySeries(rows: GmpSnapshot[]) {
-  // A snapshot counts on its own day and on each later day it was still quoted, up to the next snapshot.
-  const readings: { day: number; ms: number; row: GmpSnapshot }[] = [];
-
-  rows.forEach((row, i) => {
-    const start = (row.captured_at ?? row.observed_at).getTime();
-    readings.push({ day: istDay(start), ms: start, row });
-
-    const next = rows[i + 1];
-    const seen = (row.last_seen_at ?? row.observed_at).getTime();
-    const end = next ? Math.min(seen, next.observed_at.getTime()) : seen;
-    // The last covered day was confirmed at `end`; days in between only held, so they sit at the day's start.
-    for (let day = istDay(start) + 1; day <= istDay(end); day += 1) {
-      readings.push({ day, ms: day === istDay(end) ? end : istDayStart(day), row });
-    }
-    // The newest snapshot's latest confirmation, so today's "as of" is current.
-    if (!next && istDay(seen) === istDay(start) && seen > start) {
-      readings.push({ day: istDay(seen), ms: seen, row });
-    }
-  });
-
+  const readings = rows.flatMap((row, i) => readingsOf(row, rows[i + 1]));
   readings.sort((a, b) => a.ms - b.ms);
 
   // Later readings overwrite earlier ones, so each day keeps its last.

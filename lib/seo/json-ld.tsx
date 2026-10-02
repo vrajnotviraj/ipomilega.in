@@ -10,6 +10,11 @@ export function JsonLd({ data }: { data: object }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }} />;
 }
 
+const SITE_DESCRIPTION = "Live, upcoming and past Indian IPOs with GMP, subscription, allotment dates and a scored analysis of every prospectus.";
+
+/** The research desk as an article author, linked to /about. */
+export const researchAuthor = { "@type": "Organization", name: RESEARCH_AUTHOR, url: `${SITE_URL}/about` };
+
 /** The publisher and the site, once for every page. */
 export const siteJsonLd = {
   "@context": "https://schema.org",
@@ -20,14 +25,16 @@ export const siteJsonLd = {
       name: SITE_NAME,
       url: SITE_URL,
       logo: `${SITE_URL}/apple-icon.png`,
+      description: SITE_DESCRIPTION,
       sameAs: ["https://x.com/ipomilega"],
     },
     {
       "@type": "WebSite",
       "@id": `${SITE_URL}/#website`,
       name: SITE_NAME,
+      alternateName: ["IPOMilega", "ipomilega.in"],
       url: SITE_URL,
-      description: "Live, upcoming and past Indian IPOs with GMP, subscription, allotment dates and a scored analysis of every prospectus.",
+      description: SITE_DESCRIPTION,
       publisher: { "@id": ORGANIZATION_ID },
       inLanguage: "en-IN",
     },
@@ -80,7 +87,7 @@ export function articleJsonLd(blog: Blog) {
   const url = `${SITE_URL}/blogs/${blog.slug}`;
   const author =
     blog.author === RESEARCH_AUTHOR
-      ? { "@type": "Organization", name: RESEARCH_AUTHOR, url: `${SITE_URL}/about` }
+      ? researchAuthor
       : { "@type": "Person", name: blog.author, ...(blog.author_slug && { url: `${SITE_URL}/authors/${blog.author_slug}` }) };
 
   return {

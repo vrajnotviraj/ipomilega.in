@@ -16,6 +16,7 @@ export interface Blog {
   published_at?: string
   updated_at: string
   article_type?: "analysis" | "gmp" | "subscription" | "allotment" | "listing"
+  generated_by?: string
 }
 
 export interface Author {
@@ -47,7 +48,7 @@ export interface Ipo {
   ipo_market_lot: IpoMarketLot[];
   promoters: string;
   nii_sr: string;
-  // The two NII tiers; missing on IPOs captured before the split.
+  // The two NII tiers (S-HNI and B-HNI); absent on older captures, which only have nii_sr.
   snii_sr?: string;
   bnii_sr?: string;
   qib_sr: string;

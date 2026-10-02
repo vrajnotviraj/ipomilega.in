@@ -14,7 +14,7 @@ import {
   parseEstListingPercent,
   parseGainValue,
 } from "@/lib/ipo-format";
-import { getGmp, getIssueDates, getLotShares, getMinInvestment } from "./analysis-facts";
+import { getGmp, getIssueDates, getLotShares, getMinInvestment, formatMinInvestment } from "./analysis-facts";
 
 export interface HeadlineFigure {
   label: string;
@@ -92,7 +92,7 @@ function getMinInvestmentFigure(analysis: IpoComprehensiveAnalysis): HeadlineFig
   const lotShares = getLotShares(analysis);
   return {
     label: "Min. investment",
-    value: minInvestment ? `₹${minInvestment.toLocaleString("en-IN")}` : "N/A",
+    value: formatMinInvestment(analysis),
     caption: lotShares ? `${lotShares} shares` : "One lot",
     color: minInvestment ? "text-foreground" : "text-muted-foreground",
   };

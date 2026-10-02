@@ -3,7 +3,7 @@ import { cache } from 'react';
 import { getDb, toPlain } from '@/lib/db/mongo';
 import { cached } from '@/lib/db/cache';
 import { liveFilter, NEWEST_FIRST } from '@/lib/queries/blogs';
-import { toSummary, type PostSummary } from '@/components/blog/blog-format';
+import { toSummary, type PostSummary } from '@/lib/blog-format';
 import { Author, Blog } from '@/types/ipo';
 
 export const AUTHOR_PAGE_SIZE = 12;

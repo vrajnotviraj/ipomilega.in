@@ -13,10 +13,13 @@ import {
   type IssueStage,
 } from "@/lib/ipo-format";
 import { overallScoreOf } from "@/lib/seo/share";
+import { RESEARCH_AUTHOR } from "@/lib/seo/json-ld";
+import { formatBlogDate } from "@/lib/blog-format";
 import { cn } from "@/lib/utils";
-import { IpoLogo } from "@/components/ipo/IpoLogo";
+import { ProgressLink } from "@/components/progress/ProgressLink";
+import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { LiveLabel } from "@/components/ui/LiveLabel";
-import { getAboutLine, getIssueDates, getLotShares, getMinInvestment, getVerdict } from "./analysis-facts";
+import { getAboutLine, getIssueDates, getLotShares, formatMinInvestment, getVerdict } from "./analysis-facts";
 import { getHeadlineFigures, type HeadlineFigure } from "./headline-figures";
 import { Eyebrow } from "./primitives";
 
@@ -38,6 +41,7 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
       </div>
       <h1 className="type-hero mt-4 text-balance break-words text-[44px] sm:text-[60px]">{analysis.company_name}</h1>
       <AboutLine text={getAboutLine(analysis)} />
+      <Byline published={analysis.created_at} updated={analysis.updated_at} />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12">
         <ScoreVerdict score={overallScoreOf(analysis)} verdict={getVerdict(analysis)} />
@@ -47,7 +51,7 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
             <p className="mt-2 text-xs text-muted-foreground">
               GMP is an unofficial grey market indication.
               {gmpUpdatedAt && (
-                <> Updated <span className="font-mono tabular-nums">{gmpUpdatedAt}</span>.</>
+                <> GMP updated <span className="font-mono tabular-nums">{gmpUpdatedAt}</span>.</>
               )}
             </p>
           </div>
@@ -56,6 +60,30 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
         </div>
       </div>
     </div>
+  );
+}
+
+/** Who wrote the analysis and when, matching the Article markup. The update date shows only when it falls on another day. */
+function Byline({ published, updated }: { published?: Date | string; updated?: Date | string }) {
+  const publishedOn = published ? formatBlogDate(String(published)) : null;
+  const updatedOn = updated ? formatBlogDate(String(updated)) : null;
+  return (
+    <p className="mt-3 text-sm text-muted-foreground">
+      By{" "}
+      <ProgressLink href="/about" className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground">
+        {RESEARCH_AUTHOR}
+      </ProgressLink>
+      {publishedOn && (
+        <>
+          {" · "}Published <time dateTime={String(published)} className="font-mono tabular-nums">{publishedOn}</time>
+        </>
+      )}
+      {updatedOn && updatedOn !== publishedOn && (
+        <>
+          {" · "}Updated <time dateTime={String(updated)} className="font-mono tabular-nums">{updatedOn}</time>
+        </>
+      )}
+    </p>
   );
 }
 
@@ -125,11 +153,10 @@ function HeadlineFigures({ figures }: { figures: HeadlineFigure[] }) {
 /** Price band, lot, cost of one lot and issue size. */
 function KeyFacts({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
   const lotShares = getLotShares(analysis);
-  const minInvestment = getMinInvestment(analysis);
   const facts = [
     { label: "Price band", value: formatPriceBand(analysis.ipo_details?.price_band) },
     { label: "Lot size", value: lotShares ? `${lotShares} shares` : "N/A" },
-    { label: "Min. investment", value: minInvestment ? `₹${minInvestment.toLocaleString("en-IN")}` : "N/A" },
+    { label: "Min. investment", value: formatMinInvestment(analysis) },
     { label: "Issue size", value: formatIssueSize(analysis.ipo_details?.issue_size) ?? "N/A" },
   ];
 

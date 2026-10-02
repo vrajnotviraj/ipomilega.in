@@ -7,7 +7,7 @@ import { BookOpen, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
-import type { PostSummary } from "@/components/blog/blog-format";
+import type { PostSummary } from "@/lib/blog-format";
 import { Byline, MetaLine, PostCard } from "@/components/blog/PostCard";
 
 /** The newest matching post, wide, with its cover image when there is one. */

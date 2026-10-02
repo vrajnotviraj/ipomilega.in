@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Clock } from 'lucide-react';
-import { IpoSectionProps, HomePageIpoProps } from '@/types/homepage';
+import { IpoSectionProps, HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { LiveIpoCard } from '@/components/home/ipo-card/LiveIpoCard';
 import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';

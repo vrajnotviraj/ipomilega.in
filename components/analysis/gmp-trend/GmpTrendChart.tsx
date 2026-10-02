@@ -4,7 +4,8 @@ import { gainColor } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { LiveLabel } from "@/components/ui/LiveLabel";
 import dynamic from "next/dynamic";
-import { DIRECTION, formatDay, formatDelta, formatRupees, formatTime, useGmpHistory, type ChartPoint } from "./gmp-history";
+import { formatRupees } from "@/lib/ipo-format";
+import { DIRECTION, formatDay, formatDelta, formatTime, useGmpHistory, type ChartPoint } from "./gmp-history";
 
 const GmpChart = dynamic(() => import("./GmpChart").then((module) => module.GmpChart), {
   ssr: false,

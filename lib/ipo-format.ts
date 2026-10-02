@@ -1,5 +1,5 @@
 import type { IpoMarketLot } from '@/types/ipo';
-import type { HomePageIpoProps } from '@/types/homepage';
+import type { HomePageIpoProps } from '@/types/ipo-with-analysis';
 
 // ---------- Board and price band ----------
 
@@ -34,7 +34,7 @@ export const getIpoType = (ipo: {
 // An RHP prints a figure not fixed yet as "[●]"; the scraper stores it verbatim and it is cleaned here.
 const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
 
-export const isUnfixedValue = (raw: string | undefined | null): boolean =>
+const isUnfixedValue = (raw: string | undefined | null): boolean =>
   UNFIXED_VALUE_RE.test(raw ?? '');
 
 const isKnownValue = (value: string | undefined): value is string =>
@@ -248,6 +248,15 @@ const oddsN = (r: number) => (r < 10 ? Math.round(r * 10) / 10 : Math.round(r)).
 /** A percent with its sign: "+38.2%", "-4%", "+0%". */
 export const signedPercent = (value: number) => `${value >= 0 ? '+' : ''}${value}%`;
 
+/** A rupee amount in Indian grouping: "₹1,49,760". */
+export const formatRupees = (value: number) => `₹${value.toLocaleString('en-IN')}`;
+
+/** GMP with its sign ("+38.23%"), or "N/A" when there is none. */
+export const formatGmp = (percent: number | null) => (percent === null ? 'N/A' : signedPercent(percent));
+
+/** A subscription ratio as "101.86x", or "–" when unknown. */
+export const formatTimes = (ratio: number | null) => (ratio === null ? '–' : `${ratio}x`);
+
 /** "1 in 40". One decimal below 10x so small books don't all read "1 in 1". */
 export const formatAllotmentOdds = (subscriptionRatio: number | null): string => {
   if (!isValidRatio(subscriptionRatio)) return 'N/A';
@@ -308,6 +317,14 @@ export const getMarketLotRows = (
   return { min: findRow(/minimum/i), max: findRow(/maximum/i) };
 };
 
+/** Share of a B-HNI application one winning slot covers: S-HNI minimum ÷ B-HNI minimum, about ⅕. */
+function bhniSlotShare(marketLot: IpoMarketLot[] | undefined, bhniKeyword: string): number {
+  const slot = parseGainValue(getMarketLotRows(marketLot, 's[- ]?hni').min?.shares);
+  const minApp = parseGainValue(getMarketLotRows(marketLot, bhniKeyword).min?.shares);
+  // Without a lot table, use the ₹2L/₹10L thresholds the rows would give.
+  return slot && minApp ? slot / minApp : 0.2;
+}
+
 /**
  * A category's subscription, and `lottery`: applicants per winning slot, the N in "1 in N".
  *
@@ -324,12 +341,7 @@ export const getAllotmentRatio = (
   // Older captures and ipowatch rows only have the combined NII figure.
   const usesCombinedNii = tierRatio === null && cat.key !== 'retail';
   const subscription = usesCombinedNii ? parseGainValue(ipo?.nii_sr) : tierRatio;
-  if (subscription === null || cat.key !== 'bhni') return { subscription, lottery: subscription, usesCombinedNii };
-
-  const slot = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, 's[- ]?hni').min?.shares);
-  const minApp = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, cat.matchKeyword).min?.shares);
-  // Without a lot table, use the ₹2L/₹10L thresholds the rows would give.
-  const lottery = subscription * (slot && minApp ? slot / minApp : 0.2);
+  const lottery = subscription !== null && cat.key === 'bhni' ? subscription * bhniSlotShare(ipo?.ipo_market_lot, cat.matchKeyword) : subscription;
   return { subscription, lottery, usesCombinedNii };
 };
 

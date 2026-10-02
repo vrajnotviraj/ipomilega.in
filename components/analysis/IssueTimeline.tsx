@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { dayNumberInIndia, formatShortDate, parseIpoDate } from "@/lib/ipo-format";
+import { dayNumberInIndia, daysFromToday, formatShortDate, parseIpoDate } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 
 type Align = "left" | "center" | "right";
@@ -38,19 +38,38 @@ function progressAt(todayRaw: number | null, truePositions: number[], railPositi
 }
 
 /** "Closes in 3 days", "Lists tomorrow": the next issue date from today, or null once listed. */
-function countdownLabel(today: Date, steps: { verb: string; date: string }[]): string | null {
-  const todayDay = dayNumberInIndia(today);
+function countdownLabel(steps: { verb: string; date: string }[]): string | null {
   for (const { verb, date } of steps) {
-    const parsed = parseIpoDate(date);
-    if (!parsed) continue;
-    const days = dayNumberInIndia(parsed) - todayDay;
-    if (days < 0) continue;
+    const days = daysFromToday(date);
+    if (days === null || days < 0) continue;
     if (days === 0) return `${verb} today`;
     if (days === 1) return `${verb} tomorrow`;
     return `${verb} in ${days} days`;
   }
   return null;
 }
+
+/** Raises each position to at least the one before it, so stations stay in date order. */
+function keepInDateOrder(positions: number[]): number[] {
+  const ordered = [...positions];
+  for (let i = 1; i < ordered.length; i++) ordered[i] = Math.max(ordered[i], ordered[i - 1]);
+  return ordered;
+}
+
+/** Date-proportional station positions, the same spread apart for labels, and the date-to-percent map. */
+function railLayout(closing: string, allotment: string, openDate: Date, listDate: Date) {
+  const openDay = dayNumberInIndia(openDate);
+  const totalDays = dayNumberInIndia(listDate) - openDay;
+  const percentThrough = (date: Date) => ((dayNumberInIndia(date) - openDay) / totalDays) * 100;
+  const positionOf = (value: string) => {
+    const date = parseIpoDate(value);
+    return date ? clamp(percentThrough(date), 0, 100) : 0;
+  };
+  const truePositions = keepInDateOrder([0, positionOf(closing), positionOf(allotment), 100]);
+  return { percentThrough, truePositions, railPositions: spreadApart(truePositions) };
+}
+
+type Station = { label: string; date: string; pos: number; align: Align };
 
 /** Open, close, allotment and listing on a rail spaced by date, with a marker for today. */
 export function IssueTimeline({ opening, closing, allotment, listing }: Record<"opening" | "closing" | "allotment" | "listing", string>) {
@@ -64,19 +83,8 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
     return <p className="py-6 text-center text-sm text-muted-foreground">Timeline will be available once opening and listing dates are confirmed.</p>;
   }
 
-  const openDay = dayNumberInIndia(openDate);
-  const totalDays = dayNumberInIndia(listDate) - openDay;
-  const percentThrough = (date: Date) => ((dayNumberInIndia(date) - openDay) / totalDays) * 100;
-  const positionOf = (value: string) => {
-    const date = parseIpoDate(value);
-    return date ? clamp(percentThrough(date), 0, 100) : 0;
-  };
-
-  const truePositions = [0, positionOf(closing), positionOf(allotment), 100];
-  for (let i = 1; i < truePositions.length; i++) truePositions[i] = Math.max(truePositions[i], truePositions[i - 1]);
-  const railPositions = spreadApart(truePositions);
-
-  const stations: { label: string; date: string; pos: number; align: Align }[] = [
+  const { percentThrough, truePositions, railPositions } = railLayout(closing, allotment, openDate, listDate);
+  const stations: Station[] = [
     { label: "Open", date: opening, pos: railPositions[0], align: "left" },
     { label: "Close", date: closing, pos: railPositions[1], align: "center" },
     { label: "Allotment", date: allotment, pos: railPositions[2], align: "center" },
@@ -90,7 +98,7 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
     return !!date && !!today && dayNumberInIndia(date) <= dayNumberInIndia(today);
   };
   const countdown = today
-    ? countdownLabel(today, [
+    ? countdownLabel([
         { verb: "Opens", date: opening },
         { verb: "Closes", date: closing },
         { verb: "Lists", date: listing },
@@ -104,7 +112,7 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
       {countdown && <span className="font-mono text-xs tabular-nums text-muted-foreground">{countdown}</span>}
     </li>
   );
-  const stationRow = (station: (typeof stations)[number]) => (
+  const stationRow = (station: Station) => (
     <li key={station.label} className="flex items-center gap-3">
       <StationDot reached={isReached(station.date)} />
       <span className="w-24 shrink-0 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{station.label}</span>
@@ -121,54 +129,60 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
         {stations.slice(todayIndex).map(stationRow)}
       </ol>
 
-      <div className="hidden pt-2 sm:block">
-        <div className="relative h-5">
-          {stations.map((station) => (
-            <span
-              key={station.label}
-              className={cn("absolute top-0 whitespace-nowrap text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground", ALIGN_OFFSET[station.align])}
-              style={{ left: `${station.pos}%` }}
-            >
-              {station.label}
-            </span>
-          ))}
-        </div>
-
-        <div className="relative my-1.5 h-4">
-          <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-border" />
-          <div className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary" style={{ width: `${progress}%` }} />
-          {stations.map((station) => (
-            <StationDot
-              key={station.label}
-              reached={isReached(station.date)}
-              className={cn("absolute top-1/2 -translate-y-1/2", ALIGN_OFFSET[station.align])}
-              style={{ left: `${station.pos}%` }}
-            />
-          ))}
-        </div>
-
-        {/* Fixed height so nothing shifts when the today marker appears. */}
-        <div className="relative h-8">
-          {today && (
-            <div className="absolute top-1 -translate-x-1/2" style={{ left: `${clamp(progress, 6, 94)}%` }}>
-              <TodayChip label={todayLabel} />
-            </div>
-          )}
-        </div>
-
-        <div className="relative h-5">
-          {stations.map((station) => (
-            <span
-              key={station.label}
-              className={cn("absolute top-0 whitespace-nowrap font-mono text-sm font-medium tabular-nums", ALIGN_OFFSET[station.align])}
-              style={{ left: `${station.pos}%` }}
-            >
-              {formatShortDate(station.date, true)}
-            </span>
-          ))}
-        </div>
-      </div>
+      <DesktopRail stations={stations} progress={progress} today={today} todayLabel={todayLabel} isReached={isReached} />
     </>
+  );
+}
+
+/** Places an element at its station on the rail, aligned to the station's side. */
+const atStation = (station: Station, className: string) => ({
+  className: cn(className, ALIGN_OFFSET[station.align]),
+  style: { left: `${station.pos}%` },
+});
+
+/** The sm+ rail: labels above, dots and progress on the line, the today chip, then dates. */
+function DesktopRail({ stations, progress, today, todayLabel, isReached }: {
+  stations: Station[];
+  progress: number;
+  today: Date | null;
+  todayLabel: string;
+  isReached: (value: string) => boolean;
+}) {
+  return (
+    <div className="hidden pt-2 sm:block">
+      <div className="relative h-5">
+        {stations.map((station) => (
+          <span key={station.label} {...atStation(station, "absolute top-0 whitespace-nowrap text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground")}>
+            {station.label}
+          </span>
+        ))}
+      </div>
+
+      <div className="relative my-1.5 h-4">
+        <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-border" />
+        <div className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary" style={{ width: `${progress}%` }} />
+        {stations.map((station) => (
+          <StationDot key={station.label} reached={isReached(station.date)} {...atStation(station, "absolute top-1/2 -translate-y-1/2")} />
+        ))}
+      </div>
+
+      {/* Fixed height so nothing shifts when the today marker appears. */}
+      <div className="relative h-8">
+        {today && (
+          <div className="absolute top-1 -translate-x-1/2" style={{ left: `${clamp(progress, 6, 94)}%` }}>
+            <TodayChip label={todayLabel} />
+          </div>
+        )}
+      </div>
+
+      <div className="relative h-5">
+        {stations.map((station) => (
+          <span key={station.label} {...atStation(station, "absolute top-0 whitespace-nowrap font-mono text-sm font-medium tabular-nums")}>
+            {formatShortDate(station.date, true)}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 

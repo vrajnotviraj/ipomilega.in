@@ -7,7 +7,7 @@ import { toast } from "sonner";
  * Opens the system share sheet with the text, plus the page link when `url` is set.
  * Without a share sheet it copies the link (or the text) and says so in a toast.
  */
-export function ShareButton({ title, text, url = false, label = "Share" }: { title: string; text: string; url?: boolean; label?: string }) {
+export function ShareButton({ title, text, url = false }: { title: string; text: string; url?: boolean }) {
   async function share() {
     const link = url ? window.location.href : undefined;
     try {
@@ -31,7 +31,7 @@ export function ShareButton({ title, text, url = false, label = "Share" }: { tit
       className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary active:scale-[0.98]"
     >
       <Share2 className="size-4" strokeWidth={2} />
-      <span className="max-sm:sr-only">{label}</span>
+      <span className="max-sm:sr-only">Share</span>
     </button>
   );
 }

@@ -1,4 +1,4 @@
-import { HomePageIpoProps } from "@/types/homepage";
+import { HomePageIpoProps } from "@/types/ipo-with-analysis";
 import { daysFromToday, formatIssueSize, formatShortDate, getIpoType, parseEstListingPercent, scoreOf, type Board } from "@/lib/ipo-format";
 
 export type Status = "Upcoming" | "Open" | "Closed" | "Listed";
@@ -22,6 +22,11 @@ export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 ];
 
 export type Filters = { status: Status | "all"; board: Board | "all"; query: string; sort: SortKey };
+
+export const PAGE_SIZE = 10;
+
+/** /ipos for page 1, /ipos/<n> after. A path segment keeps each page in the ISR cache, where ?page= would not. */
+export const ipoPagePath = (page: number) => (page === 1 ? "/ipos" : `/ipos/${page}`);
 
 const nameOf = (row: Row) => row.ipo?.upcoming_ipo_2025 || "";
 
@@ -63,6 +68,13 @@ const COMPARE: Record<SortKey, (a: Row, b: Row) => number> = {
   closing: (a, b) => closeRankOf(a) - closeRankOf(b) || 0,
 };
 
+/** future until its day, done once passed; on the day itself only the last step due today is "today". */
+function stepState(day: number | null, isLastDueToday: boolean): StepState {
+  if (day === null || day > 0) return "future";
+  if (day < 0) return "done";
+  return isLastDueToday ? "today" : "done";
+}
+
 /** Open, close, allotment and listing dates. Only the last step due today is "today"; earlier ones count as done. */
 function lifecycleOf(item: HomePageIpoProps): Step[] {
   const dates = item.ipo?.ipo_dates;
@@ -75,13 +87,12 @@ function lifecycleOf(item: HomePageIpoProps): Step[] {
   const days = raw.map(([, date]) => daysFromToday(date));
   const todayIndex = days.lastIndexOf(0);
 
-  return raw.map(([name, date], index) => {
-    const day = days[index];
-    let state: StepState = "future";
-    if (day !== null && day < 0) state = "done";
-    if (day === 0) state = index === todayIndex ? "today" : "done";
-    return { name, date: formatShortDate(date), days: day, state };
-  });
+  return raw.map(([name, date], index) => ({
+    name,
+    date: formatShortDate(date),
+    days: days[index],
+    state: stepState(days[index], index === todayIndex),
+  }));
 }
 
 /** Merges the four buckets into one list, tagging each IPO with its status and lifecycle. Call on the server. */
@@ -96,6 +107,8 @@ export function toRows(buckets: { live: HomePageIpoProps[]; upcoming: HomePageIp
   ];
 }
 
+export const matchesStatus = (row: Row, status: Filters["status"]) => status === "all" || row.status === status;
+
 /** Rows on the chosen board whose name matches the search. */
 export function matchBoardAndSearch(rows: Row[], { board, query }: Pick<Filters, "board" | "query">): Row[] {
   const search = query.trim().toLowerCase();
@@ -107,7 +120,7 @@ export function matchBoardAndSearch(rows: Row[], { board, query }: Pick<Filters,
 /** Rows matching the status, board and name search, in the chosen order. */
 export function applyFilters(rows: Row[], filters: Filters): Row[] {
   return matchBoardAndSearch(rows, filters)
-    .filter((row) => filters.status === "all" || row.status === filters.status)
+    .filter((row) => matchesStatus(row, filters.status))
     .sort(COMPARE[filters.sort]);
 }
 

@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { IpoLogo } from "@/components/ipo/IpoLogo";
+import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { ShareButton } from "@/components/ui/ShareButton";
 import { buildShareMessage, type ShareFacts } from "@/lib/seo/share";
 import { getRiskTextColor } from "@/lib/ipo-format";

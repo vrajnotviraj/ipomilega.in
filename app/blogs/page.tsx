@@ -4,7 +4,7 @@ import { getPublishedBlogs } from "@/lib/queries/blogs";
 import { blogIndexJsonLd, JsonLd } from "@/lib/seo/json-ld";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import BlogsClient from "@/components/blog/BlogsClient";
-import { formatBlogDate, toSummary } from "@/components/blog/blog-format";
+import { formatBlogDate, toSummary } from "@/lib/blog-format";
 
 export const revalidate = 600;
 

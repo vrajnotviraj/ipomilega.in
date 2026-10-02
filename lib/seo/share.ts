@@ -27,7 +27,7 @@ export function closingLine(closing: string | null | undefined, opening: string 
 }
 
 /** "GMP ₹25" for a premium amount, "GMP +6.17%" for an estimated-listing string like "430 (6.17%)". */
-export function gmpLine(gmp: string | number | null | undefined): string | null {
+function gmpLine(gmp: string | number | null | undefined): string | null {
   const raw = gmp == null ? "" : String(gmp).trim();
   if (!raw || ["n/a", "na", "tba", "tbd", "-", "0"].includes(raw.toLowerCase())) return null;
 
@@ -50,10 +50,9 @@ function oneLiner(text: string | null | undefined, max = 150): string | null {
   if (!clean) return null;
 
   const firstSentence = clean.split(/(?<=[.!?])\s/)[0] || clean;
-  const candidate = firstSentence.length <= max ? firstSentence : clean;
-  if (candidate.length <= max) return candidate.replace(/\.$/, "");
-
-  return candidate.slice(0, candidate.lastIndexOf(" ", max) + 1).trim().replace(/[,.;:]$/, "") + "…";
+  if (firstSentence.length <= max) return firstSentence;
+  // The first sentence alone is too long, so cut the whole text at the last word that fits.
+  return clean.slice(0, clean.lastIndexOf(" ", max) + 1).trim().replace(/[,.;:]$/, "") + "…";
 }
 
 export interface ShareFacts {
@@ -89,7 +88,9 @@ export function buildShareDescription({ companyName, score, gmp, opening, closin
     score !== undefined && score > 0 ? `Scored ${score.toFixed(1)}/10 from the RHP.` : null,
     `Read the full ${companyName} IPO analysis on ${SITE_NAME}.`,
   ]
-    .filter(Boolean)
+    .filter((part): part is string => Boolean(part))
+    // gmpLine never ends in a stop and oneLiner may not, so each part is ended as a sentence before joining.
+    .map((part) => (/[.!?…]$/.test(part) ? part : `${part}.`))
     .join(" ");
 }
 

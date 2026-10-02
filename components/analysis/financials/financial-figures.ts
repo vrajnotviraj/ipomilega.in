@@ -14,7 +14,7 @@ export interface FinancialHighlight {
 export const croresOf = (raw: string | undefined) => parseGainValue(raw) ?? 0;
 
 /** When a period ended, from "31 Mar 2025", "Mar 2025", "2025" or "FY25" (those three read as 31 March). */
-export function periodTime(period: string): number | null {
+function periodTime(period: string): number | null {
   const exact = parseIpoDate(period);
   if (exact) return exact.getTime();
   const year = periodYear(period);

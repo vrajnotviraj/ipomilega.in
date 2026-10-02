@@ -1,5 +1,5 @@
 import { ProgressLink } from "@/components/progress/ProgressLink";
-import { formatBlogDate, type PostSummary } from "@/components/blog/blog-format";
+import { formatBlogDate, type PostSummary } from "@/lib/blog-format";
 
 /** "IPO Analysis · 4 min read" */
 export function MetaLine({ post }: { post: PostSummary }) {

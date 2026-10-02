@@ -2,15 +2,17 @@ import { ArrowUpRight, Clock } from 'lucide-react';
 import { Ipo } from '@/types/ipo';
 import {
   daysFromToday,
+  formatGmp,
   formatShortDate,
   formatShortDateOrToday,
+  formatTimes,
   gainColor,
   getAllotmentCheckUrl,
   parseEstListingPercent,
   parseGainValue,
 } from '@/lib/ipo-format';
 import { cn } from '@/lib/utils';
-import { CardHeader, IpoCardProps, Stat, formatGmp, formatTimes } from './CardParts';
+import { CardHeader, IpoCardProps, Stat } from './CardParts';
 
 /** Card for an IPO whose bidding has closed but has not listed: final GMP, subscription, listing date and the allotment check. */
 export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {

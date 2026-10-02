@@ -8,6 +8,7 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PostCard } from "@/components/blog/PostCard";
+import { PAGER, pageFromSegments } from "@/components/ui/pager";
 
 // Pages are /authors/<slug> and /authors/<slug>/<n>. A path segment keeps each page in the ISR cache, where ?page= would not.
 export const revalidate = 600;
@@ -19,23 +20,12 @@ export function generateStaticParams() {
 
 type Params = { params: Promise<{ slug: string; page?: string[] }> };
 
-const PAGER =
-  "inline-flex items-center gap-1 rounded-full border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2";
-
 const pathOf = (slug: string, page: number) => (page === 1 ? `/authors/${slug}` : `/authors/${slug}/${page}`);
-
-/** The page number in the path: 1 when absent, null for "1", junk or extra segments. */
-function pageOf(segments?: string[]): number | null {
-  if (!segments) return 1;
-  if (segments.length !== 1 || !/^[1-9]\d*$/.test(segments[0])) return null;
-  const page = Number(segments[0]);
-  return page > 1 ? page : null;
-}
 
 /** The writer, this page's posts and the page count, or null for an unknown writer or page. */
 async function load({ params }: Params) {
   const { slug, page: segments } = await params;
-  const page = pageOf(segments);
+  const page = pageFromSegments(segments);
   if (!page) return null;
   const author = await getAuthor(slug);
   if (!author) return null;

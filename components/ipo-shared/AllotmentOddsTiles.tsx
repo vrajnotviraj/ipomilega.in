@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronRight, Landmark, User, Users } from "lucide-react";
 import type { Ipo } from "@/types/ipo";
-import { AllotmentPredictorModal } from "@/components/ipo/AllotmentPredictorModal";
+import { AllotmentPredictorModal } from "@/components/ipo-shared/AllotmentPredictorModal";
 import {
   ALLOTMENT_CATEGORIES,
   formatAllotmentOdds,

@@ -2,7 +2,10 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
-import { cn, getInitials } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+
+const getInitials = (name: string) =>
+  name.split(' ').map((word) => word.charAt(0)).join('').toUpperCase().slice(0, 2);
 
 const SIZES = {
   sm: 'w-7 h-7 text-[10px]',

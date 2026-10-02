@@ -46,7 +46,7 @@ interface IpoFundamentals {
         quick_ratio: string | null;
         return_on_equity: string | null;
     };
-    // Missing on analyses generated before these fields existed.
+    // Absent on older analyses.
     debt?: {
         total_debt: string | null; // "₹120 Cr" or "Debt-free"
         summary: string;

@@ -85,7 +85,7 @@ export function Walkthrough() {
   const step = steps[index];
   const active = !!step;
 
-  // Measured every frame, not on scroll: iOS Safari keeps moving the target after the last scroll event.
+  // Measures the target every frame because iOS Safari keeps moving it after the last scroll event.
   useLayoutEffect(() => {
     if (!step) return;
     findTarget(step)?.scrollIntoView({ block: 'center', behavior: 'smooth' });

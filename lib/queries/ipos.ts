@@ -5,7 +5,7 @@ import { cached } from '@/lib/db/cache';
 import { getDb, toPlain } from '@/lib/db/mongo';
 import { Ipo } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
-import { HomePageIpoProps } from '@/types/homepage';
+import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { stripCitations } from '@/lib/queries/citations';
 import { daysFromToday, formatIssueSize, getIpoType, parseIpoDate } from '@/lib/ipo-format';
 
@@ -31,6 +31,14 @@ type RawIpo = Ipo & { _id: { toString(): string } };
 
 const openDateOf = (ipo: RawIpo) => ipo.ipo_dates?.ipo_open_date || ipo.open_date || '';
 const closeDateOf = (ipo: RawIpo) => ipo.ipo_dates?.ipo_close_date || ipo.closing_date || '';
+const timeOf = (date: string) => parseIpoDate(date)?.getTime() ?? 0;
+
+// A recorded listing price counts too, for rows whose listing date is missing.
+const isListed = (ipo: RawIpo) => {
+  if (ipo.listing_price) return true;
+  const toListing = daysFromToday(ipo.ipo_dates?.ipo_listing_date);
+  return toListing !== null && toListing <= 0;
+};
 
 /** Splits IPOs into upcoming, live, closed (not listed yet) and past (listed), each sorted. IPOs without both dates are left out. */
 function bucketIpos(ipoList: RawIpo[]) {
@@ -48,24 +56,15 @@ function bucketIpos(ipoList: RawIpo[]) {
     else past.push(ipo);
   }
 
-  const byDate = (dateOf: (ipo: RawIpo) => string) => (a: RawIpo, b: RawIpo) =>
-    (parseIpoDate(dateOf(a))?.getTime() ?? 0) - (parseIpoDate(dateOf(b))?.getTime() ?? 0);
+  upcoming.sort((a, b) => timeOf(openDateOf(a)) - timeOf(openDateOf(b))); // opening soonest first
+  live.sort((a, b) => timeOf(closeDateOf(a)) - timeOf(closeDateOf(b))); // closing soonest first
+  past.sort((a, b) => timeOf(closeDateOf(b)) - timeOf(closeDateOf(a))); // most recently closed first
 
-  upcoming.sort(byDate(openDateOf));
-  live.sort(byDate(closeDateOf));
-  past.sort((a, b) => byDate(closeDateOf)(b, a));
-
-  // A recorded listing price counts too, for rows whose listing date is missing.
-  const isListed = (ipo: RawIpo) => {
-    if (ipo.listing_price) return true;
-    const toListing = daysFromToday(ipo.ipo_dates?.ipo_listing_date);
-    return toListing !== null && toListing <= 0;
-  };
-
+  const listed = past.filter(isListed);
   return {
     upcoming,
     live,
-    past: past.filter(isListed),
+    past: listed,
     closed: past.filter((ipo) => !isListed(ipo)),
   };
 }
@@ -129,6 +128,13 @@ export const getAnalysisBySlug = cache(cached(
   'analysis-by-slug'
 ));
 
+/** The IPO's name for a slug, or null when no IPO has it. Tells "analysis pending" apart from "no such IPO". */
+export const getIpoNameBySlug = cache(cached(async (slug: string): Promise<string | null> => {
+  const db = await getDb();
+  const ipo = await db.collection('ipos').findOne({ slug }, { projection: { upcoming_ipo_2025: 1 } });
+  return ipo ? ipo.upcoming_ipo_2025 || '' : null;
+}, 'ipo-name-by-slug'));
+
 type AnalysisSlug = { slug: string; updated_at?: string };
 
 /** Every analysis slug with its last edit, for prerendering and the sitemap. */
@@ -157,10 +163,11 @@ export const getIpoLink = cache(cached(async (ipoId: string): Promise<IpoLink | 
   ]);
   const name = (analysis?.slug && analysis.company_name) || ipo?.upcoming_ipo_2025;
   if (!name) return null;
+  // Only an IPO with an analysis has an entity page. One whose slug has not been synced yet still lives at the IPO's own slug.
+  const slug = analysis ? ((analysis.slug as string) || ipo?.slug || null) : null;
   return {
     name: name as string,
-    // An analysis whose slug has not been synced yet still lives at the IPO's own slug.
-    slug: (analysis?.slug as string) || (analysis ? ipo?.slug : null) || null,
+    slug,
     logo: ipo?.image_url || null,
     board: ipo ? getIpoType(ipo as unknown as Ipo) : null,
     issueSize: formatIssueSize(ipo?.ipo_details?.issue_size),

@@ -1,6 +1,6 @@
 'use client';
 
-import { IpoSectionProps, HomePageIpoProps } from '@/types/homepage';
+import { IpoSectionProps, HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { ClosedIpoCard } from '@/components/home/ipo-card/ClosedIpoCard';
 import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
