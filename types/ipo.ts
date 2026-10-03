@@ -74,6 +74,8 @@ export interface Ipo {
   gmp_updated_at: string;
   // Issue facts as plain values (lib/queries/ipos.ts publicIssue); where each was scraped from never reaches the site.
   issue?: IpoIssue;
+  // Valuation ratios by normalised label ("roe", "roce", "price_to_book_value"); keys vary by IPO.
+  ipo_valuation?: Record<string, string>;
 }
 
 export interface UseOfProceedsItem {

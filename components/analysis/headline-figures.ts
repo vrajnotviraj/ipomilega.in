@@ -25,10 +25,10 @@ export interface HeadlineFigure {
 
 /**
  * The three numbers to check before bidding. Once bids come in: GMP as a signed listing gain, total subscription
- * and retail odds. Before that: GMP, the opening date and the cost of one lot.
+ * and retail odds. Before that: GMP, the opening date and the cost of one lot. Once listed, the listing gain replaces GMP.
  */
 export function getHeadlineFigures(analysis: IpoComprehensiveAnalysis, ipo: Ipo): HeadlineFigure[] {
-  const gmp = getGmpFigure(analysis, ipo);
+  const gmp = getListingFigure(ipo) ?? getGmpFigure(analysis, ipo);
   const subscription = parseGainValue(ipo.total_sr);
   if (subscription === null) return [gmp, getOpensFigure(analysis), getMinInvestmentFigure(analysis)];
 
@@ -49,6 +49,18 @@ export function getHeadlineFigures(analysis: IpoComprehensiveAnalysis, ipo: Ipo)
       color: getProbabilityColor(getAllotmentProbability(retailLottery)),
     },
   ];
+}
+
+/** The listing-day gain and price, or null before the IPO lists. */
+function getListingFigure(ipo: Ipo): HeadlineFigure | null {
+  const gain = parseGainValue(String(ipo.listing_gain ?? ""));
+  if (!ipo.listing_price || gain === null) return null;
+  return {
+    label: "Listing gain",
+    value: signedPercent(Math.round(gain * 100) / 100),
+    caption: `Listed at ₹${ipo.listing_price}`,
+    color: gainColor(gain),
+  };
 }
 
 /** GMP as a signed listing gain, or the rupee premium when there is no percent. */

@@ -8,7 +8,7 @@ type Time = IpoComprehensiveAnalysis["time"];
 // Market timing in words, on the same bands as the score colour.
 const MARKET_TIMING_WORD = { good: "Favourable", mid: "Neutral", bad: "Unfavourable" };
 
-/** Why the market timing does or does not suit the issue, how allotment works and the milestones, beside the timing facts. */
+/** Why the market timing does or does not suit the issue and how allotment works, beside the timing facts and milestones. */
 export function TimingSection({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
   const time = analysis.time;
   const milestones = (time.key_milestones ?? []).filter((milestone) => milestone.event?.trim());
@@ -26,9 +26,11 @@ export function TimingSection({ analysis }: { analysis: IpoComprehensiveAnalysis
               { term: "How allotment works", detail: time.allotment_timeline?.process },
             ]}
           />
+        </div>
+        <div className="min-w-0 space-y-8">
+          <TimingFacts time={time} />
           {milestones.length > 0 && <Milestones milestones={milestones} />}
         </div>
-        <TimingFacts time={time} />
       </div>
     </section>
   );

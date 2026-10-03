@@ -1,31 +1,29 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Ipo } from "@/types/ipo";
-import { gainColor, parseEstListingPercent } from "@/lib/ipo-format";
+import { gainColor, getUseOfProceeds, parseEstListingPercent } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { AllotmentOddsTiles } from "@/components/ipo-shared/AllotmentOddsTiles";
 import { GmpTrendChart } from "./gmp-trend/GmpTrendChart";
-import { getGmp, getIssueDates, getQuotaSplit, hasAllotmentOdds, nonBlank } from "./analysis-facts";
-import { IssueTimeline } from "./IssueTimeline";
+import { getGmp, getQuotaSplit, hasAllotmentOdds, nonBlank } from "./analysis-facts";
 import { Eyebrow } from "./primitives";
 import { ScoreBreakdown } from "./ScoreBreakdown";
 import { StrengthsAndConcerns } from "./StrengthsAndConcerns";
+import { SubscriptionByCategory } from "./SubscriptionByCategory";
 import { SummaryPanel } from "./SummaryPanel";
+import { WhereTheMoneyGoes } from "./WhereTheMoneyGoes";
 import { WhoGetsShares } from "./WhoGetsShares";
 
-/** The top of the page: summary, dates, odds and GMP, the score breakdown, strengths and concerns, and who gets shares. */
+/** The top of the page: summary and dates, where the money goes, odds and GMP, the score breakdown, strengths and concerns, and who gets shares. */
 export function OverviewSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const applicationRows = analysis.investorSplit?.filter((row) => row.application.toLowerCase() !== "application") ?? [];
+  const proceeds = getUseOfProceeds(ipo);
 
   return (
     <section id="overview" className="space-y-6 sm:space-y-8">
       <SummaryPanel analysis={analysis} ipo={ipo} />
+      {proceeds && <WhereTheMoneyGoes proceeds={proceeds} />}
       {/* Keeps the heading order h1, h2, h3 for the block titles below. */}
       <h2 className="sr-only">Overview</h2>
-
-      <div className="rounded-[18px] bg-secondary p-5 sm:p-6">
-        <Eyebrow className="mb-4">Issue timeline</Eyebrow>
-        <IssueTimeline {...getIssueDates(analysis)} />
-      </div>
 
       <OddsAndGmp analysis={analysis} ipo={ipo} />
 
@@ -76,6 +74,7 @@ function OddsAndGmp({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo
           heading="Your odds"
           caption="Estimated from the current subscription figures. Tap a category to work it out for your application size."
         />
+        <SubscriptionByCategory ipo={ipo} />
         {estimatedListing}
       </div>
       {gmpTrend}

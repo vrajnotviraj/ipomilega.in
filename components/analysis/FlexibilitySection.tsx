@@ -5,7 +5,7 @@ import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from 
 
 type Metric = { score: number | null; description: string | null } | undefined;
 
-/** How well the business can adapt: three scored metrics as tiles first, then the summary, diversification and outlook notes. */
+/** How well the business can adapt: three scored metrics as tiles first, then the summary beside diversification and outlook notes. */
 export function FlexibilitySection({ flexibility }: { flexibility: IpoComprehensiveAnalysis["flexibility"] }) {
   const metrics = [
     { label: "Market adaptability", metric: flexibility.market_adaptability },
@@ -24,15 +24,16 @@ export function FlexibilitySection({ flexibility }: { flexibility: IpoComprehens
         </div>
       )}
 
-      <Prose className="mb-10">{flexibility.summary}</Prose>
-
-      <FactList
-        columns
-        facts={[
-          { term: "Product diversification", detail: flexibility.product_diversification },
-          { term: "Future adaptability", detail: flexibility.future_adaptability_potential },
-        ]}
-      />
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-10">
+        <Prose>{flexibility.summary}</Prose>
+        <FactList
+          className="rounded-[18px] bg-secondary p-5 sm:p-6"
+          facts={[
+            { term: "Product diversification", detail: flexibility.product_diversification },
+            { term: "Future adaptability", detail: flexibility.future_adaptability_potential },
+          ]}
+        />
+      </div>
     </section>
   );
 }

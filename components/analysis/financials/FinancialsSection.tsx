@@ -1,20 +1,19 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { FinancialReport, Ipo } from "@/types/ipo";
-import { formatRupees, getRiskTextColor, getUseOfProceeds } from "@/lib/ipo-format";
+import { formatRupees, getRiskTextColor } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { DotScale, Prose, ScoreFigure, SectionHeading } from "../primitives";
 import { FinancialTrendChart } from "./FinancialTrendChart";
 import { getFinancialHighlights, sortReports } from "./financial-figures";
-import { DebtCard, OfferStructureCard, UseOfProceedsCard } from "./FundamentalsCards";
+import { DebtCard, OfferStructureCard } from "./FundamentalsCards";
 import { Highlights, RatioList } from "./Highlights";
 
 /**
  * Numbers first: the latest year's figures and ratios, the trend chart beside the summary,
- * then allotment profitability, debt and offer structure in one row, and where the money goes under them.
+ * then allotment profitability, debt and offer structure in one row.
  */
 export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { fundamentals } = analysis;
-  const proceeds = getUseOfProceeds(ipo);
   // The scraped issue amounts win over the AI's, so the page shows one number per fact.
   const freshCr = ipo.issue?.fresh_issue_cr;
   const ofsCr = ipo.issue?.offer_for_sale_cr;
@@ -26,14 +25,14 @@ export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiv
   const { reports, dated } = sortReports(analysis.financialReport ?? []);
   const allotment = analysis.ipo_details?.profitability_of_allotment;
   // Older analyses do not carry debt or offer structure.
-  const hasCards = allotment || fundamentals.debt || offer || proceeds;
+  const hasCards = allotment || fundamentals.debt || offer;
 
   return (
     <section id="financials" className="reveal">
       <SectionHeading title="Financials" score={fundamentals.score ?? 0} />
 
       {reports.length > 0 && <Highlights {...getFinancialHighlights(reports, dated)} />}
-      <RatioList fundamentals={fundamentals} />
+      <RatioList fundamentals={fundamentals} valuation={ipo.ipo_valuation} />
 
       <TrendAndSummary reports={reports} summary={fundamentals.summary} />
 
@@ -42,7 +41,6 @@ export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiv
           <AllotmentProfitability allotment={allotment} />
           {fundamentals.debt && <DebtCard debt={fundamentals.debt} />}
           {offer && <OfferStructureCard offer={offer} />}
-          {proceeds && <UseOfProceedsCard proceeds={proceeds} />}
         </div>
       )}
     </section>

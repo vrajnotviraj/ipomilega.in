@@ -21,11 +21,13 @@ import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { LiveLabel } from "@/components/ui/LiveLabel";
 import { getAboutLine, getIssueDates, getLotShares, formatMinInvestment, getVerdict } from "./analysis-facts";
 import { getHeadlineFigures, type HeadlineFigure } from "./headline-figures";
+import { IssueTimeline } from "./IssueTimeline";
 import { Eyebrow } from "./primitives";
 
 /**
- * The top of the page: company, what it does and its status, the overall score with a one-line verdict, the three numbers
- * to check before bidding, and the issue's key facts. A server component, so "today" comes from the ISR render.
+ * The top of the page: company, what it does and its status, the overall score with a one-line verdict beside the three
+ * numbers to check before bidding and the issue's key facts, then the issue timeline.
+ * A server component, so "today" comes from the ISR render.
  */
 export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { opening, closing } = getIssueDates(analysis);
@@ -58,6 +60,11 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
           <KeyFacts analysis={analysis} />
           {allotmentUrl && <AllotmentCheckLink href={allotmentUrl} />}
         </div>
+      </div>
+
+      <div className="mt-8 rounded-xl bg-secondary p-4 sm:p-6">
+        <Eyebrow className="mb-4">Issue timeline</Eyebrow>
+        <IssueTimeline {...getIssueDates(analysis)} />
       </div>
     </div>
   );

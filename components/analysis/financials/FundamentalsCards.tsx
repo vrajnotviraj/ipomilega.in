@@ -1,5 +1,5 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
-import { formatRupees, parseGainValue, type UseOfProceeds } from "@/lib/ipo-format";
+import { parseGainValue } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "../primitives";
 
@@ -83,54 +83,6 @@ function SplitLabel({ name, amount, percent, alignRight = false }: { name: strin
         {name} <span className="font-mono tabular-nums">{percent}%</span>
       </div>
       <div className="break-words font-mono tabular-nums text-muted-foreground">{amount}</div>
-    </div>
-  );
-}
-
-const crore = (value: number) => `${formatRupees(value)} Cr`;
-/** What the company will spend the fresh issue on, item by item, with the OFS called out as money the company never gets. */
-export function UseOfProceedsCard({ proceeds }: { proceeds: UseOfProceeds }) {
-  const { items, freshCr, ofsCr } = proceeds;
-  const ofsOnly = freshCr === 0;
-
-  return (
-    <div className="rounded-xl border border-border bg-card p-5 md:col-span-3">
-      <Eyebrow className="mb-3">Where the money goes</Eyebrow>
-      {ofsOnly ? (
-        <p className="text-sm text-pretty">
-          This IPO is entirely an offer for sale. The company receives none of the money; it all goes to the selling shareholders.
-        </p>
-      ) : (
-        <ul className="space-y-3">
-          {items.map((item, index) => (
-            <li key={index}>
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="min-w-0 text-sm text-pretty">{item.purpose}</span>
-                <span className="shrink-0 text-right font-mono text-sm tabular-nums">
-                  {item.amount_cr === null ? <span className="text-muted-foreground">Not stated</span> : crore(item.amount_cr)}
-                </span>
-              </div>
-              {item.percent !== null && (
-                <div className="mt-1.5 h-1.5 rounded-full bg-secondary" aria-hidden="true">
-                  <span className="block h-full rounded-full bg-chart-1" style={{ width: `${Math.min(item.percent, 100)}%` }} />
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="mt-4 space-y-1 border-t border-border pt-3 text-sm">
-        {!ofsOnly && freshCr !== null && (
-          <p>
-            Fresh issue <span className="font-mono tabular-nums">{crore(freshCr)}</span>
-          </p>
-        )}
-        {!ofsOnly && items.length > 0 && (ofsCr ?? 0) > 0 && (
-          <p className="text-pretty">
-            Offer for sale <span className="font-mono tabular-nums">{crore(ofsCr ?? 0)}</span> goes to selling shareholders, not the company.
-          </p>
-        )}
-      </div>
     </div>
   );
 }

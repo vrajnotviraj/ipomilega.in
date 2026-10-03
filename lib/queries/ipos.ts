@@ -22,10 +22,10 @@ const PUBLIC_IPO_FIELDS = [
   'subscription_captured_at', 'subscription_is_provisional', 'retail_allotment_probability',
   'gmp_current_ipos', 'gmp_price_gain', 'gmp_ipo_gmp', 'gmp_est_listing', 'gmp_trend', 'gmp_price_band', 'gmp_status',
   'gmp_date', 'gmp_subject', 'gmp_type', 'gmp_updated_at',
-  'issue',
+  'issue', 'ipo_valuation',
 ] as const;
 // Card and list views skip the long-form fields; the analysis page and the API get them all.
-const CARD_SKIPS: readonly string[] = ['about', 'promoters', 'financial_report', 'issue'];
+const CARD_SKIPS: readonly string[] = ['about', 'promoters', 'financial_report', 'issue', 'ipo_valuation'];
 const projectionOf = (fields: readonly string[]) => Object.fromEntries(fields.map((field) => [field, 1]));
 export const PUBLIC_IPO_PROJECTION = projectionOf(PUBLIC_IPO_FIELDS);
 const IPO_CARD_PROJECTION = projectionOf(PUBLIC_IPO_FIELDS.filter((field) => !CARD_SKIPS.includes(field)));

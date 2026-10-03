@@ -1,4 +1,5 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
+import { cn } from "@/lib/utils";
 import { nonBlank } from "./analysis-facts";
 import { Prose, SectionHeading } from "./primitives";
 
@@ -10,7 +11,7 @@ function categoryTitle(key: string) {
   return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
-/** How many risks sit in each category beside the summary, then the risks themselves beside how the company offsets them. */
+/** How many risks sit in each category beside the summary and how the company offsets them, then the risks themselves. */
 export function RiskSection({ risk }: { risk: IpoComprehensiveAnalysis["risk_meter"] }) {
   const categories = Object.entries(risk.risk_categories ?? {})
     .map(([key, items]) => ({ title: categoryTitle(key), items: nonBlank(items) }))
@@ -24,27 +25,16 @@ export function RiskSection({ risk }: { risk: IpoComprehensiveAnalysis["risk_met
         <span className="font-mono tabular-nums">1/10</span> the highest.
       </p>
 
-      <MixAndSummary categories={categories} summary={risk.summary} />
-
-      {(categories.length > 0 || risk.risk_mitigation) && (
-        <div className="mt-8 grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:gap-6">
-          {categories.length > 0 && <RiskCategories categories={categories} />}
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10">
+        {categories.length > 0 && <RiskMix categories={categories} />}
+        <div className={cn("min-w-0 space-y-6", categories.length > 0 ? "lg:col-start-2" : "lg:col-span-2")}>
+          <Prose>{risk.summary}</Prose>
           {risk.risk_mitigation && <Mitigation text={risk.risk_mitigation} />}
         </div>
-      )}
+      </div>
+
+      {categories.length > 0 && <RiskCategories categories={categories} />}
     </section>
-  );
-}
-
-/** The risk mix on the left and the summary on the right from lg up; the summary alone without categories. */
-function MixAndSummary({ categories, summary }: { categories: RiskCategory[]; summary: string }) {
-  if (categories.length === 0) return <Prose>{summary}</Prose>;
-
-  return (
-    <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10">
-      <RiskMix categories={categories} />
-      <Prose>{summary}</Prose>
-    </div>
   );
 }
 
@@ -73,7 +63,7 @@ function RiskMix({ categories }: { categories: RiskCategory[] }) {
 /** The risks grouped by category on one surface panel. */
 function RiskCategories({ categories }: { categories: RiskCategory[] }) {
   return (
-    <div className="grid grid-cols-1 gap-x-10 gap-y-8 rounded-[18px] bg-secondary p-5 sm:grid-cols-2 sm:p-8">
+    <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 rounded-[18px] bg-secondary p-5 sm:grid-cols-2 sm:p-8 xl:grid-cols-4">
       {categories.map(({ title, items }) => (
         <div key={title}>
           <h3 className="mb-3 flex items-baseline justify-between gap-3 border-b border-border pb-2 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">

@@ -51,13 +51,20 @@ function ratioText(value: string | number | null | undefined, unit = ""): string
   return `${text}${unit}`;
 }
 
-/** Return on equity, debt to equity, current ratio and revenue CAGR as a small mono list, leaving out missing ones. */
-export function RatioList({ fundamentals }: { fundamentals: Fundamentals }) {
+/**
+ * The analysis ratios, then the listed valuation ratios, as a small mono list. Missing ones are left out,
+ * and a valuation ratio the analysis already gives is not repeated.
+ */
+export function RatioList({ fundamentals, valuation }: { fundamentals: Fundamentals; valuation?: Record<string, string> }) {
   const ratios = [
-    { label: "Return on equity", value: ratioText(fundamentals.financial_ratios?.return_on_equity) },
-    { label: "Debt to equity", value: ratioText(fundamentals.assets_and_liabilities?.debt_to_equity_ratio) },
+    { label: "Return on equity", value: ratioText(fundamentals.financial_ratios?.return_on_equity) ?? ratioText(valuation?.roe) },
+    { label: "Debt to equity", value: ratioText(fundamentals.assets_and_liabilities?.debt_to_equity_ratio) ?? ratioText(valuation?.debt_to_equity_ratio) },
     { label: "Current ratio", value: ratioText(fundamentals.financial_ratios?.current_ratio) },
     { label: "Revenue CAGR", value: ratioText(fundamentals.revenue_details?.revenue_cagr || null, "%") },
+    { label: "ROCE", value: ratioText(valuation?.roce) },
+    { label: "Return on net worth", value: ratioText(valuation?.return_on_net_worth_ronw) },
+    { label: "NAV per share (₹)", value: ratioText(valuation?.net_asset_value_nav) },
+    { label: "Price to book", value: ratioText(valuation?.price_to_book_value) },
   ].filter((ratio) => ratio.value);
   if (ratios.length === 0) return null;
 
