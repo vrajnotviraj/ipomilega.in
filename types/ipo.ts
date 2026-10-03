@@ -34,8 +34,6 @@ export interface Ipo {
   ipo_type: string;
   ipo_size: string;
   price_band: string;
-  detail_url: string;
-  scraped_at: string;
   about: string;
   image_url: string;
   financial_report: FinancialReport[];
@@ -54,17 +52,14 @@ export interface Ipo {
   qib_sr: string;
   rii_sr: string;
   subscription_date_range: string;
-  subscription_scraped_at: string;
   subscription_status: string;
   total_sr: string;
-  // The exchange's own "updated as on" time; judge freshness on this, not subscription_scraped_at.
+  // The exchange's own "updated as on" time.
   subscription_captured_at?: string;
-  subscription_source?: string;
   // Retail only, from the scraper; the site computes every category's odds with getAllotmentRatio.
   retail_allotment_probability?: number | null;
   // While bidding is open, the probability means "if bidding closed now".
   subscription_is_provisional?: boolean;
-  rhp_url: string;
   blog?: Blog;
   gmp_current_ipos: string;
   gmp_price_gain: string;
@@ -76,7 +71,22 @@ export interface Ipo {
   gmp_date: string;
   gmp_subject: string;
   gmp_type: string;
-  gmp_scraped_at: string;
+  gmp_updated_at: string;
+  // Issue facts as plain values (lib/queries/ipos.ts publicIssue); where each was scraped from never reaches the site.
+  issue?: IpoIssue;
+}
+
+export interface UseOfProceedsItem {
+  purpose: string;
+  amount_cr: number | null;
+  // Share of the listed amounts, so a list sums to 100; not a share of the fresh issue.
+  percent: number | null;
+}
+
+export interface IpoIssue {
+  objects?: UseOfProceedsItem[];
+  fresh_issue_cr?: number;
+  offer_for_sale_cr?: number;
 }
 
 export interface FinancialReport {

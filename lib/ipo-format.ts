@@ -1,4 +1,4 @@
-import type { IpoMarketLot } from '@/types/ipo';
+import type { Ipo, IpoMarketLot, UseOfProceedsItem } from '@/types/ipo';
 import type { HomePageIpoProps } from '@/types/ipo-with-analysis';
 
 // ---------- Board and price band ----------
@@ -7,14 +7,13 @@ export const BOARDS = ['Mainboard', 'SME'] as const;
 export type Board = (typeof BOARDS)[number];
 
 /**
- * "Mainboard", "SME" or "N/A". ipo_type is often missing, so it falls back to the subscription range,
- * the exchange listing ("NSE SME" vs "NSE") and the "/sme-ipo/" detail URL.
+ * "Mainboard", "SME" or "N/A". ipo_type is often missing, so it falls back to the subscription range
+ * and the exchange listing ("NSE SME" vs "NSE").
  */
 export const getIpoType = (ipo: {
   ipo_type?: string;
   subscription_date_range?: string;
   ipo_details?: { ipo_listing?: string };
-  detail_url?: string;
 } | null | undefined): string => {
   const raw = ipo?.ipo_type?.trim();
   if (raw && raw.toLowerCase() !== 'n/a') return raw;
@@ -26,8 +25,6 @@ export const getIpoType = (ipo: {
   const listing = ipo?.ipo_details?.ipo_listing || '';
   if (/\bsme\b/i.test(listing)) return 'SME';
   if (listing.trim()) return 'Mainboard';
-
-  if (/sme/i.test(ipo?.detail_url || '')) return 'SME';
   return 'N/A';
 };
 
@@ -376,7 +373,6 @@ export const getQibSignal = (
     ipo_type?: string;
     subscription_date_range?: string;
     ipo_details?: { ipo_listing?: string };
-    detail_url?: string;
     ipo_dates?: { ipo_close_date?: string };
     closing_date?: string;
   } | null | undefined
@@ -411,4 +407,23 @@ export const describeQibAdjustment = (baseScore: number, signal: QibSignal | nul
   if (!baseScore || !signal || signal.delta === 0) return 'Analysis score';
   const sign = signal.delta > 0 ? '+' : '';
   return `Analysis score ${baseScore} ${sign}${signal.delta} for ${signal.qib}x QIB subscription${signal.final ? '' : ' (closing day)'}`;
+};
+
+// ---------- Use of proceeds ----------
+
+export type UseOfProceeds = { items: UseOfProceedsItem[]; freshCr: number | null; ofsCr: number | null };
+
+const croreOrNull = (value: unknown): number | null =>
+  typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
+
+/** Where the issue money goes, from the IPO's `issue` facts. Null when there is nothing to show. */
+export const getUseOfProceeds = (ipo: Pick<Ipo, 'issue'>): UseOfProceeds | null => {
+  const items = (Array.isArray(ipo.issue?.objects) ? ipo.issue.objects : []).filter(
+    (item) => typeof item?.purpose === 'string' && item.purpose.trim()
+  );
+  const freshCr = croreOrNull(ipo.issue?.fresh_issue_cr);
+  const ofsCr = croreOrNull(ipo.issue?.offer_for_sale_cr);
+  // No items is only worth a card when the issue is OFS-only (fresh 0); otherwise there is nothing to list.
+  if (items.length === 0 && freshCr !== 0) return null;
+  return { items, freshCr, ofsCr };
 };

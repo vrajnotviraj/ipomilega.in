@@ -1,23 +1,32 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
-import type { FinancialReport } from "@/types/ipo";
-import { getRiskTextColor } from "@/lib/ipo-format";
+import type { FinancialReport, Ipo } from "@/types/ipo";
+import { formatRupees, getRiskTextColor, getUseOfProceeds } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { DotScale, Prose, ScoreFigure, SectionHeading } from "../primitives";
 import { FinancialTrendChart } from "./FinancialTrendChart";
 import { getFinancialHighlights, sortReports } from "./financial-figures";
-import { DebtCard, OfferStructureCard } from "./FundamentalsCards";
+import { DebtCard, OfferStructureCard, UseOfProceedsCard } from "./FundamentalsCards";
 import { Highlights, RatioList } from "./Highlights";
 
 /**
  * Numbers first: the latest year's figures and ratios, the trend chart beside the summary,
- * then allotment profitability, debt and offer structure in one row.
+ * then allotment profitability, debt and offer structure in one row, and where the money goes under them.
  */
-export function FinancialsSection({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
+export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { fundamentals } = analysis;
+  const proceeds = getUseOfProceeds(ipo);
+  // The scraped issue amounts win over the AI's, so the page shows one number per fact.
+  const freshCr = ipo.issue?.fresh_issue_cr;
+  const ofsCr = ipo.issue?.offer_for_sale_cr;
+  const offer = fundamentals.offer_structure && {
+    ...fundamentals.offer_structure,
+    ...(typeof freshCr === "number" && { fresh_issue: `${formatRupees(freshCr)} Cr` }),
+    ...(typeof ofsCr === "number" && { offer_for_sale: `${formatRupees(ofsCr)} Cr` }),
+  };
   const { reports, dated } = sortReports(analysis.financialReport ?? []);
   const allotment = analysis.ipo_details?.profitability_of_allotment;
   // Older analyses do not carry debt or offer structure.
-  const hasCards = allotment || fundamentals.debt || fundamentals.offer_structure;
+  const hasCards = allotment || fundamentals.debt || offer || proceeds;
 
   return (
     <section id="financials" className="reveal">
@@ -32,7 +41,8 @@ export function FinancialsSection({ analysis }: { analysis: IpoComprehensiveAnal
         <div className="mt-6 grid grid-cols-1 items-start gap-4 md:grid-cols-3">
           <AllotmentProfitability allotment={allotment} />
           {fundamentals.debt && <DebtCard debt={fundamentals.debt} />}
-          {fundamentals.offer_structure && <OfferStructureCard offer={fundamentals.offer_structure} />}
+          {offer && <OfferStructureCard offer={offer} />}
+          {proceeds && <UseOfProceedsCard proceeds={proceeds} />}
         </div>
       )}
     </section>

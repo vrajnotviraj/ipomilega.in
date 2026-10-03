@@ -3,21 +3,36 @@ import { cache } from 'react';
 import { ObjectId } from 'mongodb';
 import { cached } from '@/lib/db/cache';
 import { getDb, toPlain } from '@/lib/db/mongo';
-import { Ipo } from '@/types/ipo';
+import { Ipo, IpoIssue } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { stripCitations } from '@/lib/queries/citations';
 import { daysFromToday, formatIssueSize, getIpoType, parseIpoDate } from '@/lib/ipo-format';
 
-// Card and list views never read these fields; `tables_raw` alone is most of each document.
-const IPO_CARD_PROJECTION = {
-  tables_raw: 0,
-  about: 0,
-  ipo_valuation: 0,
-  promoters: 0,
-  rhp_url: 0,
-  financial_report: 0,
-} as const;
+// The IPO fields the site may read: an allowlist, so where the engine scraped each fact from (raw captures, source
+// names, source links, scrape times) never leaves the database, and a field the engine adds stays private until listed here.
+const PUBLIC_IPO_FIELDS = [
+  'upcoming_ipo_2025', 'slug', 'open_date', 'closing_date', 'ipo_type', 'ipo_size', 'price_band', 'image_url',
+  'about', 'promoters', 'financial_report', 'ipo_dates', 'ipo_market_lot', 'ipo_name', 'ipo_price',
+  'ipo_details.ipo_open_date', 'ipo_details.ipo_close_date', 'ipo_details.face_value', 'ipo_details.ipo_price_band',
+  'ipo_details.issue_size', 'ipo_details.issue_type', 'ipo_details.ipo_listing', 'ipo_details.fresh_issue',
+  'ipo_details.offer_for_sale', 'ipo_details.lot_size',
+  'listing_price', 'listing_gain',
+  'total_sr', 'qib_sr', 'nii_sr', 'snii_sr', 'bnii_sr', 'rii_sr', 'subscription_date_range', 'subscription_status',
+  'subscription_captured_at', 'subscription_is_provisional', 'retail_allotment_probability',
+  'gmp_current_ipos', 'gmp_price_gain', 'gmp_ipo_gmp', 'gmp_est_listing', 'gmp_trend', 'gmp_price_band', 'gmp_status',
+  'gmp_date', 'gmp_subject', 'gmp_type', 'gmp_updated_at',
+  'issue',
+] as const;
+// Card and list views skip the long-form fields; the analysis page and the API get them all.
+const CARD_SKIPS: readonly string[] = ['about', 'promoters', 'financial_report', 'issue'];
+const projectionOf = (fields: readonly string[]) => Object.fromEntries(fields.map((field) => [field, 1]));
+export const PUBLIC_IPO_PROJECTION = projectionOf(PUBLIC_IPO_FIELDS);
+const IPO_CARD_PROJECTION = projectionOf(PUBLIC_IPO_FIELDS.filter((field) => !CARD_SKIPS.includes(field)));
+
+/** The engine's `issue` block as plain values: each fact's source and capture time are dropped. */
+export const publicIssue = (issue: Record<string, { value?: unknown } | undefined> | undefined): IpoIssue =>
+  Object.fromEntries(Object.entries(issue ?? {}).map(([key, fact]) => [key, fact?.value])) as IpoIssue;
 
 // Cards show only risk_meter.score from the analysis document.
 const ANALYSIS_CARD_PROJECTION = {
@@ -114,8 +129,9 @@ export const getAnalysisBySlug = cache(cached(
   async (slug: string): Promise<AnalysisPage | null> => {
     const db = await getDb();
 
-    const ipo = await db.collection('ipos').findOne({ slug });
+    const ipo = await db.collection('ipos').findOne({ slug }, { projection: PUBLIC_IPO_PROJECTION });
     if (!ipo) return null;
+    ipo.issue = publicIssue(ipo.issue);
 
     const analysis = await db
       .collection('ipo_comprehensive_analysis')
@@ -157,7 +173,7 @@ export const getIpoLink = cache(cached(async (ipoId: string): Promise<IpoLink | 
     ObjectId.isValid(ipoId)
       ? db.collection('ipos').findOne(
           { _id: new ObjectId(ipoId) },
-          { projection: { upcoming_ipo_2025: 1, slug: 1, image_url: 1, ipo_type: 1, subscription_date_range: 1, detail_url: 1, 'ipo_details.ipo_listing': 1, 'ipo_details.issue_size': 1 } }
+          { projection: { upcoming_ipo_2025: 1, slug: 1, image_url: 1, ipo_type: 1, subscription_date_range: 1, 'ipo_details.ipo_listing': 1, 'ipo_details.issue_size': 1 } }
         )
       : null,
   ]);

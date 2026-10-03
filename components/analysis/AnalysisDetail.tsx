@@ -31,7 +31,7 @@ export function AnalysisDetail({ analysis, ipo, articles }: { analysis: IpoCompr
       <div className="app-container space-y-16 pt-6 pb-10 sm:space-y-24 sm:pb-14">
         <OverviewSection analysis={analysis} ipo={ipo} />
         {analysis.time && <TimingSection analysis={analysis} />}
-        {analysis.fundamentals && <FinancialsSection analysis={analysis} />}
+        {analysis.fundamentals && <FinancialsSection analysis={analysis} ipo={ipo} />}
         {analysis.risk_meter && <RiskSection risk={analysis.risk_meter} />}
         {analysis.performance && <PerformanceSection performance={analysis.performance} />}
         {analysis.flexibility && <FlexibilitySection flexibility={analysis.flexibility} />}

@@ -67,8 +67,8 @@ export default function AboutPage() {
         <h2 className="type-h2 mb-4">Where the data comes from</h2>
         <p className="mb-4 max-w-[65ch] text-muted-foreground">
           IPO details, subscription figures and listing prices come from public filings and exchange
-          disclosures. The analysis is generated from the RHP/DRHP a company files with SEBI, and grey market
-          premium (GMP) comes from ipowatch. Live numbers, subscription and grey market premium especially, move through
+          disclosures. The analysis is generated from the RHP/DRHP a company files with SEBI. Grey market
+          premium (GMP) is an unofficial estimate from the informal market. Live numbers, subscription and grey market premium especially, move through
           the day, so treat what you see as the latest reading.
         </p>
 

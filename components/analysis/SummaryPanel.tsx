@@ -30,7 +30,7 @@ import { Eyebrow } from "./primitives";
 export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { opening, closing } = getIssueDates(analysis);
   const allotmentUrl = getAllotmentCheckUrl(ipo);
-  const gmpUpdatedAt = formatIstTimestamp(ipo.gmp_scraped_at);
+  const gmpUpdatedAt = formatIstTimestamp(ipo.gmp_updated_at);
 
   return (
     <div className="rounded-[18px] border border-border bg-card p-5 sm:p-8">
