@@ -29,6 +29,9 @@ const nameOf = (row: Row) => row.ipo?.upcoming_ipo_2025 || "";
 /** Whole days until the IPO closes (0 today, negative passed), null when unknown. */
 export const daysToCloseOf = (row: Row) => row.steps.find((step) => step.name === "Close")?.days ?? null;
 
+/** Listing date as "1 Oct", or "TBA". */
+export const listingDateOf = (row: Row) => row.steps.find((step) => step.name === "List")?.date || "TBA";
+
 /** Days left to close for ranking: closed or undated issues sort last. */
 const closeRankOf = (row: Row) => {
   const days = daysToCloseOf(row);
