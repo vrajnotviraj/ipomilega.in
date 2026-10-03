@@ -29,7 +29,7 @@ export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
     <article
       className={cn(
         'card-lift flex flex-col gap-4 rounded-xl border p-4 sm:p-5',
-        allotmentToday ? 'border-brand-accent bg-tint-closed-today' : 'border-brand-accent/30 bg-tint-closed'
+        allotmentToday ? 'border-brand-accent bg-tint-closed-today' : 'border-brand-accent/50 bg-tint-closed'
       )}
     >
       <CardHeader ipo={ipo} analysis={analysis} aside={<Subscribed times={parseGainValue(ipo?.total_sr)} />} />

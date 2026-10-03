@@ -54,7 +54,7 @@ One ink and one accent. Data colours are separate and only mean up, down or caut
 | `--score-mid` | `#94620C` | Scores above 3 up to 6, odds 25–59%. A text-safe amber, not marigold. |
 | `--score-bad`, `--destructive` | `#B8452F` | Losses, scores 3 and below, odds under 25%, closing today |
 | `--score-good-on-ink`, `--score-mid-on-ink`, `--score-bad-on-ink` | 45% of the data colour mixed into chalk | The same three data colours on the ink panel and ticker, where the plain ones are too dark to read |
-| `--tint-live`, `--tint-closed`, `--tint-closed-today` | 6% gain, 10% and 14% marigold mixed into white | Card fills that tell IPO stages apart: open, bidding closed, allotment day. Every text colour above stays at least 4.5:1 on them. The section heading still names the stage, so colour is never the only signal. |
+| `--tint-live`, `--tint-closed`, `--tint-closed-today` | 6% gain, 18% and 22% marigold mixed into white | Card fills that tell IPO stages apart: open, bidding closed, allotment day. Ink, muted, gain and loss text stay at least 4.5:1 on them; amber text is only safe on `--tint-live` and `--tint-closed`. The section heading still names the stage, so colour is never the only signal. |
 | `--chart-1..5` | ink, gain, marigold, loss, muted | Chart series only. Revenue is chart-1, expense chart-5. Profit uses `--score-good` or `--score-bad`. |
 
 **Rules**
