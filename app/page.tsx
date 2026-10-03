@@ -59,7 +59,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen">
       <div className="app-container pt-16">
-        <Hero openCount={live.length} closedCount={closed.length} upcomingCount={upcoming.length} />
+        <Hero />
       </div>
       <IpoTicker live={live} upcoming={upcoming} />
       <div className="app-container">

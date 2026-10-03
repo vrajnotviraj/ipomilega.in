@@ -118,7 +118,7 @@ Load all three with `next/font/google` in `app/layout.tsx`. Preload only Figtree
 
 These are the site's existing patterns, restyled with the tokens above.
 
-- **Hero:** compact band, not a full-screen opener. Tagline h1 with one highlighted phrase and a subline; open and upcoming counts as plain text on the right from lg. No CTA, no side panel and no announcement banner.
+- **Hero:** compact band, not a full-screen opener. Tagline h1 with one highlighted phrase and a subline. No counts, no CTA, no side panel and no announcement banner.
 - **Header:** logo left and nav right. The active link uses `aria-current="page"` and the `underline-grow` utility.
 - **Ticker:** full-bleed band on ink green. Company names in chalk, scores in data colours, and the reversed mark if a logo is needed. Pauses on hover; respects reduced motion.
 - **Section heading:** display h2 on the left, "View all" link on the right as a pill or text link in `--primary`. The live badge is a `live-dot` plus the `LIVE` label in `--score-bad`.
