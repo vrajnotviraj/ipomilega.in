@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ScoreMethodology } from "@/components/home/ScoreMethodology";
 
 const title = "About";
-const description = "What IPO Milega is, where its IPO data comes from, how AI writes and software checks its content, and how we score every RHP/DRHP by the same rules.";
+const description = "What IPO Milega is, where its IPO data comes from, how its content is checked and reviewed, and how we score every RHP/DRHP by the same rules.";
 
 export const metadata: Metadata = {
   title,
@@ -74,11 +74,12 @@ export default function AboutPage() {
 
         <h2 id="how-content-is-made" className="type-h2 mt-12 mb-4 scroll-mt-24">How this site&apos;s content is made</h2>
         <p className="mb-4 max-w-[65ch] text-muted-foreground">
-          AI writes the IPO analyses and the blog articles. Analyses come from the company&apos;s RHP/DRHP. Articles
-          come from a fact sheet built from our IPO data, which holds the prospectus figures, exchange data and GMP.
+          The IPO analyses come from the company&apos;s RHP/DRHP. The blog articles come from a fact sheet built from
+          our IPO data, which holds the prospectus figures, exchange data and GMP. The IPO Milega research team
+          reviews the data manually.
         </p>
         <p className="mb-4 max-w-[65ch] text-muted-foreground">
-          Software checks every AI-written article before it goes live. Each number and date has to match the fact
+          Software also checks every article before it goes live. Each number and date has to match the fact
           sheet, links can only point to the sources we supply, and the article must end with a Sources section. It
           also can&apos;t call GMP official or call anything guaranteed. If an article fails, the site doesn&apos;t
           publish it automatically.

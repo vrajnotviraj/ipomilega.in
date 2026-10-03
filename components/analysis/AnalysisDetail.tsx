@@ -37,9 +37,7 @@ export function AnalysisDetail({ analysis, ipo, articles }: { analysis: IpoCompr
         {analysis.flexibility && <FlexibilitySection flexibility={analysis.flexibility} />}
         <IpoArticleLinks title={`Latest on ${name}`} blogs={articles} />
 
-        <div className="border-t border-border pt-6">
-          <Disclaimer className="max-w-[65ch]" />
-        </div>
+        <Disclaimer className="border-t border-border pt-6 text-pretty" />
       </div>
     </div>
   );

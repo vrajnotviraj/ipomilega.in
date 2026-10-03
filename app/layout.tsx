@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | IPO Milega",
   },
   description:
-    "Track live IPOs, upcoming listings and past performance with AI-generated analysis of every RHP/DRHP filing.",
+    "Track live IPOs, upcoming listings and past performance with a manually reviewed analysis of every RHP/DRHP filing.",
   applicationName: SITE_NAME,
   authors: [{ name: SITE_NAME }],
   creator: SITE_NAME,
