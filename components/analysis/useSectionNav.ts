@@ -31,7 +31,14 @@ export function useStickyTop(stickyRef: RefObject<HTMLElement | null>) {
   return top;
 }
 
-/** Tracks which section sits under the sticky header, and scrolls to a section on request. */
+/** A section's top in page coordinates, from layout so the .reveal entry animation's shift doesn't count. */
+function layoutTop(el: HTMLElement) {
+  let top = 0;
+  for (let node: HTMLElement | null = el; node; node = node.offsetParent as HTMLElement | null) top += node.offsetTop;
+  return top;
+}
+
+/** Tracks which section the reader is on, and scrolls to a section on request. */
 export function useActiveSection(keys: string[]) {
   const [active, setActive] = useState(keys[0]);
   // Paused during a tab's smooth scroll, so the tabs it passes do not flash.
@@ -49,8 +56,10 @@ export function useActiveSection(keys: string[]) {
       const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
       if (atBottom) return sections[sections.length - 1].id;
 
-      const line = (parseFloat(document.documentElement.style.scrollPaddingTop) || 160) + 8;
-      const passed = sections.filter((el) => el.getBoundingClientRect().top <= line);
+      // A section counts as current once its top reaches the upper third of the space below the sticky header.
+      const headerBottom = parseFloat(document.documentElement.style.scrollPaddingTop) || 160;
+      const line = headerBottom + (window.innerHeight - headerBottom) / 3;
+      const passed = sections.filter((el) => layoutTop(el) - window.scrollY <= line);
       return (passed[passed.length - 1] ?? sections[0]).id;
     }
 
