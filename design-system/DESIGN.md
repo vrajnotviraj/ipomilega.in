@@ -121,7 +121,7 @@ These are the site's existing patterns, restyled with the tokens above.
 - **Hero:** compact band, not a full-screen opener. Tagline h1 with one highlighted phrase and a subline. No counts, no CTA, no side panel and no announcement banner.
 - **Header:** logo left and nav right. The active link uses `aria-current="page"` and the `underline-grow` utility.
 - **Ticker:** full-bleed band on ink green. Company names in chalk, scores in data colours, and the reversed mark if a logo is needed. Pauses on hover; respects reduced motion.
-- **Section heading:** display h2 on the left, "View all" link on the right as a pill or text link in `--primary`. The live badge is a `live-dot` plus the `LIVE` label in `--score-bad`.
+- **Section heading:** display h2 on the left, "View all" link on the right as a pill or text link in `--primary`. The live badge is a rippling dot (`pulse-ring`) plus the `LIVE` label in `--score-bad`.
 - **Live IPO card:** `--tint-live` card with a 1px border, radius 12px and `card-lift`. Inner tiles are white. Contents:
   - company logo and name
   - GMP, QIB and Total row in mono
@@ -134,7 +134,7 @@ These are the site's existing patterns, restyled with the tokens above.
   - Primary is a pill on `--primary` with chalk text, with the trailing arrow in a marigold circle.
   - Secondary is a pill with a 1px border.
   - Pressed state is `scale(0.98)`.
-- **Chips:** pill, 12px text. The "today" chip is a marigold fill with ink text, and the live chip uses `live-dot`.
+- **Chips:** pill, 12px text. The "today" chip is a marigold fill with ink text, and the live chip uses a `pulse-ring` dot.
 - **Empty state:** the shared `EmptyState` component. Dashed border in `--border`, surface icon tile, display title, one-line hint.
 - **Score:** coloured by `getRiskTextColor`. In lists it is `ScorePill`, a mono `tabular-nums` pill with a smaller `/10` on an 11% tint of its own colour. On the analysis page the headline score is a display-700 figure. Shows a muted `–` when there is no analysis.
 - **Status tiles (/ipos):** buttons with `aria-pressed`. The active tile is ink with chalk text. 2 columns on phones, 5 from sm.
@@ -157,12 +157,11 @@ Motion follows the same rules Apple's interfaces do: things move like physical o
 | `card-lift` | "It responds to me" | A cork bobbing up on water and settling | Cards: float up on hover, dip on press |
 | `press` | Something gave way under my finger | A pressed spring pushing back | Pills, segmented control, status tiles, pager, "View all" |
 | `reveal`, `reveal-stagger` | Calm, things arriving in order | Leaves landing and settling, one after another | Sections below the fold, card grids, table rows and the lists on the details page, in waves of three |
-| `track-grow` | Progress, anticipation | A stem growing toward light | The reached part of a lifecycle track |
-| `grow-in` | A value filling up to where it belongs | Water filling a channel | Subscription bars, the money bar, risk-mix bars, the issue timeline's progress line |
+| `grow-in` | A value filling up to where it belongs; progress toward today | Water filling a channel, a stem growing toward light | Subscription, money and risk-mix bars, the issue timeline's progress line, the reached part of a lifecycle track |
 | `bloom` | The verdict opening up | A flower opening from its centre | The score radar |
 | `dot-in` | Each point of a score counted out | Beads catching light one by one | Every 10-dot score scale |
 | `gain-rise` / `gain-sink` (via `gainMotion`) | Optimism or caution, without alarm | Bubbles rise, stones sink | GMP and listing gain figures |
-| `live-dot`, `pulse-ring` | "This is happening now" | A ripple where a drop just landed | Live badge, today's step on a lifecycle track or the issue timeline |
+| `pulse-ring` | "This is happening now" | A ripple where a drop just landed | Live badge, today's step on a lifecycle track or the issue timeline |
 | `glint` | Anticipation: results are out | Sunlight glinting off water | The solid "Check allotment" on allotment day |
 | `underline-grow`, `row-hover` | Where am I pointing | — | Nav, tabs, list rows |
 
@@ -181,7 +180,7 @@ Every design change has to keep these numbers:
 - CSS is inlined into the HTML (`experimental.inlineCss`), so every KB is paid on every page. Keep utilities compact and don't let Tailwind scan docs folders (see the `@source not` lines in `app/globals.css`).
 - Charts (recharts) load through `next/dynamic` and stay out of the first-load bundle. Analytics load on idle.
 - Four font files at most. Only the LCP font is preloaded.
-- Animations are CSS only and move only `transform` and `opacity`. Don't add a JS animation library. Infinite animations (`live-dot`, `pulse-ring`, `glint`) stay small and composited.
+- Animations are CSS only and move only `transform` and `opacity`. Don't add a JS animation library. Infinite animations (`pulse-ring`, `glint`) stay small and composited.
 
 ## 10. Checklist for any UI change
 

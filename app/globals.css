@@ -292,24 +292,6 @@
   }
 }
 
-/* A dot with a ring that ripples out of it, for things happening right now. Color comes from bg-*. */
-@utility live-dot {
-  position: relative;
-  display: inline-block;
-  width: 0.375rem;
-  height: 0.375rem;
-  border-radius: 999px;
-  flex-shrink: 0;
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: inherit;
-    animation: live-ping 1.6s var(--ease-out) infinite;
-  }
-}
-
 @keyframes live-ping {
   from {
     transform: scale(1);
@@ -321,7 +303,7 @@
   }
 }
 
-/* The same ripple around a dot that is already sized and positioned, such as today's step on a timeline. */
+/* A ring that ripples out of a dot, for things happening right now. The dot sets its own size, colour and position. */
 @utility pulse-ring {
   &::after {
     content: "";
@@ -368,7 +350,7 @@
   }
 }
 
-/* Sections below the fold rise in as they scroll into view, driven by scroll position. Browsers without support show them as is. */
+/* Rises 24px into place with a small overshoot. Browsers without scroll-driven animations show content as is. */
 @keyframes reveal-up {
   from {
     opacity: 0;
@@ -403,29 +385,18 @@
   }
 }
 
-/* Gains drift up into place, losses drift down. */
-@keyframes rise {
+/* Drifts into place from --drift below (positive) or above (negative). */
+@keyframes drift {
   from {
     opacity: 0;
-    transform: translateY(0.45em);
-  }
-}
-
-@keyframes sink {
-  from {
-    opacity: 0;
-    transform: translateY(-0.45em);
+    transform: translateY(var(--drift));
   }
 }
 
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation: reveal-up linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 35%;
-    }
-    /* Cards and rows rise one after another, in waves of three. */
+    /* Sections rise in; cards and rows in a .reveal-stagger rise one after another, in waves of three. */
+    .reveal,
     .reveal-stagger > * {
       animation: reveal-up linear both;
       animation-timeline: view();
@@ -437,25 +408,18 @@
     .reveal-stagger > :nth-child(3n) {
       animation-range: entry 16% entry 56%;
     }
-    /* The reached part of a timeline grows step by step toward today. */
-    .track-grow {
-      transform-origin: left;
-      animation: grow-x linear both;
-      animation-timeline: view();
-      animation-range: entry 50% cover 20%;
-    }
-    li:nth-child(2) > .track-grow {
-      animation-range: entry 65% cover 25%;
-    }
-    li:nth-child(3) > .track-grow {
-      animation-range: entry 80% cover 30%;
-    }
-    /* Bars fill from the left to their value. */
+    /* Bars and timeline lines fill from the left; in a list, each row starts a little later. */
     .grow-in {
       transform-origin: left;
       animation: grow-x linear both;
       animation-timeline: view();
       animation-range: entry 40% cover 30%;
+    }
+    li:nth-child(2) > .grow-in {
+      animation-range: entry 60% cover 35%;
+    }
+    li:nth-child(n + 3) > .grow-in {
+      animation-range: entry 80% cover 40%;
     }
     /* The score radar opens from its centre. */
     .bloom {
@@ -474,20 +438,23 @@
     span.gain-sink {
       display: inline-block;
     }
-    .gain-rise,
-    .gain-sink {
-      animation: rise linear both;
-      animation-timeline: view();
-      animation-range: entry 30% entry 90%;
+    /* Gains drift up into place, losses drift down. */
+    .gain-rise {
+      --drift: 0.45em;
     }
     .gain-sink {
-      animation-name: sink;
+      --drift: -0.45em;
+    }
+    .gain-rise,
+    .gain-sink {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: entry 30% entry 90%;
     }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .live-dot::after,
   .pulse-ring::after,
   .glint::after {
     animation: none;

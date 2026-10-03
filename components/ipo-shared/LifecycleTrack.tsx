@@ -32,7 +32,7 @@ function TrackStep({ step, lineToNext }: { step: Step; lineToNext: StepState | n
   return (
     <li className="relative flex flex-col items-center text-center">
       {lineToNext && (
-        <span aria-hidden className={cn("absolute left-1/2 top-1 h-px w-full", lineToNext === "future" ? "bg-border" : "track-grow bg-primary")} />
+        <span aria-hidden className={cn("absolute left-1/2 top-1 h-px w-full", lineToNext === "future" ? "bg-border" : "grow-in bg-primary")} />
       )}
       <span aria-hidden className={cn("relative size-[9px] rounded-full", DOT[step.state])} />
       <span className="mt-1.5 text-xs leading-none text-muted-foreground">{step.name}</span>
