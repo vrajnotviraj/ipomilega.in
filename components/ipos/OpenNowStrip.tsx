@@ -1,10 +1,10 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { LiveLabel } from "@/components/ui/LiveLabel";
-import { formatGmp, gainColor, parseEstListingPercent, parseGainValue, scoreOf } from "@/lib/ipo-format";
+import { formatGmp, gainColor, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { ScorePill } from "@/components/ipos/ScorePill";
-import { Row, daysToCloseOf, hasAnalysis, subscribedText } from "@/components/ipos/rows";
+import { Row, daysToCloseOf, gmpOf, hasAnalysis, subscribedOf } from "@/components/ipos/rows";
 
 const MAX_CARDS = 6;
 
@@ -39,7 +39,7 @@ export function OpenNowStrip({ rows }: { rows: Row[] }) {
 
 /** Compact card: company, score, then time left, GMP and subscription as large figures. */
 function OpenCard({ row }: { row: Row }) {
-  const gmp = parseEstListingPercent(row.ipo?.gmp_price_gain);
+  const gmp = gmpOf(row);
   const score = scoreOf(row);
   return (
     <article className="card-lift flex h-full flex-col gap-4 rounded-xl border border-border bg-card p-4">
@@ -53,7 +53,7 @@ function OpenCard({ row }: { row: Row }) {
       <dl className="mt-auto grid grid-cols-3 gap-2 border-t border-border pt-3">
         <BigFigure label="Closes"><ClosesValue days={daysToCloseOf(row)} /></BigFigure>
         <BigFigure label="GMP" className={gainColor(gmp)}>{formatGmp(gmp)}</BigFigure>
-        <BigFigure label="Subscribed">{subscribedText(parseGainValue(row.ipo?.total_sr))}</BigFigure>
+        <BigFigure label="Subscribed">{subscribedOf(row)}</BigFigure>
       </dl>
     </article>
   );

@@ -1,5 +1,5 @@
 import { HomePageIpoProps } from "@/types/ipo-with-analysis";
-import { formatIssueSize, formatTimes, getIpoType, getPriceBand, scoreOf, type Board } from "@/lib/ipo-format";
+import { formatIssueSize, formatTimes, getIpoType, getPriceBand, parseEstListingPercent, parseGainValue, scoreOf, type Board } from "@/lib/ipo-format";
 import { ipoLifecycleSteps, type Step } from "@/components/ipo-shared/lifecycle";
 
 export type Status = "Upcoming" | "Open" | "Closed" | "Listed";
@@ -100,11 +100,14 @@ export function issueSizeOf(row: Row): string {
   return isAmount ? `₹${size}` : size;
 }
 
-/** Subscription multiple, rounded to whole times from 100x so it fits a phone card. */
-export function subscribedText(times: number | null): string {
-  if (times !== null && times >= 100) return `${Math.round(times)}x`;
-  return formatTimes(times);
+/** Overall subscription as "12.5x", whole numbers from 100x. */
+export function subscribedOf(row: Row): string {
+  const times = parseGainValue(row.ipo?.total_sr);
+  return times !== null && times >= 100 ? `${Math.round(times)}x` : formatTimes(times);
 }
 
-/** Bidding is over: price band and score no longer help, the subscription and returns do. */
+/** Latest GMP gain %. For a listed IPO, the last quote before listing. */
+export const gmpOf = (row: Row) => parseEstListingPercent(row.ipo?.gmp_price_gain);
+
+/** True once bidding has closed. */
 export const isPastBidding = (row: Row) => row.status === "Closed" || row.status === "Listed";

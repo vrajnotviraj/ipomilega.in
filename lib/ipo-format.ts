@@ -469,7 +469,7 @@ export function estimatedListing(ipo: ListingFields): Listing {
 export function lastListing(ipo: (ListingFields & Pick<Ipo, 'last_price'>) | null | undefined): Listing {
   const price = parseGainValue(ipo?.last_price);
   const issue = issuePrice(ipo);
-  return { price, gain: price !== null && issue ? ((price - issue) / issue) * 100 : null };
+  return { price, gain: price !== null && issue ? Math.round(((price - issue) / issue) * 10000) / 100 : null };
 }
 
 /** Rupees the minimum retail application would gain at today's GMP (one lot on Mainboard, usually two on SME), or null without a GMP or lot table. */
