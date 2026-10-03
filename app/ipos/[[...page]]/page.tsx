@@ -6,10 +6,9 @@ import IposClient from "@/components/ipos/IposClient";
 import { PAGE_SIZE, ipoPagePath, toRows } from "@/components/ipos/rows";
 import { pageFromSegments } from "@/components/ui/pager";
 
-// Pages are /ipos and /ipos/<n>, so every IPO is a crawlable link on some page.
 export const revalidate = 60;
 
-// Nothing is built ahead; each page renders on its first visit and is cached from then on.
+// Builds no pages ahead; each renders on its first visit and is then cached.
 export function generateStaticParams() {
   return [];
 }
@@ -35,7 +34,7 @@ export async function generateMetadata(props: Params): Promise<Metadata> {
 export default async function IposPage(props: Params) {
   const page = await pageOf(props);
   if (!page) notFound();
-  // Rows carry "days from today" figures, so they are built here rather than in the client.
+  // Rows hold "days from today", so they are built on the server.
   const rows = toRows(await getIpoBuckets());
   if (page > Math.max(1, Math.ceil(rows.length / PAGE_SIZE))) notFound();
   return <IposClient key={page} rows={rows} initialPage={page} />;

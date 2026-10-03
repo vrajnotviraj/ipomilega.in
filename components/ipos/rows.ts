@@ -1,10 +1,10 @@
 import { HomePageIpoProps } from "@/types/ipo-with-analysis";
-import { formatIssueSize, getIpoType, parseEstListingPercent, scoreOf, type Board } from "@/lib/ipo-format";
+import { formatIssueSize, getIpoType, getPriceBand, parseEstListingPercent, scoreOf, type Board } from "@/lib/ipo-format";
 import { ipoLifecycleSteps, type Step } from "@/components/ipo-shared/lifecycle";
 
 export type Status = "Upcoming" | "Open" | "Closed" | "Listed";
 
-/** An IPO with its status and every "today"-relative figure, computed on the server so hydration matches. */
+/** An IPO with its status and lifecycle steps. Built on the server, so "today" matches between server and browser. */
 export type Row = HomePageIpoProps & { status: Status; steps: Step[] };
 
 export type SortKey = "status" | "score-desc" | "score-asc" | "closing" | "name";
@@ -21,13 +21,13 @@ export type Filters = { status: Status | "all"; board: Board | "all"; query: str
 
 export const PAGE_SIZE = 10;
 
-/** /ipos for page 1, /ipos/<n> after. A path segment keeps each page in the ISR cache, where ?page= would not. */
+/** /ipos for page 1, /ipos/<n> after. */
 export const ipoPagePath = (page: number) => (page === 1 ? "/ipos" : `/ipos/${page}`);
 
 const nameOf = (row: Row) => row.ipo?.upcoming_ipo_2025 || "";
 
 /** Whole days until the IPO closes (0 today, negative passed), null when unknown. */
-export const daysToCloseOf = (row: Row) => row.steps[1].days;
+export const daysToCloseOf = (row: Row) => row.steps.find((step) => step.name === "Close")?.days ?? null;
 
 /** Days left to close for ranking: closed or undated issues sort last. */
 const closeRankOf = (row: Row) => {
@@ -91,6 +91,12 @@ export function applyFilters(rows: Row[], filters: Filters): Row[] {
   return matchBoardAndSearch(rows, filters)
     .filter((row) => matchesStatus(row, filters.status))
     .sort(COMPARE[filters.sort]);
+}
+
+/** Price band with a rupee sign, or "N/A". */
+export function priceBandOf(row: Row): string {
+  const band = getPriceBand(row.ipo);
+  return band ? `₹${band}` : "N/A";
 }
 
 /** Issue size with a rupee sign, unless the feed gave a share count instead of an amount. */

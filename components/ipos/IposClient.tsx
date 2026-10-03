@@ -1,6 +1,6 @@
 "use client";
 
-import { MouseEvent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MouseEvent, Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -20,7 +20,7 @@ const STATUS_BY_FILTER_PARAM: Record<string, Status> = { live: "Open", upcoming:
 /** Applies ?filter=live|upcoming|closed|past, and resets to all without it. Kept behind its own Suspense so the table still prerenders. */
 function StatusFromQuery({ onStatus }: { onStatus: (status: Filters["status"]) => void }) {
   const searchParams = useSearchParams();
-  // Starts as "no filter" so a first load without ?filter keeps its /ipos/<n> page instead of resetting to page 1.
+  // The last ?filter applied. Starts as none, so a first load without one keeps its page.
   const applied = useRef<string | null>(null);
   useEffect(() => {
     const filter = searchParams.get("filter");
@@ -75,21 +75,21 @@ export default function IposClient({ rows, initialPage }: { rows: Row[]; initial
   const [filters, setFilters] = useState<Filters>({ status: "all", board: "all", query: "", sort: "status" });
   const [page, setPage] = useState(initialPage);
 
-  const searchedRows = useMemo(() => matchBoardAndSearch(rows, filters), [rows, filters]);
-  const matchingRows = useMemo(() => applyFilters(rows, filters), [rows, filters]);
-  const boardCounts = useMemo(() => countByBoard(rows, filters), [rows, filters]);
+  const searchedRows = matchBoardAndSearch(rows, filters);
+  const matchingRows = applyFilters(rows, filters);
+  const boardCounts = countByBoard(rows, filters);
   const pageRows = matchingRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const showOpenNow = (filters.status === "all" || filters.status === "Open") && !filters.query.trim();
   const openRows = searchedRows.filter((row) => row.status === "Open");
 
-  const updateFilters = useCallback((next: Partial<Filters>) => {
+  const updateFilters = (next: Partial<Filters>) => {
     setFilters((current) => ({ ...current, ...next }));
     setPage(1);
-  }, []);
-  const showStatus = useCallback((status: Filters["status"]) => updateFilters({ status }), [updateFilters]);
+  };
+  const showStatus = (status: Filters["status"]) => updateFilters({ status });
 
-  // Unfiltered, the address bar follows the page on screen so a reload or share lands on it. The query is kept so ?filter does not re-apply.
+  // With no filters set, the address bar follows the page on screen.
   const unfiltered = filters.status === "all" && filters.board === "all" && !filters.query.trim() && filters.sort === "status";
   useEffect(() => {
     if (unfiltered) window.history.replaceState(null, "", ipoPagePath(page) + window.location.search);

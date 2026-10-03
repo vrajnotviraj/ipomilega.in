@@ -3,18 +3,13 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
-import { formatGmp, gainColor, gainMotion, getIpoType, getPriceBand, scoreOf } from "@/lib/ipo-format";
+import { formatGmp, gainColor, gainMotion, getIpoType, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { LifecycleTrack } from "@/components/ipo-shared/LifecycleTrack";
 import { ScorePill } from "@/components/ipos/ScorePill";
-import { Row, Status, gainOf, hasAnalysis, issueSizeOf } from "@/components/ipos/rows";
+import { Row, Status, gainOf, hasAnalysis, issueSizeOf, priceBandOf } from "@/components/ipos/rows";
 
 const TH = "px-4 py-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground";
-
-const priceBandOf = (row: Row) => {
-  const band = getPriceBand(row.ipo);
-  return band ? `₹${band}` : "N/A";
-};
 
 function StatusChip({ status }: { status: Status }) {
   if (status === "Open") {

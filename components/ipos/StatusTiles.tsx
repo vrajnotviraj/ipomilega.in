@@ -5,13 +5,7 @@ import { Step, StepName, whenText } from "@/components/ipo-shared/lifecycle";
 
 type TileValue = Filters["status"];
 
-const TILES: { value: TileValue; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "Open", label: "Open" },
-  { value: "Upcoming", label: "Upcoming" },
-  { value: "Closed", label: "Closed" },
-  { value: "Listed", label: "Listed" },
-];
+const TILES: TileValue[] = ["all", "Open", "Upcoming", "Closed", "Listed"];
 
 /** The dated step nearest ahead (soonest) or most recently passed (latest) among the rows. */
 function nearestStep(rows: Row[], step: StepName, pick: "soonest" | "latest") {
@@ -68,17 +62,17 @@ export function StatusTiles({ rows, value, onChange }: { rows: Row[]; value: Til
   return (
     <div role="group" aria-label="IPO status" className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
       {TILES.map((tile) => {
-        const tileRows = rows.filter((row) => matchesStatus(row, tile.value));
+        const tileRows = rows.filter((row) => matchesStatus(row, tile));
         return (
           <Tile
-            key={tile.value}
-            label={tile.label}
+            key={tile}
+            label={tile === "all" ? "All" : tile}
             count={tileRows.length}
-            subtitle={subtitleFor(tile.value, tileRows)}
-            isLive={tile.value === "Open"}
-            isActive={value === tile.value}
-            onClick={() => onChange(tile.value)}
-            isWide={tile.value === "all"}
+            subtitle={subtitleFor(tile, tileRows)}
+            isLive={tile === "Open"}
+            isActive={value === tile}
+            onClick={() => onChange(tile)}
+            isWide={tile === "all"}
           />
         );
       })}
