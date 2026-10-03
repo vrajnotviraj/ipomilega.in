@@ -13,7 +13,7 @@ const isListed = (row: Row) => row.status === "Listed";
 const TH = "px-4 py-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground";
 
 /** IPO list: a table on wide screens, stacked rows on phones. Rows with an analysis open it on click.
- * Closed and listed rows skip price band and score, other rows skip the listing date; each column hides when no row has it. */
+ * Closed and listed rows skip the price band, other rows skip the listing date; each column hides when no row has it. */
 export function IpoTable({ rows }: { rows: Row[] }) {
   const router = useProgressRouter();
   const openAnalysis = (row: Row) => {
@@ -35,7 +35,6 @@ export function IpoTable({ rows }: { rows: Row[] }) {
             <th className={cn(TH, "text-right")}>Subscribed</th>
             <th className={cn(TH, "text-right")}>GMP</th>
             <th className={cn(TH, "w-[232px]")}>{stageHeader}</th>
-            {showBidding && <th className={cn(TH, "text-right")}>Score</th>}
           </tr>
         </thead>
         <tbody className="reveal-stagger">
@@ -52,7 +51,6 @@ export function IpoTable({ rows }: { rows: Row[] }) {
               <td className="px-4 py-4 text-right font-mono text-sm tabular-nums text-foreground">{subscribedOf(row)}</td>
               <td className="px-4 py-4 text-right"><Gain value={gmpOf(row)} /></td>
               <td className="px-4 py-4"><Stage row={row} /></td>
-              {showBidding && <td className="px-4 py-4 text-right">{isPastBidding(row) ? null : <ScorePill value={scoreOf(row)} />}</td>}
             </tr>
           ))}
         </tbody>
