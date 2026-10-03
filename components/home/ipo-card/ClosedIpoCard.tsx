@@ -1,18 +1,13 @@
 import { ArrowUpRight, Clock } from 'lucide-react';
 import { Ipo } from '@/types/ipo';
 import {
-  ALLOTMENT_CATEGORIES,
   daysFromToday,
   estimatedListing,
-  formatAllotmentOdds,
   formatRupees,
   formatShortDate,
   formatTimes,
   gainColor,
   getAllotmentCheckUrl,
-  getAllotmentProbability,
-  getAllotmentRatio,
-  getProbabilityColor,
   gmpGainPerLot,
   parseGainValue,
   signedPercent,
@@ -20,40 +15,39 @@ import {
 import { cn } from '@/lib/utils';
 import { LifecycleTrack } from '@/components/ipos/LifecycleTrack';
 import { afterCloseSteps } from '@/components/ipos/rows';
-import { CardHeader, IpoCardProps, Stat } from './CardParts';
+import { CardHeader, IpoCardProps } from './CardParts';
 
 /**
  * Card for an IPO whose bidding has closed but has not listed. It answers what an applicant comes back for:
- * the expected listing, what happens next and when, their odds, and the allotment check.
+ * how heavily it was bid, the expected listing, what happens next and when, and the allotment check.
  */
 export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
   const allotmentDays = daysFromToday(ipo?.ipo_dates?.basis_of_allotment);
   const allotmentToday = allotmentDays === 0;
-  const retailLottery = getAllotmentRatio(ipo, ALLOTMENT_CATEGORIES[0]).lottery;
 
   return (
     <article
       className={cn(
         'card-lift flex flex-col gap-4 rounded-xl border p-4 sm:p-5',
-        allotmentToday ? 'border-transparent bg-secondary' : 'border-border bg-card'
+        allotmentToday ? 'border-brand-accent bg-tint-closed-today' : 'border-brand-accent/30 bg-tint-closed'
       )}
     >
-      <CardHeader ipo={ipo} analysis={analysis} />
+      <CardHeader ipo={ipo} analysis={analysis} aside={<Subscribed times={parseGainValue(ipo?.total_sr)} />} />
       <ExpectedListing ipo={ipo} />
-      <LifecycleTrack steps={afterCloseSteps(ipo)} showCaption={false} className={cn('rounded-lg px-3 py-2.5', allotmentToday ? 'bg-card' : 'bg-secondary')} />
-
-      <div className="grid grid-cols-2 gap-2">
-        <Stat label="Subscribed" value={formatTimes(parseGainValue(ipo?.total_sr))} />
-        <Stat
-          label="Retail odds"
-          value={formatAllotmentOdds(retailLottery)}
-          valueClass={getProbabilityColor(getAllotmentProbability(retailLottery))}
-          className="text-right"
-        />
-      </div>
+      <LifecycleTrack steps={afterCloseSteps(ipo)} showCaption={false} className="rounded-lg bg-card px-3 py-2.5" />
 
       <AllotmentAction ipo={ipo} allotmentDays={allotmentDays} />
     </article>
+  );
+}
+
+/** Total subscription as a mono figure for the card's top right. */
+function Subscribed({ times }: { times: number | null }) {
+  return (
+    <div className="shrink-0 text-right">
+      <div className="font-mono text-lg font-medium leading-tight tabular-nums">{formatTimes(times)}</div>
+      <div className="text-xs text-muted-foreground">subscribed</div>
+    </div>
   );
 }
 
@@ -94,7 +88,7 @@ function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDay
 
   if (!checkUrl) {
     return (
-      <div className="inline-flex items-center justify-center gap-1.5 rounded-full border border-dashed border-border py-2 text-xs text-muted-foreground">
+      <div className="inline-flex items-center justify-center gap-1.5 rounded-full border border-dashed border-border bg-card py-2 text-xs text-muted-foreground">
         <Clock className="size-3.5" strokeWidth={2} />
         {allotmentDays === null ? (
           'Allotment date TBA'
@@ -117,7 +111,7 @@ function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDay
         'group inline-flex items-center justify-center gap-1 rounded-full py-2 text-sm font-medium transition active:scale-[0.98]',
         allotmentDays === 0
           ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-          : 'border border-border text-foreground hover:bg-secondary'
+          : 'border border-border bg-card text-foreground hover:bg-secondary'
       )}
     >
       Check allotment

@@ -21,7 +21,7 @@ const VARIANTS = {
   compact: {
     heading: "mb-1.5 text-xs text-muted-foreground",
     grid: "gap-2",
-    tile: "rounded-lg bg-secondary py-2.5 ring-1 ring-transparent transition hover:ring-primary/30",
+    tile: "rounded-lg bg-card py-2.5 ring-1 ring-transparent transition hover:ring-primary/30",
     chevron: "right-1 top-1 size-3",
     odds: "text-sm",
   },
