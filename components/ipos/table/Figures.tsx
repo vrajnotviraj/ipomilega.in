@@ -1,6 +1,7 @@
 import { formatGmp, gainColor, gainMotion, lastListing, parseEstListingPercent } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { LifecycleTrack } from "@/components/ipo-shared/LifecycleTrack";
+import { lifecycleCaption } from "@/components/ipo-shared/lifecycle";
 import { Row } from "@/components/ipos/rows";
 
 /** A gain % in green or red, or "N/A" when unknown. */
@@ -18,12 +19,15 @@ export function Figure({ label, children }: { label: string; children: React.Rea
   );
 }
 
-/** Listing-day gain and gain at the last close. */
+/** Listing date, then the listing-day gain and the gain at the last close. */
 function Returns({ row }: { row: Row }) {
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <Figure label="Listing day"><Gain value={parseEstListingPercent(row.ipo?.listing_gain)} /></Figure>
-      <Figure label="Held till today"><Gain value={lastListing(row.ipo).gain} /></Figure>
+    <div>
+      <p className="text-xs font-medium text-foreground">{lifecycleCaption(row.steps)}</p>
+      <div className="mt-2 grid grid-cols-2 gap-3">
+        <Figure label="Listing day"><Gain value={parseEstListingPercent(row.ipo?.listing_gain)} /></Figure>
+        <Figure label="Held till today"><Gain value={lastListing(row.ipo).gain} /></Figure>
+      </div>
     </div>
   );
 }
