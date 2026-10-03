@@ -36,14 +36,19 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
 
   return (
     <div className="rounded-[18px] border border-border bg-card p-5 sm:p-8">
-      <div className="flex flex-wrap items-center gap-3">
-        <IpoLogo src={ipo.image_url} name={analysis.company_name} size="lg" />
-        <BoardChip board={getIpoType(ipo)} />
-        <StageChip stage={getIssueStage(opening, closing).stage} />
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-10">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-3">
+            <IpoLogo src={ipo.image_url} name={analysis.company_name} size="lg" />
+            <BoardChip board={getIpoType(ipo)} />
+            <StageChip stage={getIssueStage(opening, closing).stage} />
+          </div>
+          <h1 className="type-hero mt-4 text-balance break-words text-[44px] sm:text-[60px]">{analysis.company_name}</h1>
+          <AboutLine text={getAboutLine(analysis)} />
+          <Byline published={analysis.created_at} updated={analysis.updated_at} />
+        </div>
+        {allotmentUrl && <AllotmentCheckLink href={allotmentUrl} />}
       </div>
-      <h1 className="type-hero mt-4 text-balance break-words text-[44px] sm:text-[60px]">{analysis.company_name}</h1>
-      <AboutLine text={getAboutLine(analysis)} />
-      <Byline published={analysis.created_at} updated={analysis.updated_at} />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12">
         <ScoreVerdict score={overallScoreOf(analysis)} verdict={getVerdict(analysis)} />
@@ -58,7 +63,6 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
             </p>
           </div>
           <KeyFacts analysis={analysis} />
-          {allotmentUrl && <AllotmentCheckLink href={allotmentUrl} />}
         </div>
       </div>
 
@@ -115,7 +119,7 @@ function AllotmentCheckLink({ href }: { href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium transition-[transform,background-color] hover:bg-secondary active:scale-[0.98]"
+      className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium transition-[transform,background-color] hover:bg-secondary active:scale-[0.98]"
     >
       Check allotment
       <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden="true" />

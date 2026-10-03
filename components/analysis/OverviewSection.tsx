@@ -13,7 +13,7 @@ import { SummaryPanel } from "./SummaryPanel";
 import { WhereTheMoneyGoes } from "./WhereTheMoneyGoes";
 import { WhoGetsShares } from "./WhoGetsShares";
 
-/** The top of the page: summary and dates, where the money goes, odds and GMP, the score breakdown, strengths and concerns, and who gets shares. */
+/** The top of the page: summary and dates, odds and GMP, where the money goes, the score breakdown, strengths and concerns, and who gets shares. */
 export function OverviewSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const applicationRows = analysis.investorSplit?.filter((row) => row.application.toLowerCase() !== "application") ?? [];
   const proceeds = getUseOfProceeds(ipo);
@@ -21,11 +21,11 @@ export function OverviewSection({ analysis, ipo }: { analysis: IpoComprehensiveA
   return (
     <section id="overview" className="space-y-6 sm:space-y-8">
       <SummaryPanel analysis={analysis} ipo={ipo} />
-      {proceeds && <WhereTheMoneyGoes proceeds={proceeds} />}
       {/* Keeps the heading order h1, h2, h3 for the block titles below. */}
       <h2 className="sr-only">Overview</h2>
 
       <OddsAndGmp analysis={analysis} ipo={ipo} />
+      {proceeds && <WhereTheMoneyGoes proceeds={proceeds} />}
 
       <div className="reveal pt-4">
         <ScoreBreakdown analysis={analysis} />
@@ -64,7 +64,7 @@ function OddsAndGmp({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo
   }
 
   return (
-    <div className="grid grid-cols-1 items-start gap-6 pt-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-8">
+    <div className="grid grid-cols-1 gap-6 pt-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-8">
       <div className="space-y-4">
         <AllotmentOddsTiles
           ipo={ipo}

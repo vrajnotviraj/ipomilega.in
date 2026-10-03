@@ -1,8 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { FinancialReport, Ipo } from "@/types/ipo";
-import { formatRupees, getRiskTextColor } from "@/lib/ipo-format";
-import { cn } from "@/lib/utils";
-import { DotScale, Prose, ScoreFigure, SectionHeading } from "../primitives";
+import { formatRupees } from "@/lib/ipo-format";
+import { Prose, SectionHeading } from "../primitives";
 import { FinancialTrendChart } from "./FinancialTrendChart";
 import { getFinancialHighlights, sortReports } from "./financial-figures";
 import { DebtCard, OfferStructureCard } from "./FundamentalsCards";
@@ -10,7 +9,7 @@ import { Highlights, RatioList } from "./Highlights";
 
 /**
  * Numbers first: the latest year's figures and ratios, the trend chart beside the summary,
- * then allotment profitability, debt and offer structure in one row.
+ * then debt and offer structure side by side.
  */
 export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { fundamentals } = analysis;
@@ -23,9 +22,8 @@ export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiv
     ...(typeof ofsCr === "number" && { offer_for_sale: `${formatRupees(ofsCr)} Cr` }),
   };
   const { reports, dated } = sortReports(analysis.financialReport ?? []);
-  const allotment = analysis.ipo_details?.profitability_of_allotment;
   // Older analyses do not carry debt or offer structure.
-  const hasCards = allotment || fundamentals.debt || offer;
+  const hasCards = fundamentals.debt || offer;
 
   return (
     <section id="financials" className="reveal">
@@ -37,8 +35,7 @@ export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiv
       <TrendAndSummary reports={reports} summary={fundamentals.summary} />
 
       {hasCards && (
-        <div className="mt-6 grid grid-cols-1 items-start gap-4 md:grid-cols-3">
-          <AllotmentProfitability allotment={allotment} />
+        <div className="mt-6 grid grid-cols-1 items-start gap-4 md:grid-cols-2">
           {fundamentals.debt && <DebtCard debt={fundamentals.debt} />}
           {offer && <OfferStructureCard offer={offer} />}
         </div>
@@ -55,23 +52,6 @@ function TrendAndSummary({ reports, summary }: { reports: FinancialReport[]; sum
     <div className="mt-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-10">
       <TrendPanel reports={reports} />
       <Prose>{summary}</Prose>
-    </div>
-  );
-}
-
-/** How profitable an allotment looks, as a large score with its dot scale and the reasoning. */
-function AllotmentProfitability({ allotment }: { allotment?: { score: number; assessment: string } }) {
-  if (!allotment) return null;
-  const score = allotment.score ?? 0;
-
-  return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">Profitability of allotment</h3>
-      <div className={cn("mt-3 flex items-center gap-4", getRiskTextColor(score))}>
-        <ScoreFigure score={score} />
-        <DotScale score={score} />
-      </div>
-      {allotment.assessment && <p className="mt-3 text-sm text-pretty">{allotment.assessment}</p>}
     </div>
   );
 }

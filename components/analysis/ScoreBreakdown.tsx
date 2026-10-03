@@ -6,7 +6,7 @@ import { DotScale, gainColorOnInk, scoreColorOnInk } from "./primitives";
 
 type Axis = { label: string; score: number };
 
-/** The page's one ink panel: the radar of section scores, each score spelled out on a dot scale, and the gains estimate. */
+/** The page's one ink panel: the radar of section scores, each score spelled out on a dot scale, and the gains estimate beside them. */
 export function ScoreBreakdown({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
   const axes = getScoreAxes(analysis);
   const gainsPotential = analysis.ipo_details?.approximate_gains_potential ?? 0;
@@ -18,21 +18,37 @@ export function ScoreBreakdown({ analysis }: { analysis: IpoComprehensiveAnalysi
         <ScoreRadar axes={axes} overallScore={overallScoreOf(analysis)} gainsPotential={gainsPotential} />
         <GainsNote gainsPotential={gainsPotential} />
       </div>
-      <div className="min-w-0">
-        <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">How the score adds up</h3>
-        <p className="mt-1 text-sm text-primary-foreground/70">The overall score is the average of these five.</p>
-        {/* The radar has no axis labels, so the scores behind it are listed here. */}
-        <ul className="mt-5 divide-y divide-primary-foreground/10">
-          {axes.map((axis) => (
-            <li key={axis.label} className={cn("grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 py-2.5 text-sm", scoreColorOnInk(axis.score))}>
-              <span className="text-primary-foreground/75">{axis.label}</span>
-              <DotScale score={axis.score} />
-              <span className="font-mono text-base font-medium tabular-nums">{axis.score.toFixed(1)}</span>
-            </li>
-          ))}
-        </ul>
-        {gainsRationale && <p className="mt-4 whitespace-pre-wrap text-pretty text-sm text-primary-foreground/70">{gainsRationale}</p>}
+      <div className="grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
+        <div className="min-w-0">
+          <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">How the score adds up</h3>
+          <p className="mt-1 text-sm text-primary-foreground/70">The overall score is the average of these five.</p>
+          {/* The radar has no axis labels, so the scores behind it are listed here. */}
+          <ul className="mt-5 divide-y divide-primary-foreground/10">
+            {axes.map((axis) => (
+              <li key={axis.label} className={cn("grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 py-2.5 text-sm", scoreColorOnInk(axis.score))}>
+                <span className="text-primary-foreground/75">{axis.label}</span>
+                <DotScale score={axis.score} />
+                <span className="font-mono text-base font-medium tabular-nums">{axis.score.toFixed(1)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <EstimatedGain gainsPotential={gainsPotential} rationale={gainsRationale} />
       </div>
+    </div>
+  );
+}
+
+/** The fundamentals-only gain estimate as a large signed figure, with the reasoning behind it. */
+function EstimatedGain({ gainsPotential, rationale }: { gainsPotential: number; rationale?: string }) {
+  return (
+    <div className="min-w-0 border-t border-primary-foreground/10 pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10">
+      <div className="text-xs font-medium uppercase tracking-[0.04em] text-primary-foreground/70">Estimated gain (fundamentals only)</div>
+      <div className={cn("mt-1 font-mono text-4xl font-medium tabular-nums", gainColorOnInk(gainsPotential))}>
+        {gainsPotential > 0 ? "+" : ""}
+        {gainsPotential}%
+      </div>
+      {rationale && <p className="mt-4 whitespace-pre-wrap text-pretty text-sm text-primary-foreground/75">{rationale}</p>}
     </div>
   );
 }

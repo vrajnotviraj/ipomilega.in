@@ -13,6 +13,7 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
 function spreadApart(positions: number[]): number[] {
   const spread = [...positions];
   for (let i = 1; i < spread.length; i++) spread[i] = Math.max(spread[i], spread[i - 1] + MIN_LABEL_GAP);
+  spread[spread.length - 1] = 100;
   for (let i = spread.length - 2; i >= 0; i--) spread[i] = Math.min(spread[i], spread[i + 1] - MIN_LABEL_GAP);
   return spread;
 }

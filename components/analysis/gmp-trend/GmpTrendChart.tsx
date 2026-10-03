@@ -19,7 +19,7 @@ export function GmpTrendChart({ ipoId, companyName }: { ipoId: string; companyNa
   const hasPoints = Array.isArray(points) && points.length > 0;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="flex h-full flex-col rounded-xl border border-border bg-card p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">GMP trend</h3>
@@ -47,7 +47,10 @@ export function GmpTrendChart({ ipoId, companyName }: { ipoId: string; companyNa
       {hasPoints && (
         <>
           <TrendSummary points={points} />
-          {showTable ? <GmpTable points={points} companyName={companyName} /> : <GmpChart points={points} />}
+          {/* Grows to the card's height when the card sits beside a taller column. */}
+          <div className="flex min-h-[220px] flex-1 flex-col">
+            {showTable ? <GmpTable points={points} companyName={companyName} /> : <GmpChart points={points} />}
+          </div>
           {points.length === 1 && (
             <p className="mt-3 text-xs text-muted-foreground">The line builds from here: one point per day, showing that day&apos;s latest GMP.</p>
           )}

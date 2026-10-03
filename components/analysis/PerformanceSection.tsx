@@ -6,7 +6,7 @@ import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from 
 
 type Performance = IpoComprehensiveAnalysis["performance"];
 
-/** The summary beside management quality, growth and position notes on a surface panel, then the key achievements. */
+/** The summary and the growth and position notes beside management quality, then the key achievements. */
 export function PerformanceSection({ performance }: { performance: Performance }) {
   const growth = performance.historical_growth;
   const achievements = nonBlank(performance.key_achievements);
@@ -21,20 +21,35 @@ export function PerformanceSection({ performance }: { performance: Performance }
   return (
     <section id="performance" className="reveal">
       <SectionHeading title="Performance" score={performance.score} />
-      <SummaryAndManagement summary={performance.summary} management={performance.management_quality} />
-      <FactList columns facts={facts} className="mt-8 rounded-[18px] bg-secondary px-5 py-2 sm:px-8 [&>div]:border-t-0" />
+      <SummaryAndManagement summary={performance.summary} management={performance.management_quality}>
+        <FactList columns facts={facts} className="rounded-[18px] bg-secondary px-5 py-2 sm:px-6 [&>div]:border-t-0" />
+      </SummaryAndManagement>
       {achievements.length > 0 && <Achievements items={achievements} />}
     </section>
   );
 }
 
-/** The summary on the left and the management panel on the right from lg up; the summary alone without it. */
-function SummaryAndManagement({ summary, management }: { summary: string; management: Performance["management_quality"] | undefined }) {
-  if (!management) return <Prose>{summary}</Prose>;
+/** The summary with its notes under it on the left, and the management panel on the right from lg up. */
+function SummaryAndManagement({
+  summary,
+  management,
+  children,
+}: {
+  summary: string;
+  management: Performance["management_quality"] | undefined;
+  children: React.ReactNode;
+}) {
+  const summaryAndNotes = (
+    <div className="min-w-0 space-y-8">
+      <Prose>{summary}</Prose>
+      {children}
+    </div>
+  );
+  if (!management) return summaryAndNotes;
 
   return (
     <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] lg:gap-10">
-      <Prose>{summary}</Prose>
+      {summaryAndNotes}
       <ManagementPanel management={management} />
     </div>
   );

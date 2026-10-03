@@ -35,7 +35,7 @@ export function GmpChart({ points }: { points: ChartPoint[] }) {
 
   return (
     // Height includes the x-axis band, so the tick labels never need a scrollbar.
-    <div className="-ml-2 h-[220px]">
+    <div className="-ml-2 min-h-[220px] flex-1">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={points} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
           <defs>
