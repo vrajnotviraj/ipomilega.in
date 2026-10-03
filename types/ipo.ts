@@ -43,6 +43,9 @@ export interface Ipo {
   ipo_price: string;
   listing_price: string;
   listing_gain: string;
+  // Latest close, refreshed each weekday for a year after listing; absent until the engine's prices job reaches the IPO.
+  last_price?: string;
+  last_price_date?: string;
   ipo_market_lot: IpoMarketLot[];
   promoters: string;
   nii_sr: string;

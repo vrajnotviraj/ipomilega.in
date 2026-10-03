@@ -2,7 +2,7 @@ import { CalendarDays } from 'lucide-react';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { IpoTitleLink } from '@/components/ipo-shared/IpoTitleLink';
 import { IpoLogo } from '@/components/ipo-shared/IpoLogo';
-import { estimatedListing, formatShortDateOrToday, gainMotion, issuePrice, parseGainValue, scoreOf, type Listing } from '@/lib/ipo-format';
+import { estimatedListing, formatShortDateOrToday, gainMotion, issuePrice, lastListing, parseGainValue, scoreOf, type Listing } from '@/lib/ipo-format';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SectionHeading } from '@/components/home/SectionHeading';
 
@@ -44,9 +44,9 @@ function ListingFigure({ label, listing, fallback, className }: { label: string;
   );
 }
 
-const ROW_GRID = 'grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-[minmax(0,2fr)_1fr_1fr] sm:items-center';
+const ROW_GRID = 'grid grid-cols-3 gap-x-4 gap-y-3 sm:grid-cols-[minmax(0,2fr)_1fr_1fr_1fr] sm:items-center';
 
-/** One recently listed IPO: company, then GMP estimate next to the actual listing. */
+/** One recently listed IPO: company, then the GMP estimate, the actual listing and the latest close. */
 function ListedRow({ item }: { item: HomePageIpoProps }) {
   const { ipo } = item;
   const hasAnalysis = scoreOf(item) > 0;
@@ -54,7 +54,7 @@ function ListedRow({ item }: { item: HomePageIpoProps }) {
 
   return (
     <li className={`${ROW_GRID} px-4 py-4 sm:px-5`}>
-      <div className="col-span-2 flex min-w-0 items-center gap-3 sm:col-span-1">
+      <div className="col-span-3 flex min-w-0 items-center gap-3 sm:col-span-1">
         <IpoLogo src={ipo?.image_url} name={ipo?.upcoming_ipo_2025} />
         <div className="min-w-0">
           <h3 className="truncate font-display font-bold tracking-[-0.015em]">
@@ -71,12 +71,13 @@ function ListedRow({ item }: { item: HomePageIpoProps }) {
         </div>
       </div>
       <ListingFigure label="Est. listing (GMP)" listing={estimatedListing(ipo)} fallback="N/A" className="sm:text-right" />
-      <ListingFigure label="Actual listing" listing={actualListing(ipo)} fallback="Awaiting" className="text-right" />
+      <ListingFigure label="Actual listing" listing={actualListing(ipo)} fallback="Awaiting" className="sm:text-right" />
+      <ListingFigure label="Last close" listing={lastListing(ipo)} fallback="Awaiting" className="text-right" />
     </li>
   );
 }
 
-/** Last four listings, with the GMP estimate next to how each one actually listed. */
+/** Last four listings: the GMP estimate, how each one actually listed, and where it trades now. */
 export function PastIposSection({ ipos }: { ipos: HomePageIpoProps[] }) {
   const visibleIpos = ipos.slice(0, 4);
 
@@ -97,6 +98,7 @@ export function PastIposSection({ ipos }: { ipos: HomePageIpoProps[] }) {
             <span>Company</span>
             <span className="text-right">Est. listing (GMP)</span>
             <span className="text-right">Actual listing</span>
+            <span className="text-right">Last close</span>
           </div>
           <ul className="reveal-stagger divide-y divide-border">
             {visibleIpos.map((item) => (

@@ -3,7 +3,7 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
-import { formatGmp, gainColor, gainMotion, getIpoType, scoreOf } from "@/lib/ipo-format";
+import { formatGmp, gainColor, gainMotion, getIpoType, lastListing, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { LifecycleTrack } from "@/components/ipo-shared/LifecycleTrack";
 import { ScorePill } from "@/components/ipos/ScorePill";
@@ -42,13 +42,19 @@ function Company({ row }: { row: Row }) {
   );
 }
 
-/** Actual listing gain for listed IPOs, else the GMP estimate. Listed rows say which one it is. */
+/** Actual listing gain for listed IPOs, else the GMP estimate. Listed rows say which one it is, then the gain at the last close. */
 function Gain({ row }: { row: Row }) {
   const { value, isActual } = gainOf(row);
+  const now = row.status === "Listed" ? lastListing(row.ipo).gain : null;
   return (
     <span className="inline-flex flex-col">
       <span className={cn("font-mono text-sm font-medium tabular-nums", gainColor(value), gainMotion(value))}>{formatGmp(value)}</span>
       {row.status === "Listed" && <span className="font-sans text-xs font-normal text-muted-foreground">{isActual ? "Listed" : "Est."}</span>}
+      {now !== null && (
+        <span className="font-sans text-xs font-normal text-muted-foreground">
+          Now <span className={cn("font-mono", gainColor(now))}>{formatGmp(now)}</span>
+        </span>
+      )}
     </span>
   );
 }

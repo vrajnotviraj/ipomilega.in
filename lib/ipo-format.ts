@@ -465,6 +465,13 @@ export function estimatedListing(ipo: ListingFields): Listing {
   return { price: null, gain };
 }
 
+/** Latest close and its gain on the issue price: how the IPO has done since it listed. */
+export function lastListing(ipo: (ListingFields & Pick<Ipo, 'last_price'>) | null | undefined): Listing {
+  const price = parseGainValue(ipo?.last_price);
+  const issue = issuePrice(ipo);
+  return { price, gain: price !== null && issue ? ((price - issue) / issue) * 100 : null };
+}
+
 /** Rupees the minimum retail application would gain at today's GMP (one lot on Mainboard, usually two on SME), or null without a GMP or lot table. */
 export function gmpGainPerApplication(ipo: Pick<Ipo, 'gmp_ipo_gmp' | 'ipo_market_lot'> | null | undefined): number | null {
   const perShare = parseGainValue(ipo?.gmp_ipo_gmp);
