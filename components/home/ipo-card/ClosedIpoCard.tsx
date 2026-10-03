@@ -29,13 +29,13 @@ export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
   return (
     <article
       className={cn(
-        'card-lift flex flex-col gap-4 rounded-xl border p-4 sm:p-5',
-        allotmentToday ? 'border-primary bg-tint-closed' : 'border-tint-closed-border bg-tint-closed'
+        'flex flex-col gap-4 rounded-xl border p-4 sm:p-5',
+        allotmentToday ? 'card-lift border-primary bg-card' : 'border-transparent bg-secondary'
       )}
     >
       <CardHeader ipo={ipo} analysis={analysis} aside={<Subscribed times={parseGainValue(ipo?.total_sr)} />} />
       <ExpectedListing ipo={ipo} />
-      <LifecycleTrack steps={afterCloseSteps(ipo)} showCaption={false} className="rounded-lg bg-card px-3 py-2.5" />
+      <LifecycleTrack steps={afterCloseSteps(ipo)} showCaption={false} className="border-y border-primary/10 py-3.5" />
 
       <AllotmentAction ipo={ipo} allotmentDays={allotmentDays} />
     </article>
@@ -91,7 +91,7 @@ function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDay
 
   if (!checkUrl) {
     return (
-      <div className="inline-flex items-center justify-center gap-1.5 rounded-full border border-dashed border-border bg-card py-2 text-xs text-muted-foreground">
+      <div className="inline-flex items-center justify-center gap-1.5 rounded-full border border-dashed border-primary/20 py-2 text-xs text-muted-foreground">
         <Clock className="size-3.5" strokeWidth={2} />
         {allotmentDays === null ? (
           'Allotment date TBA'
@@ -114,7 +114,7 @@ function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDay
         'group inline-flex items-center justify-center gap-1 rounded-full py-2 text-sm font-medium press',
         allotmentDays === 0
           ? 'glint bg-primary text-primary-foreground hover:bg-primary/90'
-          : 'border border-border bg-card text-foreground hover:bg-secondary'
+          : 'border border-primary/25 text-foreground hover:border-primary/40 hover:bg-card'
       )}
     >
       Check allotment

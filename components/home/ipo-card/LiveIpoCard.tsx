@@ -13,7 +13,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
     : 'Institutions mostly bid on the closing day, so this is usually near 0x until then';
 
   return (
-    <article className="card-lift flex h-full flex-col gap-4 rounded-xl border border-score-good/20 bg-tint-live p-5">
+    <article className="card-lift flex h-full flex-col gap-4 rounded-xl border border-border bg-card p-5">
       <CardHeader ipo={ipo} analysis={analysis} />
 
       <div data-tour="demand" className="grid grid-cols-3 gap-2">

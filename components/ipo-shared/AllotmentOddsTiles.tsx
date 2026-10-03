@@ -20,8 +20,8 @@ const CATEGORY_ICONS: Record<AllotmentCategoryDef["key"], typeof User> = { retai
 const VARIANTS = {
   compact: {
     heading: "mb-1.5 text-xs text-muted-foreground",
-    grid: "gap-2",
-    tile: "rounded-lg bg-card py-2.5 ring-1 ring-transparent transition hover:ring-primary/30",
+    grid: "divide-x divide-border overflow-hidden rounded-lg border border-border",
+    tile: "py-2.5 transition-colors hover:bg-secondary",
     chevron: "right-1 top-1 size-3",
     odds: "text-sm",
   },
