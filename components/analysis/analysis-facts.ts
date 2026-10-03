@@ -121,7 +121,6 @@ export function getQuotaSplit(analysis: IpoComprehensiveAnalysis, ipo: Ipo) {
   return [
     { name: "QIB", value: allocation?.qib || firstNumber(ipo.ipo_details?.qib_quota || "50"), color: "var(--chart-1)" },
     { name: "NII", value: allocation?.nii || firstNumber(ipo.ipo_details?.nii_quota || "15"), color: "var(--chart-5)" },
-    // Marigold marks the investor's own slice, the only marigold in that card.
     { name: "Retail", value: allocation?.retail || firstNumber(ipo.ipo_details?.retail_quota || "35"), color: "var(--chart-3)" },
   ];
 }

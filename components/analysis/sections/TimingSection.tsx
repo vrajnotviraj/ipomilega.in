@@ -1,7 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { formatShortDate, getRiskTextColor, scoreBand } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { DotScale, Eyebrow, FactList, Prose, SectionHeading } from "./primitives";
+import { DotScale, Eyebrow, FactList, Prose, SectionHeading } from "@/components/analysis/primitives";
 
 type Time = IpoComprehensiveAnalysis["time"];
 

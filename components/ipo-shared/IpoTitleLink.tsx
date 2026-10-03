@@ -4,7 +4,7 @@ import { ProgressLink } from '@/components/progress/ProgressLink';
 
 // Company name linking to its analysis page, or plain text when there is no analysis yet.
 export function IpoTitleLink({ ipo, hasAnalysis }: { ipo: Ipo | null; hasAnalysis: boolean }) {
-  const name = ipo?.upcoming_ipo_2025 || 'Company Name';
+  const name = ipo?.upcoming_ipo_2025 || '';
 
   if (!hasAnalysis || !ipo?.slug) {
     return <span>{name}</span>;

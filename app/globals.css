@@ -342,7 +342,7 @@
   }
 }
 
-/* A soft band of light that crosses a solid button every few seconds, for something worth acting on now. */
+/* A soft band of light that crosses a solid button every few seconds. */
 @utility glint {
   position: relative;
   overflow: hidden;
@@ -368,10 +368,7 @@
   }
 }
 
-/*
- * Sections below the fold rise in as they scroll into view. Scroll-driven, so there is no
- * IntersectionObserver and no hidden-until-hydrated content; browsers without support just show it.
- */
+/* Sections below the fold rise in as they scroll into view, driven by scroll position. Browsers without support show them as is. */
 @keyframes reveal-up {
   from {
     opacity: 0;
@@ -383,14 +380,14 @@
   }
 }
 
-/* A line drawn from its left end, like a stem growing. */
+/* Draws a line out from its left end. */
 @keyframes grow-x {
   from {
     transform: scaleX(0);
   }
 }
 
-/* Gains drift up into place and losses drift down, so the direction of a move is felt as well as read. */
+/* Gains drift up into place, losses drift down. */
 @keyframes rise {
   from {
     opacity: 0;

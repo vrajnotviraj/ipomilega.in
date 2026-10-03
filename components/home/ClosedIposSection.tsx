@@ -6,29 +6,25 @@ import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
 import { Clock } from 'lucide-react';
 import { getIpoType, gmpOf } from '@/lib/ipo-format';
-import { afterCloseSteps, lifecycleCaption, type Step } from '@/components/ipos/rows';
+import { afterCloseSteps, lifecycleCaption, type Step } from '@/components/ipo-shared/lifecycle';
 
-/** The step an IPO is on: the one due today, else the next dated one. Null once nothing is left or dates are missing. */
-function currentStep(steps: Step[]) {
+/** Days to the step an IPO is on (the one due today, else the next dated one), with earlier steps first on the same day. */
+function rankOf(steps: Step[]) {
   const index = steps.findIndex((step) => step.state === 'today' || (step.state === 'future' && step.days !== null));
-  return index === -1 ? null : { index, days: steps[index].days ?? Infinity };
+  return index === -1 ? Infinity : (steps[index].days ?? 0) * 10 + index;
 }
 
-/**
- * Groups IPOs by what happens next ("Allotment today", "Lists in 2 days"), soonest first and, on the same day,
- * earlier steps first. Highest GMP first within a group.
- */
+/** Groups IPOs by what happens next ("Lists in 2 days"), soonest first, highest GMP first within a group. */
 function groupByNextStep(ipos: HomePageIpoProps[]) {
-  const groups = new Map<string, { rank: [number, number]; isToday: boolean; items: HomePageIpoProps[] }>();
+  const groups = new Map<string, { rank: number; isToday: boolean; items: HomePageIpoProps[] }>();
   for (const item of [...ipos].sort((a, b) => gmpOf(b) - gmpOf(a))) {
     const steps = afterCloseSteps(item.ipo);
-    const step = currentStep(steps);
     const caption = lifecycleCaption(steps);
-    const group = groups.get(caption) ?? { rank: step ? [step.days, step.index] : [Infinity, 0], isToday: step?.days === 0, items: [] };
+    const group = groups.get(caption) ?? { rank: rankOf(steps), isToday: steps.some((step) => step.state === 'today'), items: [] };
     group.items.push(item);
     groups.set(caption, group);
   }
-  return [...groups].sort(([, a], [, b]) => a.rank[0] - b.rank[0] || a.rank[1] - b.rank[1]);
+  return [...groups].sort(([, a], [, b]) => a.rank - b.rank);
 }
 
 /** IPOs whose bidding has closed but which have not listed yet, for the chosen board. */

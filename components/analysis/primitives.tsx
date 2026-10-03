@@ -1,17 +1,5 @@
-import { getRiskTextColor, scoreBand } from "@/lib/ipo-format";
+import { getRiskTextColor } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-
-const ON_INK_COLOR = { good: "text-score-good-on-ink", mid: "text-score-mid-on-ink", bad: "text-score-bad-on-ink" };
-
-/** Score colour for text on the ink panel, on the same bands as getRiskTextColor. */
-export const scoreColorOnInk = (score: number) => ON_INK_COLOR[scoreBand(score)];
-
-/** Gain or loss colour for a signed figure on the ink panel, plain chalk for zero. */
-export function gainColorOnInk(value: number) {
-  if (value > 0) return "text-score-good-on-ink";
-  if (value < 0) return "text-score-bad-on-ink";
-  return "text-primary-foreground";
-}
 
 /** A 0-10 score as a large display figure with a mono "/10", in the current text colour. */
 export function ScoreFigure({ score }: { score: number }) {

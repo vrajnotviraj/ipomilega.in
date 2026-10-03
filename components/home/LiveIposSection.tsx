@@ -32,7 +32,7 @@ function groupByClosingDay(ipos: HomePageIpoProps[]) {
 /** Live IPO cards for the chosen board, with the Mainboard/SME switch that filters every home section. */
 export function LiveIposSection({ ipos }: IpoSectionProps) {
   const { board, setBoard } = useBoard();
-  // Fade only on tab switches, not the first paint: these cards sit right under the LCP.
+  // Fades only on board switches, never on first paint.
   const mounted = useRef(false);
   useEffect(() => {
     mounted.current = true;

@@ -1,7 +1,6 @@
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { ProgressLink } from '@/components/progress/ProgressLink';
-import { applyQibAdjustment, getQibSignal, scoreOf } from '@/lib/ipo-format';
-import { scoreColorOnInk } from '@/components/analysis/primitives';
+import { applyQibAdjustment, getQibSignal, scoreColorOnInk, scoreOf } from '@/lib/ipo-format';
 
 interface TickerEntry {
   key: string;

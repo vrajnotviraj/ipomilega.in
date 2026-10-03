@@ -1,4 +1,4 @@
-import { Eyebrow } from "./primitives";
+import { Eyebrow } from "@/components/analysis/primitives";
 
 type Slice = { name: string; value: number; color: string };
 
@@ -7,7 +7,7 @@ const CENTER = SIZE / 2;
 const RADIUS = 52;
 const STROKE = 21;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-// A small break between slices, like the card showing through.
+// Gap between slices, in units of ring length.
 const GAP = 2;
 
 /** Donut of the QIB, NII and retail quota, with a legend beside it on phones and below it on desktop. */

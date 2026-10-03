@@ -1,11 +1,11 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { FinancialReport, Ipo } from "@/types/ipo";
 import { formatRupees } from "@/lib/ipo-format";
-import { Prose, SectionHeading } from "../primitives";
-import { FinancialTrendChart } from "./FinancialTrendChart";
-import { getFinancialHighlights, sortReports } from "./financial-figures";
-import { DebtCard, OfferStructureCard } from "./FundamentalsCards";
-import { Highlights, RatioList } from "./Highlights";
+import { Prose, SectionHeading } from "@/components/analysis/primitives";
+import { FinancialTrendChart } from "@/components/analysis/sections/financials/FinancialTrendChart";
+import { getFinancialHighlights, sortReports } from "@/components/analysis/sections/financials/financial-figures";
+import { DebtCard, OfferStructureCard } from "@/components/analysis/sections/financials/FundamentalsCards";
+import { Highlights, RatioList } from "@/components/analysis/sections/financials/Highlights";
 
 /**
  * Numbers first: the latest year's figures and ratios, the trend chart beside the summary,
@@ -13,7 +13,7 @@ import { Highlights, RatioList } from "./Highlights";
  */
 export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { fundamentals } = analysis;
-  // The scraped issue amounts win over the AI's, so the page shows one number per fact.
+  // Scraped issue amounts replace the analysis's own.
   const freshCr = ipo.issue?.fresh_issue_cr;
   const ofsCr = ipo.issue?.offer_for_sale_cr;
   const offer = fundamentals.offer_structure && {
@@ -22,7 +22,6 @@ export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiv
     ...(typeof ofsCr === "number" && { offer_for_sale: `${formatRupees(ofsCr)} Cr` }),
   };
   const { reports, dated } = sortReports(analysis.financialReport ?? []);
-  // Older analyses do not carry debt or offer structure.
   const hasCards = fundamentals.debt || offer;
 
   return (

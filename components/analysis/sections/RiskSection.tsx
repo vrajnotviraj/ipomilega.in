@@ -1,7 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { cn } from "@/lib/utils";
-import { nonBlank } from "./analysis-facts";
-import { Prose, SectionHeading } from "./primitives";
+import { nonBlank } from "@/components/analysis/analysis-facts";
+import { Prose, SectionHeading } from "@/components/analysis/primitives";
 
 type RiskCategory = { title: string; items: string[] };
 

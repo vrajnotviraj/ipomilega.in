@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Step, StepState, lifecycleCaption } from "@/components/ipos/rows";
+import { Step, StepState, lifecycleCaption } from "@/components/ipo-shared/lifecycle";
 
 const DOT: Record<StepState, string> = {
   done: "bg-primary",

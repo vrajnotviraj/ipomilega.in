@@ -1,5 +1,5 @@
 import type { IpoMarketLot } from "@/types/ipo";
-import { QuotaDonut } from "./QuotaDonut";
+import { QuotaDonut } from "@/components/analysis/overview/QuotaDonut";
 
 type Slice = { name: string; value: number; color: string };
 

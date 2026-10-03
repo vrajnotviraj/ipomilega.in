@@ -38,7 +38,7 @@ function countByBoard(rows: Row[], { query, status }: Filters): BoardCounts {
   return { all: matching.length, Mainboard: countOf("Mainboard"), SME: countOf("SME") };
 }
 
-/** "Showing 1 to 10 of 42" with previous and next links. The links are real /ipos/<n> URLs for crawlers; a click swaps the page in place so filters stay, and IposClient keeps the address bar in step. */
+/** "Showing 1 to 10 of 42" with previous and next links. Links are real /ipos/<n> URLs; a click swaps the page in place and keeps the filters. */
 function Pager({ page, total, onPage }: { page: number; total: number; onPage: (page: number) => void }) {
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const first = (page - 1) * PAGE_SIZE + 1;

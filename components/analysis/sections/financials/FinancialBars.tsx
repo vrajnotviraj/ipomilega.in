@@ -1,7 +1,7 @@
 "use client";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { FinancialReport } from "@/types/ipo";
-import { croresOf, periodLabel } from "./financial-figures";
+import { croresOf, periodLabel } from "@/components/analysis/sections/financials/financial-figures";
 
 const AXIS_TICK = { fontSize: 12, fill: "var(--muted-foreground)", fontFamily: "var(--font-mono)" };
 

@@ -70,7 +70,7 @@ function railLayout(closing: string, allotment: string, openDate: Date, listDate
   return { percentThrough, truePositions, railPositions: spreadApart(truePositions) };
 }
 
-type Station = { label: string; date: string; pos: number; align: Align };
+type Station = { label: string; date: string; pos: number; align: Align; reached: boolean; isToday: boolean };
 
 /** Open, close, allotment and listing on a rail spaced by date, with a marker for today. */
 export function IssueTimeline({ opening, closing, allotment, listing }: Record<"opening" | "closing" | "allotment" | "listing", string>) {
@@ -85,25 +85,25 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
   }
 
   const { percentThrough, truePositions, railPositions } = railLayout(closing, allotment, openDate, listDate);
-  const stations: Station[] = [
-    { label: "Open", date: opening, pos: railPositions[0], align: "left" },
-    { label: "Close", date: closing, pos: railPositions[1], align: "center" },
-    { label: "Allotment", date: allotment, pos: railPositions[2], align: "center" },
-    { label: "Listing", date: listing, pos: railPositions[3], align: "right" },
-  ];
+  const todayDay = today ? dayNumberInIndia(today) : null;
+  const stations: Station[] = (
+    [
+      { label: "Open", date: opening, align: "left" },
+      { label: "Close", date: closing, align: "center" },
+      { label: "Allotment", date: allotment, align: "center" },
+      { label: "Listing", date: listing, align: "right" },
+    ] as const
+  ).map((station, index) => {
+    const date = parseIpoDate(station.date);
+    const day = date ? dayNumberInIndia(date) : null;
+    const known = day !== null && todayDay !== null;
+    return { ...station, pos: railPositions[index], reached: known && day <= todayDay, isToday: known && day === todayDay };
+  });
 
   const progress = progressAt(today ? percentThrough(today) : null, truePositions, railPositions);
   const todayLabel = today?.toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) ?? "";
-  const isReached = (value: string) => {
-    const date = parseIpoDate(value);
-    return !!date && !!today && dayNumberInIndia(date) <= dayNumberInIndia(today);
-  };
-  const isToday = (value: string) => {
-    const date = parseIpoDate(value);
-    return !!date && !!today && dayNumberInIndia(date) === dayNumberInIndia(today);
-  };
-  // On a station's own day that station is marked instead, and after listing the rail is simply done.
-  const showTodayChip = !!today && !stations.some((station) => isToday(station.date)) && !isReached(listing);
+  // The chip shows only between stations: a station's own day marks that station, and after listing nothing is left.
+  const showTodayChip = !!today && !stations.some((station) => station.isToday) && !stations[3].reached;
   const countdown = today
     ? countdownLabel([
         { verb: "Opens", date: opening },
@@ -111,8 +111,8 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
         { verb: "Lists", date: listing },
       ])
     : null;
-  // Stations are in date order, so today sits after the last one reached. Before mount it waits at the end, hidden.
-  const todayIndex = today ? stations.filter((station) => isReached(station.date)).length : stations.length;
+  // Today's row sits after the last station reached.
+  const todayIndex = today ? stations.filter((station) => station.reached).length : stations.length;
   const todayRow = (
     <li key="today" className={cn("flex items-center gap-3", !showTodayChip && "hidden")}>
       <TodayChip label={todayLabel} />
@@ -121,9 +121,9 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
   );
   const stationRow = (station: Station) => (
     <li key={station.label} className="flex items-center gap-3">
-      <StationDot reached={isReached(station.date)} today={isToday(station.date)} />
+      <StationDot reached={station.reached} today={station.isToday} />
       <span className="w-24 shrink-0 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{station.label}</span>
-      <StationDate date={station.date} today={isToday(station.date)} />
+      <StationDate date={station.date} today={station.isToday} />
     </li>
   );
 
@@ -136,7 +136,7 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
         {stations.slice(todayIndex).map(stationRow)}
       </ol>
 
-      <DesktopRail stations={stations} progress={progress} showTodayChip={showTodayChip} todayLabel={todayLabel} isReached={isReached} isToday={isToday} />
+      <DesktopRail stations={stations} progress={progress} showTodayChip={showTodayChip} todayLabel={todayLabel} />
     </>
   );
 }
@@ -148,14 +148,7 @@ const atStation = (station: Station, className: string) => ({
 });
 
 /** The sm+ rail: labels above, dots and progress on the line, the today chip pointing at today, then dates. */
-function DesktopRail({ stations, progress, showTodayChip, todayLabel, isReached, isToday }: {
-  stations: Station[];
-  progress: number;
-  showTodayChip: boolean;
-  todayLabel: string;
-  isReached: (value: string) => boolean;
-  isToday: (value: string) => boolean;
-}) {
+function DesktopRail({ stations, progress, showTodayChip, todayLabel }: { stations: Station[]; progress: number; showTodayChip: boolean; todayLabel: string }) {
   return (
     <div className="hidden pt-2 sm:block">
       <div className="relative h-5">
@@ -170,7 +163,7 @@ function DesktopRail({ stations, progress, showTodayChip, todayLabel, isReached,
         <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-border" />
         <div className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary" style={{ width: `${progress}%` }} />
         {stations.map((station) => (
-          <StationDot key={station.label} reached={isReached(station.date)} today={isToday(station.date)} {...atStation(station, "absolute top-1/2 -translate-y-1/2")} />
+          <StationDot key={station.label} reached={station.reached} today={station.isToday} {...atStation(station, "absolute top-1/2 -translate-y-1/2")} />
         ))}
       </div>
 
@@ -189,7 +182,7 @@ function DesktopRail({ stations, progress, showTodayChip, todayLabel, isReached,
       <div className="relative h-5">
         {stations.map((station) => (
           <span key={station.label} {...atStation(station, "absolute top-0")}>
-            <StationDate date={station.date} today={isToday(station.date)} />
+            <StationDate date={station.date} today={station.isToday} />
           </span>
         ))}
       </div>

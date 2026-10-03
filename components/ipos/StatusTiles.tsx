@@ -1,6 +1,7 @@
 import { getIpoType, parseEstListingPercent } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { Filters, Row, Step, StepName, matchesStatus, whenText } from "@/components/ipos/rows";
+import { Filters, Row, matchesStatus } from "@/components/ipos/rows";
+import { Step, StepName, whenText } from "@/components/ipo-shared/lifecycle";
 
 type TileValue = Filters["status"];
 

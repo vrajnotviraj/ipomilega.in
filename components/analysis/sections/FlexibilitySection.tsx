@@ -1,7 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { getRiskTextColor } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from "./primitives";
+import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from "@/components/analysis/primitives";
 
 type Metric = { score: number | null; description: string | null } | undefined;
 

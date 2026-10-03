@@ -1,8 +1,8 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { getRiskTextColor } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { nonBlank } from "./analysis-facts";
-import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from "./primitives";
+import { nonBlank } from "@/components/analysis/analysis-facts";
+import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from "@/components/analysis/primitives";
 
 type Performance = IpoComprehensiveAnalysis["performance"];
 

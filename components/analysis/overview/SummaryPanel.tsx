@@ -19,10 +19,10 @@ import { cn } from "@/lib/utils";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { LiveLabel } from "@/components/ui/LiveLabel";
-import { getAboutLine, getIssueDates, getLotShares, formatMinInvestment, getVerdict } from "./analysis-facts";
-import { getHeadlineFigures, type HeadlineFigure } from "./headline-figures";
-import { IssueTimeline } from "./IssueTimeline";
-import { Eyebrow } from "./primitives";
+import { getAboutLine, getIssueDates, getLotShares, formatMinInvestment, getVerdict } from "@/components/analysis/analysis-facts";
+import { getHeadlineFigures, type HeadlineFigure } from "@/components/analysis/overview/headline-figures";
+import { IssueTimeline } from "@/components/analysis/overview/IssueTimeline";
+import { Eyebrow } from "@/components/analysis/primitives";
 
 /**
  * The top of the page: company, what it does and its status, the overall score with a one-line verdict beside the three
@@ -41,7 +41,7 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
           <div className="flex flex-wrap items-center gap-3">
             <IpoLogo src={ipo.image_url} name={analysis.company_name} size="lg" />
             <BoardChip board={getIpoType(ipo)} />
-            <StageChip stage={getIssueStage(opening, closing).stage} />
+            <StageChip stage={getIssueStage(opening, closing)} />
           </div>
           <h1 className="type-hero mt-4 text-balance break-words text-[44px] sm:text-[60px]">{analysis.company_name}</h1>
           <AboutLine text={getAboutLine(analysis)} />

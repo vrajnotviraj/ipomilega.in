@@ -1,9 +1,10 @@
 import { formatRupees, type UseOfProceeds } from "@/lib/ipo-format";
-import { Eyebrow } from "./primitives";
+import { cn } from "@/lib/utils";
+import { Eyebrow } from "@/components/analysis/primitives";
 
 const crore = (value: number) => `${formatRupees(value)} Cr`;
 
-// Ink at falling strengths, so each purpose reads as a part of the company's money; the OFS sits apart in muted grey.
+// Purpose colours: ink at falling strengths. The offer for sale uses muted grey.
 const PURPOSE_SHADES = ["100%", "78%", "58%", "42%", "30%", "20%"];
 const shadeOf = (index: number) =>
   `color-mix(in oklab, var(--chart-1) ${PURPOSE_SHADES[Math.min(index, PURPOSE_SHADES.length - 1)]}, var(--card))`;
@@ -12,8 +13,8 @@ const shadeOf = (index: number) =>
 type Segment = { label: string; amountCr: number | null; share: number | null; color: string };
 
 /**
- * Each purpose's slice of the whole issue, in crores. Amounts come from the prospectus table; a purpose with only a
- * percent is scaled by the fresh issue. The OFS joins the bar when its size is known.
+ * Each purpose's slice of the whole issue in crores, plus the offer for sale when its size is known.
+ * A purpose with only a percent is scaled by the fresh issue.
  */
 function segmentsOf({ items, freshCr, ofsCr }: UseOfProceeds): Segment[] {
   const purposes = items.map((item, index) => ({
@@ -75,7 +76,7 @@ function Split({ label, value, note, muted = false }: { label: string; value: st
       <dt>
         <Eyebrow>{label}</Eyebrow>
       </dt>
-      <dd className={`mt-1 break-words font-mono text-2xl font-medium tabular-nums sm:text-3xl ${muted ? "text-muted-foreground" : ""}`}>{value}</dd>
+      <dd className={cn("mt-1 break-words font-mono text-2xl font-medium tabular-nums sm:text-3xl", muted && "text-muted-foreground")}>{value}</dd>
       <dd className="mt-0.5 text-xs text-muted-foreground">{note}</dd>
     </div>
   );

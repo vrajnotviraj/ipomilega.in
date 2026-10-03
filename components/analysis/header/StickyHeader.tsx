@@ -7,8 +7,8 @@ import { ShareButton } from "@/components/ui/ShareButton";
 import { buildShareMessage, type ShareFacts } from "@/lib/seo/share";
 import { getRiskTextColor } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import type { SectionTab } from "./analysis-facts";
-import { useActiveSection, useStickyTop } from "./useSectionNav";
+import type { SectionTab } from "@/components/analysis/analysis-facts";
+import { useActiveSection, useStickyTop } from "@/components/analysis/header/useSectionNav";
 
 const iconButton =
   "grid size-9 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-secondary active:scale-[0.98]";
@@ -44,8 +44,7 @@ export function StickyHeader({
 }
 
 /**
- * Goes back when the visitor came from within the site; otherwise home, since a shared link
- * often opens in a fresh tab where history.back() would leave the site.
+ * Goes back when the visitor came from within the site, otherwise home.
  */
 function BackButton() {
   const router = useRouter();

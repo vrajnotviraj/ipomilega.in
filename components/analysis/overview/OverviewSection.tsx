@@ -3,15 +3,15 @@ import type { Ipo } from "@/types/ipo";
 import { gainColor, getUseOfProceeds, parseEstListingPercent } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { AllotmentOddsTiles } from "@/components/ipo-shared/AllotmentOddsTiles";
-import { GmpTrendChart } from "./gmp-trend/GmpTrendChart";
-import { getGmp, getQuotaSplit, hasAllotmentOdds, nonBlank } from "./analysis-facts";
-import { Eyebrow } from "./primitives";
-import { ScoreBreakdown } from "./ScoreBreakdown";
-import { StrengthsAndConcerns } from "./StrengthsAndConcerns";
-import { SubscriptionByCategory } from "./SubscriptionByCategory";
-import { SummaryPanel } from "./SummaryPanel";
-import { WhereTheMoneyGoes } from "./WhereTheMoneyGoes";
-import { WhoGetsShares } from "./WhoGetsShares";
+import { GmpTrendChart } from "@/components/analysis/overview/gmp-trend/GmpTrendChart";
+import { getGmp, getQuotaSplit, hasAllotmentOdds, nonBlank } from "@/components/analysis/analysis-facts";
+import { Eyebrow } from "@/components/analysis/primitives";
+import { ScoreBreakdown } from "@/components/analysis/overview/ScoreBreakdown";
+import { StrengthsAndConcerns } from "@/components/analysis/overview/StrengthsAndConcerns";
+import { SubscriptionByCategory } from "@/components/analysis/overview/SubscriptionByCategory";
+import { SummaryPanel } from "@/components/analysis/overview/SummaryPanel";
+import { WhereTheMoneyGoes } from "@/components/analysis/overview/WhereTheMoneyGoes";
+import { WhoGetsShares } from "@/components/analysis/overview/WhoGetsShares";
 
 /** The top of the page: summary and dates, odds and GMP, where the money goes, the score breakdown, strengths and concerns, and who gets shares. */
 export function OverviewSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {

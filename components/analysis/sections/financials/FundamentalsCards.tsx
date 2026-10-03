@@ -1,7 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { parseGainValue } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { Eyebrow } from "../primitives";
+import { Eyebrow } from "@/components/analysis/primitives";
 
 type Fundamentals = IpoComprehensiveAnalysis["fundamentals"];
 type Offer = NonNullable<Fundamentals["offer_structure"]>;

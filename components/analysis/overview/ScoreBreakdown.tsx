@@ -1,8 +1,9 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { overallScoreOf } from "@/lib/seo/share";
 import { cn } from "@/lib/utils";
-import { getScoreAxes } from "./analysis-facts";
-import { DotScale, gainColorOnInk, scoreColorOnInk } from "./primitives";
+import { getScoreAxes } from "@/components/analysis/analysis-facts";
+import { gainColorOnInk, scoreColorOnInk } from "@/lib/ipo-format";
+import { DotScale } from "@/components/analysis/primitives";
 
 type Axis = { label: string; score: number };
 
@@ -16,7 +17,7 @@ export function ScoreBreakdown({ analysis }: { analysis: IpoComprehensiveAnalysi
     <div className="grid grid-cols-1 items-center gap-6 rounded-[18px] bg-primary p-5 text-primary-foreground sm:grid-cols-[auto_1fr] sm:gap-10 sm:p-8">
       <div className="flex flex-col items-center">
         <ScoreRadar axes={axes} overallScore={overallScoreOf(analysis)} gainsPotential={gainsPotential} />
-        <GainsNote gainsPotential={gainsPotential} />
+        <p className="mt-2 text-center text-xs text-primary-foreground/70">Outer ring: estimated gain</p>
       </div>
       <div className="grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
         <div className="min-w-0">
@@ -50,20 +51,6 @@ function EstimatedGain({ gainsPotential, rationale }: { gainsPotential: number; 
       </div>
       {rationale && <p className="mt-4 whitespace-pre-wrap text-pretty text-sm text-primary-foreground/75">{rationale}</p>}
     </div>
-  );
-}
-
-/** Labels the marigold ring: "Outer ring: estimated gain +18% (fundamentals only)", signed and coloured for ink. */
-function GainsNote({ gainsPotential }: { gainsPotential: number }) {
-  return (
-    <p className="mt-2 max-w-[220px] text-center text-xs text-primary-foreground/70">
-      Outer ring: estimated gain{" "}
-      <span className={cn("font-mono font-medium tabular-nums", gainColorOnInk(gainsPotential))}>
-        {gainsPotential > 0 ? "+" : ""}
-        {gainsPotential}%
-      </span>{" "}
-      (fundamentals only)
-    </p>
   );
 }
 

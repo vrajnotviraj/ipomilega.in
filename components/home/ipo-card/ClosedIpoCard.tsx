@@ -14,13 +14,13 @@ import {
   signedPercent,
 } from '@/lib/ipo-format';
 import { cn } from '@/lib/utils';
-import { LifecycleTrack } from '@/components/ipos/LifecycleTrack';
-import { afterCloseSteps } from '@/components/ipos/rows';
+import { LifecycleTrack } from '@/components/ipo-shared/LifecycleTrack';
+import { afterCloseSteps } from '@/components/ipo-shared/lifecycle';
 import { CardHeader, IpoCardProps } from './CardParts';
 
 /**
- * Card for an IPO whose bidding has closed but has not listed. It answers what an applicant comes back for:
- * how heavily it was bid, the expected listing, what happens next and when, and the allotment check.
+ * Card for an IPO whose bidding has closed but has not listed: subscription, the GMP expected listing,
+ * the allotment, demat and listing dates, and the allotment check.
  */
 export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
   const allotmentDays = daysFromToday(ipo?.ipo_dates?.basis_of_allotment);

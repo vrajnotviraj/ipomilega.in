@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 import { LiveLabel } from "@/components/ui/LiveLabel";
 import dynamic from "next/dynamic";
 import { formatRupees } from "@/lib/ipo-format";
-import { DIRECTION, formatDay, formatDelta, formatTime, useGmpHistory, type ChartPoint } from "./gmp-history";
+import { DIRECTION, formatDay, formatDelta, formatTime, useGmpHistory, type ChartPoint } from "@/components/analysis/overview/gmp-trend/gmp-history";
 
-const GmpChart = dynamic(() => import("./GmpChart").then((module) => module.GmpChart), {
+const GmpChart = dynamic(() => import("@/components/analysis/overview/gmp-trend/GmpChart").then((module) => module.GmpChart), {
   ssr: false,
   loading: () => <div className="h-[220px] rounded-lg bg-secondary" />,
 });

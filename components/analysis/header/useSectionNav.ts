@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 
 /**
- * Keeps the sticky page header just below the site header, and sets scroll-padding so every
- * anchor jump clears both. Measured because header heights change per breakpoint.
+ * Keeps the sticky page header just below the site header, and sets scroll-padding so anchor jumps clear both.
+ * Measures both, since their heights change per breakpoint.
  */
 export function useStickyTop(stickyRef: RefObject<HTMLElement | null>) {
   const [top, setTop] = useState(64);

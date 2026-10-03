@@ -28,7 +28,7 @@ export const getIpoType = (ipo: {
   return 'N/A';
 };
 
-// An RHP prints a figure not fixed yet as "[●]"; the scraper stores it verbatim and it is cleaned here.
+// Matches a figure the RHP hasn't fixed yet, printed as "[●]".
 const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
 
 const isUnfixedValue = (raw: string | undefined | null): boolean =>
@@ -100,6 +100,18 @@ export const getRiskTextColor = (score: number) => SCORE_TEXT_COLOR[scoreBand(sc
 /** Word for a score, on the same bands as its colour. */
 export const getScoreTrustLabel = (score: number): string => SCORE_WORD[scoreBand(score)];
 
+const SCORE_TEXT_COLOR_ON_INK: Record<ScoreBand, string> = { good: 'text-score-good-on-ink', mid: 'text-score-mid-on-ink', bad: 'text-score-bad-on-ink' };
+
+/** Text colour for a score on the ink panel or ticker, by band. */
+export const scoreColorOnInk = (score: number) => SCORE_TEXT_COLOR_ON_INK[scoreBand(score)];
+
+/** Gain or loss colour for a signed figure on the ink panel, plain chalk for zero. */
+export const gainColorOnInk = (value: number) => {
+  if (value > 0) return 'text-score-good-on-ink';
+  if (value < 0) return 'text-score-bad-on-ink';
+  return 'text-primary-foreground';
+};
+
 /** An IPO's analysis score, or 0 when it has no analysis yet. */
 export const scoreOf = (item: Pick<HomePageIpoProps, 'analysis'>): number => item.analysis?.risk_meter?.score || 0;
 
@@ -150,17 +162,14 @@ export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string
 
 export type IssueStage = 'upcoming' | 'live' | 'past';
 
-/** Where an issue is in its bidding window, with whole days to the next date. Stage is null without both dates. */
-export const getIssueStage = (
-  opening: string | null | undefined,
-  closing: string | null | undefined
-): { stage: IssueStage | null; days: number } => {
+/** Where an issue is in its bidding window, or null without both dates. */
+export const getIssueStage = (opening: string | null | undefined, closing: string | null | undefined): IssueStage | null => {
   const toOpen = daysFromToday(opening);
   const toClose = daysFromToday(closing);
-  if (toOpen === null || toClose === null) return { stage: null, days: 0 };
-  if (toClose < 0) return { stage: 'past', days: 0 };
-  if (toOpen > 0) return { stage: 'upcoming', days: toOpen };
-  return { stage: 'live', days: toClose };
+  if (toOpen === null || toClose === null) return null;
+  if (toClose < 0) return 'past';
+  if (toOpen > 0) return 'upcoming';
+  return 'live';
 };
 
 /** "18 Aug", or "18 Aug 2026" with the year. Null when the date doesn't parse. */
@@ -341,7 +350,7 @@ export const getAllotmentRatio = (
   cat: AllotmentCategoryDef
 ): { subscription: number | null; lottery: number | null; usesCombinedNii: boolean } => {
   const tierRatio = parseGainValue(ipo?.[cat.ratioField]);
-  // Older captures and ipowatch rows only have the combined NII figure.
+  // Falls back to the combined NII figure when the tier has none.
   const usesCombinedNii = tierRatio === null && cat.key !== 'retail';
   const subscription = usesCombinedNii ? parseGainValue(ipo?.nii_sr) : tierRatio;
   const lottery = subscription !== null && cat.key === 'bhni' ? subscription * bhniSlotShare(ipo?.ipo_market_lot, cat.matchKeyword) : subscription;

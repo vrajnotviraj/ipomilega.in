@@ -5,7 +5,7 @@ import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
 import { formatGmp, gainColor, gainMotion, getIpoType, getPriceBand, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { LifecycleTrack } from "@/components/ipos/LifecycleTrack";
+import { LifecycleTrack } from "@/components/ipo-shared/LifecycleTrack";
 import { ScorePill } from "@/components/ipos/ScorePill";
 import { Row, Status, gainOf, hasAnalysis, issueSizeOf } from "@/components/ipos/rows";
 

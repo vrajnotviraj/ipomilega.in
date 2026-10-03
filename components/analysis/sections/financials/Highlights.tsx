@@ -1,8 +1,8 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { gainColor } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { Eyebrow } from "../primitives";
-import type { FinancialHighlight } from "./financial-figures";
+import { Eyebrow } from "@/components/analysis/primitives";
+import type { FinancialHighlight } from "@/components/analysis/sections/financials/financial-figures";
 
 type Fundamentals = IpoComprehensiveAnalysis["fundamentals"];
 

@@ -59,7 +59,7 @@ function OpenCard({ row }: { row: Row }) {
   );
 }
 
-/** Days left to bid. Closing today is shown in the loss colour, as DESIGN.md asks. */
+/** Days left to bid, in the loss colour when it closes today. */
 function ClosesValue({ days }: { days: number | null }) {
   if (days === 0) return <span className="text-score-bad">Today</span>;
   if (days === null) return <>TBA</>;

@@ -1,12 +1,12 @@
 import type { Ipo } from "@/types/ipo";
 import { parseGainValue } from "@/lib/ipo-format";
-import { Eyebrow } from "./primitives";
+import { Eyebrow } from "@/components/analysis/primitives";
 
 /** How many times each investor category has bid for its quota, as bars scaled to the most-bid category. */
 export function SubscriptionByCategory({ ipo }: { ipo: Ipo }) {
   const rows = [
     { label: "QIB", times: parseGainValue(ipo.qib_sr) },
-    // NSE splits NII into S-HNI and B-HNI; older captures only have the combined figure.
+    // The S-HNI and B-HNI split when there is one, else the combined NII.
     ...(ipo.snii_sr || ipo.bnii_sr
       ? [{ label: "S-HNI", times: parseGainValue(ipo.snii_sr) }, { label: "B-HNI", times: parseGainValue(ipo.bnii_sr) }]
       : [{ label: "NII", times: parseGainValue(ipo.nii_sr) }]),
