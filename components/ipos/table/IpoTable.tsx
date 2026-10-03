@@ -21,6 +21,7 @@ export function IpoTable({ rows }: { rows: Row[] }) {
   };
   const showBidding = rows.some((row) => !isPastBidding(row));
   const showListed = rows.some(isListed);
+  const stageHeader = rows.every(isListed) ? "Gains" : showListed ? "Timeline / gains" : "Timeline";
 
   return (
     <>
@@ -33,7 +34,7 @@ export function IpoTable({ rows }: { rows: Row[] }) {
             {showListed && <th className={TH}>Listed on</th>}
             <th className={cn(TH, "text-right")}>Subscribed</th>
             <th className={cn(TH, "text-right")}>GMP</th>
-            <th className={cn(TH, "w-[232px]")}>Timeline</th>
+            <th className={cn(TH, "w-[232px]")}>{stageHeader}</th>
             {showBidding && <th className={cn(TH, "text-right")}>Score</th>}
           </tr>
         </thead>
