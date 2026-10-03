@@ -450,8 +450,8 @@ export function estimatedListing(ipo: ListingFields): Listing {
   return { price: null, gain };
 }
 
-/** Rupees one retail lot would gain at today's GMP, or null without a GMP or lot size. */
-export function gmpGainPerLot(ipo: Pick<Ipo, 'gmp_ipo_gmp' | 'ipo_market_lot'> | null | undefined): number | null {
+/** Rupees the minimum retail application would gain at today's GMP (one lot on Mainboard, usually two on SME), or null without a GMP or lot table. */
+export function gmpGainPerApplication(ipo: Pick<Ipo, 'gmp_ipo_gmp' | 'ipo_market_lot'> | null | undefined): number | null {
   const perShare = parseGainValue(ipo?.gmp_ipo_gmp);
   const lotShares = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, 'retail').min?.shares);
   if (!perShare || !lotShares) return null;

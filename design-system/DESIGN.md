@@ -54,7 +54,7 @@ One ink and one accent. Data colours are separate and only mean up, down or caut
 | `--score-mid` | `#94620C` | Scores above 3 up to 6, odds 25–59%. A text-safe amber, not marigold. |
 | `--score-bad`, `--destructive` | `#B8452F` | Losses, scores 3 and below, odds under 25%, closing today |
 | `--score-good-on-ink`, `--score-mid-on-ink`, `--score-bad-on-ink` | 45% of the data colour mixed into chalk | The same three data colours on the ink panel and ticker, where the plain ones are too dark to read |
-| `--tint-live` / `--tint-closed`, `--tint-closed-border` | 6% gain mixed into white / `#ECF1F8` slate, border `#C8D5E8` | Card fills that tell IPO stages apart: open and bidding closed. Slate sits about 7 ΔE off chalk and 5 off the live green. Ink, muted, gain and loss text stay at least 4.5:1 on both. The section heading still names the stage, so colour is never the only signal. |
+| `--tint-live` / `--tint-closed`, `--tint-closed-border` | 6% gain mixed into white / `#F0EEEA` stone, border `#D9D4CB` | Card fills that tell IPO stages apart: open and bidding closed. The border carries most of the separation from the chalk page. Ink, muted, gain and loss text stay at least 4.5:1 on both. The section heading still names the stage, so colour is never the only signal. |
 | `--chart-1..5` | ink, gain, marigold, loss, muted | Chart series only. Revenue is chart-1, expense chart-5. Profit uses `--score-good` or `--score-bad`. |
 
 **Rules**
@@ -128,7 +128,7 @@ These are the site's existing patterns, restyled with the tokens above.
   - allotment odds tiles, hidden until subscription numbers exist
   - issue size in the footer
   - no board badge, since the tabs already say Mainboard or SME
-- **Closed IPO card:** same card on `--tint-closed` with a `--tint-closed-border` border, or a solid ink border on allotment day. The subscription figure sits top right; then the GMP expected listing with the gain on one lot, the allotment, demat and listing track on white, and "Check allotment" as a full pill: solid `--primary` when allotment is today, outlined otherwise.
+- **Closed IPO card:** same card on `--tint-closed` with a `--tint-closed-border` border, or a solid ink border on allotment day. The subscription figure sits top right; then the GMP expected listing with the gain on the minimum retail application ("Per application"), the allotment, demat and listing track on white, and "Check allotment" as a full pill: solid `--primary` when allotment is today, outlined otherwise.
 - **Upcoming row:** list row with the `row-hover` tint, logo, name, open date, price band and score.
 - **Buttons:**
   - Primary is a pill on `--primary` with chalk text, with the trailing arrow in a marigold circle.

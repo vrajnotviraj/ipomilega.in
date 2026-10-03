@@ -8,7 +8,7 @@ import {
   formatTimes,
   gainColor,
   getAllotmentCheckUrl,
-  gmpGainPerLot,
+  gmpGainPerApplication,
   parseGainValue,
   signedPercent,
 } from '@/lib/ipo-format';
@@ -51,10 +51,10 @@ function Subscribed({ times }: { times: number | null }) {
   );
 }
 
-/** The GMP-implied listing price and gain, with what that comes to on one retail lot. */
+/** The GMP-implied listing price and gain, with what that comes to on the minimum retail application. */
 function ExpectedListing({ ipo }: { ipo: Ipo | null }) {
   const { price, gain } = estimatedListing(ipo);
-  const perLot = gmpGainPerLot(ipo);
+  const perApplication = gmpGainPerApplication(ipo);
 
   if (price === null && gain === null) {
     return <p className="text-sm text-muted-foreground">No grey market quote for this issue yet.</p>;
@@ -69,12 +69,14 @@ function ExpectedListing({ ipo }: { ipo: Ipo | null }) {
           {gain !== null && <span className={cn('font-mono text-sm font-medium tabular-nums', gainColor(gain))}>{signedPercent(gain)}</span>}
         </div>
       </div>
-      {perLot !== null && (
-        <div className="shrink-0 text-right">
-          <div className="text-xs text-muted-foreground">Per lot</div>
-          <div className={cn('mt-1 font-mono text-sm font-medium tabular-nums', gainColor(perLot))}>
-            {perLot > 0 ? '+' : perLot < 0 ? '−' : ''}
-            {formatRupees(Math.abs(perLot))}
+      {perApplication !== null && (
+        <div className="shrink-0 text-right" title="GMP gain on the minimum retail application">
+          <div className="text-xs text-muted-foreground">
+            Per application<span className="sr-only">, GMP gain on the minimum retail application</span>
+          </div>
+          <div className={cn('mt-1 font-mono text-sm font-medium tabular-nums', gainColor(perApplication))}>
+            {perApplication > 0 ? '+' : perApplication < 0 ? '−' : ''}
+            {formatRupees(Math.abs(perApplication))}
           </div>
         </div>
       )}

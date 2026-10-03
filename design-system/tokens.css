@@ -42,10 +42,10 @@
   --score-good-on-ink: color-mix(in srgb, var(--score-good) 45%, var(--background));
   --score-mid-on-ink: color-mix(in srgb, var(--score-mid) 45%, var(--background));
   --score-bad-on-ink: color-mix(in srgb, var(--score-bad) 45%, var(--background));
-  /* Card tints by stage: open is a faint gain green, closed a slate blue that stands off both the chalk page and the green. */
+  /* Card tints by stage: open is a faint gain green, closed a warm stone grey. */
   --tint-live: color-mix(in srgb, var(--score-good) 6%, var(--card));
-  --tint-closed: #ECF1F8;
-  --tint-closed-border: #C8D5E8;
+  --tint-closed: #F0EEEA;
+  --tint-closed-border: #D9D4CB;
   --chart-1: #0F3B2E;
   --chart-2: #1C7A4E;
   --chart-3: #F0A92E;
