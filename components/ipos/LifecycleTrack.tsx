@@ -8,14 +8,14 @@ const DOT: Record<StepState, string> = {
 };
 
 /** Lifecycle steps as dots on a line: done is ink, today marigold with a ripple, future hollow. */
-export function LifecycleTrack({ steps, className }: { steps: Step[]; className?: string }) {
+export function LifecycleTrack({ steps, showCaption = true, className }: { steps: Step[]; showCaption?: boolean; className?: string }) {
   const caption = lifecycleCaption(steps);
   return (
     <div className={cn("min-w-0", className)}>
-      <p className="text-xs font-medium text-foreground">{caption}</p>
+      {showCaption && <p className="text-xs font-medium text-foreground">{caption}</p>}
       <ol
         aria-label={`IPO timeline. ${caption}`}
-        className="mt-2 grid"
+        className={cn("grid", showCaption && "mt-2")}
         style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
       >
         {steps.map((step, index) => (

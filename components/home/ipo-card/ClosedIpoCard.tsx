@@ -40,7 +40,7 @@ export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
     >
       <CardHeader ipo={ipo} analysis={analysis} />
       <ExpectedListing ipo={ipo} />
-      <LifecycleTrack steps={afterCloseSteps(ipo)} className={cn('rounded-lg px-3 py-2.5', allotmentToday ? 'bg-card' : 'bg-secondary')} />
+      <LifecycleTrack steps={afterCloseSteps(ipo)} showCaption={false} className={cn('rounded-lg px-3 py-2.5', allotmentToday ? 'bg-card' : 'bg-secondary')} />
 
       <div className="grid grid-cols-2 gap-2">
         <Stat label="Subscribed" value={formatTimes(parseGainValue(ipo?.total_sr))} />
