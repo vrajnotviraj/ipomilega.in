@@ -1,5 +1,6 @@
 import { AllotmentOddsTiles } from '@/components/ipo-shared/AllotmentOddsTiles';
-import { formatGmp, formatIssueSize, formatTimes, gainColor, getQibColor, getQibSignal, parseEstListingPercent, parseGainValue } from '@/lib/ipo-format';
+import { cn } from '@/lib/utils';
+import { formatGmp, formatIssueSize, formatTimes, gainColor, gainMotion, getQibColor, getQibSignal, parseEstListingPercent, parseGainValue } from '@/lib/ipo-format';
 import { CardHeader, IpoCardProps, Stat } from './CardParts';
 
 /** Card for an IPO open for bidding: GMP and demand, allotment odds per category, issue size. */
@@ -16,7 +17,7 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
       <CardHeader ipo={ipo} analysis={analysis} />
 
       <div data-tour="demand" className="grid grid-cols-3 gap-2">
-        <Stat label="GMP" value={formatGmp(gmpPercent)} valueClass={gainColor(gmpPercent)} />
+        <Stat label="GMP" value={formatGmp(gmpPercent)} valueClass={cn(gainColor(gmpPercent), gainMotion(gmpPercent))} />
         <Stat label="QIB" value={formatTimes(parseGainValue(ipo?.qib_sr))} valueClass={getQibColor(qibSignal)} className="text-center" title={qibHint} />
         <Stat label="Subscribed" value={formatTimes(parseGainValue(ipo?.total_sr))} className="text-right" />
       </div>

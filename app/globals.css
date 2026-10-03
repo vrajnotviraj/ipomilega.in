@@ -101,6 +101,14 @@
   --duration-fast: 150ms;
   --duration-base: 250ms;
   --duration-slow: 500ms;
+  /* A lightly damped spring: overshoots about 3% and settles. Falls back to ease-out where linear() is unsupported. */
+  --ease-spring: var(--ease-out);
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --ease-spring: linear(0, 0.06 3%, 0.22 7%, 0.46 12%, 0.7 18%, 0.87 24%, 0.97 30%, 1.02 37%, 1.03 44%, 1.025 52%, 1.012 62%, 1.003 74%, 1);
+  }
 }
 
 /* Page gutter shared by every page and the header. */
@@ -202,16 +210,20 @@
   letter-spacing: -0.035em;
 }
 
-/* Cards you act on rise a little under the cursor. Phones skip it since they have no hover. */
+/* Cards you act on float up under the cursor and settle on a spring, and dip when pressed. Phones skip the hover. */
 @utility card-lift {
   box-shadow: var(--shadow-card);
-  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out);
+  transition: transform var(--duration-slow) var(--ease-spring), box-shadow var(--duration-base) var(--ease-out), border-color var(--duration-base) var(--ease-out);
   @media (hover: hover) {
     &:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px);
       box-shadow: var(--shadow-lift);
       border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
     }
+  }
+  &:active {
+    transform: translateY(0) scale(0.99);
+    transition-duration: 100ms;
   }
 }
 
@@ -321,6 +333,41 @@
   }
 }
 
+/* Buttons sink quickly when pressed and spring back on release. */
+@utility press {
+  transition: transform var(--duration-slow) var(--ease-spring), background-color var(--duration-fast), color var(--duration-fast);
+  &:active {
+    transform: scale(0.96);
+    transition-duration: 100ms;
+  }
+}
+
+/* A soft band of light that crosses a solid button every few seconds, for something worth acting on now. */
+@utility glint {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.22) 50%, transparent 70%);
+    transform: translateX(-120%);
+    animation: glint 5s var(--ease-out) 1.5s infinite;
+  }
+}
+
+@keyframes glint {
+  0% {
+    transform: translateX(-120%);
+  }
+  30%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
 /*
  * Sections below the fold rise in as they scroll into view. Scroll-driven, so there is no
  * IntersectionObserver and no hidden-until-hydrated content; browsers without support just show it.
@@ -328,7 +375,33 @@
 @keyframes reveal-up {
   from {
     opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(24px) scale(0.98);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1);
+  }
+}
+
+/* A line drawn from its left end, like a stem growing. */
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Gains drift up into place and losses drift down, so the direction of a move is felt as well as read. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+  }
+}
+
+@keyframes sink {
+  from {
+    opacity: 0;
+    transform: translateY(-0.45em);
   }
 }
 
@@ -339,24 +412,48 @@
       animation-timeline: view();
       animation-range: entry 0% entry 35%;
     }
-    /* Cards in a grid rise one after another across each row of three. */
-    .reveal-cards > * {
+    /* Cards and rows rise one after another, in waves of three. */
+    .reveal-stagger > * {
       animation: reveal-up linear both;
       animation-timeline: view();
       animation-range: entry 0% entry 40%;
     }
-    .reveal-cards > :nth-child(3n + 2) {
+    .reveal-stagger > :nth-child(3n + 2) {
       animation-range: entry 8% entry 48%;
     }
-    .reveal-cards > :nth-child(3n) {
+    .reveal-stagger > :nth-child(3n) {
       animation-range: entry 16% entry 56%;
+    }
+    /* The reached part of a timeline grows step by step toward today. */
+    .track-grow {
+      transform-origin: left;
+      animation: grow-x linear both;
+      animation-timeline: view();
+      animation-range: entry 50% cover 20%;
+    }
+    li:nth-child(2) > .track-grow {
+      animation-range: entry 65% cover 25%;
+    }
+    li:nth-child(3) > .track-grow {
+      animation-range: entry 80% cover 30%;
+    }
+    .gain-rise,
+    .gain-sink {
+      display: inline-block;
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 30% entry 90%;
+    }
+    .gain-sink {
+      animation-name: sink;
     }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .live-dot::after,
-  .pulse-ring::after {
+  .pulse-ring::after,
+  .glint::after {
     animation: none;
   }
 }

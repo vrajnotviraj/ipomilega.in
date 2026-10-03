@@ -27,7 +27,7 @@ export function PostCard({ post }: { post: PostSummary }) {
   return (
     <ProgressLink
       href={`/blogs/${post.slug}`}
-      className="card-lift group flex flex-col rounded-xl border border-border bg-card p-5 active:scale-[0.98]"
+      className="card-lift group flex flex-col rounded-xl border border-border bg-card p-5"
     >
       <MetaLine post={post} />
       <h3 className="mb-2 line-clamp-2 font-display text-lg font-bold leading-[1.2] tracking-[-0.015em] text-balance group-hover:underline group-hover:underline-offset-4">

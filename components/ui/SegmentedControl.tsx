@@ -25,7 +25,7 @@ export function SegmentedControl<T extends string>({
           type="button"
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground active:scale-[0.98] aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-(--shadow-card) sm:flex-none sm:px-3.5"
+          className="inline-flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground press aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-(--shadow-card) sm:flex-none sm:px-3.5"
         >
           {option.label}
           {option.count !== undefined && <span className="font-mono text-xs tabular-nums text-muted-foreground">{option.count}</span>}

@@ -225,6 +225,12 @@ export const gainColor = (value: number | null): string => {
   return value > 0 ? 'text-score-good' : 'text-score-bad';
 };
 
+/** Motion class for a signed figure: gains drift up into place, losses drift down, zero stays still. */
+export const gainMotion = (value: number | null): string => {
+  if (!value) return '';
+  return value > 0 ? 'gain-rise' : 'gain-sink';
+};
+
 /** GMP gain % for sorting highest first; no GMP sorts last. */
 export const gmpOf = (item: HomePageIpoProps) => parseEstListingPercent(item.ipo?.gmp_price_gain) ?? -Infinity;
 

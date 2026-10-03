@@ -145,15 +145,23 @@ These are the site's existing patterns, restyled with the tokens above.
 
 ## 7. Motion
 
-- **Easing:** `--ease-out` for everything. Durations are fast (150ms) for colour, base (250ms) for hover, and slow (500ms) for reveals.
-- **Properties:** only `transform` and `opacity`. No animating layout, `clip-path` or filters, and nothing that runs during page load above the fold (it pushes LCP back).
-- **Existing utilities:**
-  - `card-lift` (hover rise)
-  - `live-dot` (ripple)
-  - `underline-grow` (nav and tabs)
-  - `row-hover` (list tint)
-  - `.reveal` (CSS scroll-driven section entry; no JS)
+Motion follows the same rules Apple's interfaces do: things move like physical objects, every movement means something, touch gets an instant response, and nothing makes you wait. Each animation below names the feeling it is for and the natural movement it borrows from. If a new animation can't fill in both columns, it doesn't ship.
+
+- **Easing:** `--ease-out` for colour and fades. `--ease-spring` (a lightly damped spring, about 3% overshoot, written with CSS `linear()`) for anything that moves; browsers without `linear()` fall back to `--ease-out`. Durations: fast (150ms) for colour, base (250ms) for hover, slow (500ms) for springs and reveals. Presses respond in 100ms.
+- **Properties:** only `transform` and `opacity`. No animating layout, `clip-path` or filters.
+- **Load:** nothing animates above the fold on load. Scroll-driven animations use `animation-timeline: view()`, so anything already fully on screen starts at rest and costs nothing. All motion is CSS; no JS animation library and no IntersectionObserver.
 - Everything is disabled under `prefers-reduced-motion: reduce`.
+
+| Utility | Feeling | Natural reference | Used on |
+|---|---|---|---|
+| `card-lift` | "It responds to me" | A cork bobbing up on water and settling | Cards: float up on hover, dip on press |
+| `press` | Something gave way under my finger | A pressed spring pushing back | Pills, segmented control, status tiles, pager, "View all" |
+| `reveal`, `reveal-stagger` | Calm, things arriving in order | Leaves landing and settling, one after another | Sections below the fold, card grids and table rows in waves of three |
+| `track-grow` | Progress, anticipation | A stem growing toward light | The reached part of a lifecycle track |
+| `gain-rise` / `gain-sink` (via `gainMotion`) | Optimism or caution, without alarm | Bubbles rise, stones sink | GMP and listing gain figures |
+| `live-dot`, `pulse-ring` | "This is happening now" | A ripple where a drop just landed | Live badge, today's step on a timeline |
+| `glint` | Anticipation: results are out | Sunlight glinting off water | The solid "Check allotment" on allotment day |
+| `underline-grow`, `row-hover` | Where am I pointing | — | Nav, tabs, list rows |
 
 ## 8. Voice
 
@@ -170,7 +178,7 @@ Every design change has to keep these numbers:
 - CSS is inlined into the HTML (`experimental.inlineCss`), so every KB is paid on every page. Keep utilities compact and don't let Tailwind scan docs folders (see the `@source not` lines in `app/globals.css`).
 - Charts (recharts) load through `next/dynamic` and stay out of the first-load bundle. Analytics load on idle.
 - Four font files at most. Only the LCP font is preloaded.
-- Animations are CSS only. Don't add a JS animation library.
+- Animations are CSS only and move only `transform` and `opacity`. Don't add a JS animation library. Infinite animations (`live-dot`, `pulse-ring`, `glint`) stay small and composited.
 
 ## 10. Checklist for any UI change
 

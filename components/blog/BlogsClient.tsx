@@ -15,7 +15,7 @@ function FeaturedPost({ post }: { post: PostSummary }) {
   return (
     <Link
       href={`/blogs/${post.slug}`}
-      className="card-lift mb-6 grid active:scale-[0.98] grid-cols-1 items-center gap-6 overflow-hidden rounded-xl border border-border bg-card p-5 sm:p-6 lg:grid-cols-[1fr_320px]"
+      className="card-lift mb-6 grid grid-cols-1 items-center gap-6 overflow-hidden rounded-xl border border-border bg-card p-5 sm:p-6 lg:grid-cols-[1fr_320px]"
     >
       <div>
         <MetaLine post={post} />

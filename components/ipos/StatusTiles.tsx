@@ -102,7 +102,7 @@ function Tile({ label, count, subtitle, isLive, isWide, isActive, onClick }: {
       aria-pressed={isActive}
       onClick={onClick}
       className={cn(
-        "grid content-start rounded-xl border p-3 text-left transition-colors active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-4",
+        "grid content-start rounded-xl border p-3 text-left press focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-4",
         isActive ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground hover:border-primary/30 hover:bg-secondary/50",
         isWide && "col-span-2 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 sm:col-span-1 sm:grid-cols-1"
       )}

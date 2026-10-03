@@ -2,7 +2,7 @@ import { CalendarDays } from 'lucide-react';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { IpoTitleLink } from '@/components/ipo-shared/IpoTitleLink';
 import { IpoLogo } from '@/components/ipo-shared/IpoLogo';
-import { estimatedListing, formatShortDateOrToday, issuePrice, parseGainValue, scoreOf, type Listing } from '@/lib/ipo-format';
+import { estimatedListing, formatShortDateOrToday, gainMotion, issuePrice, parseGainValue, scoreOf, type Listing } from '@/lib/ipo-format';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SectionHeading } from '@/components/home/SectionHeading';
 
@@ -36,7 +36,7 @@ function ListingFigure({ label, listing, fallback, className }: { label: string;
         <div className="font-mono text-base font-medium tabular-nums">₹{formatPrice(listing.price)}</div>
       )}
       {listing.gain !== null && (
-        <div className={`font-mono text-xs font-medium tabular-nums ${listing.gain >= 0 ? 'text-score-good' : 'text-score-bad'}`}>
+        <div className={`font-mono text-xs font-medium tabular-nums ${listing.gain >= 0 ? 'text-score-good' : 'text-score-bad'} ${gainMotion(listing.gain)}`}>
           {formatSignedPercent(listing.gain)}
         </div>
       )}
@@ -98,7 +98,7 @@ export function PastIposSection({ ipos }: { ipos: HomePageIpoProps[] }) {
             <span className="text-right">Est. listing (GMP)</span>
             <span className="text-right">Actual listing</span>
           </div>
-          <ul className="divide-y divide-border">
+          <ul className="reveal-stagger divide-y divide-border">
             {visibleIpos.map((item) => (
               <ListedRow key={item._id} item={item} />
             ))}

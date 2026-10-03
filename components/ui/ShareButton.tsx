@@ -28,7 +28,7 @@ export function ShareButton({ title, text, url = false }: { title: string; text:
     <button
       type="button"
       onClick={share}
-      className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary active:scale-[0.98]"
+      className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary press"
     >
       <Share2 className="size-4" strokeWidth={2} />
       <span className="max-sm:sr-only">Share</span>

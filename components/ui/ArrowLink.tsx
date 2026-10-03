@@ -8,7 +8,7 @@ export function ArrowLink({ href, children, className }: { href: string; childre
     <ProgressLink
       href={href}
       className={cn(
-        "group inline-flex items-center gap-3 rounded-full bg-primary py-1.5 pl-5 pr-1.5 text-sm font-medium text-primary-foreground transition-transform active:scale-[0.98]",
+        "group inline-flex items-center gap-3 rounded-full bg-primary py-1.5 pl-5 pr-1.5 text-sm font-medium text-primary-foreground press",
         className
       )}
     >

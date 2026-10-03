@@ -31,7 +31,7 @@ export function SectionHeading({
         <Link
           href={href}
           aria-label={linkLabel}
-          className="group inline-flex shrink-0 items-center gap-1 pb-1 text-sm font-medium text-primary transition-transform active:scale-[0.98] sm:text-base"
+          className="group inline-flex shrink-0 items-center gap-1 pb-1 text-sm font-medium text-primary press sm:text-base"
         >
           {linkText}
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />

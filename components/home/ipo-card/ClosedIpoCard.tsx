@@ -7,6 +7,7 @@ import {
   formatShortDate,
   formatTimes,
   gainColor,
+  gainMotion,
   getAllotmentCheckUrl,
   gmpGainPerApplication,
   parseGainValue,
@@ -66,7 +67,7 @@ function ExpectedListing({ ipo }: { ipo: Ipo | null }) {
         <div className="text-xs text-muted-foreground">Expected listing (GMP)</div>
         <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
           {price !== null && <span className="font-mono text-2xl font-medium tabular-nums">{formatRupees(price)}</span>}
-          {gain !== null && <span className={cn('font-mono text-sm font-medium tabular-nums', gainColor(gain))}>{signedPercent(gain)}</span>}
+          {gain !== null && <span className={cn('font-mono text-sm font-medium tabular-nums', gainColor(gain), gainMotion(gain))}>{signedPercent(gain)}</span>}
         </div>
       </div>
       {perApplication !== null && (
@@ -74,7 +75,7 @@ function ExpectedListing({ ipo }: { ipo: Ipo | null }) {
           <div className="text-xs text-muted-foreground">
             Per application<span className="sr-only">, GMP gain on the minimum retail application</span>
           </div>
-          <div className={cn('mt-1 font-mono text-sm font-medium tabular-nums', gainColor(perApplication))}>
+          <div className={cn('mt-1 font-mono text-sm font-medium tabular-nums', gainColor(perApplication), gainMotion(perApplication))}>
             {perApplication > 0 ? '+' : perApplication < 0 ? '−' : ''}
             {formatRupees(Math.abs(perApplication))}
           </div>
@@ -110,9 +111,9 @@ function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDay
       rel="noopener noreferrer"
       data-tour="check-allotment"
       className={cn(
-        'group inline-flex items-center justify-center gap-1 rounded-full py-2 text-sm font-medium transition active:scale-[0.98]',
+        'group inline-flex items-center justify-center gap-1 rounded-full py-2 text-sm font-medium press',
         allotmentDays === 0
-          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+          ? 'glint bg-primary text-primary-foreground hover:bg-primary/90'
           : 'border border-border bg-card text-foreground hover:bg-secondary'
       )}
     >

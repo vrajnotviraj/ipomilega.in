@@ -3,7 +3,7 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
-import { formatGmp, gainColor, getIpoType, getPriceBand, scoreOf } from "@/lib/ipo-format";
+import { formatGmp, gainColor, gainMotion, getIpoType, getPriceBand, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { LifecycleTrack } from "@/components/ipos/LifecycleTrack";
 import { ScorePill } from "@/components/ipos/ScorePill";
@@ -52,7 +52,7 @@ function Gain({ row }: { row: Row }) {
   const { value, isActual } = gainOf(row);
   return (
     <span className="inline-flex flex-col">
-      <span className={cn("font-mono text-sm font-medium tabular-nums", gainColor(value))}>{formatGmp(value)}</span>
+      <span className={cn("font-mono text-sm font-medium tabular-nums", gainColor(value), gainMotion(value))}>{formatGmp(value)}</span>
       {row.status === "Listed" && <span className="font-sans text-xs font-normal text-muted-foreground">{isActual ? "Listed" : "Est."}</span>}
     </span>
   );
@@ -87,7 +87,7 @@ export function IpoTable({ rows }: { rows: Row[] }) {
             <th className={cn(TH, "text-right")}>Score</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="reveal-stagger">
           {rows.map((row) => (
             <tr
               key={row._id}
@@ -105,7 +105,7 @@ export function IpoTable({ rows }: { rows: Row[] }) {
         </tbody>
       </table>
 
-      <ul className="divide-y divide-border lg:hidden">
+      <ul className="reveal-stagger divide-y divide-border lg:hidden">
         {rows.map((row) => (
           <li key={row._id} onClick={() => openAnalysis(row)} className={cn("px-4 py-4", hasAnalysis(row) && "cursor-pointer transition-colors duration-150 active:bg-secondary")}>
             <div className="flex items-start justify-between gap-3">

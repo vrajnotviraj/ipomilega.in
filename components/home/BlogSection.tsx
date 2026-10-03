@@ -15,7 +15,7 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
       {blogs.length === 0 ? (
         <EmptyState icon={PenBox} title="No posts yet" hint="Explainers on GMP, allotment and reading a prospectus are on the way." />
       ) : (
-        <div className="reveal-cards mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+        <div className="reveal-stagger mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 sm:gap-6">
           {blogs.slice(0, 3).map((blog) => (
             <PostCard key={blog._id} post={toSummary(blog)} />
           ))}
