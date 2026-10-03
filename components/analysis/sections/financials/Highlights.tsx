@@ -1,5 +1,5 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
-import { gainColor } from "@/lib/ipo-format";
+import { gainColor, gainMotion } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "@/components/analysis/primitives";
 import type { FinancialHighlight } from "@/components/analysis/sections/financials/financial-figures";
@@ -20,7 +20,7 @@ export function Highlights({ highlights, period, previousPeriod }: { highlights:
           </span>
         )}
       </div>
-      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <dl className="reveal-stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
         {highlights.map((highlight) => (
           <HighlightTile key={highlight.label} highlight={highlight} />
         ))}
@@ -36,7 +36,7 @@ function HighlightTile({ highlight: { label, value, change, isLoss } }: { highli
         <Eyebrow className="truncate">{label}</Eyebrow>
       </dt>
       <dd className={cn("mt-1.5 break-words font-mono text-lg font-medium tabular-nums sm:text-3xl", isLoss && "text-score-bad")}>{value}</dd>
-      <dd className={cn("mt-1 font-mono text-sm tabular-nums", change ? gainColor(change.value) : "text-muted-foreground")}>
+      <dd className={cn("mt-1 font-mono text-sm tabular-nums", change ? cn(gainColor(change.value), gainMotion(change.value)) : "text-muted-foreground")}>
         {change ? change.text : "No prior year"}
       </dd>
     </div>

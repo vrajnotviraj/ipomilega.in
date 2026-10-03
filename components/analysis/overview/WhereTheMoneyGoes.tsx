@@ -87,7 +87,7 @@ function SegmentBar({ segments }: { segments: Segment[] }) {
   const sized = segments.filter((segment) => segment.share);
   if (sized.length === 0) return null;
   return (
-    <div className="mb-5 flex h-3 gap-0.5 overflow-hidden rounded-full" aria-hidden="true">
+    <div className="grow-in mb-5 flex h-3 gap-0.5 overflow-hidden rounded-full" aria-hidden="true">
       {sized.map((segment) => (
         <span key={segment.label} className="h-full first:rounded-l-full last:rounded-r-full" style={{ width: `${segment.share}%`, backgroundColor: segment.color }} />
       ))}
@@ -98,7 +98,7 @@ function SegmentBar({ segments }: { segments: Segment[] }) {
 /** Each purpose with its swatch, amount and share of the issue. */
 function PurposeList({ segments }: { segments: Segment[] }) {
   return (
-    <ul className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+    <ul className="reveal-stagger grid grid-cols-1 gap-x-8 sm:grid-cols-2">
       {segments.map((segment) => (
         <li key={segment.label} className="flex items-start gap-3 border-t border-border py-3 text-sm">
           <span className="mt-1 size-2.5 shrink-0 rounded-full" style={{ backgroundColor: segment.color }} aria-hidden="true" />

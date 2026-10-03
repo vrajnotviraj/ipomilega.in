@@ -156,10 +156,13 @@ Motion follows the same rules Apple's interfaces do: things move like physical o
 |---|---|---|---|
 | `card-lift` | "It responds to me" | A cork bobbing up on water and settling | Cards: float up on hover, dip on press |
 | `press` | Something gave way under my finger | A pressed spring pushing back | Pills, segmented control, status tiles, pager, "View all" |
-| `reveal`, `reveal-stagger` | Calm, things arriving in order | Leaves landing and settling, one after another | Sections below the fold, card grids and table rows in waves of three |
+| `reveal`, `reveal-stagger` | Calm, things arriving in order | Leaves landing and settling, one after another | Sections below the fold, card grids, table rows and the lists on the details page, in waves of three |
 | `track-grow` | Progress, anticipation | A stem growing toward light | The reached part of a lifecycle track |
+| `grow-in` | A value filling up to where it belongs | Water filling a channel | Subscription bars, the money bar, risk-mix bars, the issue timeline's progress line |
+| `bloom` | The verdict opening up | A flower opening from its centre | The score radar |
+| `dot-in` | Each point of a score counted out | Beads catching light one by one | Every 10-dot score scale |
 | `gain-rise` / `gain-sink` (via `gainMotion`) | Optimism or caution, without alarm | Bubbles rise, stones sink | GMP and listing gain figures |
-| `live-dot`, `pulse-ring` | "This is happening now" | A ripple where a drop just landed | Live badge, today's step on a timeline |
+| `live-dot`, `pulse-ring` | "This is happening now" | A ripple where a drop just landed | Live badge, today's step on a lifecycle track or the issue timeline |
 | `glint` | Anticipation: results are out | Sunlight glinting off water | The solid "Check allotment" on allotment day |
 | `underline-grow`, `row-hover` | Where am I pointing | — | Nav, tabs, list rows |
 

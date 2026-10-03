@@ -161,7 +161,7 @@ function DesktopRail({ stations, progress, showTodayChip, todayLabel }: { statio
 
       <div className="relative my-1.5 h-4">
         <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-border" />
-        <div className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary" style={{ width: `${progress}%` }} />
+        <div className="grow-in absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary" style={{ width: `${progress}%` }} />
         {stations.map((station) => (
           <StationDot key={station.label} reached={station.reached} today={station.isToday} {...atStation(station, "absolute top-1/2 -translate-y-1/2")} />
         ))}
@@ -210,10 +210,10 @@ function StationDate({ date, today }: { date: string; today: boolean }) {
 }
 
 function StationDot({ reached, today = false, className, style }: { reached: boolean; today?: boolean; className?: string; style?: React.CSSProperties }) {
-  const fill = today ? "border-brand-accent bg-brand-accent" : reached ? "border-primary bg-primary" : "border-muted-foreground/40 bg-card";
+  const fill = today ? "pulse-ring border-brand-accent bg-brand-accent" : reached ? "border-primary bg-primary" : "border-muted-foreground/40 bg-card";
   return (
     <span
-      className={cn("size-3 shrink-0 rounded-full border-2", fill, className)}
+      className={cn("relative size-3 shrink-0 rounded-full border-2", fill, className)}
       style={style}
     />
   );

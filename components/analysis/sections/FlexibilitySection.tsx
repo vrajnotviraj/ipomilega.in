@@ -17,7 +17,7 @@ export function FlexibilitySection({ flexibility }: { flexibility: IpoComprehens
     <section id="flexibility" className="reveal">
       <SectionHeading title="Flexibility" score={flexibility.score} />
       {metrics.length > 0 && (
-        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="reveal-stagger mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {metrics.map(({ label, metric }) => (
             <MetricTile key={label} label={label} metric={metric} />
           ))}

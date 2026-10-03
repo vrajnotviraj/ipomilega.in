@@ -2,7 +2,7 @@ import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysi
 import { overallScoreOf } from "@/lib/seo/share";
 import { cn } from "@/lib/utils";
 import { getScoreAxes } from "@/components/analysis/analysis-facts";
-import { gainColorOnInk, scoreColorOnInk } from "@/lib/ipo-format";
+import { gainColorOnInk, gainMotion, scoreColorOnInk } from "@/lib/ipo-format";
 import { DotScale } from "@/components/analysis/primitives";
 
 type Axis = { label: string; score: number };
@@ -24,7 +24,7 @@ export function ScoreBreakdown({ analysis }: { analysis: IpoComprehensiveAnalysi
           <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">How the score adds up</h3>
           <p className="mt-1 text-sm text-primary-foreground/70">The overall score is the average of these five.</p>
           {/* The radar has no axis labels, so the scores behind it are listed here. */}
-          <ul className="mt-5 divide-y divide-primary-foreground/10">
+          <ul className="reveal-stagger mt-5 divide-y divide-primary-foreground/10">
             {axes.map((axis) => (
               <li key={axis.label} className={cn("grid grid-cols-[6.5rem_1fr_auto] items-center gap-3 py-2.5 text-sm", scoreColorOnInk(axis.score))}>
                 <span className="text-primary-foreground/75">{axis.label}</span>
@@ -45,7 +45,7 @@ function EstimatedGain({ gainsPotential, rationale }: { gainsPotential: number; 
   return (
     <div className="min-w-0 border-t border-primary-foreground/10 pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10">
       <div className="text-xs font-medium uppercase tracking-[0.04em] text-primary-foreground/70">Estimated gain (fundamentals only)</div>
-      <div className={cn("mt-1 font-mono text-4xl font-medium tabular-nums", gainColorOnInk(gainsPotential))}>
+      <div className={cn("mt-1 font-mono text-4xl font-medium tabular-nums", gainColorOnInk(gainsPotential), gainMotion(gainsPotential))}>
         {gainsPotential > 0 ? "+" : ""}
         {gainsPotential}%
       </div>
@@ -75,7 +75,7 @@ function ScoreRadar({ axes, overallScore, gainsPotential }: { axes: Axis[]; over
   const ringFilled = Math.max(0, Math.min(100, gainsPotential)) / 100;
 
   return (
-    <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="max-w-full" aria-hidden="true">
+    <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="bloom max-w-full" aria-hidden="true">
       <circle
         cx={CENTER}
         cy={CENTER}

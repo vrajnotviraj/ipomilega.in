@@ -387,6 +387,22 @@
   }
 }
 
+/* Opens out from the centre. */
+@keyframes bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.85) rotate(-6deg);
+  }
+}
+
+/* A dot that swells into place. */
+@keyframes dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
 /* Gains drift up into place, losses drift down. */
 @keyframes rise {
   from {
@@ -434,9 +450,32 @@
     li:nth-child(3) > .track-grow {
       animation-range: entry 80% cover 30%;
     }
+    /* Bars fill from the left to their value. */
+    .grow-in {
+      transform-origin: left;
+      animation: grow-x linear both;
+      animation-timeline: view();
+      animation-range: entry 40% cover 30%;
+    }
+    /* The score radar opens from its centre. */
+    .bloom {
+      animation: bloom linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 35%;
+    }
+    /* Score dots swell in one after another; each dot sets its own start. */
+    .dot-in > * {
+      animation: dot-in linear both;
+      animation-timeline: view();
+      animation-range-end: cover 40%;
+    }
+    /* Transforms skip plain inline elements, so a span becomes inline-block; block elements keep their layout. */
+    span.gain-rise,
+    span.gain-sink {
+      display: inline-block;
+    }
     .gain-rise,
     .gain-sink {
-      display: inline-block;
       animation: rise linear both;
       animation-timeline: view();
       animation-range: entry 30% entry 90%;

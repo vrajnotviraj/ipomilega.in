@@ -84,7 +84,7 @@ function Milestones({ milestones }: { milestones: Time["key_milestones"] }) {
   return (
     <div>
       <h3 className="mb-3 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">Key milestones</h3>
-      <ol className="divide-y divide-border">
+      <ol className="reveal-stagger divide-y divide-border">
         {milestones.map((milestone, index) => (
           <li key={index} className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3 py-2.5 text-sm">
             <span className="break-words font-mono tabular-nums text-muted-foreground">{formatMilestoneDate(milestone.date)}</span>

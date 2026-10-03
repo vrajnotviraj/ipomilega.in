@@ -81,7 +81,7 @@ function Achievements({ items }: { items: string[] }) {
   return (
     <div className="mt-10">
       <h3 className="mb-4 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">Key achievements</h3>
-      <ol className="grid grid-cols-1 gap-x-8 md:grid-cols-2">
+      <ol className="reveal-stagger grid grid-cols-1 gap-x-8 md:grid-cols-2">
         {items.map((achievement, index) => (
           <li key={index} className="flex items-start gap-3 border-t border-border py-3 text-sm text-pretty">
             <span className="font-mono text-xs font-medium tabular-nums text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>

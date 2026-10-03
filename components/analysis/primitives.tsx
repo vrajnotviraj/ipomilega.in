@@ -38,13 +38,17 @@ export function SectionHeading({ title, score }: { title: string; score: number 
   );
 }
 
-/** Ten dots with one filled per score point, in the current text colour. */
+/** Ten dots with one filled per score point, in the current text colour. They swell in left to right as they scroll into view. */
 export function DotScale({ score }: { score: number }) {
   const filled = Math.round(Math.max(0, Math.min(10, score)));
   return (
-    <span className="flex gap-1" aria-hidden="true">
+    <span className="dot-in flex gap-1" aria-hidden="true">
       {Array.from({ length: 10 }, (_, index) => (
-        <span key={index} className={cn("size-1.5 rounded-full bg-current", index >= filled && "opacity-20")} />
+        <span
+          key={index}
+          className={cn("size-1.5 rounded-full bg-current", index >= filled && "opacity-20")}
+          style={{ animationRangeStart: `entry ${40 + index * 5}%` }}
+        />
       ))}
     </span>
   );

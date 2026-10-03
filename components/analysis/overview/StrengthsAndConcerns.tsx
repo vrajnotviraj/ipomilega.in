@@ -31,7 +31,7 @@ function TileColumn({ kind, items }: { kind: keyof typeof COLUMNS; items: string
       {shown.length === 0 ? (
         <p className="text-sm text-muted-foreground">{empty}</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="reveal-stagger space-y-2">
           {shown.map((item, index) => (
             <li key={index} className={cn("flex items-start gap-2.5 rounded-lg px-3.5 py-3 text-sm text-pretty", tile)}>
               <Icon className={cn("mt-0.5 size-3.5 shrink-0", icon)} strokeWidth={2} aria-hidden="true" />

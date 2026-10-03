@@ -24,12 +24,12 @@ export function SubscriptionByCategory({ ipo }: { ipo: Ipo }) {
           {total}x <span className="text-xs font-normal text-muted-foreground">total{ipo.subscription_is_provisional ? " so far" : ""}</span>
         </span>
       </div>
-      <dl className="space-y-2.5">
+      <dl className="reveal-stagger space-y-2.5">
         {rows.map(({ label, times }) => (
           <div key={label} className="grid grid-cols-[3.5rem_minmax(0,1fr)_4.5rem] items-center gap-3 text-sm">
             <dt className="font-medium">{label}</dt>
             <dd className="h-1.5 rounded-full bg-secondary" aria-hidden="true">
-              <span className="block h-full rounded-full bg-chart-1" style={{ width: `${Math.max(2, (times / most) * 100)}%` }} />
+              <span className="grow-in block h-full rounded-full bg-chart-1" style={{ width: `${Math.max(2, (times / most) * 100)}%` }} />
             </dd>
             <dd className="text-right font-mono tabular-nums">{times}x</dd>
           </div>

@@ -45,14 +45,14 @@ function RiskMix({ categories }: { categories: RiskCategory[] }) {
   return (
     <div>
       <h3 className="mb-3 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">Where the risks sit</h3>
-      <ul className="space-y-3">
+      <ul className="reveal-stagger space-y-3">
         {categories.map(({ title, items }) => (
           <li key={title}>
             <div className="flex items-baseline justify-between gap-3 text-sm">
               <span className="font-medium">{title}</span>
               <span className="font-mono font-medium tabular-nums">{items.length}</span>
             </div>
-            <div className="mt-1.5 h-1.5 rounded-full bg-score-bad" style={{ width: `${(items.length / maxCount) * 100}%` }} aria-hidden="true" />
+            <div className="grow-in mt-1.5 h-1.5 rounded-full bg-score-bad" style={{ width: `${(items.length / maxCount) * 100}%` }} aria-hidden="true" />
           </li>
         ))}
       </ul>
@@ -63,7 +63,7 @@ function RiskMix({ categories }: { categories: RiskCategory[] }) {
 /** The risks grouped by category on one surface panel. */
 function RiskCategories({ categories }: { categories: RiskCategory[] }) {
   return (
-    <div className="mt-8 grid grid-cols-1 gap-x-8 gap-y-8 rounded-[18px] bg-secondary p-5 sm:grid-cols-2 sm:p-8 xl:grid-cols-4">
+    <div className="reveal-stagger mt-8 grid grid-cols-1 gap-x-8 gap-y-8 rounded-[18px] bg-secondary p-5 sm:grid-cols-2 sm:p-8 xl:grid-cols-4">
       {categories.map(({ title, items }) => (
         <div key={title}>
           <h3 className="mb-3 flex items-baseline justify-between gap-3 border-b border-border pb-2 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">
