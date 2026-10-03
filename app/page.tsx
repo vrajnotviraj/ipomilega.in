@@ -59,28 +59,26 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen">
       <div className="app-container pt-16">
-        <Hero openCount={live.length} upcomingCount={upcoming.length} />
+        <Hero openCount={live.length} closedCount={closed.length} upcomingCount={upcoming.length} />
       </div>
       <IpoTicker live={live} upcoming={upcoming} />
       <div className="app-container">
         <BoardProvider>
           <LiveIposSection ipos={live} />
-          <div className="reveal">
-            <ClosedIposSection ipos={closed} />
-          </div>
-          <div className="reveal">
-            <UpcomingIposSection ipos={upcoming} />
+          <ClosedIposSection ipos={closed} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-10">
+            <div className="reveal min-w-0">
+              <UpcomingIposSection ipos={upcoming} />
+            </div>
+            <div className="reveal min-w-0">
+              <PastIposSection ipos={past} />
+            </div>
           </div>
         </BoardProvider>
         <div className="reveal">
-          <PastIposSection ipos={past} />
-        </div>
-        <div className="reveal">
           <ScoreMethodology />
         </div>
-        <div className="reveal">
-          <BlogSection blogs={blogs} />
-        </div>
+        <BlogSection blogs={blogs} />
         <Footer />
       </div>
       <Walkthrough />

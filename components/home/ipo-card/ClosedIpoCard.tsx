@@ -1,24 +1,35 @@
 import { ArrowUpRight, Clock } from 'lucide-react';
 import { Ipo } from '@/types/ipo';
 import {
+  ALLOTMENT_CATEGORIES,
   daysFromToday,
-  formatGmp,
+  estimatedListing,
+  formatAllotmentOdds,
+  formatRupees,
   formatShortDate,
-  formatShortDateOrToday,
   formatTimes,
   gainColor,
   getAllotmentCheckUrl,
-  parseEstListingPercent,
+  getAllotmentProbability,
+  getAllotmentRatio,
+  getProbabilityColor,
+  gmpGainPerLot,
   parseGainValue,
+  signedPercent,
 } from '@/lib/ipo-format';
 import { cn } from '@/lib/utils';
+import { LifecycleTrack } from '@/components/ipos/LifecycleTrack';
+import { afterCloseSteps } from '@/components/ipos/rows';
 import { CardHeader, IpoCardProps, Stat } from './CardParts';
 
-/** Card for an IPO whose bidding has closed but has not listed: final GMP, subscription, listing date and the allotment check. */
+/**
+ * Card for an IPO whose bidding has closed but has not listed. It answers what an applicant comes back for:
+ * the expected listing, what happens next and when, their odds, and the allotment check.
+ */
 export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
-  const gmpPercent = parseEstListingPercent(ipo?.gmp_price_gain);
   const allotmentDays = daysFromToday(ipo?.ipo_dates?.basis_of_allotment);
   const allotmentToday = allotmentDays === 0;
+  const retailLottery = getAllotmentRatio(ipo, ALLOTMENT_CATEGORIES[0]).lottery;
 
   return (
     <article
@@ -28,15 +39,52 @@ export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
       )}
     >
       <CardHeader ipo={ipo} analysis={analysis} />
+      <ExpectedListing ipo={ipo} />
+      <LifecycleTrack steps={afterCloseSteps(ipo)} className={cn('rounded-lg px-3 py-2.5', allotmentToday ? 'bg-card' : 'bg-secondary')} />
 
-      <div className="grid grid-cols-3 gap-2">
-        <Stat label="GMP" value={formatGmp(gmpPercent)} valueClass={gainColor(gmpPercent)} />
+      <div className="grid grid-cols-2 gap-2">
         <Stat label="Subscribed" value={formatTimes(parseGainValue(ipo?.total_sr))} />
-        <Stat label="Lists" value={formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)} className="text-right" />
+        <Stat
+          label="Retail odds"
+          value={formatAllotmentOdds(retailLottery)}
+          valueClass={getProbabilityColor(getAllotmentProbability(retailLottery))}
+          className="text-right"
+        />
       </div>
 
       <AllotmentAction ipo={ipo} allotmentDays={allotmentDays} />
     </article>
+  );
+}
+
+/** The GMP-implied listing price and gain, with what that comes to on one retail lot. */
+function ExpectedListing({ ipo }: { ipo: Ipo | null }) {
+  const { price, gain } = estimatedListing(ipo);
+  const perLot = gmpGainPerLot(ipo);
+
+  if (price === null && gain === null) {
+    return <p className="text-sm text-muted-foreground">No grey market quote for this issue yet.</p>;
+  }
+
+  return (
+    <div className="flex items-end justify-between gap-3">
+      <div className="min-w-0">
+        <div className="text-xs text-muted-foreground">Expected listing (GMP)</div>
+        <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+          {price !== null && <span className="font-mono text-2xl font-medium tabular-nums">{formatRupees(price)}</span>}
+          {gain !== null && <span className={cn('font-mono text-sm font-medium tabular-nums', gainColor(gain))}>{signedPercent(gain)}</span>}
+        </div>
+      </div>
+      {perLot !== null && (
+        <div className="shrink-0 text-right">
+          <div className="text-xs text-muted-foreground">Per lot</div>
+          <div className={cn('mt-1 font-mono text-sm font-medium tabular-nums', gainColor(perLot))}>
+            {perLot > 0 ? '+' : perLot < 0 ? '−' : ''}
+            {formatRupees(Math.abs(perLot))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -427,3 +427,33 @@ export const getUseOfProceeds = (ipo: Pick<Ipo, 'issue'>): UseOfProceeds | null 
   if (items.length === 0 && freshCr !== 0) return null;
   return { items, freshCr, ofsCr };
 };
+
+// ---------- Listing estimate ----------
+
+export type Listing = { price: number | null; gain: number | null };
+
+type ListingFields = Pick<Ipo, 'gmp_price_band' | 'ipo_price' | 'gmp_est_listing' | 'gmp_price_gain'> | null | undefined;
+
+/** Issue price: the GMP feed's upper band, else the performance row's issue price. */
+export const issuePrice = (ipo: ListingFields): number | null =>
+  parseGainValue(ipo?.gmp_price_band) || parseGainValue(ipo?.ipo_price) || null;
+
+/** GMP-implied listing from "584 (37.74%)". The price is "-" when no GMP was quoted, so it is derived from the gain. */
+export function estimatedListing(ipo: ListingFields): Listing {
+  const raw = ipo?.gmp_est_listing || ipo?.gmp_price_gain;
+  const gain = parseEstListingPercent(raw);
+  const leadingNumber = raw?.trim().match(/^-?[\d,]+(?:\.\d+)?/);
+  const issue = issuePrice(ipo);
+
+  if (leadingNumber) return { price: parseFloat(leadingNumber[0].replace(/,/g, '')), gain };
+  if (gain !== null && issue) return { price: Math.round(issue * (1 + gain / 100)), gain };
+  return { price: null, gain };
+}
+
+/** Rupees one retail lot would gain at today's GMP, or null without a GMP or lot size. */
+export function gmpGainPerLot(ipo: Pick<Ipo, 'gmp_ipo_gmp' | 'ipo_market_lot'> | null | undefined): number | null {
+  const perShare = parseGainValue(ipo?.gmp_ipo_gmp);
+  const lotShares = parseGainValue(getMarketLotRows(ipo?.ipo_market_lot, 'retail').min?.shares);
+  if (!perShare || !lotShares) return null;
+  return Math.round(perShare * lotShares);
+}

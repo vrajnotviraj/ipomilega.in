@@ -1,10 +1,11 @@
 import { Logo } from "@/components/layout/Logo";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { NAV_LINKS } from "@/components/layout/nav-links";
+import { Disclaimer } from "@/components/ui/Disclaimer";
 
 const FOOTER_LINKS = [...NAV_LINKS, { href: "/about", label: "About" }];
 
-/** Site footer: logo, tagline, links and the not-investment-advice note. */
+/** Site footer: logo, tagline, links, the disclaimer and the copyright line. */
 export function Footer() {
   return (
     <footer className="border-t border-border">
@@ -25,11 +26,11 @@ export function Footer() {
           ))}
         </nav>
       </div>
-      <div className="flex flex-col gap-2 border-t border-border py-6 text-xs text-muted-foreground sm:flex-row sm:justify-between">
+      <div className="space-y-3 border-t border-border py-6 text-xs text-muted-foreground">
+        <Disclaimer className="text-pretty" />
         <p>
           © <span className="font-mono tabular-nums">{new Date().getFullYear()}</span> IPO Milega. All rights reserved.
         </p>
-        <p>For information only, not investment advice. Read the offer document before you bid.</p>
       </div>
     </footer>
   );

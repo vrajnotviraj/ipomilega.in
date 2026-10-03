@@ -2,38 +2,16 @@ import { CalendarDays } from 'lucide-react';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { IpoTitleLink } from '@/components/ipo-shared/IpoTitleLink';
 import { IpoLogo } from '@/components/ipo-shared/IpoLogo';
-import { formatShortDateOrToday, parseEstListingPercent, parseGainValue, scoreOf } from '@/lib/ipo-format';
+import { estimatedListing, formatShortDateOrToday, issuePrice, parseGainValue, scoreOf, type Listing } from '@/lib/ipo-format';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SectionHeading } from '@/components/home/SectionHeading';
 
 type Ipo = HomePageIpoProps['ipo'];
 
-interface Listing {
-  price: number | null;
-  gain: number | null;
-}
-
 const formatPrice = (value: number) =>
   value.toLocaleString('en-IN', { maximumFractionDigits: Number.isInteger(value) ? 0 : 2 });
 
 const formatSignedPercent = (gain: number) => `${gain >= 0 ? '+' : ''}${gain.toFixed(1)}%`;
-
-/** Issue price: the GMP feed's upper band, else the performance row's issue price. */
-function issuePrice(ipo: Ipo): number | null {
-  return parseGainValue(ipo?.gmp_price_band) || parseGainValue(ipo?.ipo_price) || null;
-}
-
-/** GMP-implied listing from "584 (37.74%)". The price is "-" when no GMP was quoted, so it is derived from the gain. */
-function estimatedListing(ipo: Ipo): Listing {
-  const raw = ipo?.gmp_est_listing || ipo?.gmp_price_gain;
-  const gain = parseEstListingPercent(raw);
-  const leadingNumber = raw?.trim().match(/^-?[\d,]+(?:\.\d+)?/);
-  const issue = issuePrice(ipo);
-
-  if (leadingNumber) return { price: parseFloat(leadingNumber[0].replace(/,/g, '')), gain };
-  if (gain !== null && issue) return { price: Math.round(issue * (1 + gain / 100)), gain };
-  return { price: null, gain };
-}
 
 /** Listing-day price and gain; when only one was captured, the other comes from the issue price. */
 function actualListing(ipo: Ipo): Listing {

@@ -3,17 +3,21 @@ import { Step, StepState, lifecycleCaption } from "@/components/ipos/rows";
 
 const DOT: Record<StepState, string> = {
   done: "bg-primary",
-  today: "bg-brand-accent",
+  today: "pulse-ring bg-brand-accent",
   future: "border border-muted-foreground/60 bg-card",
 };
 
-/** Open, close, allotment and listing as four dots on a line: done is ink, today marigold, future hollow. */
+/** Lifecycle steps as dots on a line: done is ink, today marigold with a ripple, future hollow. */
 export function LifecycleTrack({ steps, className }: { steps: Step[]; className?: string }) {
   const caption = lifecycleCaption(steps);
   return (
     <div className={cn("min-w-0", className)}>
       <p className="text-xs font-medium text-foreground">{caption}</p>
-      <ol aria-label={`IPO timeline. ${caption}`} className="mt-2 grid grid-cols-4">
+      <ol
+        aria-label={`IPO timeline. ${caption}`}
+        className="mt-2 grid"
+        style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+      >
         {steps.map((step, index) => (
           <TrackStep key={step.name} step={step} lineToNext={index < steps.length - 1 ? steps[index + 1].state : null} />
         ))}

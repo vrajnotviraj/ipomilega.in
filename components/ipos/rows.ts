@@ -3,7 +3,7 @@ import { daysFromToday, formatIssueSize, formatShortDate, getIpoType, parseEstLi
 
 export type Status = "Upcoming" | "Open" | "Closed" | "Listed";
 
-export type StepName = "Open" | "Close" | "Allot" | "List";
+export type StepName = "Open" | "Close" | "Allot" | "Demat" | "List";
 export type StepState = "done" | "today" | "future";
 /** One lifecycle date. days is whole days from today (0 today, negative passed), null when unknown. */
 export type Step = { name: StepName; date: string; days: number | null; state: StepState };
@@ -75,15 +75,29 @@ function stepState(day: number | null, isLastDueToday: boolean): StepState {
   return isLastDueToday ? "today" : "done";
 }
 
-/** Open, close, allotment and listing dates. Only the last step due today is "today"; earlier ones count as done. */
+/** Open, close, allotment and listing dates. */
 function lifecycleOf(item: HomePageIpoProps): Step[] {
   const dates = item.ipo?.ipo_dates;
-  const raw: [StepName, string | undefined][] = [
+  return stepsOf([
     ["Open", dates?.ipo_open_date || item.ipo?.open_date],
     ["Close", dates?.ipo_close_date || item.ipo?.closing_date],
     ["Allot", dates?.basis_of_allotment],
     ["List", dates?.ipo_listing_date],
-  ];
+  ]);
+}
+
+/** What happens after bidding closes: allotment, shares in demat, and listing. */
+export function afterCloseSteps(ipo: HomePageIpoProps["ipo"] | null): Step[] {
+  const dates = ipo?.ipo_dates;
+  return stepsOf([
+    ["Allot", dates?.basis_of_allotment],
+    ["Demat", dates?.credit_to_demat_account],
+    ["List", dates?.ipo_listing_date],
+  ]);
+}
+
+/** Dated steps in order. Only the last step due today is "today"; earlier ones count as done. */
+function stepsOf(raw: [StepName, string | undefined][]): Step[] {
   const days = raw.map(([, date]) => daysFromToday(date));
   const todayIndex = days.lastIndexOf(0);
 
@@ -136,6 +150,7 @@ const STEP_VERB: Record<StepName, { next: string; today: string; past: string }>
   Open: { next: "Opens", today: "Opens today", past: "Opened" },
   Close: { next: "Closes", today: "Closes today", past: "Closed" },
   Allot: { next: "Allotment", today: "Allotment today", past: "Allotted" },
+  Demat: { next: "Shares in demat", today: "Shares in demat today", past: "Shares credited" },
   List: { next: "Lists", today: "Lists today", past: "Listed" },
 };
 

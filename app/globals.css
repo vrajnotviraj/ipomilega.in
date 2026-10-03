@@ -302,6 +302,18 @@
   }
 }
 
+/* The same ripple around a dot that is already sized and positioned, such as today's step on a timeline. */
+@utility pulse-ring {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: live-ping 1.6s var(--ease-out) infinite;
+  }
+}
+
 /*
  * Sections below the fold rise in as they scroll into view. Scroll-driven, so there is no
  * IntersectionObserver and no hidden-until-hydrated content; browsers without support just show it.
@@ -320,11 +332,24 @@
       animation-timeline: view();
       animation-range: entry 0% entry 35%;
     }
+    /* Cards in a grid rise one after another across each row of three. */
+    .reveal-cards > * {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    .reveal-cards > :nth-child(3n + 2) {
+      animation-range: entry 8% entry 48%;
+    }
+    .reveal-cards > :nth-child(3n) {
+      animation-range: entry 16% entry 56%;
+    }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .live-dot::after {
+  .live-dot::after,
+  .pulse-ring::after {
     animation: none;
   }
 }

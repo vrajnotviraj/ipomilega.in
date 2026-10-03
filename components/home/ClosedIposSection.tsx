@@ -51,7 +51,7 @@ export function ClosedIposSection({ ipos }: IpoSectionProps) {
               )}
               <span className="font-mono text-xs tabular-nums">({items.length})</span>
             </h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="reveal-cards grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((item) => (
                 <ClosedIpoCard key={item._id} ipo={item.ipo} analysis={item.analysis} />
               ))}
