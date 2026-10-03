@@ -17,7 +17,7 @@ const PUBLIC_IPO_FIELDS = [
   'ipo_details.ipo_open_date', 'ipo_details.ipo_close_date', 'ipo_details.face_value', 'ipo_details.ipo_price_band',
   'ipo_details.issue_size', 'ipo_details.issue_type', 'ipo_details.ipo_listing', 'ipo_details.fresh_issue',
   'ipo_details.offer_for_sale', 'ipo_details.lot_size',
-  'listing_price', 'listing_gain', 'last_price', 'last_price_date',
+  'listing_price', 'listing_gain', 'last_price',
   'total_sr', 'qib_sr', 'nii_sr', 'snii_sr', 'bnii_sr', 'rii_sr', 'subscription_date_range', 'subscription_status',
   'subscription_captured_at', 'subscription_is_provisional', 'retail_allotment_probability',
   'gmp_current_ipos', 'gmp_price_gain', 'gmp_ipo_gmp', 'gmp_est_listing', 'gmp_trend', 'gmp_price_band', 'gmp_status',
