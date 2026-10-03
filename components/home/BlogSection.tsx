@@ -1,7 +1,7 @@
 import { PenBox } from 'lucide-react';
 import { Blog } from '@/types/ipo';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { AiDisclaimer } from '@/components/ui/AiDisclaimer';
+import { Disclaimer } from '@/components/ui/Disclaimer';
 import { PostCard } from '@/components/blog/PostCard';
 import { toSummary } from '@/lib/blog-format';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
@@ -23,7 +23,7 @@ export function BlogSection({ blogs }: { blogs: Blog[] }) {
         </div>
       )}
 
-      <AiDisclaimer className="mt-8 border-t border-border pt-4" />
+      <Disclaimer className="mt-8 border-t border-border pt-4" />
 
       <NewsletterSignup />
     </section>

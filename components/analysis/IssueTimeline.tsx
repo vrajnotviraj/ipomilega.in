@@ -98,6 +98,12 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
     const date = parseIpoDate(value);
     return !!date && !!today && dayNumberInIndia(date) <= dayNumberInIndia(today);
   };
+  const isToday = (value: string) => {
+    const date = parseIpoDate(value);
+    return !!date && !!today && dayNumberInIndia(date) === dayNumberInIndia(today);
+  };
+  // On a station's own day that station is marked instead, and after listing the rail is simply done.
+  const showTodayChip = !!today && !stations.some((station) => isToday(station.date)) && !isReached(listing);
   const countdown = today
     ? countdownLabel([
         { verb: "Opens", date: opening },
@@ -108,16 +114,16 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
   // Stations are in date order, so today sits after the last one reached. Before mount it waits at the end, hidden.
   const todayIndex = today ? stations.filter((station) => isReached(station.date)).length : stations.length;
   const todayRow = (
-    <li key="today" className={cn("flex items-center gap-3", !today && "invisible")}>
+    <li key="today" className={cn("flex items-center gap-3", !showTodayChip && "hidden")}>
       <TodayChip label={todayLabel} />
       {countdown && <span className="font-mono text-xs tabular-nums text-muted-foreground">{countdown}</span>}
     </li>
   );
   const stationRow = (station: Station) => (
     <li key={station.label} className="flex items-center gap-3">
-      <StationDot reached={isReached(station.date)} />
+      <StationDot reached={isReached(station.date)} today={isToday(station.date)} />
       <span className="w-24 shrink-0 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{station.label}</span>
-      <span className="font-mono text-sm font-medium tabular-nums">{formatShortDate(station.date, true)}</span>
+      <StationDate date={station.date} today={isToday(station.date)} />
     </li>
   );
 
@@ -130,7 +136,7 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
         {stations.slice(todayIndex).map(stationRow)}
       </ol>
 
-      <DesktopRail stations={stations} progress={progress} today={today} todayLabel={todayLabel} isReached={isReached} />
+      <DesktopRail stations={stations} progress={progress} showTodayChip={showTodayChip} todayLabel={todayLabel} isReached={isReached} isToday={isToday} />
     </>
   );
 }
@@ -141,13 +147,14 @@ const atStation = (station: Station, className: string) => ({
   style: { left: `${station.pos}%` },
 });
 
-/** The sm+ rail: labels above, dots and progress on the line, the today chip, then dates. */
-function DesktopRail({ stations, progress, today, todayLabel, isReached }: {
+/** The sm+ rail: labels above, dots and progress on the line, the today chip pointing at today, then dates. */
+function DesktopRail({ stations, progress, showTodayChip, todayLabel, isReached, isToday }: {
   stations: Station[];
   progress: number;
-  today: Date | null;
+  showTodayChip: boolean;
   todayLabel: string;
   isReached: (value: string) => boolean;
+  isToday: (value: string) => boolean;
 }) {
   return (
     <div className="hidden pt-2 sm:block">
@@ -163,23 +170,26 @@ function DesktopRail({ stations, progress, today, todayLabel, isReached }: {
         <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-border" />
         <div className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary" style={{ width: `${progress}%` }} />
         {stations.map((station) => (
-          <StationDot key={station.label} reached={isReached(station.date)} {...atStation(station, "absolute top-1/2 -translate-y-1/2")} />
+          <StationDot key={station.label} reached={isReached(station.date)} today={isToday(station.date)} {...atStation(station, "absolute top-1/2 -translate-y-1/2")} />
         ))}
       </div>
 
       {/* Fixed height so nothing shifts when the today marker appears. */}
       <div className="relative h-8">
-        {today && (
-          <div className="absolute top-1 -translate-x-1/2" style={{ left: `${clamp(progress, 6, 94)}%` }}>
-            <TodayChip label={todayLabel} />
+        {showTodayChip && (
+          <div className="absolute top-1.5" style={{ left: `${progress}%` }}>
+            <span className="absolute -top-1.5 -translate-x-1/2 border-x-[5px] border-b-[6px] border-x-transparent border-b-brand-accent" aria-hidden="true" />
+            <div className={cn("absolute top-0 flex", chipOffset(progress))}>
+              <TodayChip label={todayLabel} />
+            </div>
           </div>
         )}
       </div>
 
       <div className="relative h-5">
         {stations.map((station) => (
-          <span key={station.label} {...atStation(station, "absolute top-0 whitespace-nowrap font-mono text-sm font-medium tabular-nums")}>
-            {formatShortDate(station.date, true)}
+          <span key={station.label} {...atStation(station, "absolute top-0")}>
+            <StationDate date={station.date} today={isToday(station.date)} />
           </span>
         ))}
       </div>
@@ -187,10 +197,30 @@ function DesktopRail({ stations, progress, today, todayLabel, isReached }: {
   );
 }
 
-function StationDot({ reached, className, style }: { reached: boolean; className?: string; style?: React.CSSProperties }) {
+/** Centres the chip on its arrow, or keeps it inside the rail near either end. */
+function chipOffset(progress: number) {
+  if (progress < 8) return "-translate-x-3";
+  if (progress > 92) return "-translate-x-[calc(100%-0.75rem)]";
+  return "-translate-x-1/2";
+}
+
+/** A station's date; on the station's own day it becomes the marigold today chip. */
+function StationDate({ date, today }: { date: string; today: boolean }) {
+  const formatted = formatShortDate(date, true);
+  if (!today) return <span className="whitespace-nowrap font-mono text-sm font-medium tabular-nums">{formatted}</span>;
+  return (
+    <span className="-mx-2 whitespace-nowrap rounded-full bg-brand-accent px-2 py-0.5 font-mono text-sm font-medium tabular-nums text-primary">
+      <span className="sr-only">Today, </span>
+      {formatted}
+    </span>
+  );
+}
+
+function StationDot({ reached, today = false, className, style }: { reached: boolean; today?: boolean; className?: string; style?: React.CSSProperties }) {
+  const fill = today ? "border-brand-accent bg-brand-accent" : reached ? "border-primary bg-primary" : "border-muted-foreground/40 bg-card";
   return (
     <span
-      className={cn("size-3 shrink-0 rounded-full border-2", reached ? "border-primary bg-primary" : "border-muted-foreground/40 bg-card", className)}
+      className={cn("size-3 shrink-0 rounded-full border-2", fill, className)}
       style={style}
     />
   );

@@ -8,7 +8,7 @@ import { PerformanceSection } from "./PerformanceSection";
 import { RiskSection } from "./RiskSection";
 import { StickyHeader } from "./StickyHeader";
 import { TimingSection } from "./TimingSection";
-import { AiDisclaimer } from "@/components/ui/AiDisclaimer";
+import { Disclaimer } from "@/components/ui/Disclaimer";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { IpoArticleLinks } from "@/components/blog/IpoArticleLinks";
 
@@ -37,7 +37,9 @@ export function AnalysisDetail({ analysis, ipo, articles }: { analysis: IpoCompr
         {analysis.flexibility && <FlexibilitySection flexibility={analysis.flexibility} />}
         <IpoArticleLinks title={`Latest on ${name}`} blogs={articles} />
 
-        <AiDisclaimer className="max-w-[65ch] border-t border-border pt-6" />
+        <div className="border-t border-border pt-6">
+          <Disclaimer className="max-w-[65ch]" />
+        </div>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ import { MouseEvent, Suspense, useCallback, useEffect, useMemo, useRef, useState
 import { useSearchParams } from "next/navigation";
 import { Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { AiDisclaimer } from "@/components/ui/AiDisclaimer";
+import { Disclaimer } from "@/components/ui/Disclaimer";
 import { BoardCounts, IpoFilters } from "@/components/ipos/IpoFilters";
 import { IpoTable } from "@/components/ipos/IpoTable";
 import { OpenNowStrip } from "@/components/ipos/OpenNowStrip";
@@ -130,7 +130,7 @@ export default function IposClient({ rows, initialPage }: { rows: Row[]; initial
         </div>
       )}
 
-      <AiDisclaimer className="mt-6 max-w-[65ch]" />
+      <Disclaimer className="mt-6 max-w-[65ch]" />
     </div>
   );
 }
