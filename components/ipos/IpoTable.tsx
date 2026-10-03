@@ -3,11 +3,11 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
-import { formatGmp, gainColor, gainMotion, getIpoType, lastListing, scoreOf } from "@/lib/ipo-format";
+import { formatGmp, gainColor, gainMotion, getIpoType, lastListing, parseEstListingPercent, parseGainValue, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { LifecycleTrack } from "@/components/ipo-shared/LifecycleTrack";
 import { ScorePill } from "@/components/ipos/ScorePill";
-import { Row, Status, gainOf, hasAnalysis, issueSizeOf, priceBandOf } from "@/components/ipos/rows";
+import { Row, Status, hasAnalysis, isPastBidding, issueSizeOf, priceBandOf, subscribedText } from "@/components/ipos/rows";
 
 const TH = "px-4 py-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground";
 
@@ -42,22 +42,27 @@ function Company({ row }: { row: Row }) {
   );
 }
 
-/** Actual listing gain for listed IPOs, else the GMP estimate. Listed rows say which one it is, then the gain at the last close. */
-function Gain({ row }: { row: Row }) {
-  const { value, isActual } = gainOf(row);
-  const now = row.status === "Listed" ? lastListing(row.ipo).gain : null;
+/** A gain % in green or red, or "N/A" when unknown. */
+function Gain({ value }: { value: number | null }) {
+  return <span className={cn("font-mono text-sm font-medium tabular-nums", gainColor(value), gainMotion(value))}>{formatGmp(value)}</span>;
+}
+
+/** Last GMP quote; for a listed IPO that is the GMP before it listed. */
+const gmpOf = (row: Row) => parseEstListingPercent(row.ipo?.gmp_price_gain);
+
+const subscribedOf = (row: Row) => subscribedText(parseGainValue(row.ipo?.total_sr));
+
+/** Listed IPOs: the gain on listing day and at the last close, in place of the finished timeline. */
+function Returns({ row }: { row: Row }) {
   return (
-    <span className="inline-flex flex-col">
-      <span className={cn("font-mono text-sm font-medium tabular-nums", gainColor(value), gainMotion(value))}>{formatGmp(value)}</span>
-      {row.status === "Listed" && <span className="font-sans text-xs font-normal text-muted-foreground">{isActual ? "Listed" : "Est."}</span>}
-      {now !== null && (
-        <span className="font-sans text-xs font-normal text-muted-foreground">
-          Now <span className={cn("font-mono", gainColor(now))}>{formatGmp(now)}</span>
-        </span>
-      )}
-    </span>
+    <div className="grid grid-cols-2 gap-3">
+      <Figure label="Listing day"><Gain value={parseEstListingPercent(row.ipo?.listing_gain)} /></Figure>
+      <Figure label="Held till today"><Gain value={lastListing(row.ipo).gain} /></Figure>
+    </div>
   );
 }
+
+const Progress = ({ row }: { row: Row }) => (row.status === "Listed" ? <Returns row={row} /> : <LifecycleTrack steps={row.steps} />);
 
 function Figure({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -68,12 +73,15 @@ function Figure({ label, children }: { label: string; children: React.ReactNode 
   );
 }
 
-/** IPO list: a table on wide screens, stacked rows on phones. Rows with an analysis open it on click. */
+/** IPO list: a table on wide screens, stacked rows on phones. Rows with an analysis open it on click.
+ * Price band and score only matter while bidding, so closed and listed rows leave them out, and the columns go when no row needs them. */
 export function IpoTable({ rows }: { rows: Row[] }) {
   const router = useProgressRouter();
   const openAnalysis = (row: Row) => {
     if (hasAnalysis(row)) router.push(`/analysis/${row.ipo.slug}`);
   };
+  const showBidding = rows.some((row) => !isPastBidding(row));
+  const onlyListed = rows.every((row) => row.status === "Listed");
 
   return (
     <>
@@ -81,11 +89,12 @@ export function IpoTable({ rows }: { rows: Row[] }) {
         <thead>
           <tr className="border-b border-border text-left">
             <th className={TH}>Company</th>
-            <th className={TH}>Price band</th>
+            {showBidding && <th className={TH}>Price band</th>}
             <th className={TH}>Issue size</th>
-            <th className={cn(TH, "text-right")}>GMP / listing</th>
-            <th className={cn(TH, "w-[232px]")}>Timeline</th>
-            <th className={cn(TH, "text-right")}>Score</th>
+            <th className={cn(TH, "text-right")}>Subscribed</th>
+            <th className={cn(TH, "text-right")}>GMP</th>
+            <th className={cn(TH, "w-[232px]")}>{onlyListed ? "Returns" : "Timeline"}</th>
+            {showBidding && <th className={cn(TH, "text-right")}>Score</th>}
           </tr>
         </thead>
         <tbody className="reveal-stagger">
@@ -96,11 +105,12 @@ export function IpoTable({ rows }: { rows: Row[] }) {
               className={cn("border-b border-border last:border-b-0", hasAnalysis(row) && "cursor-pointer transition-colors duration-150 hover:bg-secondary/60")}
             >
               <td className="px-4 py-4"><Company row={row} /></td>
-              <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{priceBandOf(row)}</td>
+              {showBidding && <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{isPastBidding(row) ? null : priceBandOf(row)}</td>}
               <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{issueSizeOf(row)}</td>
-              <td className="px-4 py-4 text-right"><Gain row={row} /></td>
-              <td className="px-4 py-4"><LifecycleTrack steps={row.steps} /></td>
-              <td className="px-4 py-4 text-right"><ScorePill value={scoreOf(row)} /></td>
+              <td className="px-4 py-4 text-right font-mono text-sm tabular-nums text-foreground">{subscribedOf(row)}</td>
+              <td className="px-4 py-4 text-right"><Gain value={gmpOf(row)} /></td>
+              <td className="px-4 py-4"><Progress row={row} /></td>
+              {showBidding && <td className="px-4 py-4 text-right">{isPastBidding(row) ? null : <ScorePill value={scoreOf(row)} />}</td>}
             </tr>
           ))}
         </tbody>
@@ -111,14 +121,15 @@ export function IpoTable({ rows }: { rows: Row[] }) {
           <li key={row._id} onClick={() => openAnalysis(row)} className={cn("px-4 py-4", hasAnalysis(row) && "cursor-pointer transition-colors duration-150 active:bg-secondary")}>
             <div className="flex items-start justify-between gap-3">
               <Company row={row} />
-              <ScorePill value={scoreOf(row)} />
+              {!isPastBidding(row) && <ScorePill value={scoreOf(row)} />}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2">
-              <Figure label="Price band">{priceBandOf(row)}</Figure>
+              {!isPastBidding(row) && <Figure label="Price band">{priceBandOf(row)}</Figure>}
               <Figure label="Issue size">{issueSizeOf(row)}</Figure>
-              <Figure label={row.status === "Listed" ? "Listing" : "GMP"}><Gain row={row} /></Figure>
+              <Figure label="Subscribed">{subscribedOf(row)}</Figure>
+              <Figure label={row.status === "Listed" ? "GMP before listing" : "GMP"}><Gain value={gmpOf(row)} /></Figure>
             </div>
-            <LifecycleTrack steps={row.steps} className="mt-3 rounded-lg bg-secondary px-3 py-2.5" />
+            <div className="mt-3 rounded-lg bg-secondary px-3 py-2.5"><Progress row={row} /></div>
           </li>
         ))}
       </ul>

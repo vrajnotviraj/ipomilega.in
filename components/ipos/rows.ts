@@ -1,5 +1,5 @@
 import { HomePageIpoProps } from "@/types/ipo-with-analysis";
-import { formatIssueSize, getIpoType, getPriceBand, parseEstListingPercent, scoreOf, type Board } from "@/lib/ipo-format";
+import { formatIssueSize, formatTimes, getIpoType, getPriceBand, scoreOf, type Board } from "@/lib/ipo-format";
 import { ipoLifecycleSteps, type Step } from "@/components/ipo-shared/lifecycle";
 
 export type Status = "Upcoming" | "Open" | "Closed" | "Listed";
@@ -39,13 +39,6 @@ const STATUS_RANK: Record<Status, number> = { Open: 0, Upcoming: 1, Closed: 2, L
 
 /** True when the IPO has a scored analysis page to open. */
 export const hasAnalysis = (row: Row) => scoreOf(row) > 0 && !!row.ipo?.slug;
-
-/** Listing gain % once listed, else the GMP estimate. */
-export function gainOf(row: Row): { value: number | null; isActual: boolean } {
-  const listed = row.status === "Listed" ? parseEstListingPercent(row.ipo?.listing_gain) : null;
-  if (listed !== null) return { value: listed, isActual: true };
-  return { value: parseEstListingPercent(row.ipo?.gmp_price_gain), isActual: false };
-}
 
 /** Earlier stage first, then closing soonest, then higher score. */
 function compareByStatus(a: Row, b: Row): number {
@@ -106,3 +99,12 @@ export function issueSizeOf(row: Row): string {
   const isAmount = /^[\d.]/.test(size) && !/share/i.test(size);
   return isAmount ? `₹${size}` : size;
 }
+
+/** Subscription multiple, rounded to whole times from 100x so it fits a phone card. */
+export function subscribedText(times: number | null): string {
+  if (times !== null && times >= 100) return `${Math.round(times)}x`;
+  return formatTimes(times);
+}
+
+/** Bidding is over: price band and score no longer help, the subscription and returns do. */
+export const isPastBidding = (row: Row) => row.status === "Closed" || row.status === "Listed";

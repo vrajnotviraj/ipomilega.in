@@ -1,10 +1,10 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { LiveLabel } from "@/components/ui/LiveLabel";
-import { formatGmp, formatTimes, gainColor, parseEstListingPercent, parseGainValue, scoreOf } from "@/lib/ipo-format";
+import { formatGmp, gainColor, parseEstListingPercent, parseGainValue, scoreOf } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { ScorePill } from "@/components/ipos/ScorePill";
-import { Row, daysToCloseOf, hasAnalysis } from "@/components/ipos/rows";
+import { Row, daysToCloseOf, hasAnalysis, subscribedText } from "@/components/ipos/rows";
 
 const MAX_CARDS = 6;
 
@@ -65,12 +65,6 @@ function ClosesValue({ days }: { days: number | null }) {
   if (days === null) return <>TBA</>;
   if (days === 1) return <>1 day</>;
   return <>{days} days</>;
-}
-
-/** Subscription multiple, rounded to whole times from 100x so it fits a phone card. */
-function subscribedText(times: number | null): string {
-  if (times !== null && times >= 100) return `${Math.round(times)}x`;
-  return formatTimes(times);
 }
 
 function BigFigure({ label, className, children }: { label: string; className?: string; children: React.ReactNode }) {
