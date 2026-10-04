@@ -21,19 +21,27 @@ export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: bo
   const date = stageDate(ipo);
   const divider = highlighted ? "border-border" : "border-primary/15";
   return (
-    <article className={cn("flex h-full flex-col rounded-xl p-4 sm:p-5", highlighted ? "card-lift border border-border bg-card" : "bg-secondary")}>
-      <p className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">Hold 1 share of</p>
-      <h3 className="mt-1 font-display text-lg font-bold leading-tight tracking-[-0.015em] text-balance text-foreground sm:text-xl">
-        {ipo.parents.join(" or ")}
-      </h3>
-      <p className="mt-2 text-sm text-muted-foreground">
-        for the shareholder quota in <IpoName ipo={ipo} />
-      </p>
+    // Four rows (heading, track, note, footer) on the list's subgrid, so they line up across the cards in a row.
+    <article
+      className={cn(
+        "row-span-4 grid grid-rows-subgrid gap-y-0 rounded-xl p-4 sm:p-5",
+        highlighted ? "card-lift border border-border bg-card" : "bg-secondary"
+      )}
+    >
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">Hold 1 share of</p>
+        <h3 className="mt-1 font-display text-lg font-bold leading-tight tracking-[-0.015em] text-balance text-foreground sm:text-xl">
+          {ipo.parents.join(" or ")}
+        </h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          for the shareholder quota in <IpoName ipo={ipo} />
+        </p>
+      </div>
 
       <StageTrack stage={ipo.stage} className={cn("mt-4 border-t pt-4", divider)} />
       <p className="mt-4 text-sm text-pretty text-muted-foreground">{STAGE_NOTE[ipo.stage]}</p>
 
-      <div className={cn("mt-auto flex flex-wrap items-end gap-x-6 gap-y-2 border-t pt-3", divider)}>
+      <div className={cn("mt-4 flex flex-wrap items-end gap-x-6 gap-y-2 self-end border-t pt-3", divider)}>
         <dl className="flex flex-wrap gap-x-6 gap-y-2">
           {date && <Figure label={date.label}>{date.value}</Figure>}
           {ipo.stage === "dates" && ipo.priceBand && <Figure label="Price band">{ipo.priceBand}</Figure>}

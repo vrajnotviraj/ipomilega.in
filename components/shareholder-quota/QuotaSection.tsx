@@ -14,9 +14,9 @@ export function QuotaSection({ id, title, hint, empty, ipos, highlighted }: Prop
       {ipos.length === 0 ? (
         <EmptyState icon={CalendarClock} title="Nothing here yet" hint={empty} />
       ) : (
-        <ul className="reveal-stagger mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="reveal-stagger mt-6 grid gap-x-4 sm:grid-cols-2 lg:grid-cols-3">
           {ipos.map((ipo) => (
-            <li key={ipo.id}>
+            <li key={ipo.id} className="row-span-4 grid grid-rows-subgrid gap-y-0 pb-4">
               <QuotaCard ipo={ipo} highlighted={highlighted} />
             </li>
           ))}
