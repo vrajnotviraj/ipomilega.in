@@ -8,7 +8,7 @@ import { Disclaimer } from "@/components/ui/Disclaimer";
 import { BoardCounts, IpoFilters } from "@/components/ipos/filters/IpoFilters";
 import { IpoTable } from "@/components/ipos/table/IpoTable";
 import { OpenNowStrip } from "@/components/ipos/OpenNowStrip";
-import { QuotaTeaser } from "@/components/ipos/QuotaTeaser";
+import { QuotaTeaser } from "@/components/shareholder-quota/QuotaTeaser";
 import { StatusTiles } from "@/components/ipos/filters/StatusTiles";
 import { getIpoType } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";

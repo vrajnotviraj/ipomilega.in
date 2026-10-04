@@ -82,6 +82,31 @@ export function blogIndexJsonLd({ name, description, posts }: { name: string; de
   };
 }
 
+/** The shareholder-quota page as a CollectionPage listing its IPOs, each linked to its IPO page when there is one. */
+export function quotaListJsonLd({ name, description, ipos }: { name: string; description: string; ipos: { name: string; slug: string }[] }) {
+  const url = `${SITE_URL}/ipos/shareholder-quota`;
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url,
+    inLanguage: "en-IN",
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+    publisher: { "@id": ORGANIZATION_ID },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: ipos.length,
+      itemListElement: ipos.map((ipo, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: `${ipo.name} IPO`,
+        url: ipo.slug ? `${SITE_URL}/analysis/${ipo.slug}` : url,
+      })),
+    },
+  };
+}
+
 /** A BlogPosting for one post. The research desk is an Organization; a writer is a Person, linked to their page when they have one. */
 export function articleJsonLd(blog: Blog) {
   const url = `${SITE_URL}/blogs/${blog.slug}`;
