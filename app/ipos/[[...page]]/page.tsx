@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { openGraphBase } from "@/lib/seo/share";
 import { getIpoBuckets } from "@/lib/queries/ipos";
+import { getShareholderQuotaIpos } from "@/lib/queries/shareholder-quota";
 import IposClient from "@/components/ipos/IposClient";
 import { PAGE_SIZE, ipoPagePath, toRows } from "@/components/ipos/rows";
 import { pageFromSegments } from "@/components/ui/pager";
@@ -35,7 +36,8 @@ export default async function IposPage(props: Params) {
   const page = await pageOf(props);
   if (!page) notFound();
   // Rows hold "days from today", so they are built on the server.
-  const rows = toRows(await getIpoBuckets());
+  const [buckets, quota] = await Promise.all([getIpoBuckets(), getShareholderQuotaIpos()]);
+  const rows = toRows(buckets);
   if (page > Math.max(1, Math.ceil(rows.length / PAGE_SIZE))) notFound();
-  return <IposClient key={page} rows={rows} initialPage={page} />;
+  return <IposClient key={page} rows={rows} initialPage={page} quotaCount={quota.ipos.length} />;
 }

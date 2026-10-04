@@ -8,6 +8,7 @@ import { Disclaimer } from "@/components/ui/Disclaimer";
 import { BoardCounts, IpoFilters } from "@/components/ipos/filters/IpoFilters";
 import { IpoTable } from "@/components/ipos/table/IpoTable";
 import { OpenNowStrip } from "@/components/ipos/OpenNowStrip";
+import { QuotaTeaser } from "@/components/ipos/QuotaTeaser";
 import { StatusTiles } from "@/components/ipos/filters/StatusTiles";
 import { getIpoType } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
@@ -71,7 +72,7 @@ function Pager({ page, total, onPage }: { page: number; total: number; onPage: (
 }
 
 /** The /ipos page: status tiles, the IPOs open now, then every IPO with search, board filter, sorting and pages. */
-export default function IposClient({ rows, initialPage }: { rows: Row[]; initialPage: number }) {
+export default function IposClient({ rows, initialPage, quotaCount }: { rows: Row[]; initialPage: number; quotaCount: number }) {
   const [filters, setFilters] = useState<Filters>({ status: "all", board: "all", query: "", sort: "status" });
   const [page, setPage] = useState(initialPage);
 
@@ -110,6 +111,10 @@ export default function IposClient({ rows, initialPage }: { rows: Row[]; initial
       </header>
 
       <StatusTiles rows={searchedRows} value={filters.status} onChange={showStatus} />
+
+      <div className="mt-4">
+        <QuotaTeaser count={quotaCount} />
+      </div>
 
       {showOpenNow && (
         <div className="mt-6">
