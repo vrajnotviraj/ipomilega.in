@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
-import { Footer } from "@/components/layout/Footer";
 import { ScoreMethodology } from "@/components/home/ScoreMethodology";
 
 const title = "About";
@@ -110,8 +109,6 @@ export default function AboutPage() {
           Read the prospectus, weigh your own position, and speak to a qualified adviser before you apply.
         </p>
       </section>
-
-      <Footer />
     </div>
   );
 }

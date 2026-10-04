@@ -8,7 +8,6 @@ import { ScoreMethodology } from '@/components/home/ScoreMethodology';
 import { getIpoBuckets } from '@/lib/queries/ipos';
 import { getFeaturedBlogs } from '@/lib/queries/blogs';
 import { Metadata } from 'next';
-import { Footer } from '@/components/layout/Footer';
 import { Walkthrough } from '@/components/home/Walkthrough';
 import { Hero } from '@/components/home/Hero';
 import { BoardProvider } from '@/components/home/BoardContext';
@@ -79,7 +78,6 @@ export default async function HomePage() {
           <ScoreMethodology />
         </div>
         <BlogSection blogs={blogs} />
-        <Footer />
       </div>
       <Walkthrough />
     </div>
