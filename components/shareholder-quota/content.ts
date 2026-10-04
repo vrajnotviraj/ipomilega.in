@@ -1,4 +1,4 @@
-import type { QuotaIpo, QuotaStage } from "@/lib/queries/shareholder-quota";
+import type { QuotaStage } from "@/lib/queries/shareholder-quota";
 
 export const RULES = [
   { label: "Parent shares you need", value: "1" },
@@ -59,15 +59,3 @@ export const STAGE_NOTE: Record<QuotaStage, string> = {
   filed: "The draft offer document has a shareholder quota. It is waiting for SEBI's approval.",
   announced: "The quota comes from the company's announcement. There is no offer document yet, so it could still change.",
 };
-
-const shortName = (name: string) => name.replace(/\s+(?:Ltd|Limited)\.?$/i, "").replace(/\.$/, "");
-
-const joinNames = (names: string[]) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`);
-
-/** One sentence naming every IPO on the list and its parent, e.g. "Jio Platforms (Reliance Industries) and ...". */
-export function listSummary(ipos: QuotaIpo[]) {
-  if (ipos.length === 0) return "No upcoming IPO has a shareholder quota right now.";
-  const names = ipos.map((ipo) => `${shortName(ipo.name)} (hold ${ipo.parents.map(shortName).join(" or ")})`);
-  const count = ipos.length === 1 ? "1 upcoming IPO has" : `${ipos.length} upcoming IPOs have`;
-  return `${count} a shareholder quota: ${joinNames(names)}.`;
-}

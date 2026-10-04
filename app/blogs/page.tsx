@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
 import { getPublishedBlogs } from "@/lib/queries/blogs";
-import { blogIndexJsonLd, JsonLd } from "@/lib/seo/json-ld";
+import { collectionJsonLd, JsonLd } from "@/lib/seo/json-ld";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import BlogsClient from "@/components/blog/BlogsClient";
 import { formatBlogDate, toSummary } from "@/lib/blog-format";
@@ -27,7 +27,7 @@ export default async function BlogsPage() {
 
   return (
     <div className="app-container min-h-screen pt-24 pb-16">
-      <JsonLd data={blogIndexJsonLd({ name: title, description, posts })} />
+      <JsonLd data={collectionJsonLd({ path: "/blogs", name: title, description, items: posts.map((post) => ({ name: post.title, href: `/blogs/${post.slug}` })), newestFirst: true })} />
       <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: "Blog", href: "/blogs" }]} />
 
       <header className="mt-6 mb-8 max-w-[65ch]">

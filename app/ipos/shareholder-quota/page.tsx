@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
 import { formatIstTimestamp } from "@/lib/ipo-format";
 import { getShareholderQuotaIpos } from "@/lib/queries/shareholder-quota";
-import { JsonLd, quotaListJsonLd } from "@/lib/seo/json-ld";
+import { collectionJsonLd, JsonLd } from "@/lib/seo/json-ld";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { listSummary } from "@/components/shareholder-quota/content";
+import { listSummary } from "@/components/shareholder-quota/summary";
 import { Hero, HowItWorks } from "@/components/shareholder-quota/Intro";
 import { QuotaSection } from "@/components/shareholder-quota/QuotaSection";
 import { Faq } from "@/components/shareholder-quota/Faq";
@@ -36,7 +36,7 @@ export default async function ShareholderQuotaPage() {
 
   return (
     <div className="app-container pt-24 sm:pt-28">
-      <JsonLd data={quotaListJsonLd({ name: titleOf(), description: summary, ipos })} />
+      <JsonLd data={collectionJsonLd({ path, name: titleOf(), description: summary, items: ipos.map((ipo) => ({ name: `${ipo.name} IPO`, href: ipo.slug ? `/analysis/${ipo.slug}` : path })) })} />
       <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: "IPOs", href: "/ipos" }, { name: "Shareholder quota", href: path }]} />
       <div className="mt-6">
         <Hero summary={summary} />

@@ -57,52 +57,28 @@ export function breadcrumbJsonLd(crumbs: Crumb[]) {
   };
 }
 
-/** The blog index as a CollectionPage whose ItemList is the posts shown on it, newest first. */
-export function blogIndexJsonLd({ name, description, posts }: { name: string; description: string; posts: { slug: string; title: string }[] }) {
+/** A CollectionPage at `path` whose ItemList is the items shown on it, in page order. */
+export function collectionJsonLd({ path, name, description, items, newestFirst = false }: {
+  path: string;
+  name: string;
+  description: string;
+  items: { name: string; href: string }[];
+  newestFirst?: boolean;
+}) {
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name,
     description,
-    url: `${SITE_URL}/blogs`,
+    url: `${SITE_URL}${path}`,
     inLanguage: "en-IN",
     isPartOf: { "@id": `${SITE_URL}/#website` },
     publisher: { "@id": ORGANIZATION_ID },
     mainEntity: {
       "@type": "ItemList",
-      itemListOrder: "https://schema.org/ItemListOrderDescending",
-      numberOfItems: posts.length,
-      itemListElement: posts.map((post, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        url: `${SITE_URL}/blogs/${post.slug}`,
-        name: post.title,
-      })),
-    },
-  };
-}
-
-/** The shareholder-quota page as a CollectionPage listing its IPOs, each linked to its IPO page when there is one. */
-export function quotaListJsonLd({ name, description, ipos }: { name: string; description: string; ipos: { name: string; slug: string }[] }) {
-  const url = `${SITE_URL}/ipos/shareholder-quota`;
-  return {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name,
-    description,
-    url,
-    inLanguage: "en-IN",
-    isPartOf: { "@id": `${SITE_URL}/#website` },
-    publisher: { "@id": ORGANIZATION_ID },
-    mainEntity: {
-      "@type": "ItemList",
-      numberOfItems: ipos.length,
-      itemListElement: ipos.map((ipo, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        name: `${ipo.name} IPO`,
-        url: ipo.slug ? `${SITE_URL}/analysis/${ipo.slug}` : url,
-      })),
+      ...(newestFirst && { itemListOrder: "https://schema.org/ItemListOrderDescending" }),
+      numberOfItems: items.length,
+      itemListElement: items.map((item, index) => ({ "@type": "ListItem", position: index + 1, url: `${SITE_URL}${item.href}`, name: item.name })),
     },
   };
 }
