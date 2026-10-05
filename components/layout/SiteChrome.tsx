@@ -10,6 +10,7 @@ import { Logo } from "@/components/layout/Logo";
 import { MobileMenu } from "@/components/layout/MobileMenu";
 import { NAV_LINKS } from "@/components/layout/nav-links";
 import { Footer } from "@/components/layout/Footer";
+import { SubscribePopup } from "@/components/subscribe/SubscribePopup";
 
 // Toasts on the card surface in the design tokens, with the icon in the data colour.
 const TOAST_COLORS = { "--normal-bg": "var(--card)", "--normal-border": "var(--border)", "--normal-text": "var(--foreground)" } as React.CSSProperties;
@@ -55,7 +56,7 @@ function Header({ pathname, onOpenMenu }: { pathname: string; onOpenMenu: () => 
   );
 }
 
-/** Page shell: skip link, header, mobile menu, main content, footer and toasts. */
+/** Page shell: skip link, header, mobile menu, main content, footer, toasts and the IPO alerts popup. */
 export default function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -72,6 +73,7 @@ export default function SiteChrome({ children }: { children: React.ReactNode }) 
         <Footer />
         <Toaster position="top-right" style={TOAST_COLORS} toastOptions={{ classNames: TOAST_CLASSES }} />
       </main>
+      <SubscribePopup />
     </ProgressProvider>
   );
 }

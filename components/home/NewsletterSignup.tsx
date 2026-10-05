@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { rememberSubscribed } from '@/components/subscribe/popup-memory';
 
 /** Email signup panel that posts to /api/subscription and reports the result in a toast. */
 export function NewsletterSignup() {
@@ -16,7 +17,7 @@ export function NewsletterSignup() {
       const response = await fetch('/api/subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, form: 'home', page: window.location.pathname }),
       });
       const data = await response.json();
 
@@ -24,7 +25,8 @@ export function NewsletterSignup() {
         toast.error(data.message || "We couldn't subscribe you. Please try again.");
         return;
       }
-      toast.success(data.message || 'Subscribed. The next analysis lands in your inbox.');
+      toast.success(data.message || "You're in. Check your inbox for a welcome email.");
+      rememberSubscribed();
       setEmail('');
     } catch (error) {
       console.error('Failed to subscribe:', error);

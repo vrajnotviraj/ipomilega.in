@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/revalidate', '/api/subscription', '/ingest/'],
+      disallow: ['/api/revalidate', '/api/subscription', '/api/unsubscribe', '/api/email-preview', '/ingest/'],
     },
     sitemap: [`${SITE_URL}/sitemap.xml`, `${SITE_URL}/news-sitemap.xml`],
   };
