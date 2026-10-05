@@ -135,10 +135,11 @@ export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string
   daysFromToday(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date);
 
 /** Whether bidding has shut: after the close date, or from 5 PM IST on it. Null without a usable close date. */
-export const hasBiddingClosed = (closing: string | null | undefined): boolean | null => {
-  const toClose = daysFromToday(closing);
-  if (toClose === null) return null;
-  const hourInIndia = Number(new Date().toLocaleString('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Kolkata' }));
+export const hasBiddingClosed = (closing: string | null | undefined, now = new Date()): boolean | null => {
+  const date = parseIpoDate(closing);
+  if (!date) return null;
+  const toClose = dayNumberInIndia(date) - dayNumberInIndia(now);
+  const hourInIndia = Number(now.toLocaleString('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Kolkata' }));
   return toClose < 0 || (toClose === 0 && hourInIndia >= 17);
 };
 
