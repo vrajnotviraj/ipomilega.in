@@ -8,7 +8,7 @@ import { popupIsDue } from '@/components/subscribe/popup-memory';
 // The dialog's code loads only when it is about to open, so it stays out of every page's first load.
 const SubscribeDialog = dynamic(() => import('@/components/subscribe/SubscribeDialog').then((mod) => mod.SubscribeDialog), { ssr: false });
 
-const DELAY_MS = 6000;
+const DELAY_MS = 12_000;
 const RETRY_MS = 2000;
 
 /** True while another modal (the home tour, a calculator) is open, so the popup never stacks on top of one. */

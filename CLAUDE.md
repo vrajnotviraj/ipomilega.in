@@ -13,7 +13,7 @@ Read `design-system/DESIGN.md` before any UI, styling, copy or logo change. It d
 - `components/ipos/`: the /ipos list page.
 - `components/shareholder-quota/`: the /ipos/shareholder-quota page (hero, how it works, quota cards and stage track, FAQ) and its teaser on /ipos. Page copy lives in `content.ts`.
 - `components/ipo-shared/`: pieces used on more than one page (logo, odds tiles, lifecycle steps and track).
-- `components/subscribe/`: the IPO alerts popup (opens 6s into a visit; `?alerts` opens it at once) and the /unsubscribe status.
+- `components/subscribe/`: the IPO alerts popup (opens 12s into a visit; `?alerts` opens it at once) and the /unsubscribe status.
 - `lib/subscribers/`: the `subscribers` collection. `signup.ts` holds the rules (email and Indian mobile checks, which doc a signup writes) with no runtime imports, checked by `signup.check.mjs`; `store.ts` does the Mongo writes.
 - `lib/email/`: the welcome mail. `welcome-email.ts` renders it (tables and inline styles, C1 tokens as hex), `welcome.ts` fills it with live IPOs and sends it over SMTP. Preview it at `/api/email-preview` in dev.
 - `lib/ipo-format.ts`: parsing and formatting of IPO data, in labelled sections. It has no runtime imports, so `*.check.mjs` scripts run it under plain Node.
