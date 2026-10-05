@@ -97,7 +97,11 @@ export function useActiveSection(keys: string[]) {
   function jumpTo(key: string) {
     setActive(key);
     pausedUntil.current = Date.now() + 900;
-    document.getElementById(key)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const section = document.getElementById(key);
+    if (!section) return;
+    // Scrolls to the layout position; scrollIntoView would include the .reveal shift and hide the heading under the header.
+    const headerBottom = parseFloat(document.documentElement.style.scrollPaddingTop) || 0;
+    window.scrollTo({ top: layoutTop(section) - headerBottom, behavior: "smooth" });
   }
 
   return { active, jumpTo };
