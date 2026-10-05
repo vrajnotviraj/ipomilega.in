@@ -134,14 +134,22 @@ export const daysFromToday = (raw: string | null | undefined): number | null => 
 export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string }; closing_date?: string } | null | undefined): number | null =>
   daysFromToday(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date);
 
+/** Whether bidding has shut: after the close date, or from 5 PM IST on it. Null without a usable close date. */
+export const hasBiddingClosed = (closing: string | null | undefined): boolean | null => {
+  const toClose = daysFromToday(closing);
+  if (toClose === null) return null;
+  const hourInIndia = Number(new Date().toLocaleString('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Kolkata' }));
+  return toClose < 0 || (toClose === 0 && hourInIndia >= 17);
+};
+
 export type IssueStage = 'upcoming' | 'live' | 'past';
 
 /** Where an issue is in its bidding window, or null without both dates. */
 export const getIssueStage = (opening: string | null | undefined, closing: string | null | undefined): IssueStage | null => {
   const toOpen = daysFromToday(opening);
-  const toClose = daysFromToday(closing);
-  if (toOpen === null || toClose === null) return null;
-  if (toClose < 0) return 'past';
+  const closed = hasBiddingClosed(closing);
+  if (toOpen === null || closed === null) return null;
+  if (closed) return 'past';
   if (toOpen > 0) return 'upcoming';
   return 'live';
 };

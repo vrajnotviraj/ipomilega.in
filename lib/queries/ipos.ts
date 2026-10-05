@@ -7,7 +7,7 @@ import { Ipo, IpoIssue } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { stripCitations } from '@/lib/queries/citations';
-import { daysFromToday, formatIssueSize, getIpoType, parseIpoDate } from '@/lib/ipo-format';
+import { daysFromToday, formatIssueSize, getIpoType, hasBiddingClosed, parseIpoDate } from '@/lib/ipo-format';
 
 // The IPO fields the site may read: an allowlist, so where the engine scraped each fact from (raw captures, source
 // names, source links, scrape times) never leaves the database, and a field the engine adds stays private until listed here.
@@ -67,11 +67,11 @@ function bucketIpos(ipoList: RawIpo[]) {
 
   for (const ipo of ipoList) {
     const toOpen = daysFromToday(openDateOf(ipo));
-    const toClose = daysFromToday(closeDateOf(ipo));
-    if (toOpen === null || toClose === null) continue;
+    const closed = hasBiddingClosed(closeDateOf(ipo));
+    if (toOpen === null || closed === null) continue;
 
     if (toOpen > 0) upcoming.push(ipo);
-    else if (toClose >= 0) live.push(ipo);
+    else if (!closed) live.push(ipo);
     else past.push(ipo);
   }
 
