@@ -1,7 +1,7 @@
 "use client";
 
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
-import { scoreOf } from "@/lib/ipo-format";
+import { scoreOf } from "@/lib/ipo-score";
 import { cn } from "@/lib/utils";
 import { ScorePill } from "@/components/ipos/ScorePill";
 import { Row, gmpOf, hasAnalysis, isPastBidding, issueSizeOf, listingDateOf, priceBandOf, subscribedOf } from "@/components/ipos/rows";

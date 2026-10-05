@@ -1,4 +1,4 @@
-import { getRiskTextColor } from "@/lib/ipo-format";
+import { getRiskTextColor } from "@/lib/ipo-score";
 import { cn } from "@/lib/utils";
 
 /** An analysis score out of 10, coloured by band, or a muted "–" when the IPO has no analysis. */

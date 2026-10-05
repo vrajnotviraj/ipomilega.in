@@ -10,7 +10,7 @@ export function StageTrack({ stage, className }: { stage: QuotaStage; className?
       {STAGE_TRACK.map((step, index) => (
         <li key={step.stage} className="relative flex flex-col items-center text-center">
           {index < STAGE_TRACK.length - 1 && (
-            <span aria-hidden className={cn("absolute left-1/2 top-1 h-px w-full", index < current ? "grow-in bg-primary" : "bg-border")} />
+            <span aria-hidden className={cn("absolute left-1/2 top-1 h-px w-full", index < current ? "bg-primary" : "bg-border")} />
           )}
           <span
             aria-hidden

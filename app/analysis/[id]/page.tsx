@@ -5,7 +5,8 @@ import { getShareFacts } from "@/components/analysis/analysis-facts"
 import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis"
 import { getAnalysisBySlug, getAnalysisSlugs, getIpoNameBySlug } from '@/lib/queries/ipos';
 import { getIpoArticles } from '@/lib/queries/blogs';
-import { buildShareDescription, overallScoreOf, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
+import { buildShareDescription, openGraphBase, SITE_NAME, SITE_URL } from '@/lib/seo/share';
+import { adjustedScoreOf } from '@/lib/ipo-score';
 import { JsonLd, ORGANIZATION_ID, researchAuthor } from '@/lib/seo/json-ld';
 import { FileSearch } from 'lucide-react';
 import { ArrowLink } from '@/components/ui/ArrowLink';
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const description = buildShareDescription({
     ...getShareFacts(analysis, ipo!),
-    score: Number(overallScoreOf(analysis).toFixed(1)),
+    score: adjustedScoreOf({ analysis, ipo: ipo! }),
   })
 
   return {

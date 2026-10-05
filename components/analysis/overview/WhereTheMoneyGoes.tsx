@@ -87,7 +87,7 @@ function SegmentBar({ segments }: { segments: Segment[] }) {
   const sized = segments.filter((segment) => segment.share);
   if (sized.length === 0) return null;
   return (
-    <div className="grow-in mb-5 flex h-3 gap-0.5 overflow-hidden rounded-full" aria-hidden="true">
+    <div className="mb-5 flex h-3 gap-0.5 overflow-hidden rounded-full" aria-hidden="true">
       {sized.map((segment) => (
         <span key={segment.label} className="h-full first:rounded-l-full last:rounded-r-full" style={{ width: `${segment.share}%`, backgroundColor: segment.color }} />
       ))}

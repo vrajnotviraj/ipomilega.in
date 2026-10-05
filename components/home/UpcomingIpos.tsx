@@ -8,7 +8,8 @@ import { Score } from '@/components/ui/Score';
 import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatShortDateOrToday, getIpoType, getPriceBand, scoreOf } from '@/lib/ipo-format';
+import { formatShortDateOrToday, getIpoType, getPriceBand } from '@/lib/ipo-format';
+import { scoreOf } from '@/lib/ipo-score';
 
 const MAX_ROWS = 6;
 

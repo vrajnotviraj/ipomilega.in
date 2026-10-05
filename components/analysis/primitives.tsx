@@ -1,4 +1,4 @@
-import { getRiskTextColor } from "@/lib/ipo-format";
+import { getRiskTextColor } from "@/lib/ipo-score";
 import { cn } from "@/lib/utils";
 
 /** A 0-10 score as a large display figure with a mono "/10", in the current text colour. */

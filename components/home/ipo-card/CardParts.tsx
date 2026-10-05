@@ -3,7 +3,7 @@ import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { IpoLogo } from '@/components/ipo-shared/IpoLogo';
 import { IpoTitleLink } from '@/components/ipo-shared/IpoTitleLink';
 import { Score } from '@/components/ui/Score';
-import { applyQibAdjustment, describeQibAdjustment, getQibSignal, scoreOf } from '@/lib/ipo-format';
+import { applyQibAdjustment, describeQibAdjustment, getQibSignal, scoreOf } from '@/lib/ipo-score';
 import { cn } from '@/lib/utils';
 
 export interface IpoCardProps {

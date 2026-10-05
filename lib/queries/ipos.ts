@@ -34,12 +34,16 @@ const IPO_CARD_PROJECTION = projectionOf(PUBLIC_IPO_FIELDS.filter((field) => !CA
 export const publicIssue = (issue: Record<string, { value?: unknown } | undefined> | undefined): IpoIssue =>
   Object.fromEntries(Object.entries(issue ?? {}).map(([key, fact]) => [key, fact?.value])) as IpoIssue;
 
-// Cards show only risk_meter.score from the analysis document.
+// Cards show the overall score (scoreOf), so they need each section's score from the analysis document.
 const ANALYSIS_CARD_PROJECTION = {
   ipo_table_id: 1,
   slug: 1,
   company_name: 1,
+  'fundamentals.score': 1,
   'risk_meter.score': 1,
+  'performance.score': 1,
+  'flexibility.score': 1,
+  'time.score': 1,
 } as const;
 
 type RawIpo = Ipo & { _id: { toString(): string } };
@@ -119,7 +123,7 @@ async function loadIpoBuckets() {
   };
 }
 
-/** IPO buckets for public pages. `analysis` holds only ANALYSIS_CARD_PROJECTION fields; consumers read just risk_meter.score. */
+/** IPO buckets for public pages. `analysis` holds only ANALYSIS_CARD_PROJECTION fields; consumers read just the section scores, via scoreOf. */
 export const getIpoBuckets = cache(loadIpoBuckets);
 
 type AnalysisPage = { ipos_analysis: IpoComprehensiveAnalysis; ipo: Ipo };

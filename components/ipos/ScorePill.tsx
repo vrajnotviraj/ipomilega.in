@@ -1,4 +1,4 @@
-import { getRiskTextColor } from "@/lib/ipo-format";
+import { getRiskTextColor } from "@/lib/ipo-score";
 import { cn } from "@/lib/utils";
 
 /** Analysis score as a pill tinted with its band colour, or a muted "–" when there is no analysis. */

@@ -1,7 +1,8 @@
 import { ImageResponse } from "next/og";
 import { getAnalysisBySlug } from "@/lib/queries/ipos";
-import { closingLine, gmpFigure, overallScoreOf } from "@/lib/seo/share";
-import { formatIpoDate, getPriceBand, scoreBand, type ScoreBand } from "@/lib/ipo-format";
+import { closingLine, gmpFigure } from "@/lib/seo/share";
+import { formatIpoDate, getPriceBand } from "@/lib/ipo-format";
+import { adjustedScoreOf, scoreBand, type ScoreBand } from "@/lib/ipo-score";
 import { BrandMark, CHALK, INK, MUTED, OG_SIZE } from "@/lib/seo/og";
 import RootImage from "@/app/opengraph-image";
 
@@ -25,7 +26,7 @@ export default async function AnalysisOgImage({ params }: { params: Promise<{ id
   if (!data) return RootImage();
 
   const { ipos_analysis: analysis, ipo } = data;
-  const score = overallScoreOf(analysis);
+  const score = adjustedScoreOf({ analysis, ipo });
   const gmp = gmpFigure(analysis.gmp_price_gain ?? ipo?.gmp_price_gain);
   const status = closingLine(analysis.time?.issue_dates?.closing, analysis.time?.issue_dates?.opening)?.replace(/\.$/, "");
   const listing = formatIpoDate(ipo?.ipo_dates?.ipo_listing_date);

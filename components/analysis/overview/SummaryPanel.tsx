@@ -1,18 +1,8 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Ipo } from "@/types/ipo";
 import { ArrowUpRight } from "lucide-react";
-import {
-  formatIssueSize,
-  formatIstTimestamp,
-  formatPriceBand,
-  getAllotmentCheckUrl,
-  getIpoType,
-  getIssueStage,
-  getRiskTextColor,
-  getScoreTrustLabel,
-  type IssueStage,
-} from "@/lib/ipo-format";
-import { overallScoreOf } from "@/lib/seo/share";
+import { formatIssueSize, formatIstTimestamp, formatPriceBand, getAllotmentCheckUrl, getIpoType, getIssueStage, type IssueStage } from "@/lib/ipo-format";
+import { applyQibAdjustment, describeQibAdjustment, getQibSignal, getRiskTextColor, getScoreTrustLabel, scoreOf } from "@/lib/ipo-score";
 import { RESEARCH_AUTHOR } from "@/lib/seo/json-ld";
 import { formatBlogDate } from "@/lib/blog-format";
 import { cn } from "@/lib/utils";
@@ -51,7 +41,7 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12">
-        <ScoreVerdict score={overallScoreOf(analysis)} verdict={getVerdict(analysis)} />
+        <ScoreVerdict baseScore={scoreOf({ analysis })} qibSignal={getQibSignal(ipo)} verdict={getVerdict(analysis)} />
         <div className="min-w-0 space-y-6">
           <div>
             <HeadlineFigures figures={getHeadlineFigures(analysis, ipo)} />
@@ -128,7 +118,9 @@ function AllotmentCheckLink({ href }: { href: string }) {
   );
 }
 
-function ScoreVerdict({ score, verdict }: { score: number; verdict: string | null }) {
+/** The overall score with the same QIB nudge the home cards apply, and a note when the nudge moved it. */
+function ScoreVerdict({ baseScore, qibSignal, verdict }: { baseScore: number; qibSignal: ReturnType<typeof getQibSignal>; verdict: string | null }) {
+  const score = applyQibAdjustment(baseScore, qibSignal);
   return (
     <div>
       <Eyebrow>Our score</Eyebrow>
@@ -139,6 +131,7 @@ function ScoreVerdict({ score, verdict }: { score: number; verdict: string | nul
         <span className="font-mono text-lg tabular-nums text-muted-foreground">/10</span>
         <span className={cn("ml-1 text-sm font-medium", getRiskTextColor(score))}>{getScoreTrustLabel(score)}</span>
       </div>
+      {score !== baseScore && <p className="mt-2 text-xs text-muted-foreground">{describeQibAdjustment(baseScore, qibSignal)}</p>}
       {verdict && <p className="mt-4 max-w-[48ch] text-pretty text-base text-muted-foreground">{verdict}</p>}
     </div>
   );

@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { ShareButton } from "@/components/ui/ShareButton";
 import { buildShareMessage, type ShareFacts } from "@/lib/seo/share";
-import { getRiskTextColor } from "@/lib/ipo-format";
+import { getRiskTextColor } from "@/lib/ipo-score";
 import { cn } from "@/lib/utils";
 import type { SectionTab } from "@/components/analysis/analysis-facts";
 import { useActiveSection, useStickyTop } from "@/components/analysis/header/useSectionNav";

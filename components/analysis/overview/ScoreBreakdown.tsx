@@ -1,8 +1,8 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
-import { overallScoreOf } from "@/lib/seo/share";
 import { cn } from "@/lib/utils";
 import { getScoreAxes } from "@/components/analysis/analysis-facts";
-import { gainColorOnInk, gainMotion, scoreColorOnInk } from "@/lib/ipo-format";
+import { gainColorOnInk, gainMotion } from "@/lib/ipo-format";
+import { overallScoreOf, scoreColorOnInk } from "@/lib/ipo-score";
 import { DotScale } from "@/components/analysis/primitives";
 
 type Axis = { label: string; score: number };
@@ -22,7 +22,7 @@ export function ScoreBreakdown({ analysis }: { analysis: IpoComprehensiveAnalysi
       <div className="grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
         <div className="min-w-0">
           <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">How the score adds up</h3>
-          <p className="mt-1 text-sm text-primary-foreground/70">The overall score is the average of these five.</p>
+          <p className="mt-1 text-sm text-primary-foreground/70">The overall score is the average of these five, nudged by QIB demand once bidding closes.</p>
           {/* The radar has no axis labels, so the scores behind it are listed here. */}
           <ul className="reveal-stagger mt-5 divide-y divide-primary-foreground/10">
             {axes.map((axis) => (

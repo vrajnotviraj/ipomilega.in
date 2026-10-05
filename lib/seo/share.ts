@@ -1,5 +1,4 @@
 // Share copy for one IPO. The Share dialog and the link-preview metadata both read from here so they match.
-import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { daysFromToday, formatIpoDate } from "@/lib/ipo-format";
 
 export const SITE_URL = "https://www.ipomilega.in";
@@ -94,10 +93,3 @@ export function buildShareDescription({ companyName, score, gmp, opening, closin
     .join(" ");
 }
 
-/** The overall score: the mean of the five section scores, the same way the page body computes it. */
-export function overallScoreOf(
-  analysis: Pick<IpoComprehensiveAnalysis, "fundamentals" | "risk_meter" | "performance" | "flexibility" | "time">
-): number {
-  const sections = [analysis.fundamentals, analysis.risk_meter, analysis.performance, analysis.flexibility, analysis.time];
-  return sections.reduce((sum, section) => sum + (section?.score ?? 0), 0) / sections.length;
-}

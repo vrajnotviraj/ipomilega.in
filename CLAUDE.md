@@ -13,4 +13,5 @@ Read `design-system/DESIGN.md` before any UI, styling, copy or logo change. It d
 - `components/ipos/`: the /ipos list page.
 - `components/shareholder-quota/`: the /ipos/shareholder-quota page (hero, how it works, quota cards and stage track, FAQ) and its teaser on /ipos. Page copy lives in `content.ts`.
 - `components/ipo-shared/`: pieces used on more than one page (logo, odds tiles, lifecycle steps and track).
-- `lib/ipo-format.ts`: parsing and formatting of IPO data, in labelled sections. Kept as one file so the `*.check.mjs` scripts can run it under plain Node.
+- `lib/ipo-format.ts`: parsing and formatting of IPO data, in labelled sections. It has no runtime imports, so `*.check.mjs` scripts run it under plain Node.
+- `lib/ipo-score.ts`: the IPO score: section-score mean, QIB adjustment, score bands and colours. It imports `@/lib/ipo-format`, so `ipo-score.check.mjs` registers a resolve hook for `@/` paths.

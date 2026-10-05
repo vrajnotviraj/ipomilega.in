@@ -52,7 +52,7 @@ function RiskMix({ categories }: { categories: RiskCategory[] }) {
               <span className="font-medium">{title}</span>
               <span className="font-mono font-medium tabular-nums">{items.length}</span>
             </div>
-            <div className="grow-in mt-1.5 h-1.5 rounded-full bg-score-bad" style={{ width: `${(items.length / maxCount) * 100}%` }} aria-hidden="true" />
+            <div className="mt-1.5 h-1.5 rounded-full bg-score-bad" style={{ width: `${(items.length / maxCount) * 100}%` }} aria-hidden="true" />
           </li>
         ))}
       </ul>

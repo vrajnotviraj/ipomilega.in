@@ -1,5 +1,6 @@
 import { HomePageIpoProps } from "@/types/ipo-with-analysis";
-import { formatIssueSize, formatTimes, getIpoType, getPriceBand, parseEstListingPercent, parseGainValue, scoreOf, type Board } from "@/lib/ipo-format";
+import { formatIssueSize, formatTimes, getIpoType, getPriceBand, parseEstListingPercent, parseGainValue, type Board } from "@/lib/ipo-format";
+import { scoreOf } from "@/lib/ipo-score";
 import { ipoLifecycleSteps, type Step } from "@/components/ipo-shared/lifecycle";
 
 export type Status = "Upcoming" | "Open" | "Closed" | "Listed";

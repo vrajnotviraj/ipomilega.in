@@ -355,13 +355,6 @@
   }
 }
 
-/* Draws a line out from its left end. */
-@keyframes grow-x {
-  from {
-    transform: scaleX(0);
-  }
-}
-
 /* Opens out from the centre. */
 @keyframes bloom {
   from {
@@ -400,19 +393,6 @@
     }
     .reveal-stagger > :nth-child(3n) {
       animation-range: entry 16% entry 56%;
-    }
-    /* Bars and timeline lines fill from the left; in a list, each row starts a little later. */
-    .grow-in {
-      transform-origin: left;
-      animation: grow-x linear both;
-      animation-timeline: view();
-      animation-range: entry 40% cover 30%;
-    }
-    li:nth-child(2) > .grow-in {
-      animation-range: entry 60% cover 35%;
-    }
-    li:nth-child(n + 3) > .grow-in {
-      animation-range: entry 80% cover 40%;
     }
     /* The score radar opens from its centre. */
     .bloom {

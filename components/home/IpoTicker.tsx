@@ -1,6 +1,6 @@
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { ProgressLink } from '@/components/progress/ProgressLink';
-import { applyQibAdjustment, getQibSignal, scoreColorOnInk, scoreOf } from '@/lib/ipo-format';
+import { adjustedScoreOf, scoreColorOnInk } from '@/lib/ipo-score';
 
 interface TickerEntry {
   key: string;
@@ -10,18 +10,18 @@ interface TickerEntry {
   status: 'Open' | 'Upcoming';
 }
 
-const entry = (item: HomePageIpoProps, status: TickerEntry['status'], score: number) => ({
+const entry = (item: HomePageIpoProps, status: TickerEntry['status']) => ({
   key: item._id,
   slug: item.ipo?.slug,
   name: item.ipo?.upcoming_ipo_2025,
-  score: score || null,
+  score: adjustedScoreOf(item) || null,
   status,
 });
 
 function toEntries(live: HomePageIpoProps[], upcoming: HomePageIpoProps[]): TickerEntry[] {
   return [
-    ...live.map((item) => entry(item, 'Open', applyQibAdjustment(scoreOf(item), getQibSignal(item.ipo)))),
-    ...upcoming.map((item) => entry(item, 'Upcoming', scoreOf(item))),
+    ...live.map((item) => entry(item, 'Open')),
+    ...upcoming.map((item) => entry(item, 'Upcoming')),
   ].filter((entry): entry is TickerEntry => !!entry.slug && !!entry.name);
 }
 

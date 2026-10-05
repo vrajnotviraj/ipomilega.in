@@ -1,5 +1,5 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
-import { getRiskTextColor } from "@/lib/ipo-format";
+import { getRiskTextColor } from "@/lib/ipo-score";
 import { cn } from "@/lib/utils";
 import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from "@/components/analysis/primitives";
 

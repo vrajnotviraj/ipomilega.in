@@ -1,6 +1,7 @@
 import { AllotmentOddsTiles } from '@/components/ipo-shared/AllotmentOddsTiles';
 import { cn } from '@/lib/utils';
-import { formatGmp, formatIssueSize, formatTimes, gainColor, gainMotion, getQibColor, getQibSignal, parseEstListingPercent, parseGainValue } from '@/lib/ipo-format';
+import { formatGmp, formatIssueSize, formatTimes, gainColor, gainMotion, parseEstListingPercent, parseGainValue } from '@/lib/ipo-format';
+import { getQibColor, getQibSignal } from '@/lib/ipo-score';
 import { CardHeader, IpoCardProps, Stat } from './CardParts';
 
 /** Card for an IPO open for bidding: GMP and demand, allotment odds per category, issue size. */

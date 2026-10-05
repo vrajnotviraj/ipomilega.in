@@ -161,7 +161,7 @@ function DesktopRail({ stations, progress, showTodayChip, todayLabel }: { statio
 
       <div className="relative my-1.5 h-4">
         <div className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-border" />
-        <div className="grow-in absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary" style={{ width: `${progress}%` }} />
+        <div className="absolute left-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-primary" style={{ width: `${progress}%` }} />
         {stations.map((station) => (
           <StationDot key={station.label} reached={station.reached} today={station.isToday} {...atStation(station, "absolute top-1/2 -translate-y-1/2")} />
         ))}
