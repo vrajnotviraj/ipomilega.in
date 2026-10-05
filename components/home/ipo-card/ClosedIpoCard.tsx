@@ -85,7 +85,7 @@ function ExpectedListing({ ipo }: { ipo: Ipo | null }) {
   );
 }
 
-/** "Check allotment" pill once the basis of allotment is out (solid on the day), else the allotment date. */
+/** "Check allotment" pill once the basis of allotment is out (solid on the day), else "out soon" on the day, else the allotment date. */
 function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDays: number | null }) {
   const checkUrl = getAllotmentCheckUrl(ipo);
 
@@ -95,6 +95,8 @@ function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDay
         <Clock className="size-3.5" strokeWidth={2} />
         {allotmentDays === null ? (
           'Allotment date TBA'
+        ) : allotmentDays === 0 ? (
+          'Allotment out soon'
         ) : (
           <span>
             Allotment <span className="font-mono tabular-nums">{formatShortDate(ipo?.ipo_dates?.basis_of_allotment)}</span>

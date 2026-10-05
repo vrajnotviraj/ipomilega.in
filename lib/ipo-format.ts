@@ -134,13 +134,16 @@ export const daysFromToday = (raw: string | null | undefined): number | null => 
 export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string }; closing_date?: string } | null | undefined): number | null =>
   daysFromToday(ipo?.ipo_dates?.ipo_close_date || ipo?.closing_date);
 
-/** Whether bidding has shut: after the close date, or from 5 PM IST on it. Null without a usable close date. */
-export const hasBiddingClosed = (closing: string | null | undefined, now = new Date()): boolean | null => {
-  const date = parseIpoDate(closing);
+/**
+ * Whether the date has passed, counting from 5 PM IST on the day itself: when bidding shuts and allotment comes out.
+ * Null when the date is unknown.
+ */
+export const isPastFivePmIst = (raw: string | null | undefined, now = new Date()): boolean | null => {
+  const date = parseIpoDate(raw);
   if (!date) return null;
-  const toClose = dayNumberInIndia(date) - dayNumberInIndia(now);
+  const days = dayNumberInIndia(date) - dayNumberInIndia(now);
   const hourInIndia = Number(now.toLocaleString('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Kolkata' }));
-  return toClose < 0 || (toClose === 0 && hourInIndia >= 17);
+  return days < 0 || (days === 0 && hourInIndia >= 17);
 };
 
 export type IssueStage = 'upcoming' | 'live' | 'past';
@@ -148,7 +151,7 @@ export type IssueStage = 'upcoming' | 'live' | 'past';
 /** Where an issue is in its bidding window, or null without both dates. */
 export const getIssueStage = (opening: string | null | undefined, closing: string | null | undefined): IssueStage | null => {
   const toOpen = daysFromToday(opening);
-  const closed = hasBiddingClosed(closing);
+  const closed = isPastFivePmIst(closing);
   if (toOpen === null || closed === null) return null;
   if (closed) return 'past';
   if (toOpen > 0) return 'upcoming';
@@ -180,15 +183,14 @@ export const formatShortDateOrToday = (raw: string | undefined): string =>
   daysFromToday(raw) === 0 ? 'Today' : formatShortDate(raw);
 
 /**
- * The exchange's allotment checker once the basis of allotment is out, else null.
+ * The exchange's allotment checker once the basis of allotment is out (5 PM IST on the day), else null.
  * BSE covers mainboard (listed on both) and BSE SME; NSE-only issues need NSE's.
  */
 export const getAllotmentCheckUrl = (ipo: {
   ipo_dates?: { basis_of_allotment?: string };
   ipo_details?: { ipo_listing?: string };
-} | null | undefined): string | null => {
-  const days = daysFromToday(ipo?.ipo_dates?.basis_of_allotment);
-  if (days === null || days > 0) return null;
+} | null | undefined, now = new Date()): string | null => {
+  if (!isPastFivePmIst(ipo?.ipo_dates?.basis_of_allotment, now)) return null;
 
   const listing = ipo?.ipo_details?.ipo_listing || '';
   const isNseOnly = /nse/i.test(listing) && !/bse/i.test(listing);
