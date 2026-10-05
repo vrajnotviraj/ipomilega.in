@@ -65,6 +65,9 @@ function buildDailySeries(rows: GmpSnapshot[]) {
     }));
 }
 
+// Browsers keep the series for a minute, Vercel's edge for five, then serves it stale while refetching.
+const CACHE_HEADERS = { "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600" };
+
 /** The GMP series for an analysis page's trend chart: one point per IST day with that day's latest figure. */
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -94,7 +97,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       days,
       series,
       latest: series.at(-1) ?? null,
-    });
+    }, { headers: CACHE_HEADERS });
   } catch (error) {
     console.error("Error in /api/ipo/[id]/gmp-history:", error);
     return NextResponse.json({ message: "Something went wrong", success: false }, { status: 500 });
