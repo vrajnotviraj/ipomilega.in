@@ -2,11 +2,12 @@ import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
 import { getIpoBuckets } from "@/lib/queries/ipos";
 import { dayNumberInIndia } from "@/lib/ipo-format";
-import { isSkipped, toPlannerIpo, type PlannerIpo } from "@/lib/ipo-planner";
+import { isSkipped, toPlannerIpo, type PlannerIpo } from "@/lib/ipo-planner/ipo";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { PlannerClient } from "@/components/planner/PlannerClient";
 
-export const revalidate = 600;
+// Matches the 5-minute cache on the IPO read; the engine purges both after each write.
+export const revalidate = 300;
 
 const path = "/ipos/planner";
 const title = "IPO planner: where to bid with your money and accounts";
@@ -20,12 +21,10 @@ export const metadata: Metadata = {
   openGraph: { ...openGraphBase(), title, description, url: path },
 };
 
-/** /ipos/planner: the open and upcoming IPOs in planner terms; the plan itself is worked out in the browser as the inputs change. */
+/** /ipos/planner: open and upcoming IPOs in planner terms. The browser works out the plan from them. */
 export default async function PlannerPage() {
   const { live, upcoming } = await getIpoBuckets();
-  const items = [...live, ...upcoming].map((item) =>
-    toPlannerIpo(item._id, item.ipo, item.analysis ? item.analysis.slug || item.ipo.slug || null : null)
-  );
+  const items = [...live, ...upcoming].map(({ _id, ipo, analysis }) => toPlannerIpo(_id, ipo, analysis ? analysis.slug || ipo.slug || null : null));
 
   return (
     <div className="app-container pt-24 sm:pt-28">
