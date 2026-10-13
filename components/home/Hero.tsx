@@ -1,4 +1,6 @@
-/** Home opener: the tagline and what the site shows. */
+import { Walkthrough } from '@/components/home/Walkthrough';
+
+/** Home opener: the tagline, what the site shows and the tour button. */
 export function Hero() {
   return (
     <section className="py-6 sm:py-8">
@@ -8,6 +10,7 @@ export function Hero() {
       <p className="mt-2 max-w-xl text-base text-muted-foreground">
         See the GMP, subscription, your allotment odds and a scored prospectus before you bid.
       </p>
+      <Walkthrough />
     </section>
   );
 }
