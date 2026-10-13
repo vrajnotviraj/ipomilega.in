@@ -4,9 +4,12 @@ import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { formatRupees } from "@/lib/ipo-format";
+import { formatDay } from "@/lib/ipo-planner/days";
+import type { PlannerIpo } from "@/lib/ipo-planner/ipo";
 import type { Goal } from "@/lib/ipo-planner/plan";
 
-export type PlannerInputs = { funds: number; accounts: number; goal: Goal; includeSme: boolean };
+/** `excluded` holds the ids of IPOs the reader keeps out of the plan. */
+export type PlannerInputs = { funds: number; accounts: number; goal: Goal; includeSme: boolean; excluded: string[] };
 
 const MAX_FUNDS = 10_00_00_000;
 const MAX_ACCOUNTS = 10;
@@ -21,8 +24,8 @@ const HINT = "mt-1.5 text-xs text-pretty text-muted-foreground";
 /** "1,00,000" to 100000, capped at ₹10 crore. */
 const rupeesFrom = (text: string) => Math.min(MAX_FUNDS, Number(text.replace(/\D/g, "")) || 0);
 
-/** Money, accounts, goal and the SME switch. */
-export function PlannerForm({ inputs, onChange }: { inputs: PlannerInputs; onChange: (inputs: PlannerInputs) => void }) {
+/** Money, accounts, goal, the SME switch and, under Advanced, IPOs to leave out. */
+export function PlannerForm({ inputs, onChange, ipos }: { inputs: PlannerInputs; onChange: (inputs: PlannerInputs) => void; ipos: PlannerIpo[] }) {
   const [fundsText, setFundsText] = useState(inputs.funds.toLocaleString("en-IN"));
   const set = (change: Partial<PlannerInputs>) => onChange({ ...inputs, ...change });
 
@@ -74,7 +77,46 @@ export function PlannerForm({ inputs, onChange }: { inputs: PlannerInputs; onCha
           </span>
         </span>
       </label>
+
+      <ExclusionList
+        ipos={inputs.includeSme ? ipos : ipos.filter((ipo) => ipo.board !== "SME")}
+        excluded={inputs.excluded}
+        onChange={(excluded) => set({ excluded })}
+      />
     </form>
+  );
+}
+
+/** A folded list of the plannable IPOs; ticking one keeps it out of the plan. */
+function ExclusionList({ ipos, excluded, onChange }: { ipos: PlannerIpo[]; excluded: string[]; onChange: (excluded: string[]) => void }) {
+  if (ipos.length === 0) return null;
+  const toggle = (id: string, leaveOut: boolean) => onChange(leaveOut ? [...excluded, id] : excluded.filter((other) => other !== id));
+  const count = ipos.filter((ipo) => excluded.includes(ipo.id)).length;
+
+  return (
+    <details className="mt-5 border-t border-border pt-4">
+      <summary className="cursor-pointer text-sm font-medium text-foreground">
+        Advanced: leave IPOs out
+        {count > 0 && <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 font-mono text-xs tabular-nums">{count}</span>}
+      </summary>
+      <p className={HINT}>Ticked IPOs stay out of the plan, like ones you&apos;ve already bid on or don&apos;t want.</p>
+      <ul className="mt-3 space-y-1">
+        {ipos.map((ipo) => (
+          <li key={ipo.id}>
+            <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 hover:bg-secondary">
+              <input
+                type="checkbox"
+                checked={excluded.includes(ipo.id)}
+                onChange={(event) => toggle(ipo.id, event.target.checked)}
+                className="size-5 shrink-0 cursor-pointer accent-primary"
+              />
+              <span className="min-w-0 flex-1 truncate text-sm text-foreground">{ipo.name}</span>
+              <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">{formatDay(ipo.closeDay)}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }
 
