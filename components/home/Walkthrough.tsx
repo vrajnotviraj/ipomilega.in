@@ -160,7 +160,7 @@ export function Walkthrough() {
             <h3 className="mb-1 font-display text-lg font-bold tracking-[-0.015em]">{step.title}</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">{step.body}</p>
             <div className="flex items-center justify-between mt-4">
-              <Button variant="ghost" onClick={() => finish()} className="-ml-4 text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" onClick={finish} className="-ml-4 text-muted-foreground hover:text-foreground">
                 Skip tour
               </Button>
               <Button onClick={next} autoFocus>

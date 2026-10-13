@@ -25,7 +25,7 @@ const HINT = "mt-1.5 text-xs text-pretty text-muted-foreground";
 const rupeesFrom = (text: string) => Math.min(MAX_FUNDS, Number(text.replace(/\D/g, "")) || 0);
 
 /** Money, accounts, goal, the SME switch and, under Advanced, IPOs to leave out. */
-export function PlannerForm({ inputs, onChange, ipos }: { inputs: PlannerInputs; onChange: (inputs: PlannerInputs) => void; ipos: PlannerIpo[] }) {
+export function PlannerForm({ inputs, onChange, selectable }: { inputs: PlannerInputs; onChange: (inputs: PlannerInputs) => void; selectable: PlannerIpo[] }) {
   const [fundsText, setFundsText] = useState(inputs.funds.toLocaleString("en-IN"));
   const set = (change: Partial<PlannerInputs>) => onChange({ ...inputs, ...change });
 
@@ -78,11 +78,7 @@ export function PlannerForm({ inputs, onChange, ipos }: { inputs: PlannerInputs;
         </span>
       </label>
 
-      <ExclusionList
-        ipos={inputs.includeSme ? ipos : ipos.filter((ipo) => ipo.board !== "SME")}
-        excluded={inputs.excluded}
-        onChange={(excluded) => set({ excluded })}
-      />
+      <ExclusionList ipos={selectable} excluded={inputs.excluded} onChange={(excluded) => set({ excluded })} />
     </form>
   );
 }
