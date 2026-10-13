@@ -106,8 +106,12 @@ function ExclusionList({ ipos, excluded, onChange }: { ipos: PlannerIpo[]; exclu
                 onChange={(event) => toggle(ipo.id, event.target.checked)}
                 className="size-5 shrink-0 cursor-pointer accent-primary"
               />
-              <span className="min-w-0 flex-1 truncate text-sm text-foreground">{ipo.name}</span>
-              <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">{formatDay(ipo.closeDay)}</span>
+              <span className="min-w-0 flex-1 py-1.5">
+                <span className="block truncate text-sm text-foreground">{ipo.name}</span>
+                <span className="block font-mono text-xs tabular-nums text-muted-foreground">
+                  <span className="text-score-good">GMP +{ipo.gmpPercent}%</span> · closes {formatDay(ipo.closeDay)}
+                </span>
+              </span>
             </label>
           </li>
         ))}
