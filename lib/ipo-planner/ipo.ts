@@ -26,7 +26,7 @@ export type PlannerIpo = {
   gmpPercent: number;
   /** Last day to bid. */
   closeDay: number;
-  /** First day the money of a bid that wasn't allotted can be used again. */
+  /** First day the money of a bid that wasn't allotted can be used again: the refund date, when banks unblock it. */
   freeDay: number;
   /** First day the money of an allotted bid is back, after selling on listing day. */
   cashDay: number;
@@ -63,7 +63,7 @@ export function toPlannerIpo(id: string, ipo: Ipo, slug: string | null): Planner
     board: getIpoType(ipo),
     gmpPercent,
     closeDay,
-    freeDay: addWorkingDays(dayAfterClose(ipo.ipo_dates?.refunds, closeDay) ?? addWorkingDays(closeDay, 2), 1),
+    freeDay: dayAfterClose(ipo.ipo_dates?.refunds, closeDay) ?? addWorkingDays(closeDay, 2),
     cashDay: addWorkingDays(dayAfterClose(ipo.ipo_dates?.ipo_listing_date, closeDay) ?? addWorkingDays(closeDay, 3), 1),
     options,
   };
@@ -84,8 +84,8 @@ function bidOptions(ipo: Ipo, gmpPercent: number): BidOption[] {
   });
 }
 
-/** The date's day number when it falls on or after the close; null for a missing or garbled date like "2026". */
+/** The date's day number when it falls after the close; null for a missing or garbled date like "2026". */
 function dayAfterClose(raw: string | undefined, closeDay: number): number | null {
   const day = dayOf(raw);
-  return day !== null && day >= closeDay ? day : null;
+  return day !== null && day > closeDay ? day : null;
 }

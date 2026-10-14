@@ -2,7 +2,7 @@ const RULES = [
   "Every bid goes in on the last day, so your money stays free as long as it can. Brokers stop taking bids around 3 PM.",
   "Retail and S-HNI winners are drawn by lottery, one minimum application each, so each account bids the minimum. Your odds are about 1 in the subscription.",
   "Until bidding closes, the subscription is estimated from the GMP, or the live figure if that's higher. In past IPOs, retail ended near 1.2x the GMP % and S-HNI near 4x.",
-  "Money comes back the working day after the refund date (about T+3) and pays for later IPOs. An allotted bid's money comes back the day after listing, once you sell.",
+  "Money comes back on the refund date (about T+2) and pays for later IPOs. An allotted bid's money comes back the day after listing, once you sell.",
   "Weekends are skipped, exchange holidays aren't.",
 ];
 
