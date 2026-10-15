@@ -34,8 +34,9 @@ const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
 const isUnfixedValue = (raw: string | undefined | null): boolean =>
   UNFIXED_VALUE_RE.test(raw ?? '');
 
+// A known value has a figure in it: "-", "N/A" and "TBA" are placeholders.
 const isKnownValue = (value: string | undefined): value is string =>
-  !!value && value.toLowerCase() !== 'n/a' && !isUnfixedValue(value);
+  !!value && /\d/.test(value) && !isUnfixedValue(value);
 
 /** The issue price band as "93-99", or null when the feed has none. */
 export const getPriceBand = (ipo: {

@@ -36,7 +36,9 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
         <div className="text-xs text-muted-foreground">Price band</div>
         <div className="font-mono text-sm font-medium tabular-nums text-foreground">{priceText}</div>
       </div>
-      <Score value={score} />
+      <div className="w-14 shrink-0 text-right">
+        <Score value={score} />
+      </div>
     </li>
   );
 }
