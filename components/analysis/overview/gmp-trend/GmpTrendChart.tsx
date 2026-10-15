@@ -13,17 +13,42 @@ const GmpChart = dynamic(() => import("@/components/analysis/overview/gmp-trend/
 });
 
 /** How GMP has moved, one point per IST day: the direction in words, then the line or a table. */
-export function GmpTrendChart({ ipoId, companyName }: { ipoId: string; companyName?: string }) {
-  const points = useGmpHistory(ipoId);
+export function GmpTrendChart({
+  ipoId,
+  companyName,
+  todayGmp,
+  todayAsOf,
+}: {
+  ipoId: string;
+  companyName?: string;
+  todayGmp: number | null;
+  todayAsOf?: string;
+}) {
+  const history = useGmpHistory(ipoId);
+  const noHistory = Array.isArray(history) && history.length === 0;
+  const points = noHistory && todayGmp !== null ? [todayPoint(todayGmp, todayAsOf)] : history;
   const [showTable, setShowTable] = useState(false);
   const hasPoints = Array.isArray(points) && points.length > 0;
+  const live = hasPoints ? points.find((point) => point.live) : undefined;
 
   return (
     <div className="flex h-full flex-col rounded-xl border border-border bg-card p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">GMP trend</h3>
-          <p className="text-xs text-muted-foreground">Unofficial grey market quotes, times in IST</p>
+          <div className="flex items-center gap-2.5">
+            <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">GMP trend</h3>
+            {live && <LiveLabel />}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Unofficial grey market quotes
+            {live ? (
+              <>
+                , as of <span className="font-mono tabular-nums">{formatTime(live.as_of)}</span> IST today
+              </>
+            ) : (
+              ", times in IST"
+            )}
+          </p>
         </div>
         {hasPoints && (
           <button
@@ -39,11 +64,7 @@ export function GmpTrendChart({ ipoId, companyName }: { ipoId: string; companyNa
 
       {points === "failed" && <p className="text-sm text-muted-foreground">GMP history couldn&apos;t be loaded right now.</p>}
       {points === null && <div className="h-[268px] rounded-lg bg-secondary" />}
-      {Array.isArray(points) && points.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          No GMP readings recorded for this issue yet. The trend appears once the grey market has been quoted on more than one day.
-        </p>
-      )}
+      {Array.isArray(points) && points.length === 0 && <NoGmp />}
       {hasPoints && (
         <>
           <TrendSummary points={points} />
@@ -56,6 +77,24 @@ export function GmpTrendChart({ ipoId, companyName }: { ipoId: string; companyNa
           )}
         </>
       )}
+    </div>
+  );
+}
+
+/** Today's quote as the first point of the series. */
+function todayPoint(gmp: number, asOf = new Date().toISOString()): ChartPoint {
+  const now = new Date();
+  return { t: now.toISOString(), ts: now.getTime(), date: "", gmp, est_listing_price: null, est_listing_percent: null, as_of: asOf, live: true, delta: null };
+}
+
+/** A greyed dashed line where the chart goes, with a note that there is no quote yet. */
+function NoGmp() {
+  return (
+    <div className="relative flex min-h-[220px] flex-1 items-center justify-center">
+      <div aria-hidden className="absolute inset-x-0 top-1/2 border-t-2 border-dashed border-muted-foreground/30" />
+      <p className="relative max-w-xs bg-card px-3 text-center text-sm text-muted-foreground">
+        No grey market quote for this issue yet. The trend starts with the first one.
+      </p>
     </div>
   );
 }
@@ -81,7 +120,7 @@ function TrendSummary({ points }: { points: ChartPoint[] }) {
   const direction = DIRECTION[directionOf(change)];
 
   return (
-    <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
       <span className="font-mono text-2xl font-medium tabular-nums">{formatRupees(last.gmp)}</span>
       {points.length === 1 ? (
         <span className="text-sm text-muted-foreground">
@@ -95,12 +134,6 @@ function TrendSummary({ points }: { points: ChartPoint[] }) {
           <span className="font-normal text-muted-foreground">
             since <span className="font-mono tabular-nums">{formatDay(first.ts)}</span>
           </span>
-        </span>
-      )}
-      {last.live && (
-        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <LiveLabel />
-          as of <span className="font-mono tabular-nums">{formatTime(last.as_of)}</span> today
         </span>
       )}
     </div>

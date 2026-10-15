@@ -1,6 +1,6 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Ipo } from "@/types/ipo";
-import { gainColor, getUseOfProceeds, parseEstListingPercent } from "@/lib/ipo-format";
+import { gainColor, getUseOfProceeds, parseEstListingPercent, parseGainValue } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { AllotmentOddsTiles } from "@/components/ipo-shared/AllotmentOddsTiles";
 import { GmpTrendChart } from "@/components/analysis/overview/gmp-trend/GmpTrendChart";
@@ -52,7 +52,14 @@ export function OverviewSection({ analysis, ipo }: { analysis: IpoComprehensiveA
 function OddsAndGmp({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const estimatedListing = <EstimatedListing value={getGmp(analysis, ipo).estimatedListing} />;
   // Fetches its own series in the browser, so the ISR cache does not freeze it.
-  const gmpTrend = <GmpTrendChart ipoId={ipo._id} companyName={analysis.company_name} />;
+  const gmpTrend = (
+    <GmpTrendChart
+      ipoId={ipo._id}
+      companyName={analysis.company_name}
+      todayGmp={parseGainValue(ipo.gmp_ipo_gmp)}
+      todayAsOf={ipo.gmp_updated_at}
+    />
+  );
 
   if (!hasAllotmentOdds(ipo)) {
     return (
