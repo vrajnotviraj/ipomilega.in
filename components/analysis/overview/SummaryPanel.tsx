@@ -58,12 +58,13 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
         </div>
       </div>
 
-      <div className="mt-8 rounded-xl bg-secondary p-4 sm:p-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <Eyebrow>Issue timeline</Eyebrow>
-          <AddToCalendar company={analysis.company_name} dates={issueDates} />
+      {/* Phones show the calendar button under the dates; from sm it sits in the header row. */}
+      <div className="mt-8 grid gap-4 rounded-xl bg-secondary p-4 sm:grid-cols-[1fr_auto] sm:items-center sm:p-6">
+        <Eyebrow>Issue timeline</Eyebrow>
+        <AddToCalendar company={analysis.company_name} dates={issueDates} className="order-last mt-1 sm:order-none sm:mt-0" />
+        <div className="sm:col-span-2">
+          <IssueTimeline {...issueDates} />
         </div>
-        <IssueTimeline {...issueDates} />
       </div>
     </div>
   );
