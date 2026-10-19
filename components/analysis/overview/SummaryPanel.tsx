@@ -12,6 +12,7 @@ import { LiveLabel } from "@/components/ui/LiveLabel";
 import { getAboutLine, getIssueDates, getLotShares, formatMinInvestment, getVerdict } from "@/components/analysis/analysis-facts";
 import { getHeadlineFigures, type HeadlineFigure } from "@/components/analysis/overview/headline-figures";
 import { IssueTimeline } from "@/components/analysis/overview/IssueTimeline";
+import { AddToCalendar } from "@/components/analysis/overview/add-to-calendar/AddToCalendar";
 import { Eyebrow } from "@/components/analysis/primitives";
 
 /**
@@ -20,7 +21,8 @@ import { Eyebrow } from "@/components/analysis/primitives";
  * A server component, so "today" comes from the ISR render.
  */
 export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
-  const { opening, closing } = getIssueDates(analysis);
+  const issueDates = getIssueDates(analysis);
+  const { opening, closing } = issueDates;
   const allotmentUrl = getAllotmentCheckUrl(ipo);
   const gmpUpdatedAt = formatIstTimestamp(ipo.gmp_updated_at);
 
@@ -57,8 +59,11 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
       </div>
 
       <div className="mt-8 rounded-xl bg-secondary p-4 sm:p-6">
-        <Eyebrow className="mb-4">Issue timeline</Eyebrow>
-        <IssueTimeline {...getIssueDates(analysis)} />
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <Eyebrow>Issue timeline</Eyebrow>
+          <AddToCalendar company={analysis.company_name} dates={issueDates} />
+        </div>
+        <IssueTimeline {...issueDates} />
       </div>
     </div>
   );
