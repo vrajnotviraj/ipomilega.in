@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
 import { ScoreMethodology } from "@/components/home/ScoreMethodology";
 
-const title = "About";
+const title = "About IPO Milega: data, scoring and review";
 const description = "What IPO Milega is, where its IPO data comes from, how its content is checked and reviewed, and how we score every RHP/DRHP by the same rules.";
 
 export const metadata: Metadata = {

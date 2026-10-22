@@ -81,18 +81,21 @@ export function buildShareMessage({ companyName, slug, gmp, opening, closing }: 
     .join("\n\n");
 }
 
-/** The one-paragraph version for og:description and twitter:description. */
+/** The one-paragraph version for the meta, og and twitter descriptions. Google cuts at ~155 characters, so the business blurb is the first thing dropped. */
 export function buildShareDescription({ companyName, score, gmp, opening, closing, businessModel }: ShareFacts): string {
-  return [
-    gmpLine(gmp),
-    closingLine(closing, opening),
-    oneLiner(businessModel, 110),
-    score !== undefined && score > 0 ? `Scored ${score.toFixed(1)}/10 from the RHP.` : null,
-    `Read the full ${companyName} IPO analysis on ${SITE_NAME}.`,
-  ]
-    .filter((part): part is string => Boolean(part))
-    // gmpLine never ends in a stop and oneLiner may not, so each part is ended as a sentence before joining.
-    .map((part) => (/[.!?…]$/.test(part) ? part : `${part}.`))
-    .join(" ");
-}
+  const build = (blurb: string | null) =>
+    [
+      gmpLine(gmp),
+      closingLine(closing, opening),
+      blurb,
+      score !== undefined && score > 0 ? `Scored ${score.toFixed(1)}/10 from the RHP.` : null,
+      `Read the full ${companyName} IPO analysis on ${SITE_NAME}.`,
+    ]
+      .filter((part): part is string => Boolean(part))
+      // gmpLine never ends in a stop and oneLiner may not, so each part is ended as a sentence before joining.
+      .map((part) => (/[.!?…]$/.test(part) ? part : `${part}.`))
+      .join(" ");
 
+  const full = build(oneLiner(businessModel, 110));
+  return full.length <= 160 ? full : build(null);
+}
