@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { openGraphBase } from "@/lib/seo/share";
+import { openGraphBase, titleFor } from "@/lib/seo/share";
 import { notFound } from "next/navigation";
 import BlogDisplay from "@/components/blog/BlogDisplay";
 import { getBlogBySlug, getIpoArticles } from "@/lib/queries/blogs";
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   }
 
   return {
-    title: blog.title,
+    title: titleFor(blog.title),
     description: blog.meta_description,
     authors: [{ name: blog.author }],
     alternates: { canonical: `/blogs/${id}` },

@@ -12,6 +12,9 @@ export const openGraphBase = () => ({
   images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${SITE_NAME} - Prospectus analysis for every Indian IPO` }],
 });
 
+/** Keeps the layout's " | IPO Milega" suffix only while the whole title fits Google's ~60 characters; otherwise the suffix would push the page's own words off the end. */
+export const titleFor = (title: string) => (title.length + " | IPO Milega".length > 60 ? { absolute: title } : title);
+
 /** How long is left to apply, e.g. "Today is the last date to apply." */
 export function closingLine(closing: string | null | undefined, opening: string | null | undefined): string | null {
   const toOpen = daysFromToday(opening);
