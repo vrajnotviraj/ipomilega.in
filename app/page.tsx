@@ -66,7 +66,7 @@ export default async function HomePage() {
         <BoardProvider>
           <LiveIposSection ipos={live} upcoming={upcoming} closed={closed} />
           <ClosedIposSection ipos={closed} />
-          <div className="reveal py-2">
+          <div className="py-2">
             <QuotaTeaser count={quota.length} />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-10">

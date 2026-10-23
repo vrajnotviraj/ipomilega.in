@@ -4,7 +4,7 @@ import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { daysFromToday, formatShortDateOrToday } from '@/lib/ipo-format';
 
 const openDateOf = (item: HomePageIpoProps) => item.ipo?.ipo_dates?.ipo_open_date;
-const pill = 'inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-sm font-medium text-foreground press';
+const pill = 'inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-sm font-medium press';
 
 /** Shown in place of the live cards when nothing is open: when the next IPO opens, two counts and two ways onward. */
 export function NothingOpen({ board, upcoming, closed }: { board: string; upcoming: HomePageIpoProps[]; closed: HomePageIpoProps[] }) {
@@ -17,7 +17,8 @@ export function NothingOpen({ board, upcoming, closed }: { board: string; upcomi
     <div className="grid gap-6 rounded-[18px] bg-secondary px-5 py-6 text-foreground sm:grid-cols-[1fr_auto] sm:items-center sm:px-7 sm:py-7">
       <div>
         {next && (
-          <span className="inline-block rounded-full border border-primary/20 px-2.5 py-1 font-mono text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-2.5 py-1 font-mono text-xs text-foreground">
+            <span aria-hidden className="size-1.5 rounded-full bg-brand-accent" />
             Next opens {formatShortDateOrToday(openDateOf(next))}
           </span>
         )}
@@ -39,10 +40,10 @@ export function NothingOpen({ board, upcoming, closed }: { board: string; upcomi
         </dl>
       </div>
       <div className="flex flex-wrap gap-3 sm:justify-end">
-        <Link href="/ipos?filter=upcoming" className={`${pill} border-border bg-card`}>
+        <Link href="/ipos?filter=upcoming" className={`${pill} border-primary bg-primary text-primary-foreground`}>
           See upcoming <ArrowRight aria-hidden className="size-4" strokeWidth={2} />
         </Link>
-        <Link href="/ipos?filter=closed" className={`${pill} border-primary/20`}>
+        <Link href="/ipos?filter=closed" className={`${pill} border-primary/20 text-foreground`}>
           Check allotment
         </Link>
       </div>
