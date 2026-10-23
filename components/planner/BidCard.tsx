@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 /** A bid due on the day it sits under: the IPO, its category, which accounts, the money, the odds and when the money comes back. */
 export function BidCard({ app }: { app: Application }) {
   const { ipo, option } = app;
+  const note = noteFor(app);
   return (
     <li className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-center gap-3">
@@ -40,10 +41,10 @@ export function BidCard({ app }: { app: Application }) {
         <Fact label="Money back" value={formatDay(ipo.freeDay)} />
       </dl>
 
-      {noteFor(app) && (
+      {note && (
         <p className="mt-3 flex gap-2 rounded-lg bg-secondary px-3 py-2 text-xs text-pretty text-foreground">
           <Info aria-hidden className="mt-px size-3.5 shrink-0 text-muted-foreground" strokeWidth={2.25} />
-          {noteFor(app)}
+          {note}
         </p>
       )}
 

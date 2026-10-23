@@ -35,6 +35,9 @@ type Batch = { closeDay: number; freeDay: number; choices: Choice[] };
 
 const NO_BIDS: Choice = { cost: 0, worth: 0, applications: [] };
 
+// shortcut: past this many branches the plan is the best found so far, not proven best. Raise it if plans look weak.
+const MAX_BRANCHES = 200_000;
+
 /** The bids worth the most for the goal, never blocking more than `funds` at once and bidding once per account per IPO. */
 export function planIpos(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders = {}): Plan {
   const batches = batchBySchedule(ipos).map((batchIpos) => ({
@@ -59,7 +62,7 @@ function batchBySchedule(ipos: PlannerIpo[]): PlannerIpo[][] {
 function bestChoices(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders): Choice[] {
   let choices = [NO_BIDS];
   for (const ipo of ipos) {
-    const ways = waysToBid(ipo, accounts, goal, Math.min(accounts, holders[ipo.id] ?? 0));
+    const ways = keepBestPerCost(waysToBid(ipo, accounts, goal, Math.min(accounts, holders[ipo.id] ?? 0)).filter((way) => way.cost <= funds));
     const combined = choices.flatMap((choice) => ways.map((way) => join(choice, way))).filter((choice) => choice.cost <= funds);
     choices = keepBestPerCost(combined);
   }
@@ -129,7 +132,10 @@ function pickOnePerBatch(batches: Batch[], funds: number): Choice[] {
   const mostStillPossible = (from: number) =>
     batches.slice(from).reduce((sum, batch) => sum + (batch.choices.find((c) => c.cost <= funds - blockedOn(batch.closeDay))?.worth ?? 0), 0);
 
+  let branches = 0;
+
   function tryBatch(i: number, worthSoFar: number) {
+    if (++branches > MAX_BRANCHES) return;
     if (i === batches.length) {
       if (worthSoFar > best.worth + 1e-9) best = { worth: worthSoFar, picks: [...picked] };
       return;
