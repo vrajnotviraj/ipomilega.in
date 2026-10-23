@@ -6,6 +6,7 @@ import { PastIposSection } from '@/components/home/PastIposSection';
 import { UpcomingIposSection } from '@/components/home/UpcomingIpos';
 import { ScoreMethodology } from '@/components/home/ScoreMethodology';
 import { getIpoBuckets } from '@/lib/queries/ipos';
+import { QuotaTeaser } from '@/components/shareholder-quota/QuotaTeaser';
 import { getShareholderQuotaIpos } from '@/lib/queries/shareholder-quota';
 import { getFeaturedBlogs } from '@/lib/queries/blogs';
 import { Metadata } from 'next';
@@ -65,6 +66,9 @@ export default async function HomePage() {
         <BoardProvider>
           <LiveIposSection ipos={live} />
           <ClosedIposSection ipos={closed} />
+          <div className="reveal py-2">
+            <QuotaTeaser count={quota.length} />
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-10">
             <div className="reveal min-w-0">
               <UpcomingIposSection ipos={upcoming} quota={quota} />
