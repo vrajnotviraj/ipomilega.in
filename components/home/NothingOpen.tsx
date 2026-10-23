@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
-import { daysFromToday, formatShortDateOrToday } from '@/lib/ipo-format';
+import { daysFromToday, formatShortDateOrToday } from '@/lib/ipo/format';
 
 const openDateOf = (item: HomePageIpoProps) => item.ipo?.ipo_dates?.ipo_open_date;
 const pill = 'inline-flex min-h-11 items-center gap-2 rounded-full border px-5 text-sm font-medium press';

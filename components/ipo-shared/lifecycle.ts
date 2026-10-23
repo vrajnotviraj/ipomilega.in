@@ -1,5 +1,5 @@
 import type { HomePageIpoProps } from "@/types/ipo-with-analysis";
-import { daysFromToday, formatShortDate } from "@/lib/ipo-format";
+import { daysFromToday, formatShortDate } from "@/lib/ipo/format";
 
 export type StepName = "Open" | "Close" | "Allot" | "Demat" | "List";
 export type StepState = "done" | "today" | "future";

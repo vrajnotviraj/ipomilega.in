@@ -1,4 +1,4 @@
-import { getIpoType, parseEstListingPercent } from "@/lib/ipo-format";
+import { getIpoType, parseEstListingPercent } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { matchesStatus } from "@/components/ipos/model/query";
 import type { Filters, Row } from "@/components/ipos/model/types";

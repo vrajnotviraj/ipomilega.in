@@ -1,4 +1,4 @@
-import { formatRupees, type UseOfProceeds } from "@/lib/ipo-format";
+import { formatRupees, type UseOfProceeds } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "@/components/analysis/primitives";
 

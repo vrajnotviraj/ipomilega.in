@@ -1,4 +1,4 @@
-import { parseIpoDate } from "@/lib/ipo-format";
+import { parseIpoDate } from "@/lib/ipo/format";
 
 export type IssueDates = Record<"opening" | "closing" | "allotment" | "listing", string>;
 

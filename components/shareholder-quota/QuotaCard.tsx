@@ -2,7 +2,7 @@ import { ArrowUpRight, FileText } from "lucide-react";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { StageTrack } from "@/components/shareholder-quota/StageTrack";
 import { STAGE_NOTE } from "@/components/shareholder-quota/content";
-import { daysFromToday, formatIpoDate, isPastFivePmIst } from "@/lib/ipo-format";
+import { daysFromToday, formatIpoDate, isPastFivePmIst } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import type { QuotaIpo } from "@/lib/queries/shareholder-quota";
 

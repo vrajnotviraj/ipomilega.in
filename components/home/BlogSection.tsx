@@ -2,7 +2,7 @@ import { PenBox } from 'lucide-react';
 import { Blog } from '@/types/ipo';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PostCard } from '@/components/blog/PostCard';
-import { toSummary } from '@/lib/blog-format';
+import { toSummary } from '@/lib/blog/format';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import { SectionHeading } from '@/components/home/SectionHeading';
 

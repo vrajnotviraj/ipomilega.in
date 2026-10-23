@@ -1,4 +1,4 @@
-import { formatGmp, gainColor, gainMotion } from "@/lib/ipo-format";
+import { formatGmp, gainColor, gainMotion } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { LifecycleTrack } from "@/components/ipo-shared/LifecycleTrack";
 import { heldGainOf, isListed, listingGainOf } from "@/components/ipos/model/cells";

@@ -1,6 +1,6 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Ipo } from "@/types/ipo";
-import { gainColor, getUseOfProceeds, parseEstListingPercent, parseGainValue } from "@/lib/ipo-format";
+import { gainColor, getUseOfProceeds, parseEstListingPercent, parseGainValue } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { AllotmentOddsTiles } from "@/components/ipo-shared/AllotmentOddsTiles";
 import { GmpTrendChart } from "@/components/analysis/overview/gmp-trend/GmpTrendChart";

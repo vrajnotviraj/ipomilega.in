@@ -1,4 +1,4 @@
-import { eventTimes, type CalendarEvent } from "@/lib/ipo-calendar/events";
+import { eventTimes, type CalendarEvent } from "@/lib/ipo/calendar/events";
 
 /** A link that opens Google Calendar with the event filled in. Google takes one event per link. */
 export function googleCalendarUrl(event: CalendarEvent): string {

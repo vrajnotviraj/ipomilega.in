@@ -1,5 +1,5 @@
 import type { Ipo } from "@/types/ipo";
-import { parseGainValue } from "@/lib/ipo-format";
+import { parseGainValue } from "@/lib/ipo/format";
 import { Eyebrow } from "@/components/analysis/primitives";
 
 type Row = { label: string; times: number };

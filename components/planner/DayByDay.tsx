@@ -1,6 +1,6 @@
-import { formatRupees } from "@/lib/ipo-format";
-import { formatDay } from "@/lib/ipo-planner/days";
-import type { Application } from "@/lib/ipo-planner/plan";
+import { formatRupees } from "@/lib/ipo/format";
+import { formatDay } from "@/lib/ipo/planner/days";
+import type { Application } from "@/lib/ipo/planner/plan";
 import { BidCard } from "@/components/planner/BidCard";
 import { SectionTitle } from "@/components/planner/format";
 import { cn } from "@/lib/utils";

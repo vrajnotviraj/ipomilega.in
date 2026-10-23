@@ -12,7 +12,7 @@ import {
   getAllotmentRatio,
   getProbabilityColor,
   type AllotmentCategoryDef,
-} from "@/lib/ipo-format";
+} from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_ICONS: Record<AllotmentCategoryDef["key"], typeof User> = { retail: User, shni: Users, bhni: Landmark };

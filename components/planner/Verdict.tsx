@@ -1,5 +1,5 @@
-import { formatRupees } from "@/lib/ipo-format";
-import type { Goal, Plan } from "@/lib/ipo-planner/plan";
+import { formatRupees } from "@/lib/ipo/format";
+import type { Goal, Plan } from "@/lib/ipo/planner/plan";
 import { percent } from "@/components/planner/format";
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;

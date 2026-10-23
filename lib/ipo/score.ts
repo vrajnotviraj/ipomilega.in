@@ -1,6 +1,6 @@
 import type { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import type { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
-import { getDaysUntilClosing, getIpoType, parseGainValue } from '@/lib/ipo-format';
+import { getDaysUntilClosing, getIpoType, parseGainValue } from '@/lib/ipo/format';
 
 // ---------- Scores ----------
 

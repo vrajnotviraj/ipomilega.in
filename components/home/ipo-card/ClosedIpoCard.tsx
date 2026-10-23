@@ -12,7 +12,7 @@ import {
   gmpGainPerApplication,
   parseGainValue,
   signedPercent,
-} from '@/lib/ipo-format';
+} from '@/lib/ipo/format';
 import { cn } from '@/lib/utils';
 import { LifecycleTrack } from '@/components/ipo-shared/LifecycleTrack';
 import { afterCloseSteps } from '@/components/ipo-shared/lifecycle';

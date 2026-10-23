@@ -1,4 +1,4 @@
-import type { BidOption, PlannerIpo } from '@/lib/ipo-planner/ipo';
+import type { BidOption, PlannerIpo } from '@/lib/ipo/planner/ipo';
 
 export type Goal = 'gain' | 'allotments';
 

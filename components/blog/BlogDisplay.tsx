@@ -12,7 +12,7 @@ import MarkdownRenderer from "@/components/blog/MarkDown";
 import { RelatedIpoCard } from "@/components/blog/RelatedIpoCard";
 import { ShareLinks } from "@/components/blog/ShareLinks";
 import { ShareButton } from "@/components/ui/ShareButton";
-import { formatBlogDate, readTimeOf } from "@/lib/blog-format";
+import { formatBlogDate, readTimeOf } from "@/lib/blog/format";
 import { headingsOf } from "@/components/blog/headings";
 
 type Heading = { id: string; text: string };

@@ -1,6 +1,6 @@
 import type { Ipo } from '@/types/ipo';
-import { ALLOTMENT_CATEGORIES, getAllotmentRatio, getIpoType, getMarketLotRows, parseEstListingPercent, parseGainValue } from '@/lib/ipo-format';
-import { addWorkingDays, dayOf } from '@/lib/ipo-planner/days';
+import { ALLOTMENT_CATEGORIES, getAllotmentRatio, getIpoType, getMarketLotRows, parseEstListingPercent, parseGainValue } from '@/lib/ipo/format';
+import { addWorkingDays, dayOf } from '@/lib/ipo/planner/days';
 
 export type Category = 'retail' | 'shni';
 

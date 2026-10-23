@@ -7,7 +7,7 @@ import {
   parseEstListingPercent,
   formatRupees,
   signedPercent,
-} from "@/lib/ipo-format";
+} from "@/lib/ipo/format";
 import { gmpFigure, type ShareFacts } from "@/lib/seo/share";
 
 type SectionKey = "overview" | "timing" | "financials" | "risk" | "performance" | "flexibility";

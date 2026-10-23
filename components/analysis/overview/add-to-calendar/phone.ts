@@ -1,5 +1,5 @@
-import { toIcs } from "@/lib/ipo-calendar/ics";
-import type { CalendarEvent } from "@/lib/ipo-calendar/events";
+import { toIcs } from "@/lib/ipo/calendar/ics";
+import type { CalendarEvent } from "@/lib/ipo/calendar/events";
 
 /** True on iPhone and iPad. iPadOS reports itself as a Mac, so a touch screen gives it away. */
 export const isIos = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);

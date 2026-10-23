@@ -1,5 +1,5 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
-import { parseGainValue } from "@/lib/ipo-format";
+import { parseGainValue } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "@/components/analysis/primitives";
 

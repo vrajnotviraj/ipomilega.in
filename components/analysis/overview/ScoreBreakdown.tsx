@@ -1,8 +1,8 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { cn } from "@/lib/utils";
 import { getScoreAxes } from "@/components/analysis/analysis-facts";
-import { gainColorOnInk, gainMotion } from "@/lib/ipo-format";
-import { overallScoreOf, scoreColorOnInk } from "@/lib/ipo-score";
+import { gainColorOnInk, gainMotion } from "@/lib/ipo/format";
+import { overallScoreOf, scoreColorOnInk } from "@/lib/ipo/score";
 import { DotScale } from "@/components/analysis/primitives";
 
 type Axis = { label: string; score: number };

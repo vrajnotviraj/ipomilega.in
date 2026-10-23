@@ -1,8 +1,8 @@
 import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
 import { getIpoBuckets } from "@/lib/queries/ipos";
-import { dayNumberInIndia } from "@/lib/ipo-format";
-import { isSkipped, toPlannerIpo, type PlannerIpo } from "@/lib/ipo-planner/ipo";
+import { dayNumberInIndia } from "@/lib/ipo/format";
+import { isSkipped, toPlannerIpo, type PlannerIpo } from "@/lib/ipo/planner/ipo";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { PlannerClient } from "@/components/planner/PlannerClient";
 

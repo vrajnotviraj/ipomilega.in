@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, type RefObject } from "react";
-import { googleCalendarUrl } from "@/lib/ipo-calendar/google";
-import type { CalendarEvent } from "@/lib/ipo-calendar/events";
+import { googleCalendarUrl } from "@/lib/ipo/calendar/google";
+import type { CalendarEvent } from "@/lib/ipo/calendar/events";
 
 /** The desktop dropdown: one Google Calendar link per date, then all dates as an .ics file. */
 export function GoogleCalendarMenu({ events, containerRef, onGoogleClick, onIcsClick, onClose }: {

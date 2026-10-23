@@ -1,6 +1,6 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { FinancialReport, Ipo } from "@/types/ipo";
-import { formatRupees } from "@/lib/ipo-format";
+import { formatRupees } from "@/lib/ipo/format";
 import { Prose, SectionHeading } from "@/components/analysis/primitives";
 import { FinancialTrendChart } from "@/components/analysis/sections/financials/FinancialTrendChart";
 import { getFinancialHighlights, sortReports } from "@/components/analysis/sections/financials/financial-figures";

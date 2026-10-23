@@ -13,7 +13,7 @@ import {
   signedPercent,
   parseEstListingPercent,
   parseGainValue,
-} from "@/lib/ipo-format";
+} from "@/lib/ipo/format";
 import { getGmp, getIssueDates, getLotShares, getMinInvestment, formatMinInvestment } from "@/components/analysis/analysis-facts";
 
 export interface HeadlineFigure {

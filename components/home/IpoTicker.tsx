@@ -1,6 +1,6 @@
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { ProgressLink } from '@/components/progress/ProgressLink';
-import { adjustedScoreOf, scoreColorOnInk } from '@/lib/ipo-score';
+import { adjustedScoreOf, scoreColorOnInk } from '@/lib/ipo/score';
 
 interface TickerEntry {
   key: string;

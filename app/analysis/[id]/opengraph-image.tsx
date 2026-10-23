@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 import { getAnalysisBySlug } from "@/lib/queries/ipos";
 import { closingLine, gmpFigure } from "@/lib/seo/share";
-import { formatIpoDate, getPriceBand } from "@/lib/ipo-format";
-import { adjustedScoreOf, scoreBand, type ScoreBand } from "@/lib/ipo-score";
+import { formatIpoDate, getPriceBand } from "@/lib/ipo/format";
+import { adjustedScoreOf, scoreBand, type ScoreBand } from "@/lib/ipo/score";
 import { BrandMark, CHALK, INK, MUTED, OG_SIZE } from "@/lib/seo/og";
 import RootImage from "@/app/opengraph-image";
 

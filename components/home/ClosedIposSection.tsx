@@ -5,7 +5,7 @@ import { ClosedIpoCard } from '@/components/home/ipo-card/ClosedIpoCard';
 import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
 import { Clock } from 'lucide-react';
-import { getIpoType, gmpOf } from '@/lib/ipo-format';
+import { getIpoType, gmpOf } from '@/lib/ipo/format';
 import { afterCloseSteps, lifecycleCaption, type Step } from '@/components/ipo-shared/lifecycle';
 
 /** Days to the step an IPO is on (the one due today, else the next dated one), with earlier steps first on the same day. */

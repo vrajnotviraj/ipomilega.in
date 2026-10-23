@@ -1,5 +1,5 @@
 import type { HomePageIpoProps } from "@/types/ipo-with-analysis";
-import type { Board } from "@/lib/ipo-format";
+import type { Board } from "@/lib/ipo/format";
 import type { Step } from "@/components/ipo-shared/lifecycle";
 
 export type Status = "Upcoming" | "Open" | "Closed" | "Listed";

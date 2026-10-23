@@ -1,4 +1,4 @@
-import { eventTimes, utcStamp, type CalendarEvent } from "@/lib/ipo-calendar/events";
+import { eventTimes, utcStamp, type CalendarEvent } from "@/lib/ipo/calendar/events";
 
 /** Escapes text for an .ics field: backslashes, semicolons, commas and line breaks. */
 const escapeText = (text: string) => text.replace(/[\\;,]/g, (char) => `\\${char}`).replace(/\n/g, "\\n");

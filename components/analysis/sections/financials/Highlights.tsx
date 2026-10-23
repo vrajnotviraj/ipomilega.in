@@ -1,5 +1,5 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
-import { gainColor, gainMotion } from "@/lib/ipo-format";
+import { gainColor, gainMotion } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "@/components/analysis/primitives";
 import type { FinancialHighlight } from "@/components/analysis/sections/financials/financial-figures";

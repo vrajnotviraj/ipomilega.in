@@ -3,9 +3,9 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import { CalendarClock } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { formatRupees } from "@/lib/ipo-format";
-import type { PlannerIpo, SkippedIpo } from "@/lib/ipo-planner/ipo";
-import { planIpos } from "@/lib/ipo-planner/plan";
+import { formatRupees } from "@/lib/ipo/format";
+import type { PlannerIpo, SkippedIpo } from "@/lib/ipo/planner/ipo";
+import { planIpos } from "@/lib/ipo/planner/plan";
 import { PlannerForm, type PlannerInputs } from "@/components/planner/PlannerForm";
 import { Verdict } from "@/components/planner/Verdict";
 import { DayByDay } from "@/components/planner/DayByDay";

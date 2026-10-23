@@ -2,8 +2,8 @@ import { ArrowRight, Clock, FileText } from 'lucide-react';
 import { AllotmentOddsTiles } from '@/components/ipo-shared/AllotmentOddsTiles';
 import { ProgressLink } from '@/components/progress/ProgressLink';
 import { cn } from '@/lib/utils';
-import { formatGmp, formatIssueSize, formatTimes, gainColor, gainMotion, parseEstListingPercent, parseGainValue } from '@/lib/ipo-format';
-import { getQibColor, getQibSignal, scoreOf } from '@/lib/ipo-score';
+import { formatGmp, formatIssueSize, formatTimes, gainColor, gainMotion, parseEstListingPercent, parseGainValue } from '@/lib/ipo/format';
+import { getQibColor, getQibSignal, scoreOf } from '@/lib/ipo/score';
 import { CardHeader, IpoCardProps, Stat } from './CardParts';
 
 /** Card for an IPO open for bidding. Shows demand and odds once bids are in, else GMP and a link to the analysis. */

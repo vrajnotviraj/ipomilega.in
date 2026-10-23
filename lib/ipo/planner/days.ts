@@ -1,4 +1,4 @@
-import { DAY_MS, dayNumberInIndia, parseIpoDate } from '@/lib/ipo-format';
+import { DAY_MS, dayNumberInIndia, parseIpoDate } from '@/lib/ipo/format';
 
 /** The planner counts time in whole days (see dayNumberInIndia), so a date is a plain number. */
 

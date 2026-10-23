@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { dayNumberInIndia, daysFromToday, formatShortDate, parseIpoDate } from "@/lib/ipo-format";
+import { dayNumberInIndia, daysFromToday, formatShortDate, parseIpoDate } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 
 type Align = "left" | "center" | "right";

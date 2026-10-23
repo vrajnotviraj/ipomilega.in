@@ -1,4 +1,4 @@
-import { getIpoType } from "@/lib/ipo-format";
+import { getIpoType } from "@/lib/ipo/format";
 import { ipoLifecycleSteps } from "@/components/ipo-shared/lifecycle";
 import type { HomePageIpoProps } from "@/types/ipo-with-analysis";
 import { nameOf } from "@/components/ipos/model/cells";

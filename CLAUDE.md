@@ -14,7 +14,7 @@ Read `design-system/DESIGN.md` before any UI, styling, copy or logo change. It d
 - `components/shareholder-quota/`: the /ipos/shareholder-quota page (hero, how it works, quota cards and stage track, FAQ) and its teaser on /ipos. Page copy lives in `content.ts`.
 - `components/planner/`: the /ipos/planner page. `PlannerClient` holds the inputs and lays out the form, verdict, day-by-day bids, money timeline and left-out list, one file each.
 - `components/ipo-shared/`: pieces used on more than one page (logo, odds tiles, lifecycle steps and track).
-- `lib/ipo-format.ts`: parsing and formatting of IPO data, in labelled sections. It has no runtime imports, so `*.check.mjs` scripts run it under plain Node.
-- `lib/ipo-planner/`: the IPO planner. `days.ts` counts working days, `ipo.ts` turns an IPO into bid options and dates, `plan.ts` picks the bids. `plan.check.mjs` checks it against brute force.
-- `lib/ipo-calendar/`: the Add to calendar export. `events.ts` turns an IPO's dates into events, `ics.ts` writes the .ics file, `google.ts` builds Google Calendar links. `calendar.check.mjs` checks them.
-- `lib/ipo-score.ts`: the IPO score: section-score mean, QIB adjustment, score bands and colours. It imports `@/lib/ipo-format`, so `ipo-score.check.mjs` registers a resolve hook for `@/` paths.
+- `lib/ipo/format.ts`: parsing and formatting of IPO data, in labelled sections. It has no runtime imports, so `*.check.mjs` scripts run it under plain Node.
+- `lib/ipo/planner/`: the IPO planner. `days.ts` counts working days, `ipo.ts` turns an IPO into bid options and dates, `plan.ts` picks the bids. `plan.check.mjs` checks it against brute force.
+- `lib/ipo/calendar/`: the Add to calendar export. `events.ts` turns an IPO's dates into events, `ics.ts` writes the .ics file, `google.ts` builds Google Calendar links. `calendar.check.mjs` checks them.
+- `lib/ipo/score.ts`: the IPO score: section-score mean, QIB adjustment, score bands and colours. It imports `@/lib/ipo/format`, so `score.check.mjs` registers a resolve hook for `@/` paths.

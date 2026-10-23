@@ -1,7 +1,7 @@
 import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { DAY_MS, gainColor } from "@/lib/ipo-format";
+import { DAY_MS, gainColor } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
-import { formatRupees } from "@/lib/ipo-format";
+import { formatRupees } from "@/lib/ipo/format";
 import { AXIS_TICK, dotFill, formatDay, formatDelta, formatTime, niceAxis, type ChartPoint } from "@/components/analysis/overview/gmp-trend/gmp-history";
 
 function GmpTooltip({ point }: { point: ChartPoint }) {

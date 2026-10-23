@@ -12,8 +12,8 @@ import { Score } from '@/components/ui/Score';
 import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatIpoDate, formatShortDateOrToday, getIpoType, getPriceBand } from '@/lib/ipo-format';
-import { scoreOf } from '@/lib/ipo-score';
+import { formatIpoDate, formatShortDateOrToday, getIpoType, getPriceBand } from '@/lib/ipo/format';
+import { scoreOf } from '@/lib/ipo/score';
 
 const MAX_ROWS = 6;
 type Tab = 'all' | 'quota';

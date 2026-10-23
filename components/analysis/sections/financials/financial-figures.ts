@@ -1,5 +1,5 @@
 import type { FinancialReport } from "@/types/ipo";
-import { DAY_MS, formatIpoDate, parseGainValue, parseIpoDate } from "@/lib/ipo-format";
+import { DAY_MS, formatIpoDate, parseGainValue, parseIpoDate } from "@/lib/ipo/format";
 
 export interface FinancialHighlight {
   label: string;

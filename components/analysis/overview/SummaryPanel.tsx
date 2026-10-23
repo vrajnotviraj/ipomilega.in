@@ -1,10 +1,10 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Ipo } from "@/types/ipo";
 import { ArrowUpRight } from "lucide-react";
-import { formatIssueSize, formatIstTimestamp, formatPriceBand, getAllotmentCheckUrl, getIpoType, getIssueStage, type IssueStage } from "@/lib/ipo-format";
-import { applyQibAdjustment, describeQibAdjustment, getQibSignal, getRiskTextColor, getScoreTrustLabel, scoreOf } from "@/lib/ipo-score";
+import { formatIssueSize, formatIstTimestamp, formatPriceBand, getAllotmentCheckUrl, getIpoType, getIssueStage, type IssueStage } from "@/lib/ipo/format";
+import { applyQibAdjustment, describeQibAdjustment, getQibSignal, getRiskTextColor, getScoreTrustLabel, scoreOf } from "@/lib/ipo/score";
 import { RESEARCH_AUTHOR } from "@/lib/seo/json-ld";
-import { formatBlogDate } from "@/lib/blog-format";
+import { formatBlogDate } from "@/lib/blog/format";
 import { cn } from "@/lib/utils";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";

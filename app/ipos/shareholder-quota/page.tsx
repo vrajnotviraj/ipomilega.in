@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
-import { formatIstTimestamp } from "@/lib/ipo-format";
+import { formatIstTimestamp } from "@/lib/ipo/format";
 import { getShareholderQuotaIpos } from "@/lib/queries/shareholder-quota";
 import { collectionJsonLd, JsonLd } from "@/lib/seo/json-ld";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";

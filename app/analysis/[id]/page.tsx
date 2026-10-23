@@ -6,7 +6,7 @@ import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis"
 import { getAnalysisBySlug, getAnalysisSlugs, getIpoNameBySlug } from '@/lib/queries/ipos';
 import { getIpoArticles } from '@/lib/queries/blogs';
 import { buildShareDescription, openGraphBase, SITE_NAME, SITE_URL, titleFor } from '@/lib/seo/share';
-import { adjustedScoreOf } from '@/lib/ipo-score';
+import { adjustedScoreOf } from '@/lib/ipo/score';
 import { JsonLd, ORGANIZATION_ID, researchAuthor } from '@/lib/seo/json-ld';
 import { FileSearch } from 'lucide-react';
 import { ArrowLink } from '@/components/ui/ArrowLink';

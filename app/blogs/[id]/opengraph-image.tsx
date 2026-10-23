@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { getBlogBySlug } from "@/lib/queries/blogs";
 import { publishedAtOf } from "@/lib/seo/news-sitemap";
 import { BrandMark, CHALK, INK, MARIGOLD, MUTED, OG_SIZE } from "@/lib/seo/og";
-import { formatBlogDate, readTimeOf } from "@/lib/blog-format";
+import { formatBlogDate, readTimeOf } from "@/lib/blog/format";
 import RootImage from "@/app/opengraph-image";
 
 // Per-article preview card: category, title, date and read time on the C1 chalk. Engine articles have no cover image, so this is their only picture.

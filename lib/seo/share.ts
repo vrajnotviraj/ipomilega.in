@@ -1,5 +1,5 @@
 // Share copy for one IPO. The Share dialog and the link-preview metadata both read from here so they match.
-import { daysFromToday, formatIpoDate } from "@/lib/ipo-format";
+import { daysFromToday, formatIpoDate } from "@/lib/ipo/format";
 
 export const SITE_URL = "https://www.ipomilega.in";
 export const SITE_NAME = "IPO Milega";

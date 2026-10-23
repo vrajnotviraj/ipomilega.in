@@ -1,7 +1,7 @@
 import 'server-only';
 import { cached } from '@/lib/db/cache';
 import { getDb } from '@/lib/db/mongo';
-import { isPastFivePmIst } from '@/lib/ipo-format';
+import { isPastFivePmIst } from '@/lib/ipo/format';
 
 /** Strongest first: dates set (RHP filed), SEBI approved, DRHP filed, announced. */
 export const QUOTA_STAGES = ['dates', 'approved', 'filed', 'announced'] as const;

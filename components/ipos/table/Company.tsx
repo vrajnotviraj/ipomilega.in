@@ -1,6 +1,6 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
-import { getIpoType } from "@/lib/ipo-format";
+import { getIpoType } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { hasAnalysis } from "@/components/ipos/model/cells";
 import type { Row, Status } from "@/components/ipos/model/types";

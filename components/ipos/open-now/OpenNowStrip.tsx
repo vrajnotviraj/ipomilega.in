@@ -1,8 +1,8 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { LiveLabel } from "@/components/ui/LiveLabel";
-import { formatGmp, gainColor } from "@/lib/ipo-format";
-import { scoreOf } from "@/lib/ipo-score";
+import { formatGmp, gainColor } from "@/lib/ipo/format";
+import { scoreOf } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
 import { ScorePill } from "@/components/ipos/table/ScorePill";
 import { daysToStep, gmpOf, hasAnalysis, subscribedOf } from "@/components/ipos/model/cells";

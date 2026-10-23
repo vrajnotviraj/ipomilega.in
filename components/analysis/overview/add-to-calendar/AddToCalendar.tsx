@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { CalendarPlus } from "lucide-react";
-import { issueEvents, type CalendarEvent, type IssueDates } from "@/lib/ipo-calendar/events";
+import { issueEvents, type CalendarEvent, type IssueDates } from "@/lib/ipo/calendar/events";
 import { GoogleCalendarMenu } from "@/components/analysis/overview/add-to-calendar/GoogleCalendarMenu";
 import { isPhone, openIcsFile } from "@/components/analysis/overview/add-to-calendar/phone";
 import { trackCalendarClick } from "@/components/analysis/overview/add-to-calendar/track";

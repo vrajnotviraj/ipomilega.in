@@ -7,7 +7,7 @@ import { Ipo, IpoIssue } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { stripCitations } from '@/lib/queries/citations';
-import { daysFromToday, formatIssueSize, getIpoType, isPastFivePmIst, parseIpoDate } from '@/lib/ipo-format';
+import { daysFromToday, formatIssueSize, getIpoType, isPastFivePmIst, parseIpoDate } from '@/lib/ipo/format';
 
 // The IPO fields the site may read: an allowlist, so where the engine scraped each fact from (raw captures, source
 // names, source links, scrape times) never leaves the database, and a field the engine adds stays private until listed here.
@@ -18,7 +18,7 @@ const PUBLIC_IPO_FIELDS = [
   'ipo_details.issue_size', 'ipo_details.issue_type', 'ipo_details.ipo_listing', 'ipo_details.fresh_issue',
   'ipo_details.offer_for_sale', 'ipo_details.lot_size',
   'listing_price', 'listing_gain', 'last_price',
-  'total_sr', 'qib_sr', 'nii_sr', 'snii_sr', 'bnii_sr', 'rii_sr', 'subscription_date_range', 'subscription_status',
+  'total_sr', 'qib_sr', 'nii_sr', 'snii_sr', 'bnii_sr', 'rii_sr', 'shareholder_sr', 'subscription_date_range', 'subscription_status',
   'subscription_captured_at', 'subscription_is_provisional', 'retail_allotment_probability',
   'gmp_current_ipos', 'gmp_price_gain', 'gmp_ipo_gmp', 'gmp_est_listing', 'gmp_trend', 'gmp_price_band', 'gmp_status',
   'gmp_date', 'gmp_subject', 'gmp_type', 'gmp_updated_at',

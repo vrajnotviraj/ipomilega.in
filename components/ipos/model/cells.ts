@@ -1,5 +1,5 @@
-import { formatIssueSize, formatTimes, getPriceBand, lastListing, parseEstListingPercent, parseGainValue } from "@/lib/ipo-format";
-import { scoreOf } from "@/lib/ipo-score";
+import { formatIssueSize, formatTimes, getPriceBand, lastListing, parseEstListingPercent, parseGainValue } from "@/lib/ipo/format";
+import { scoreOf } from "@/lib/ipo/score";
 import type { StepName } from "@/components/ipo-shared/lifecycle";
 import type { Row } from "@/components/ipos/model/types";
 

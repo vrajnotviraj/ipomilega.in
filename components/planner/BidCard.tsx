@@ -1,9 +1,9 @@
 import { TriangleAlert } from "lucide-react";
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { ProgressLink } from "@/components/progress/ProgressLink";
-import { formatRupees, getProbabilityColor } from "@/lib/ipo-format";
-import { formatDay } from "@/lib/ipo-planner/days";
-import type { Application } from "@/lib/ipo-planner/plan";
+import { formatRupees, getProbabilityColor } from "@/lib/ipo/format";
+import { formatDay } from "@/lib/ipo/planner/days";
+import type { Application } from "@/lib/ipo/planner/plan";
 import { CATEGORY_LABEL, accountRange, oneIn } from "@/components/planner/format";
 import { cn } from "@/lib/utils";
 

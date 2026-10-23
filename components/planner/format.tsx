@@ -1,4 +1,4 @@
-import type { Category } from "@/lib/ipo-planner/ipo";
+import type { Category } from "@/lib/ipo/planner/ipo";
 
 export const CATEGORY_LABEL: Record<Category, string> = { retail: "Retail", shni: "S-HNI" };
 

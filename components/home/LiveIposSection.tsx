@@ -9,7 +9,7 @@ import { useBoard } from '@/components/home/BoardContext';
 import { NothingOpen } from '@/components/home/NothingOpen';
 import { LiveLabel } from '@/components/ui/LiveLabel';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
-import { BOARDS, getDaysUntilClosing, getIpoType, gmpOf } from '@/lib/ipo-format';
+import { BOARDS, getDaysUntilClosing, getIpoType, gmpOf } from '@/lib/ipo/format';
 import { cn } from '@/lib/utils';
 
 const closingGroupLabel = (days: number) => {

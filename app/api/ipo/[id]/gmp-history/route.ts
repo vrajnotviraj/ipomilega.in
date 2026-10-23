@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/db/mongo";
-import { DAY_MS } from "@/lib/ipo-format";
+import { DAY_MS } from "@/lib/ipo/format";
 
 // Snapshots are captured hourly, so a five-minute cache costs nothing in freshness.
 export const revalidate = 300;

@@ -1,4 +1,4 @@
-import type { PlannerIpo, SkippedIpo } from "@/lib/ipo-planner/ipo";
+import type { PlannerIpo, SkippedIpo } from "@/lib/ipo/planner/ipo";
 import { SectionTitle } from "@/components/planner/format";
 
 const DID_MORE_ELSEWHERE = "Your money and accounts do more elsewhere";

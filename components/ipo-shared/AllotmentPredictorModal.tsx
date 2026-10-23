@@ -13,7 +13,7 @@ import {
   describeAllotmentOdds,
   getAllotmentRatio,
   COMBINED_NII_NOTE,
-} from '@/lib/ipo-format';
+} from '@/lib/ipo/format';
 import { cn } from '@/lib/utils';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 

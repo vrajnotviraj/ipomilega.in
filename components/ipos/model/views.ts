@@ -1,4 +1,4 @@
-import { scoreBand, scoreOf } from "@/lib/ipo-score";
+import { scoreBand, scoreOf } from "@/lib/ipo/score";
 import { daysToStep, gmpOf, heldGainOf, listingGainOf, nameOf, sizeOf, subscribedTimesOf } from "@/components/ipos/model/cells";
 import type { Filters, QuickKey, Row, Sort, SortBy } from "@/components/ipos/model/types";
 

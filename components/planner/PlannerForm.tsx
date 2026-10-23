@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { formatRupees } from "@/lib/ipo-format";
-import { formatDay } from "@/lib/ipo-planner/days";
-import type { PlannerIpo } from "@/lib/ipo-planner/ipo";
-import type { Goal } from "@/lib/ipo-planner/plan";
+import { formatRupees } from "@/lib/ipo/format";
+import { formatDay } from "@/lib/ipo/planner/days";
+import type { PlannerIpo } from "@/lib/ipo/planner/ipo";
+import type { Goal } from "@/lib/ipo/planner/plan";
 
 /** `excluded` holds the ids of IPOs the reader keeps out of the plan. */
 export type PlannerInputs = { funds: number; accounts: number; goal: Goal; includeSme: boolean; excluded: string[] };
