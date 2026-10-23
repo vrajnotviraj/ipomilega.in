@@ -90,7 +90,7 @@ export function UpcomingIposSection({ ipos, quota }: IpoSectionProps & { quota: 
       {quota.length > 0 && (
         <SegmentedControl
           label="Upcoming IPOs"
-          options={[{ value: 'all', label: 'All' }, { value: 'quota', label: `Shareholder quota (${quota.length})` }]}
+          options={[{ value: 'all', label: 'All' }, { value: 'quota', label: 'Shareholder quota', count: quota.length }]}
           value={tab}
           onChange={setTab}
           className="mt-6 inline-flex"
