@@ -2,7 +2,7 @@ import { ArrowUpRight, FileText } from "lucide-react";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { StageTrack } from "@/components/shareholder-quota/StageTrack";
 import { STAGE_NOTE } from "@/components/shareholder-quota/content";
-import { formatIpoDate, isPastFivePmIst } from "@/lib/ipo-format";
+import { daysFromToday, formatIpoDate, isPastFivePmIst } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import type { QuotaIpo } from "@/lib/queries/shareholder-quota";
 
@@ -14,6 +14,20 @@ function stageDate(ipo: QuotaIpo) {
   }
   if (!ipo.drhpDate) return null;
   return { label: ipo.stage === "approved" ? "Approved on" : "Filed on", value: formatIpoDate(ipo.drhpDate, true) };
+}
+
+/** Whether the last day to buy the parent has passed (null when unknown): after it, buying no longer makes you eligible. */
+const eligibilityClosed = (ipo: QuotaIpo) => {
+  const days = daysFromToday(ipo.lastBuyDate);
+  return days === null ? null : days < 0;
+};
+
+/** The note under the stage track: bidding shut, or the buying deadline passed, else what the stage means. */
+function noteOf(ipo: QuotaIpo) {
+  if (isPastFivePmIst(ipo.closeDate)) return "Bidding has closed, so the quota is no longer open.";
+  if (eligibilityClosed(ipo)) return "The last day to buy the parent has passed. Buying it now will not make you eligible. Only holders from before that day can use the quota.";
+  if (ipo.lastBuyDate) return "Buy the parent by the last day shown below. Shares settle the next trading day, so a later purchase misses the record date.";
+  return STAGE_NOTE[ipo.stage];
 }
 
 /** A parent to hold and the IPO it makes you eligible for. Highlighted cards are white with lift; the rest are flat. */
@@ -39,10 +53,11 @@ export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: bo
       </div>
 
       <StageTrack stage={ipo.stage} className={cn("mt-4 border-t pt-4", divider)} />
-      <p className="mt-4 text-sm text-pretty text-muted-foreground">{isPastFivePmIst(ipo.closeDate) ? "Bidding has closed, so the quota is no longer open." : STAGE_NOTE[ipo.stage]}</p>
+      <p className="mt-4 text-sm text-pretty text-muted-foreground">{noteOf(ipo)}</p>
 
       <div className={cn("mt-4 flex flex-wrap items-end gap-x-6 gap-y-2 self-end border-t pt-3", divider)}>
         <dl className="flex flex-wrap gap-x-6 gap-y-2">
+          {ipo.lastBuyDate && <Figure label={eligibilityClosed(ipo) ? "Last day to buy was" : "Last day to buy"}>{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
           {date && <Figure label={date.label}>{date.value}</Figure>}
           {ipo.stage === "dates" && ipo.priceBand && <Figure label="Price band">{ipo.priceBand}</Figure>}
         </dl>

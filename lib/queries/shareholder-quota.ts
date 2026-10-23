@@ -16,6 +16,8 @@ export interface QuotaIpo {
   drhpDate: string | null;
   openDate: string | null;
   closeDate: string | null;
+  /** Last day to buy the parent and still hold it on the record date. */
+  lastBuyDate: string | null;
   priceBand: string;
   documentUrl: string;
   slug: string;
@@ -29,6 +31,7 @@ type QuotaDoc = {
   drhp_date: Date | null;
   open_date: Date | null;
   close_date: Date | null;
+  last_buy_date?: Date | null;
   price_band: string;
   drhp_url: string;
   ipo_slug: string;
@@ -36,7 +39,7 @@ type QuotaDoc = {
 };
 
 // Only these fields leave the database; where the engine read them stays private.
-const PUBLIC_FIELDS = { name: 1, stage: 1, parents: 1, drhp_date: 1, open_date: 1, close_date: 1, price_band: 1, drhp_url: 1, ipo_slug: 1, checked_at: 1 };
+const PUBLIC_FIELDS = { name: 1, stage: 1, parents: 1, drhp_date: 1, open_date: 1, close_date: 1, last_buy_date: 1, price_band: 1, drhp_url: 1, ipo_slug: 1, checked_at: 1 };
 
 const dayOf = (date: Date | null) => date?.toISOString().slice(0, 10) ?? null;
 const time = (date: Date | null, missing: number) => date?.getTime() ?? missing;
@@ -60,6 +63,7 @@ const getQuotaRows = cached(async () => {
     drhpDate: dayOf(doc.drhp_date),
     openDate: dayOf(doc.open_date),
     closeDate: dayOf(doc.close_date),
+    lastBuyDate: dayOf(doc.last_buy_date ?? null),
     priceBand: doc.price_band,
     documentUrl: doc.drhp_url,
     slug: doc.ipo_slug,
