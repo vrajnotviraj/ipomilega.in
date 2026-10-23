@@ -6,7 +6,7 @@ import { IpoSectionProps, HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { LiveIpoCard } from '@/components/home/ipo-card/LiveIpoCard';
 import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { NothingOpen } from '@/components/home/NothingOpen';
 import { LiveLabel } from '@/components/ui/LiveLabel';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { BOARDS, getDaysUntilClosing, getIpoType, gmpOf } from '@/lib/ipo-format';
@@ -30,7 +30,7 @@ function groupByClosingDay(ipos: HomePageIpoProps[]) {
 }
 
 /** Live IPO cards for the chosen board, with the Mainboard/SME switch that filters every home section. */
-export function LiveIposSection({ ipos }: IpoSectionProps) {
+export function LiveIposSection({ ipos, upcoming, closed }: IpoSectionProps & { upcoming: HomePageIpoProps[]; closed: HomePageIpoProps[] }) {
   const { board, setBoard } = useBoard();
   // Fades only on board switches, never on first paint.
   const mounted = useRef(false);
@@ -38,7 +38,8 @@ export function LiveIposSection({ ipos }: IpoSectionProps) {
     mounted.current = true;
   }, []);
 
-  const boardIpos = ipos.filter((item) => getIpoType(item.ipo) === board);
+  const onBoard = (list: HomePageIpoProps[]) => list.filter((item) => getIpoType(item.ipo) === board);
+  const boardIpos = onBoard(ipos);
 
   return (
     <section id="live" className="scroll-mt-24 pb-8 pt-8 sm:pb-12 sm:pt-12">
@@ -59,7 +60,7 @@ export function LiveIposSection({ ipos }: IpoSectionProps) {
 
       <div key={board} className={cn('mt-8', mounted.current && 'animate-in fade-in duration-150')}>
         {boardIpos.length === 0 ? (
-          <EmptyState icon={Clock} title={`No ${board} IPOs open for bidding`} hint="Check Upcoming below for what opens next." />
+          <NothingOpen board={board} upcoming={onBoard(upcoming)} closed={onBoard(closed)} />
         ) : (
           <div className="space-y-10">
             {groupByClosingDay(boardIpos).map(([days, items]) => (

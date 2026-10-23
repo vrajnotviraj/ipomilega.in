@@ -64,7 +64,7 @@ export default async function HomePage() {
       <IpoTicker live={live} upcoming={upcoming} />
       <div className="app-container">
         <BoardProvider>
-          <LiveIposSection ipos={live} />
+          <LiveIposSection ipos={live} upcoming={upcoming} closed={closed} />
           <ClosedIposSection ipos={closed} />
           <div className="reveal py-2">
             <QuotaTeaser count={quota.length} />
