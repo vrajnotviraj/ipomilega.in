@@ -6,6 +6,7 @@ import { PastIposSection } from '@/components/home/PastIposSection';
 import { UpcomingIposSection } from '@/components/home/UpcomingIpos';
 import { ScoreMethodology } from '@/components/home/ScoreMethodology';
 import { getIpoBuckets } from '@/lib/queries/ipos';
+import { getShareholderQuotaIpos } from '@/lib/queries/shareholder-quota';
 import { getFeaturedBlogs } from '@/lib/queries/blogs';
 import { Metadata } from 'next';
 import { Hero } from '@/components/home/Hero';
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
 // Awaited without a <Suspense> boundary: under ISR the data is ready at build time, and a
 // boundary would ship a spinner that delays LCP.
 export default async function HomePage() {
-  const [{ upcoming, live, closed, past }, blogs] = await Promise.all([getIpoBuckets(), getFeaturedBlogs()]);
+  const [{ upcoming, live, closed, past }, blogs, { ipos: quota }] = await Promise.all([getIpoBuckets(), getFeaturedBlogs(), getShareholderQuotaIpos()]);
 
   return (
     <div className="min-h-screen">
@@ -66,7 +67,7 @@ export default async function HomePage() {
           <ClosedIposSection ipos={closed} />
           <div className="grid grid-cols-1 lg:grid-cols-2 lg:gap-10">
             <div className="reveal min-w-0">
-              <UpcomingIposSection ipos={upcoming} />
+              <UpcomingIposSection ipos={upcoming} quota={quota} />
             </div>
             <div className="reveal min-w-0">
               <PastIposSection ipos={past} />
