@@ -26,7 +26,7 @@ export function NothingOpen({ board, upcoming, closed }: { board: string; upcomi
           No {board} IPOs are open for bidding.
         </h3>
         <p className="mt-2 max-w-[46ch] text-muted-foreground">
-          Nothing is taking bids right now. Scores, GMP and allotment odds are ready for the IPOs opening next.
+          Nothing is taking bids right now. Read the scored prospectus of an IPO opening next, or check allotment for one that just closed.
         </p>
         <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-3 border-t border-primary/15 pt-4">
           <div>
