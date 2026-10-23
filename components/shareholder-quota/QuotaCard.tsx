@@ -33,6 +33,7 @@ function noteOf(ipo: QuotaIpo) {
 /** A parent to hold and the IPO it makes you eligible for. Highlighted cards are white with lift; the rest are flat. */
 export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: boolean }) {
   const date = stageDate(ipo);
+  const closed = isPastFivePmIst(ipo.closeDate);
   const divider = highlighted ? "border-border" : "border-primary/15";
   return (
     // Four rows (heading, track, note, footer) on the list's subgrid, so they line up across the cards in a row.
@@ -52,15 +53,26 @@ export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: bo
         </p>
       </div>
 
-      <StageTrack stage={ipo.stage} className={cn("mt-4 border-t pt-4", divider)} />
+      {closed ? (
+        // Bidding is over, so the stage track says nothing; the dates that decided eligibility take its place.
+        <dl className={cn("mt-4 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4", divider)}>
+          {ipo.lastBuyDate && <Figure label="Last day to buy was">{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
+          {date && <Figure label={date.label}>{date.value}</Figure>}
+          {ipo.priceBand && <Figure label="Price band">{ipo.priceBand}</Figure>}
+        </dl>
+      ) : (
+        <StageTrack stage={ipo.stage} className={cn("mt-4 border-t pt-4", divider)} />
+      )}
       <p className="mt-4 text-sm text-pretty text-muted-foreground">{noteOf(ipo)}</p>
 
       <div className={cn("mt-4 flex flex-wrap items-end gap-x-6 gap-y-2 self-end border-t pt-3", divider)}>
-        <dl className="flex flex-wrap gap-x-6 gap-y-2">
-          {ipo.lastBuyDate && <Figure label={eligibilityClosed(ipo) ? "Last day to buy was" : "Last day to buy"}>{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
-          {date && <Figure label={date.label}>{date.value}</Figure>}
-          {ipo.stage === "dates" && ipo.priceBand && <Figure label="Price band">{ipo.priceBand}</Figure>}
-        </dl>
+        {!closed && (
+          <dl className="flex flex-wrap gap-x-6 gap-y-2">
+            {ipo.lastBuyDate && <Figure label={eligibilityClosed(ipo) ? "Last day to buy was" : "Last day to buy"}>{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
+            {date && <Figure label={date.label}>{date.value}</Figure>}
+            {ipo.stage === "dates" && ipo.priceBand && <Figure label="Price band">{ipo.priceBand}</Figure>}
+          </dl>
+        )}
         {ipo.documentUrl && <DocumentLink href={ipo.documentUrl} name={ipo.name} />}
       </div>
     </article>
