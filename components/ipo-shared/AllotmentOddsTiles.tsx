@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, Landmark, User, Users } from "lucide-react";
+import { ChevronRight, Landmark, User, UserCheck, Users } from "lucide-react";
 import type { Ipo } from "@/types/ipo";
 import { AllotmentPredictorModal } from "@/components/ipo-shared/AllotmentPredictorModal";
 import {
-  ALLOTMENT_CATEGORIES,
+  allotmentCategoriesOf,
   formatAllotmentOdds,
   formatAllotmentPercent,
   getAllotmentProbability,
@@ -15,7 +15,7 @@ import {
 } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 
-const CATEGORY_ICONS: Record<AllotmentCategoryDef["key"], typeof User> = { retail: User, shni: Users, bhni: Landmark };
+const CATEGORY_ICONS: Record<AllotmentCategoryDef["key"], typeof User> = { retail: User, shni: Users, bhni: Landmark, shareholder: UserCheck };
 
 const VARIANTS = {
   compact: {
@@ -56,7 +56,7 @@ export function AllotmentOddsTiles({
   const [openCategory, setOpenCategory] = useState<AllotmentCategoryDef["key"] | null>(null);
   const style = VARIANTS[variant];
 
-  const categories = ALLOTMENT_CATEGORIES.map((category) => {
+  const categories = allotmentCategoriesOf(ipo).map((category) => {
     const { lottery } = getAllotmentRatio(ipo, category);
     return {
       ...category,
@@ -73,7 +73,7 @@ export function AllotmentOddsTiles({
   return (
     <div data-tour="odds">
       <div className={style.heading}>{heading}</div>
-      <div className={cn("grid grid-cols-3", style.grid)}>
+      <div className={cn("grid", categories.length === 4 ? "grid-cols-4" : "grid-cols-3", style.grid)}>
         {categories.map(({ key, label, Icon, odds, oddsColor }) => (
           <button
             key={key}

@@ -287,10 +287,10 @@ export const getProbabilityColor = (probability: number | null): string => {
   return 'text-score-bad';
 };
 
-type RatioField = 'rii_sr' | 'snii_sr' | 'bnii_sr';
+type RatioField = 'rii_sr' | 'snii_sr' | 'bnii_sr' | 'shareholder_sr';
 
 export interface AllotmentCategoryDef {
-  key: 'retail' | 'shni' | 'bhni';
+  key: 'retail' | 'shni' | 'bhni' | 'shareholder';
   label: string;
   /** Regex fragment matched against ipo_market_lot[].application. */
   matchKeyword: string;
@@ -301,7 +301,13 @@ export const ALLOTMENT_CATEGORIES: AllotmentCategoryDef[] = [
   { key: 'retail', label: 'Retail', matchKeyword: 'retail', ratioField: 'rii_sr' },
   { key: 'shni', label: 'S-HNI', matchKeyword: 's[- ]?hni', ratioField: 'snii_sr' },
   { key: 'bhni', label: 'B-HNI', matchKeyword: 'b[- ]?hni', ratioField: 'bnii_sr' },
+  // Shareholders bid in retail-sized applications (up to ₹2L), so they share the retail rows.
+  { key: 'shareholder', label: 'Shareholder', matchKeyword: 'retail', ratioField: 'shareholder_sr' },
 ];
+
+/** The categories to show for an IPO: the shareholder one only when the exchange reports a quota. */
+export const allotmentCategoriesOf = (ipo: Pick<Ipo, 'shareholder_sr'> | null | undefined): AllotmentCategoryDef[] =>
+  ALLOTMENT_CATEGORIES.filter((cat) => cat.key !== 'shareholder' || parseGainValue(ipo?.shareholder_sr) !== null);
 
 export const COMBINED_NII_NOTE = "This IPO's S-HNI and B-HNI subscription isn't split yet, so this uses the combined NII figure.";
 
@@ -337,7 +343,7 @@ export const getAllotmentRatio = (
 ): { subscription: number | null; lottery: number | null; usesCombinedNii: boolean } => {
   const tierRatio = parseGainValue(ipo?.[cat.ratioField]);
   // Falls back to the combined NII figure when the tier has none.
-  const usesCombinedNii = tierRatio === null && cat.key !== 'retail';
+  const usesCombinedNii = tierRatio === null && (cat.key === 'shni' || cat.key === 'bhni');
   const subscription = usesCombinedNii ? parseGainValue(ipo?.nii_sr) : tierRatio;
   const lottery = subscription !== null && cat.key === 'bhni' ? subscription * bhniSlotShare(ipo?.ipo_market_lot, cat.matchKeyword) : subscription;
   return { subscription, lottery, usesCombinedNii };

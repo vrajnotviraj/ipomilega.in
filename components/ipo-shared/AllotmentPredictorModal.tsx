@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Ipo, IpoMarketLot } from '@/types/ipo';
 import {
-  ALLOTMENT_CATEGORIES,
+  allotmentCategoriesOf,
   AllotmentCategoryDef,
   getMarketLotRows,
   getAllotmentProbability,
@@ -43,7 +43,8 @@ export function AllotmentPredictorModal({
     onClose();
   };
 
-  const activeCategory = ALLOTMENT_CATEGORIES.find((c) => c.key === activeKey)!;
+  const categories = allotmentCategoriesOf(ipo);
+  const activeCategory = categories.find((c) => c.key === activeKey)!;
   const { subscription, lottery, usesCombinedNii } = getAllotmentRatio(ipo, activeCategory);
   const oddsSentence = describeAllotmentOdds(lottery);
   const lots = getMarketLotRows(ipo?.ipo_market_lot, activeCategory.matchKeyword);
@@ -58,7 +59,7 @@ export function AllotmentPredictorModal({
 
         <SegmentedControl
           label="Investor category"
-          options={ALLOTMENT_CATEGORIES.map((cat) => ({ value: cat.key, label: cat.label }))}
+          options={categories.map((cat) => ({ value: cat.key, label: cat.label }))}
           value={activeKey}
           onChange={setPicked}
           className="[&>button]:flex-1"
