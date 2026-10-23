@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /** /ipos/shareholder-quota: how the quota works, the parents to hold (closest to launch first), then questions. */
 export default async function ShareholderQuotaPage() {
-  const { ipos, checkedAt } = await getShareholderQuotaIpos();
+  const { ipos, closed, checkedAt } = await getShareholderQuotaIpos();
   const closeToLaunch = ipos.filter((ipo) => ipo.stage === "dates" || ipo.stage === "approved");
   const furtherOut = ipos.filter((ipo) => ipo.stage === "filed" || ipo.stage === "announced");
   const lastChecked = formatIstTimestamp(checkedAt);
@@ -59,6 +59,16 @@ export default async function ShareholderQuotaPage() {
         ipos={furtherOut}
         highlighted={false}
       />
+      {closed.length > 0 && (
+        <QuotaSection
+          id="closed"
+          title="Closed"
+          hint="Bidding has shut for these. Buying the parent now will not get you the quota."
+          empty=""
+          ipos={closed}
+          highlighted={false}
+        />
+      )}
       {lastChecked && (
         <p className="mt-6 text-sm text-muted-foreground">
           Updated daily. Last checked <span className="font-mono tabular-nums">{lastChecked}</span>.

@@ -2,7 +2,7 @@ import { ArrowUpRight, FileText } from "lucide-react";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { StageTrack } from "@/components/shareholder-quota/StageTrack";
 import { STAGE_NOTE } from "@/components/shareholder-quota/content";
-import { formatIpoDate } from "@/lib/ipo-format";
+import { formatIpoDate, isPastFivePmIst } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import type { QuotaIpo } from "@/lib/queries/shareholder-quota";
 
@@ -39,7 +39,7 @@ export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: bo
       </div>
 
       <StageTrack stage={ipo.stage} className={cn("mt-4 border-t pt-4", divider)} />
-      <p className="mt-4 text-sm text-pretty text-muted-foreground">{STAGE_NOTE[ipo.stage]}</p>
+      <p className="mt-4 text-sm text-pretty text-muted-foreground">{isPastFivePmIst(ipo.closeDate) ? "Bidding has closed, so the quota is no longer open." : STAGE_NOTE[ipo.stage]}</p>
 
       <div className={cn("mt-4 flex flex-wrap items-end gap-x-6 gap-y-2 self-end border-t pt-3", divider)}>
         <dl className="flex flex-wrap gap-x-6 gap-y-2">

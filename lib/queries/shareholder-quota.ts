@@ -1,6 +1,7 @@
 import 'server-only';
 import { cached } from '@/lib/db/cache';
 import { getDb } from '@/lib/db/mongo';
+import { isPastFivePmIst } from '@/lib/ipo-format';
 
 /** Strongest first: dates set (RHP filed), SEBI approved, DRHP filed, announced. */
 export const QUOTA_STAGES = ['dates', 'approved', 'filed', 'announced'] as const;
@@ -41,7 +42,7 @@ const dayOf = (date: Date | null) => date?.toISOString().slice(0, 10) ?? null;
 const time = (date: Date | null, missing: number) => date?.getTime() ?? missing;
 
 /** The IPOs on the list: strongest stage first, then nearest open date, then latest DRHP news. */
-export const getShareholderQuotaIpos = cached(async () => {
+const getQuotaRows = cached(async () => {
   const db = await getDb();
   const docs = await db.collection<QuotaDoc>('shareholder_quota').find({ active: true }, { projection: PUBLIC_FIELDS }).toArray();
   const rank = (doc: QuotaDoc) => QUOTA_STAGES.indexOf(doc.stage);
@@ -66,3 +67,10 @@ export const getShareholderQuotaIpos = cached(async () => {
   const checkedAt = docs.length ? new Date(Math.max(...docs.map((doc) => doc.checked_at.getTime()))).toISOString() : null;
   return { ipos, checkedAt };
 }, 'shareholder-quota');
+
+/** Open IPOs plus the ones whose bidding has shut (5 PM IST on the close date). Split per request, not inside the cache. */
+export async function getShareholderQuotaIpos() {
+  const { ipos: all, checkedAt } = await getQuotaRows();
+  const closed = all.filter((ipo) => isPastFivePmIst(ipo.closeDate));
+  return { ipos: all.filter((ipo) => !closed.includes(ipo)), closed, checkedAt };
+}
