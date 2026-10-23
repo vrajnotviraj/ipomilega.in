@@ -52,6 +52,8 @@ export interface Ipo {
   bnii_sr?: string;
   qib_sr: string;
   rii_sr: string;
+  // Reserved shareholder quota; present only when the exchange reports one.
+  shareholder_sr?: string;
   subscription_date_range: string;
   subscription_status: string;
   total_sr: string;
