@@ -14,7 +14,7 @@ export function NothingOpen({ board, upcoming, closed }: { board: string; upcomi
   const thisWeek = days.filter((d) => d <= 7).length;
 
   return (
-    <div className="grid gap-6 rounded-[18px] bg-secondary px-5 py-6 text-foreground sm:grid-cols-[1fr_auto] sm:items-center sm:px-7 sm:py-7">
+    <div className="grid gap-6 rounded-[18px] bg-secondary px-5 py-6 text-foreground sm:grid-cols-[1fr_auto] sm:gap-x-8 sm:px-7 sm:py-7">
       <div>
         {next && (
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-2.5 py-1 font-mono text-xs text-foreground">
@@ -28,18 +28,8 @@ export function NothingOpen({ board, upcoming, closed }: { board: string; upcomi
         <p className="mt-2 max-w-[46ch] text-muted-foreground">
           Nothing is taking bids right now. Read the scored prospectus of an IPO opening next, or check allotment for one that just closed.
         </p>
-        <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-3 border-t border-primary/15 pt-4">
-          <div>
-            <dt className="text-xs text-muted-foreground">Opening this week</dt>
-            <dd className="font-mono text-sm font-medium tabular-nums">{thisWeek} IPOs</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-muted-foreground">Closed, not listed yet</dt>
-            <dd className="font-mono text-sm font-medium tabular-nums">{closed.length} IPOs</dd>
-          </div>
-        </dl>
       </div>
-      <div className="flex flex-wrap gap-3 sm:justify-end">
+      <div className="flex flex-wrap gap-3 sm:items-center sm:justify-end">
         <Link href="/ipos?filter=upcoming" className={`${pill} border-primary bg-primary text-primary-foreground`}>
           See upcoming <ArrowRight aria-hidden className="size-4" strokeWidth={2} />
         </Link>
@@ -47,6 +37,16 @@ export function NothingOpen({ board, upcoming, closed }: { board: string; upcomi
           Check allotment
         </Link>
       </div>
+      <dl className="flex flex-wrap gap-x-6 gap-y-3 border-t border-primary/15 pt-4 sm:col-span-2">
+        <div>
+          <dt className="text-xs text-muted-foreground">Opening this week</dt>
+          <dd className="font-mono text-sm font-medium tabular-nums">{thisWeek} IPOs</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-muted-foreground">Closed, not listed yet</dt>
+          <dd className="font-mono text-sm font-medium tabular-nums">{closed.length} IPOs</dd>
+        </div>
+      </dl>
     </div>
   );
 }
