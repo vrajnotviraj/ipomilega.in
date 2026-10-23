@@ -1,7 +1,8 @@
-import { formatGmp, gainColor, gainMotion, lastListing, parseEstListingPercent } from "@/lib/ipo-format";
+import { formatGmp, gainColor, gainMotion } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
 import { LifecycleTrack } from "@/components/ipo-shared/LifecycleTrack";
-import { Row } from "@/components/ipos/rows";
+import { heldGainOf, isListed, listingGainOf } from "@/components/ipos/model/cells";
+import type { Row } from "@/components/ipos/model/types";
 
 /** A gain % in green or red, or "N/A" when unknown. */
 export function Gain({ value }: { value: number | null }) {
@@ -22,11 +23,11 @@ export function Figure({ label, children }: { label: string; children: React.Rea
 function Returns({ row }: { row: Row }) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Figure label="Listing day"><Gain value={parseEstListingPercent(row.ipo?.listing_gain)} /></Figure>
-      <Figure label="Held till today"><Gain value={lastListing(row.ipo).gain} /></Figure>
+      <Figure label="Listing day"><Gain value={listingGainOf(row)} /></Figure>
+      <Figure label="Held till today"><Gain value={heldGainOf(row)} /></Figure>
     </div>
   );
 }
 
 /** Returns once listed, else the lifecycle timeline. */
-export const Stage = ({ row }: { row: Row }) => (row.status === "Listed" ? <Returns row={row} /> : <LifecycleTrack steps={row.steps} />);
+export const Stage = ({ row }: { row: Row }) => (isListed(row) ? <Returns row={row} /> : <LifecycleTrack steps={row.steps} />);

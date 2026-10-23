@@ -4,7 +4,7 @@ import { openGraphBase } from "@/lib/seo/share";
 import { getIpoBuckets } from "@/lib/queries/ipos";
 import { getShareholderQuotaIpos } from "@/lib/queries/shareholder-quota";
 import IposClient from "@/components/ipos/IposClient";
-import { PAGE_SIZE, ipoPagePath, toRows } from "@/components/ipos/rows";
+import { PAGE_SIZE, ipoPagePath, toRows } from "@/components/ipos/model/query";
 import { pageFromSegments } from "@/components/ui/pager";
 
 export const revalidate = 60;

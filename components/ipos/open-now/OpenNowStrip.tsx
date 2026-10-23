@@ -4,15 +4,16 @@ import { LiveLabel } from "@/components/ui/LiveLabel";
 import { formatGmp, gainColor } from "@/lib/ipo-format";
 import { scoreOf } from "@/lib/ipo-score";
 import { cn } from "@/lib/utils";
-import { ScorePill } from "@/components/ipos/ScorePill";
-import { Row, daysToCloseOf, gmpOf, hasAnalysis, subscribedOf } from "@/components/ipos/rows";
+import { ScorePill } from "@/components/ipos/table/ScorePill";
+import { daysToStep, gmpOf, hasAnalysis, subscribedOf } from "@/components/ipos/model/cells";
+import type { Row } from "@/components/ipos/model/types";
 
 const MAX_CARDS = 6;
 
 /** Surface panel of the IPOs closing soonest, the rest are in the table below. Scrolls sideways on phones. */
 export function OpenNowStrip({ rows }: { rows: Row[] }) {
   if (rows.length === 0) return null;
-  const byClosing = [...rows].sort((a, b) => (daysToCloseOf(a) ?? Infinity) - (daysToCloseOf(b) ?? Infinity));
+  const byClosing = [...rows].sort((a, b) => (daysToStep(a, "Close") ?? Infinity) - (daysToStep(b, "Close") ?? Infinity));
   const shown = byClosing.slice(0, MAX_CARDS);
   const hiddenCount = rows.length - shown.length;
 
@@ -52,7 +53,7 @@ function OpenCard({ row }: { row: Row }) {
         <ScorePill value={score} />
       </div>
       <dl className="mt-auto grid grid-cols-3 gap-2 border-t border-border pt-3">
-        <BigFigure label="Closes"><ClosesValue days={daysToCloseOf(row)} /></BigFigure>
+        <BigFigure label="Closes"><ClosesValue days={daysToStep(row, "Close")} /></BigFigure>
         <BigFigure label="GMP" className={gainColor(gmp)}>{formatGmp(gmp)}</BigFigure>
         <BigFigure label="Subscribed">{subscribedOf(row)}</BigFigure>
       </dl>

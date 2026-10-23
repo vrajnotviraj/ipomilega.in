@@ -1,6 +1,7 @@
 import { getIpoType, parseEstListingPercent } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { Filters, Row, matchesStatus } from "@/components/ipos/rows";
+import { matchesStatus } from "@/components/ipos/model/query";
+import type { Filters, Row } from "@/components/ipos/model/types";
 import { Step, StepName, whenText } from "@/components/ipo-shared/lifecycle";
 
 type TileValue = Filters["status"];
@@ -57,7 +58,7 @@ function listedSubtitle(rows: Row[]): string {
   return latest ? `Latest listed ${latest.date}` : "Listing dates unknown";
 }
 
-/** Clickable status tiles, each with its count and one line of context. The active tile is ink. */
+/** Clickable status tiles, each with its count and one line of context. The active tile is ink; clicking it again clears the filter. */
 export function StatusTiles({ rows, value, onChange }: { rows: Row[]; value: TileValue; onChange: (status: TileValue) => void }) {
   return (
     <div role="group" aria-label="IPO status" className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
@@ -71,7 +72,7 @@ export function StatusTiles({ rows, value, onChange }: { rows: Row[]; value: Til
             subtitle={subtitleFor(tile, tileRows)}
             isLive={tile === "Open"}
             isActive={value === tile}
-            onClick={() => onChange(tile)}
+            onClick={() => onChange(value === tile ? "all" : tile)}
             isWide={tile === "all"}
           />
         );

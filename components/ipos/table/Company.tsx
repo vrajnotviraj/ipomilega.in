@@ -2,7 +2,8 @@ import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { getIpoType } from "@/lib/ipo-format";
 import { cn } from "@/lib/utils";
-import { Row, Status, hasAnalysis } from "@/components/ipos/rows";
+import { hasAnalysis } from "@/components/ipos/model/cells";
+import type { Row, Status } from "@/components/ipos/model/types";
 
 function StatusChip({ status }: { status: Status }) {
   if (status === "Open") {

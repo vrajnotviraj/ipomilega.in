@@ -3,38 +3,49 @@
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
 import { scoreOf } from "@/lib/ipo-score";
 import { cn } from "@/lib/utils";
-import { ScorePill } from "@/components/ipos/ScorePill";
-import { Row, gmpOf, hasAnalysis, isPastBidding, issueSizeOf, listingDateOf, priceBandOf, subscribedOf } from "@/components/ipos/rows";
+import { ScorePill } from "@/components/ipos/table/ScorePill";
+import { gmpOf, hasAnalysis, isListed, isPastBidding, issueSizeOf, listingDateOf, priceBandOf, subscribedOf } from "@/components/ipos/model/cells";
+import { VIEWS } from "@/components/ipos/model/views";
+import type { Filters, Row, SortBy } from "@/components/ipos/model/types";
 import { Company } from "@/components/ipos/table/Company";
 import { Figure, Gain, Stage } from "@/components/ipos/table/Figures";
-
-const isListed = (row: Row) => row.status === "Listed";
+import { SortHeader } from "@/components/ipos/table/SortHeader";
 
 const TH = "px-4 py-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground";
 
-/** IPO list: a table on wide screens, stacked rows on phones. Rows with an analysis open it on click.
- * Closed and listed rows skip the price band, other rows skip the listing date; each column hides when no row has it. */
-export function IpoTable({ rows }: { rows: Row[] }) {
+/** IPO list: a table on wide screens, stacked rows on phones. Rows with an analysis open it on click, column titles sort. */
+export function IpoTable({ rows, filters, onSort }: { rows: Row[]; filters: Filters; onSort: (by: SortBy) => void }) {
   const router = useProgressRouter();
+  const { sort } = filters;
   const openAnalysis = (row: Row) => {
     if (hasAnalysis(row)) router.push(`/analysis/${row.ipo.slug}`);
   };
   const showBidding = rows.some((row) => !isPastBidding(row));
   const showListed = rows.some(isListed);
-  const stageHeader = rows.every(isListed) ? "Gains" : showListed ? "Timeline / gains" : "Timeline";
+  const onlyListed = rows.every(isListed);
+  const header = (by: SortBy, label: string, align?: "right") => <SortHeader by={by} sort={sort} onSort={onSort} align={align}>{label}</SortHeader>;
 
   return (
     <>
       <table className="hidden w-full lg:table">
         <thead>
           <tr className="border-b border-border text-left">
-            <th className={TH}>Company</th>
+            <th className={TH}>{header("name", "Company")}</th>
             {showBidding && <th className={TH}>Price band</th>}
-            <th className={TH}>Issue size</th>
-            {showListed && <th className={TH}>Listed on</th>}
-            <th className={cn(TH, "text-right")}>Subscribed</th>
-            <th className={cn(TH, "text-right")}>GMP</th>
-            <th className={cn(TH, "w-[232px]")}>{stageHeader}</th>
+            <th className={TH}>{header("size", "Issue size")}</th>
+            {showListed && <th className={TH}>{header("listing", "Listed on")}</th>}
+            <th className={cn(TH, "text-right")}>{header("subscribed", "Subscribed", "right")}</th>
+            <th className={cn(TH, "text-right")}>{header("gmp", "GMP", "right")}</th>
+            <th className={cn(TH, "w-[232px]")}>
+              {onlyListed ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {header("listingGain", "Listing day")}
+                  {header("heldGain", "Held till today")}
+                </div>
+              ) : (
+                header(VIEWS[filters.status].stageSort, showListed ? "Timeline / gains" : "Timeline")
+              )}
+            </th>
           </tr>
         </thead>
         <tbody className="reveal-stagger">

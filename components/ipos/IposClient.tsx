@@ -1,105 +1,42 @@
 "use client";
 
-import { MouseEvent, Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { Building2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Suspense, useState } from "react";
+import { Building2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Disclaimer } from "@/components/ui/Disclaimer";
-import { BoardCounts, IpoFilters } from "@/components/ipos/filters/IpoFilters";
-import { IpoTable } from "@/components/ipos/table/IpoTable";
-import { OpenNowStrip } from "@/components/ipos/OpenNowStrip";
 import { QuotaTeaser } from "@/components/shareholder-quota/QuotaTeaser";
+import { FilterUrlSync } from "@/components/ipos/filters/FilterUrlSync";
+import { IpoFilters } from "@/components/ipos/filters/IpoFilters";
 import { StatusTiles } from "@/components/ipos/filters/StatusTiles";
-import { getIpoType } from "@/lib/ipo-format";
-import { cn } from "@/lib/utils";
-import { PAGER } from "@/components/ui/pager";
-import { isNativeClick } from "@/components/progress/ProgressLink";
-import { Filters, PAGE_SIZE, Row, Status, applyFilters, ipoPagePath, matchBoardAndSearch, matchesStatus } from "@/components/ipos/rows";
+import { OpenNowStrip } from "@/components/ipos/open-now/OpenNowStrip";
+import { IpoTable } from "@/components/ipos/table/IpoTable";
+import { Pager } from "@/components/ipos/table/Pager";
+import { PAGE_SIZE, applyFilters, countByBoard, matchBoardAndSearch } from "@/components/ipos/model/query";
+import { clickSort, defaultSortOf } from "@/components/ipos/model/views";
+import type { Filters, Row, SortBy } from "@/components/ipos/model/types";
 
-const STATUS_BY_FILTER_PARAM: Record<string, Status> = { live: "Open", upcoming: "Upcoming", closed: "Closed", past: "Listed" };
-
-/** Applies ?filter=live|upcoming|closed|past, and resets to all without it. Kept behind its own Suspense so the table still prerenders. */
-function StatusFromQuery({ onStatus }: { onStatus: (status: Filters["status"]) => void }) {
-  const searchParams = useSearchParams();
-  // The last ?filter applied. Starts as none, so a first load without one keeps its page.
-  const applied = useRef<string | null>(null);
-  useEffect(() => {
-    const filter = searchParams.get("filter");
-    if (filter === applied.current) return;
-    applied.current = filter;
-    onStatus(STATUS_BY_FILTER_PARAM[filter ?? ""] ?? "all");
-  }, [searchParams, onStatus]);
-  return null;
-}
-
-/** Rows per board tab for the current search and status. */
-function countByBoard(rows: Row[], { query, status }: Filters): BoardCounts {
-  const matching = matchBoardAndSearch(rows, { board: "all", query }).filter((row) => matchesStatus(row, status));
-  const countOf = (board: string) => matching.filter((row) => getIpoType(row.ipo) === board).length;
-  return { all: matching.length, Mainboard: countOf("Mainboard"), SME: countOf("SME") };
-}
-
-/** "Showing 1 to 10 of 42" with previous and next links. Links are real /ipos/<n> URLs; a click swaps the page in place and keeps the filters. */
-function Pager({ page, total, onPage }: { page: number; total: number; onPage: (page: number) => void }) {
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const first = (page - 1) * PAGE_SIZE + 1;
-  const last = Math.min(page * PAGE_SIZE, total);
-  const go = (to: number) => (e: MouseEvent<HTMLAnchorElement>) => {
-    if (isNativeClick(e, ipoPagePath(to))) return;
-    e.preventDefault();
-    onPage(to);
-  };
-  const link = (to: number, rel: "prev" | "next", children: React.ReactNode) =>
-    to < 1 || to > pages ? (
-      <span aria-disabled="true" className={cn(PAGER, "pointer-events-none opacity-40")}>{children}</span>
-    ) : (
-      <a href={ipoPagePath(to)} rel={rel} onClick={go(to)} className={PAGER}>{children}</a>
-    );
-
-  return (
-    <nav aria-label="Pagination" className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
-      <p className="text-sm text-muted-foreground">
-        Showing <span className="font-mono tabular-nums">{first}</span> to <span className="font-mono tabular-nums">{last}</span> of{" "}
-        <span className="font-mono tabular-nums">{total}</span>
-      </p>
-      <div className="flex items-center gap-2">
-        {link(page - 1, "prev", <><ChevronLeft className="size-4" strokeWidth={2} aria-hidden="true" /> Previous</>)}
-        <span className="font-mono text-sm tabular-nums text-muted-foreground">{page} / {pages}</span>
-        {link(page + 1, "next", <>Next <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" /></>)}
-      </div>
-    </nav>
-  );
-}
-
-/** The /ipos page: status tiles, the IPOs open now, then every IPO with search, board filter, sorting and pages. */
+/** The /ipos page: status tiles, the IPOs open now, then every IPO with search, filters, sorting and pages. */
 export default function IposClient({ rows, initialPage, quotaCount }: { rows: Row[]; initialPage: number; quotaCount: number }) {
-  const [filters, setFilters] = useState<Filters>({ status: "all", board: "all", query: "", sort: "status" });
+  const [filters, setFilters] = useState<Filters>({ status: "all", board: "all", query: "", sort: defaultSortOf("all"), quick: null });
   const [page, setPage] = useState(initialPage);
 
   const searchedRows = matchBoardAndSearch(rows, filters);
   const matchingRows = applyFilters(rows, filters);
-  const boardCounts = countByBoard(rows, filters);
   const pageRows = matchingRows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
   const showOpenNow = (filters.status === "all" || filters.status === "Open") && !filters.query.trim();
-  const openRows = searchedRows.filter((row) => row.status === "Open");
 
-  const updateFilters = (next: Partial<Filters>) => {
-    setFilters((current) => ({ ...current, ...next }));
+  const setFiltersAndRestart = (next: Filters) => {
+    setFilters(next);
     setPage(1);
   };
-  const showStatus = (status: Filters["status"]) => updateFilters({ status });
-
-  // With no filters set, the address bar follows the page on screen.
-  const unfiltered = filters.status === "all" && filters.board === "all" && !filters.query.trim() && filters.sort === "status";
-  useEffect(() => {
-    if (unfiltered) window.history.replaceState(null, "", ipoPagePath(page) + window.location.search);
-  }, [unfiltered, page]);
+  const updateFilters = (next: Partial<Filters>) => setFiltersAndRestart({ ...filters, ...next });
+  const showStatus = (status: Filters["status"]) => updateFilters({ status, sort: defaultSortOf(status), quick: null });
+  const sortBy = (by: SortBy) => updateFilters({ sort: clickSort(filters.sort, by) });
 
   return (
     <div className="app-container min-h-screen pt-24 pb-16">
       <Suspense fallback={null}>
-        <StatusFromQuery onStatus={showStatus} />
+        <FilterUrlSync filters={filters} page={page} onFilters={setFiltersAndRestart} />
       </Suspense>
 
       <header className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
@@ -118,19 +55,19 @@ export default function IposClient({ rows, initialPage, quotaCount }: { rows: Ro
 
       {showOpenNow && (
         <div className="mt-6">
-          <OpenNowStrip rows={openRows} />
+          <OpenNowStrip rows={searchedRows.filter((row) => row.status === "Open")} />
         </div>
       )}
 
       <div className="mt-8 mb-4">
-        <IpoFilters filters={filters} boardCounts={boardCounts} onChange={updateFilters} />
+        <IpoFilters filters={filters} boardCounts={countByBoard(rows, filters)} onChange={updateFilters} />
       </div>
 
       {matchingRows.length === 0 ? (
         <EmptyState icon={Building2} title="No IPOs found" hint="Try a different search or filter." />
       ) : (
         <div className="overflow-hidden rounded-xl border border-border bg-card">
-          <IpoTable rows={pageRows} />
+          <IpoTable rows={pageRows} filters={filters} onSort={sortBy} />
           <Pager page={page} total={matchingRows.length} onPage={setPage} />
         </div>
       )}
