@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
 import { getIpoBuckets } from "@/lib/queries/ipos";
+import { getShareholderQuotaIpos } from "@/lib/queries/shareholder-quota";
 import { dayNumberInIndia } from "@/lib/ipo/format";
 import { isSkipped, toPlannerIpo, type PlannerIpo } from "@/lib/ipo/planner/ipo";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
@@ -24,7 +25,12 @@ export const metadata: Metadata = {
 /** /ipos/planner: open and upcoming IPOs in planner terms. The browser works out the plan from them. */
 export default async function PlannerPage() {
   const { live, upcoming } = await getIpoBuckets();
-  const items = [...live, ...upcoming].map(({ _id, ipo, analysis }) => toPlannerIpo(_id, ipo, analysis ? analysis.slug || ipo.slug || null : null));
+  const { ipos: quotaIpos } = await getShareholderQuotaIpos();
+  const items = [...live, ...upcoming].map(({ _id, ipo, analysis }) => {
+    const slug = analysis ? analysis.slug || ipo.slug || null : null;
+    const parents = quotaIpos.find((quota) => slug && quota.slug === slug)?.parents ?? null;
+    return toPlannerIpo(_id, ipo, slug, parents);
+  });
 
   return (
     <div className="app-container pt-24 sm:pt-28">

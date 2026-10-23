@@ -1,4 +1,4 @@
-import { TriangleAlert } from "lucide-react";
+import { Info, TriangleAlert } from "lucide-react";
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { formatRupees, getProbabilityColor } from "@/lib/ipo/format";
@@ -40,6 +40,13 @@ export function BidCard({ app }: { app: Application }) {
         <Fact label="Money back" value={formatDay(ipo.freeDay)} />
       </dl>
 
+      {noteFor(app) && (
+        <p className="mt-3 flex gap-2 rounded-lg bg-secondary px-3 py-2 text-xs text-pretty text-foreground">
+          <Info aria-hidden className="mt-px size-3.5 shrink-0 text-muted-foreground" strokeWidth={2.25} />
+          {noteFor(app)}
+        </p>
+      )}
+
       {app.atRisk && (
         <p className="mt-3 flex gap-2 rounded-lg bg-secondary px-3 py-2 text-xs text-pretty text-foreground">
           <TriangleAlert aria-hidden className="mt-px size-3.5 shrink-0 text-score-mid" strokeWidth={2.25} />
@@ -48,6 +55,18 @@ export function BidCard({ app }: { app: Application }) {
       )}
     </li>
   );
+}
+
+/** What this category's bid needs or returns that the other cards don't show. */
+function noteFor({ ipo, option }: Application): string | null {
+  if (option.category === "bhni" && option.allotted < option.cost) {
+    return `If you win the draw you get about ${formatRupees(option.allotted)} of shares, the S-HNI minimum, while ${formatRupees(option.cost)} stays blocked until the refund.`;
+  }
+  if (option.category === "shareholder") {
+    const parents = ipo.quotaParents?.length ? ipo.quotaParents.join(" or ") : "the parent company";
+    return `Quota for ${parents} shareholders, in addition to the retail bid. Hold the shares in demat on the record date.`;
+  }
+  return null;
 }
 
 function Fact({ label, value, valueClass }: { label: string; value: string; valueClass?: string }) {

@@ -12,6 +12,9 @@ export type Application = {
   atRisk: boolean;
 };
 
+/** Accounts that hold each IPO's parent shares, by IPO id. Each can also bid in the shareholder quota. */
+export type Holders = Record<string, number>;
+
 export type Plan = {
   applications: Application[];
   /** Plannable IPOs that got no bid. */
@@ -33,11 +36,11 @@ type Batch = { closeDay: number; freeDay: number; choices: Choice[] };
 const NO_BIDS: Choice = { cost: 0, worth: 0, applications: [] };
 
 /** The bids worth the most for the goal, never blocking more than `funds` at once and bidding once per account per IPO. */
-export function planIpos(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal): Plan {
+export function planIpos(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders = {}): Plan {
   const batches = batchBySchedule(ipos).map((batchIpos) => ({
     closeDay: batchIpos[0].closeDay,
     freeDay: batchIpos[0].freeDay,
-    choices: bestChoices(batchIpos, funds, accounts, goal),
+    choices: bestChoices(batchIpos, funds, accounts, goal, holders),
   }));
   const picked = pickOnePerBatch(batches, funds);
   return describe(ipos, picked.flatMap((choice) => choice.applications), funds);
@@ -53,30 +56,40 @@ function batchBySchedule(ipos: PlannerIpo[]): PlannerIpo[][] {
 }
 
 /** For a batch, the best set of bids at each cost, best first. A set costing more must be worth more to stay. */
-function bestChoices(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal): Choice[] {
+function bestChoices(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders): Choice[] {
   let choices = [NO_BIDS];
   for (const ipo of ipos) {
-    const ways = waysToBid(ipo, accounts, goal);
+    const ways = waysToBid(ipo, accounts, goal, Math.min(accounts, holders[ipo.id] ?? 0));
     const combined = choices.flatMap((choice) => ways.map((way) => join(choice, way))).filter((choice) => choice.cost <= funds);
     choices = keepBestPerCost(combined);
   }
   return choices.reverse();
 }
 
-/** Every split of up to `accounts` accounts across the IPO's categories, including no bid. */
-function waysToBid(ipo: PlannerIpo, accounts: number, goal: Goal): Choice[] {
-  return splitAccounts(ipo.options.length, accounts).map((counts) => {
-    let nextAccount = 1;
-    const applications = counts.flatMap((count, k) => {
-      const numbers = Array.from({ length: count }, () => nextAccount++);
-      return count ? [{ ipo, option: ipo.options[k], accounts: numbers }] : [];
-    });
-    return {
-      cost: applications.reduce((sum, app) => sum + app.option.cost * app.accounts.length, 0),
-      worth: applications.reduce((sum, app) => sum + worthOf(app.option, goal) * app.accounts.length, 0),
-      applications,
-    };
-  });
+/**
+ * Every split of up to `accounts` accounts across the IPO's categories, including no bid.
+ * A shareholder bid is on top of an account's other bid, so the quota gets its own count, up to `holders`.
+ */
+function waysToBid(ipo: PlannerIpo, accounts: number, goal: Goal, holders: number): Choice[] {
+  const quota = ipo.options.find((option) => option.category === 'shareholder');
+  const shared = ipo.options.filter((option) => option.category !== 'shareholder');
+  const quotaCounts = quota ? Array.from({ length: holders + 1 }, (_, n) => n) : [0];
+
+  return splitAccounts(shared.length, accounts).flatMap((counts) =>
+    quotaCounts.map((quotaCount) => {
+      let nextAccount = 1;
+      const applications = shared.flatMap((option, k) => {
+        const numbers = Array.from({ length: counts[k] }, () => nextAccount++);
+        return numbers.length ? [{ ipo, option, accounts: numbers }] : [];
+      });
+      if (quota && quotaCount) applications.push({ ipo, option: quota, accounts: Array.from({ length: quotaCount }, (_, i) => i + 1) });
+      return {
+        cost: applications.reduce((sum, app) => sum + app.option.cost * app.accounts.length, 0),
+        worth: applications.reduce((sum, app) => sum + worthOf(app.option, goal) * app.accounts.length, 0),
+        applications,
+      };
+    })
+  );
 }
 
 const worthOf = (option: BidOption, goal: Goal) => option.odds * (goal === 'gain' ? option.gain : 1);

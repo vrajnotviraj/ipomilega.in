@@ -6,10 +6,10 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { formatRupees } from "@/lib/ipo/format";
 import { formatDay } from "@/lib/ipo/planner/days";
 import type { PlannerIpo } from "@/lib/ipo/planner/ipo";
-import type { Goal } from "@/lib/ipo/planner/plan";
+import type { Goal, Holders } from "@/lib/ipo/planner/plan";
 
-/** `excluded` holds the ids of IPOs the reader keeps out of the plan. */
-export type PlannerInputs = { funds: number; accounts: number; goal: Goal; includeSme: boolean; excluded: string[] };
+/** `excluded` holds the ids of IPOs the reader keeps out of the plan; `holders` the accounts holding each IPO's parent shares. */
+export type PlannerInputs = { funds: number; accounts: number; goal: Goal; includeSme: boolean; excluded: string[]; holders: Holders };
 
 const MAX_FUNDS = 10_00_00_000;
 const MAX_ACCOUNTS = 10;
@@ -68,6 +68,13 @@ export function PlannerForm({ inputs, onChange, selectable }: { inputs: PlannerI
       <SegmentedControl label="Plan for" options={GOALS} value={inputs.goal} onChange={(goal) => set({ goal })} className="mt-2 [&>button]:flex-1" />
       <p className={HINT}>{GOALS.find((goal) => goal.value === inputs.goal)?.hint}</p>
 
+      <QuotaHolders
+        ipos={selectable.filter((ipo) => ipo.quotaParents)}
+        accounts={inputs.accounts}
+        holders={inputs.holders}
+        onChange={(holders) => set({ holders })}
+      />
+
       <label className="mt-6 flex cursor-pointer items-start gap-3 border-t border-border pt-5">
         <input type="checkbox" checked={inputs.includeSme} onChange={(event) => set({ includeSme: event.target.checked })} className="mt-0.5 size-5 shrink-0 cursor-pointer accent-primary" />
         <span>
@@ -80,6 +87,41 @@ export function PlannerForm({ inputs, onChange, selectable }: { inputs: PlannerI
 
       <ExclusionList ipos={selectable} excluded={inputs.excluded} onChange={(excluded) => set({ excluded })} />
     </form>
+  );
+}
+
+/** For each IPO with a shareholder quota, how many accounts hold the parent company's shares. */
+function QuotaHolders({ ipos, accounts, holders, onChange }: { ipos: PlannerIpo[]; accounts: number; holders: Holders; onChange: (holders: Holders) => void }) {
+  if (ipos.length === 0) return null;
+  const countOf = (ipo: PlannerIpo) => Math.min(accounts, holders[ipo.id] ?? 0);
+  const setCount = (ipo: PlannerIpo, count: number) => onChange({ ...holders, [ipo.id]: count });
+
+  return (
+    <fieldset className="mt-6 border-t border-border pt-5">
+      <legend className={LABEL}>Shareholder quota</legend>
+      <p className={HINT}>
+        How many of your accounts hold the parent company&apos;s shares in demat on the record date. Each can bid up to {formatRupees(200000)} in the quota, on top of its retail bid.
+      </p>
+      <ul className="mt-3 space-y-3">
+        {ipos.map((ipo) => (
+          <li key={ipo.id} className="flex items-center justify-between gap-3">
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-medium text-foreground">{ipo.name}</span>
+              <span className="block truncate text-xs text-muted-foreground">{ipo.quotaParents?.join(", ") || "Parent company"}</span>
+            </span>
+            <span role="group" aria-label={`Accounts holding the parent shares for ${ipo.name}`} className="flex shrink-0 items-center gap-2">
+              <StepButton label="One account fewer" disabled={countOf(ipo) <= 0} onClick={() => setCount(ipo, countOf(ipo) - 1)}>
+                <Minus className="size-4" strokeWidth={2.25} />
+              </StepButton>
+              <output aria-live="polite" className="min-w-6 text-center font-mono text-lg font-medium tabular-nums text-foreground">{countOf(ipo)}</output>
+              <StepButton label="One account more" disabled={countOf(ipo) >= accounts} onClick={() => setCount(ipo, countOf(ipo) + 1)}>
+                <Plus className="size-4" strokeWidth={2.25} />
+              </StepButton>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </fieldset>
   );
 }
 

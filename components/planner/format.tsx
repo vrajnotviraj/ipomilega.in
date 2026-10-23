@@ -1,6 +1,6 @@
 import type { Category } from "@/lib/ipo/planner/ipo";
 
-export const CATEGORY_LABEL: Record<Category, string> = { retail: "Retail", shni: "S-HNI" };
+export const CATEGORY_LABEL: Record<Category, string> = { retail: "Retail", shni: "S-HNI", bhni: "B-HNI", shareholder: "Shareholder" };
 
 /** "26%", "<1%" or "100%". */
 export function percent(chance: number): string {

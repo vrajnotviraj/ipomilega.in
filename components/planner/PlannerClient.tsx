@@ -22,15 +22,15 @@ function leftOutReason(ipo: PlannerIpo, { includeSme, excluded }: Pick<PlannerIn
 
 /** The inputs beside the plan. The plan is worked out again whenever an input changes. */
 export function PlannerClient({ ipos, skipped, today }: { ipos: PlannerIpo[]; skipped: SkippedIpo[]; today: number }) {
-  const [inputs, setInputs] = useState<PlannerInputs>({ funds: 100000, accounts: 2, goal: "gain", includeSme: false, excluded: [] });
-  const { funds, accounts, goal, includeSme, excluded } = useDeferredValue(inputs);
+  const [inputs, setInputs] = useState<PlannerInputs>({ funds: 100000, accounts: 2, goal: "gain", includeSme: false, excluded: [], holders: {} });
+  const { funds, accounts, goal, includeSme, excluded, holders } = useDeferredValue(inputs);
 
   const choosable = useMemo(() => ipos.filter((ipo) => !leftOutReason(ipo, { includeSme, excluded })), [ipos, includeSme, excluded]);
   const leftOutByYou = ipos.flatMap((ipo) => {
     const reason = leftOutReason(ipo, { includeSme, excluded });
     return reason ? [{ id: ipo.id, name: ipo.name, reason }] : [];
   });
-  const plan = useMemo(() => planIpos(choosable, funds, accounts, goal), [choosable, funds, accounts, goal]);
+  const plan = useMemo(() => planIpos(choosable, funds, accounts, goal, holders), [choosable, funds, accounts, goal, holders]);
   const cheapestBid = Math.min(...choosable.flatMap((ipo) => ipo.options.map((option) => option.cost)));
 
   return (

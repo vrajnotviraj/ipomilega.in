@@ -33,9 +33,9 @@ export function Verdict({ plan, funds, accounts, goal, cheapestBid }: { plan: Pl
   );
 }
 
-/** True when every planned IPO already gets a bid from every account. */
+/** True when every planned IPO already gets a main bid from every account. The quota doesn't count: it adds to an account's bid. */
 function usesEveryAccount(plan: Plan, accounts: number): boolean {
   const bidsPerIpo = new Map<string, number>();
-  for (const app of plan.applications) bidsPerIpo.set(app.ipo.id, (bidsPerIpo.get(app.ipo.id) ?? 0) + app.accounts.length);
+  for (const app of plan.applications.filter((app) => app.option.category !== "shareholder")) bidsPerIpo.set(app.ipo.id, (bidsPerIpo.get(app.ipo.id) ?? 0) + app.accounts.length);
   return [...bidsPerIpo.values()].every((bids) => bids === accounts);
 }
