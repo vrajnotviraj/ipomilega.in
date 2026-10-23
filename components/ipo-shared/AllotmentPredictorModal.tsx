@@ -44,7 +44,7 @@ export function AllotmentPredictorModal({
   };
 
   const categories = allotmentCategoriesOf(ipo);
-  const activeCategory = categories.find((c) => c.key === activeKey)!;
+  const activeCategory = categories.find((c) => c.key === activeKey) ?? categories[0];
   const { subscription, lottery, usesCombinedNii } = getAllotmentRatio(ipo, activeCategory);
   const oddsSentence = describeAllotmentOdds(lottery);
   const lots = getMarketLotRows(ipo?.ipo_market_lot, activeCategory.matchKeyword);

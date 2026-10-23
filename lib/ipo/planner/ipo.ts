@@ -38,7 +38,7 @@ export type SkippedIpo = { id: string; name: string; reason: string };
 /** Final subscription per GMP point, from the medians of 77 listed IPOs. ponytail: runs low for GMPs above 50%. */
 const SUBSCRIPTION_PER_GMP_POINT: Record<Category, number> = { retail: 1.2, shni: 4 };
 
-const LOTTERY_CATEGORIES = ALLOTMENT_CATEGORIES.filter((cat): cat is typeof cat & { key: Category } => cat.key !== 'bhni' && cat.key !== 'shareholder');
+const LOTTERY_CATEGORIES = ALLOTMENT_CATEGORIES.filter((cat): cat is typeof cat & { key: Category } => cat.key === 'retail' || cat.key === 'shni');
 
 /** The IPO as the planner sees it, or the reason it can't be planned. */
 export function toPlannerIpo(id: string, ipo: Ipo, slug: string | null): PlannerIpo | SkippedIpo {

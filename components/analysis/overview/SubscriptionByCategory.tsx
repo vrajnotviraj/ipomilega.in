@@ -4,21 +4,21 @@ import { Eyebrow } from "@/components/analysis/primitives";
 
 type Row = { label: string; times: number };
 
+const row = (label: string, figure: string | undefined) => ({ label, times: parseGainValue(figure) });
+
 /** Each investor category's subscription multiple, as bars scaled to the most-bid category. */
 export function SubscriptionByCategory({ ipo }: { ipo: Ipo }) {
   const hasNiiSplit = ipo.snii_sr || ipo.bnii_sr;
   const rows = [
-    { label: "QIB", times: parseGainValue(ipo.qib_sr) },
-    ...(hasNiiSplit
-      ? [{ label: "S-HNI", times: parseGainValue(ipo.snii_sr) }, { label: "B-HNI", times: parseGainValue(ipo.bnii_sr) }]
-      : [{ label: "NII", times: parseGainValue(ipo.nii_sr) }]),
-    { label: "Retail", times: parseGainValue(ipo.rii_sr) },
-    { label: "Shareholders", times: parseGainValue(ipo.shareholder_sr) },
-  ].filter((row): row is Row => row.times !== null);
+    row("QIB", ipo.qib_sr),
+    ...(hasNiiSplit ? [row("S-HNI", ipo.snii_sr), row("B-HNI", ipo.bnii_sr)] : [row("NII", ipo.nii_sr)]),
+    row("Retail", ipo.rii_sr),
+    row("Shareholders", ipo.shareholder_sr),
+  ].filter((r): r is Row => r.times !== null);
   const total = parseGainValue(ipo.total_sr);
   if (rows.length === 0 || total === null) return null;
 
-  const most = Math.max(...rows.map((row) => row.times), 1);
+  const most = Math.max(...rows.map((r) => r.times), 1);
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
