@@ -37,11 +37,9 @@ type Batch = { closeDay: number; freeDay: number; choices: Choice[] };
 
 const NO_BIDS: Choice = { cost: 0, worth: 0, applications: [] };
 
-/** Branches the search tries before it settles for the best plan found so far: a quick limit, and a deep one for a worker. */
+/** Branches the search tries before it settles for the best plan found so far: a quick limit for the browser, a deep one for the server. */
 export const QUICK_SEARCH = 200_000;
 export const DEEP_SEARCH = 3_000_000;
-
-export type PlanRequest = { ipos: PlannerIpo[]; funds: number; accounts: number; goal: Goal; holders: Holders };
 
 /** The bids worth the most for the goal, never blocking more than `funds` at once and bidding once per account per IPO. */
 export function planIpos(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders = {}, maxBranches = QUICK_SEARCH): Plan {

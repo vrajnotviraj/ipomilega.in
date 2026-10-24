@@ -1,9 +1,7 @@
 import { Metadata } from "next";
 import { openGraphBase } from "@/lib/seo/share";
-import { getIpoBuckets } from "@/lib/queries/ipos";
-import { getShareholderQuotaIpos } from "@/lib/queries/shareholder-quota";
+import { getPlannerIpos } from "@/lib/queries/planner";
 import { dayNumberInIndia } from "@/lib/ipo/format";
-import { isSkipped, toPlannerIpo, type PlannerIpo } from "@/lib/ipo/planner/ipo";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { PlannerClient } from "@/components/planner/PlannerClient";
 
@@ -24,13 +22,7 @@ export const metadata: Metadata = {
 
 /** /ipos/planner: open and upcoming IPOs in planner terms. The browser works out the plan from them. */
 export default async function PlannerPage() {
-  const { live, upcoming } = await getIpoBuckets();
-  const { ipos: quotaIpos } = await getShareholderQuotaIpos();
-  const items = [...live, ...upcoming].map(({ _id, ipo, analysis }) => {
-    const slug = analysis ? analysis.slug || ipo.slug || null : null;
-    const parents = quotaIpos.find((quota) => slug && quota.slug === slug)?.parents ?? null;
-    return toPlannerIpo(_id, ipo, slug, parents);
-  });
+  const { ipos, skipped } = await getPlannerIpos();
 
   return (
     <div className="app-container pt-24 sm:pt-28">
@@ -45,11 +37,7 @@ export default async function PlannerPage() {
         </p>
       </header>
 
-      <PlannerClient
-        ipos={items.filter((item): item is PlannerIpo => !isSkipped(item))}
-        skipped={items.filter(isSkipped)}
-        today={dayNumberInIndia(new Date())}
-      />
+      <PlannerClient ipos={ipos} skipped={skipped} today={dayNumberInIndia(new Date())} />
     </div>
   );
 }

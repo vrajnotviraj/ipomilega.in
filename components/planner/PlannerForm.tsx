@@ -5,14 +5,13 @@ import { Minus, Plus } from "lucide-react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { formatRupees } from "@/lib/ipo/format";
 import { formatDay } from "@/lib/ipo/planner/days";
+import { MAX_ACCOUNTS, MAX_FUNDS } from "@/lib/ipo/planner/inputs";
 import type { PlannerIpo } from "@/lib/ipo/planner/ipo";
 import type { Goal, Holders } from "@/lib/ipo/planner/plan";
 
 /** `excluded` holds the ids of IPOs the reader keeps out of the plan; `holders` the accounts holding each IPO's parent shares. */
 export type PlannerInputs = { funds: number; accounts: number; goal: Goal; includeSme: boolean; excluded: string[]; holders: Holders };
 
-const MAX_FUNDS = 10_00_00_000;
-const MAX_ACCOUNTS = 10;
 const GOALS: { value: Goal; label: string; hint: string }[] = [
   { value: "gain", label: "Most profit", hint: "Expected listing gain: your odds times the gain at today's GMP." },
   { value: "allotments", label: "Most allotments", hint: "The most allotments you can expect, from IPOs with a positive GMP." },

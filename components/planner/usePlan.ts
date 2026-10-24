@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
-import { planIpos, type Plan, type PlanRequest } from "@/lib/ipo/planner/plan";
+import type { PlannerIpo } from "@/lib/ipo/planner/ipo";
+import type { PlanInputs } from "@/lib/ipo/planner/inputs";
+import { planIpos, type Goal, type Holders, type Plan } from "@/lib/ipo/planner/plan";
+
+export type PlanRequest = { ipos: PlannerIpo[]; funds: number; accounts: number; goal: Goal; holders: Holders };
 
 const TYPING_PAUSE_MS = 600;
 
 /**
- * The best plan for the request, searched deeply in a worker once the reader has paused typing.
- * A newer request cancels the one still running. `working` is true from the first change until the plan arrives.
+ * The best plan for the request, fetched from the server once the reader has paused typing. The server searches deeply and caches for a day.
+ * A newer request cancels the one in flight; if the server fails, the browser does a quick search itself.
+ * `working` is true from the first change until the plan arrives.
  */
 export function usePlan(request: PlanRequest): { plan: Plan | null; working: boolean } {
   const [plan, setPlan] = useState<Plan | null>(null);
@@ -13,25 +18,29 @@ export function usePlan(request: PlanRequest): { plan: Plan | null; working: boo
 
   useEffect(() => {
     setWorking(true);
-    let worker: Worker | undefined;
+    const controller = new AbortController();
     const finish = (found: Plan) => {
       setPlan(found);
       setWorking(false);
-      worker?.terminate();
     };
 
     const timer = setTimeout(
-      () => {
-        worker = new Worker(new URL("./plan.worker.ts", import.meta.url));
-        worker.onmessage = (event: MessageEvent<Plan>) => finish(event.data);
-        worker.onerror = () => finish(planIpos(request.ipos, request.funds, request.accounts, request.goal, request.holders));
-        worker.postMessage(request);
+      async () => {
+        const { ipos, ...rest } = request;
+        const inputs: PlanInputs = { ...rest, ids: ipos.map((ipo) => ipo.id) };
+        try {
+          const response = await fetch("/api/planner", { method: "POST", body: JSON.stringify(inputs), signal: controller.signal });
+          if (!response.ok) throw new Error(`Planner answered ${response.status}`);
+          finish(await response.json());
+        } catch {
+          if (!controller.signal.aborted) finish(planIpos(ipos, request.funds, request.accounts, request.goal, request.holders));
+        }
       },
       plan ? TYPING_PAUSE_MS : 0
     );
     return () => {
       clearTimeout(timer);
-      worker?.terminate();
+      controller.abort();
     };
     // `plan` only decides the first delay; a result arriving must not restart the search.
     // eslint-disable-next-line react-hooks/exhaustive-deps
