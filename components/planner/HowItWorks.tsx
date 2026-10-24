@@ -3,7 +3,7 @@ const RULES = [
   "Retail, S-HNI and shareholder-quota winners are drawn by lottery, one minimum application each, so each account bids the minimum. Your odds are about 1 in the subscription.",
   "B-HNI bids start at about ₹10 lakh, but a lottery winner gets only the S-HNI minimum, about ₹2 lakh of shares, so the gain is counted on that. Odds are 1 in the subscription times that fifth. Under about 5x, everyone is allotted, pro rata.",
   "An account bids in one of retail, S-HNI or B-HNI per IPO. The shareholder quota is extra: tell us how many accounts hold the parent's shares on the record date, and each can bid up to ₹2 lakh there as well.",
-  "On the last day the live subscription is used. Before that it is estimated from the GMP, or the live figure if that's higher. In past IPOs, retail ended near 1.2x the GMP % and S-HNI near 4x. B-HNI (6x) and the quota (1.2x) are our guesses.",
+  "On the last day the live subscription is used. Before that it is estimated from the GMP, or the live figure if that's higher. In past IPOs of about ₹300 crore, retail ended near 1.2x the GMP % and S-HNI near 4x; bigger issues draw less, smaller ones more. B-HNI (6x) and the quota (1.2x) are our guesses.",
   "Money comes back on the refund date (about T+2) and pays for later IPOs. An allotted bid's money comes back the day after listing, once you sell.",
   "Weekends are skipped, exchange holidays aren't.",
 ];

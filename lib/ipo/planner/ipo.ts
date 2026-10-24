@@ -48,11 +48,21 @@ export type PlannerIpo = {
 export type SkippedIpo = { id: string; name: string; reason: string };
 
 /**
- * Final subscription per GMP point, from the medians of 77 listed IPOs.
+ * Final subscription per GMP point for an issue of about `REFERENCE_ISSUE_CR`, from the medians of 77 listed IPOs.
  * shortcut: runs low for GMPs above 50%. B-HNI is 1.5x S-HNI and the shareholder quota matches retail, both guesses until the
  * engine has a history of those categories; replace them once it does.
  */
 const SUBSCRIPTION_PER_GMP_POINT: Record<Category, number> = { retail: 1.2, shni: 4, bhni: 6, shareholder: 1.2 };
+
+const REFERENCE_ISSUE_CR = 300;
+/** Retail demand per GMP point falls with issue size: a fit on 24 listed IPOs (R² 0.35), applied to every category. */
+const SIZE_EXPONENT = -0.35;
+
+/** How much a bigger issue lowers the estimated subscription: 1 at the reference size, about 0.2 for Jio, capped at 2 for tiny issues. */
+function sizeFactor(ipo: Ipo): number {
+  const issueCr = parseGainValue(ipo.ipo_size);
+  return issueCr ? Math.min(2, Math.max(0.2, (issueCr / REFERENCE_ISSUE_CR) ** SIZE_EXPONENT)) : 1;
+}
 
 /** The IPO as the planner sees it, or the reason it can't be planned. */
 export function toPlannerIpo(id: string, ipo: Ipo, slug: string | null, quotaParents: string[] | null = null, today: number | null = null): PlannerIpo | SkippedIpo {
@@ -106,7 +116,7 @@ function bidOptions(ipo: Ipo, gmpPercent: number, hasQuota: boolean, lastDay: bo
  */
 function bidOption(ipo: Ipo, cat: AllotmentCategoryDef, cost: number, gmpPercent: number, lastDay: boolean): BidOption {
   const live = getAllotmentRatio(ipo, cat).subscription;
-  const estimate = gmpPercent * SUBSCRIPTION_PER_GMP_POINT[cat.key];
+  const estimate = gmpPercent * SUBSCRIPTION_PER_GMP_POINT[cat.key] * sizeFactor(ipo);
   const useLive = lastDay && live !== null;
   const subscription = useLive ? Math.max(live, 1) : Math.max(live ?? 0, 1, estimate);
   const slot = cat.key === 'bhni' ? slotShare(ipo, cost) : 1;
