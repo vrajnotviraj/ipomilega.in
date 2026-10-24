@@ -9,6 +9,7 @@ import { PlannerForm, type PlannerInputs } from "@/components/planner/PlannerFor
 import { PlanLoader } from "@/components/planner/PlanLoader";
 import { usePlan } from "@/components/planner/usePlan";
 import { Verdict } from "@/components/planner/Verdict";
+import { GainBreakdown } from "@/components/planner/GainBreakdown";
 import { DayByDay } from "@/components/planner/DayByDay";
 import { MoneyTimeline } from "@/components/planner/MoneyTimeline";
 import { LeftOut } from "@/components/planner/LeftOut";
@@ -52,6 +53,7 @@ export function PlannerClient({ ipos, skipped, today }: { ipos: PlannerIpo[]; sk
         ) : (
           <>
             <Verdict plan={plan} funds={funds} accounts={accounts} goal={goal} cheapestBid={cheapestBid} />
+            <GainBreakdown applications={plan.applications} expectedGain={plan.expectedGain} />
             <DayByDay applications={plan.applications} funds={funds} today={today} />
             <MoneyTimeline applications={plan.applications} today={today} />
           </>

@@ -12,6 +12,15 @@ export function percent(chance: number): string {
 /** "1 in 38". */
 export const oneIn = (odds: number) => `1 in ${Math.max(1, Math.round(1 / odds)).toLocaleString("en-IN")}`;
 
+/** "38,512", "4.2 lakh", "1,300 crore" or "4 lakh crore": Indian words once the digits get long. */
+export function countInWords(count: number): string {
+  const grouped = (n: number) => n.toLocaleString("en-IN", { maximumFractionDigits: n < 10 ? 1 : 0 });
+  if (count >= 1e12) return `${grouped(count / 1e12)} lakh crore`;
+  if (count >= 1e7) return `${grouped(count / 1e7)} crore`;
+  if (count >= 1e5) return `${grouped(count / 1e5)} lakh`;
+  return grouped(Math.round(count));
+}
+
 /** "Account 2" or "Accounts 1–3". */
 export const accountRange = (accounts: number[]) =>
   accounts.length === 1 ? `Account ${accounts[0]}` : `Accounts ${accounts[0]}–${accounts[accounts.length - 1]}`;

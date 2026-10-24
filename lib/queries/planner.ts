@@ -32,5 +32,5 @@ export async function getPlan({ ids, funds, accounts, goal, holders }: PlanInput
   const holdersOfChosen = Object.fromEntries(chosen.map((ipo) => [ipo.id, holders[ipo.id] ?? 0]));
 
   const key = createHash('sha256').update(JSON.stringify([chosen, funds, accounts, goal, holdersOfChosen])).digest('hex');
-  return unstable_cache(async () => planIpos(chosen, funds, accounts, goal, holdersOfChosen, DEEP_SEARCH), ['planner', key], { revalidate: A_DAY })();
+  return unstable_cache(async () => planIpos(chosen, funds, accounts, goal, holdersOfChosen, DEEP_SEARCH), ['planner-v2', key], { revalidate: A_DAY })();
 }

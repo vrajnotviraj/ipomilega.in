@@ -27,6 +27,8 @@ export type Plan = {
   peakBlocked: number;
   /** False when the search hit its limit, so a slightly better plan may exist. */
   proven: boolean;
+  /** How hard the search worked: every plan the inputs allow and how long it took. */
+  searched: { possible: number; ms: number };
 };
 
 /** A set of bids and what it costs and is worth. */
@@ -43,13 +45,16 @@ export const DEEP_SEARCH = 3_000_000;
 
 /** The bids worth the most for the goal, never blocking more than `funds` at once and bidding once per account per IPO. */
 export function planIpos(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders = {}, maxBranches = QUICK_SEARCH): Plan {
+  const started = performance.now();
+  const searched = { possible: 1, ms: 0 };
   const batches = batchBySchedule(ipos).map((batchIpos) => ({
     closeDay: batchIpos[0].closeDay,
     freeDay: batchIpos[0].freeDay,
-    choices: bestChoices(batchIpos, funds, accounts, goal, holders),
+    choices: bestChoices(batchIpos, funds, accounts, goal, holders, searched),
   }));
   const { picks, proven } = pickOnePerBatch(batches, funds, maxBranches);
-  return { ...describe(ipos, picks.flatMap((choice) => choice.applications), funds), proven };
+  searched.ms = performance.now() - started;
+  return { ...describe(ipos, picks.flatMap((choice) => choice.applications), funds), proven, searched };
 }
 
 function batchBySchedule(ipos: PlannerIpo[]): PlannerIpo[][] {
@@ -62,10 +67,12 @@ function batchBySchedule(ipos: PlannerIpo[]): PlannerIpo[][] {
 }
 
 /** For a batch, the best set of bids at each cost, best first. A set costing more must be worth more to stay. */
-function bestChoices(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders): Choice[] {
+function bestChoices(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders, searched: Plan['searched']): Choice[] {
   let choices = [NO_BIDS];
   for (const ipo of ipos) {
-    const ways = keepBestPerCost(waysToBid(ipo, accounts, goal, Math.min(accounts, holders[ipo.id] ?? 0)).filter((way) => way.cost <= funds));
+    const allWays = waysToBid(ipo, accounts, goal, Math.min(accounts, holders[ipo.id] ?? 0));
+    searched.possible *= allWays.length;
+    const ways = keepBestPerCost(allWays.filter((way) => way.cost <= funds));
     const combined = choices.flatMap((choice) => ways.map((way) => join(choice, way))).filter((choice) => choice.cost <= funds);
     choices = keepBestPerCost(combined);
   }
@@ -159,7 +166,7 @@ function pickOnePerBatch(batches: Batch[], funds: number, maxBranches: number): 
 const holdsMoneyOn = (span: { closeDay: number; freeDay: number }, day: number) => span.closeDay <= day && day < span.freeDay;
 
 /** The picked bids in date order, with the risk flags and totals the page shows. */
-function describe(ipos: PlannerIpo[], picked: Omit<Application, 'atRisk'>[], funds: number): Omit<Plan, 'proven'> {
+function describe(ipos: PlannerIpo[], picked: Omit<Application, 'atRisk'>[], funds: number): Omit<Plan, 'proven' | 'searched'> {
   const blockedOn = (day: number) =>
     picked.reduce((sum, app) => (holdsMoneyOn(app.ipo, day) ? sum + app.option.cost * app.accounts.length : sum), 0);
   const isAtRisk = (app: Omit<Application, 'atRisk'>) =>
