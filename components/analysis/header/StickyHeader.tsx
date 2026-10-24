@@ -62,7 +62,7 @@ function BackButton() {
     if (navigatedInApp) return true;
 
     try {
-      // The same page in another language means the reader just switched languages; going back would only undo that.
+      // The same page in another language means the reader switched languages, and going back would undo that.
       const referrer = new URL(document.referrer);
       return referrer.origin === window.location.origin && bareSitePath(referrer.pathname) !== bareSitePath(window.location.pathname);
     } catch {

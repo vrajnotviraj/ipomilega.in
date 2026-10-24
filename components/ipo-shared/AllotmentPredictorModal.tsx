@@ -51,10 +51,10 @@ export function AllotmentPredictorModal({
     <Dialog open={!!initialCategory} onOpenChange={(open) => { if (!open) close(); }}>
       <DialogContent
         className="sm:max-w-md"
-        // Focuses the chosen tab, not the first button, so Safari never rings a tab that isn't selected.
+        // Focuses the dialog itself, so Safari draws no focus ring on a tab after a tap.
         onOpenAutoFocus={(event) => {
           event.preventDefault();
-          (event.currentTarget as HTMLElement).querySelector<HTMLElement>('[aria-pressed="true"]')?.focus();
+          (event.currentTarget as HTMLElement).focus();
         }}
       >
         <DialogHeader>
