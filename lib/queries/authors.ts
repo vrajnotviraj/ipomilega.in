@@ -1,7 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import { getDb, toPlain } from '@/lib/db/mongo';
-import { cached } from '@/lib/db/cache';
+import { cached, CLOCK_TTL } from '@/lib/db/cache';
 import { liveFilter, NEWEST_FIRST } from '@/lib/queries/blogs';
 import { toSummary, type PostSummary } from '@/lib/blog/format';
 import { Author, Blog } from '@/types/ipo';
@@ -33,4 +33,4 @@ export const getAuthorPosts = cache(cached(async (slug: string, page: number, la
     getTranslationMap('blog', lang),
   ]);
   return { posts: (toPlain(blogs) as unknown as Blog[]).map((blog) => toSummary(localize(blog, translations[blog._id]))), total };
-}, 'getAuthorPosts'));
+}, 'getAuthorPosts', CLOCK_TTL));
