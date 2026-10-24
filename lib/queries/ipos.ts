@@ -145,8 +145,11 @@ export const getAnalysisBySlug = cache(cached(
     if (!analysis) return null;
 
     const plain = toPlain({ analysis, ipo });
-    const translation = await getTranslation('analysis', String(plain.analysis._id), lang);
-    return { ipos_analysis: stripCitations(localize(plain.analysis, translation)), ipo: plain.ipo } as unknown as AnalysisPage;
+    const [translation, ipoTranslation] = await Promise.all([
+      getTranslation('analysis', String(plain.analysis._id), lang),
+      getTranslation('ipo', String(plain.ipo._id), lang),
+    ]);
+    return { ipos_analysis: stripCitations(localize(plain.analysis, translation)), ipo: localize(plain.ipo, ipoTranslation) } as unknown as AnalysisPage;
   },
   'analysis-by-slug'
 ));

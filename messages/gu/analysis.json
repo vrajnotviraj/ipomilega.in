@@ -14,7 +14,7 @@
   },
   "latestOn": "{name} પર તાજું",
   "lotSize": "લોટ સાઇઝ",
-  "freshIssue": "ફ્રેશ ઇશ્યૂ",
+  "freshIssue": "નવો ઇશ્યૂ",
   "notStated": "જણાવ્યું નથી",
   "categories": {
     "retail": "રિટેલ",
@@ -128,7 +128,8 @@
     "lotsAndShares": "{lots} લોટ, {shares} શેર",
     "application": "અરજી",
     "shares": "શેર",
-    "amount": "રકમ"
+    "amount": "રકમ",
+    "applicationWords": { "minimum": "ન્યૂનતમ", "maximum": "મહત્તમ", "retail": "રિટેલ", "shareholder": "શેરહોલ્ડર", "employee": "કર્મચારી" }
   },
   "gmp": {
     "title": "GMP ટ્રેન્ડ",
@@ -183,7 +184,7 @@
     "promotersSelling": "પ્રમોટર્સ વેચે છે",
     "promotersNotSelling": "પ્રમોટર્સ વેચતા નથી",
     "none": "કોઈ નહીં",
-    "freshVsOfs": "ફ્રેશ ઇશ્યૂ કંપનીને જાય છે. OFS વેચનાર શેરહોલ્ડરોને જાય છે."
+    "freshVsOfs": "નવો ઇશ્યૂ કંપનીને જાય છે. OFS વેચનાર શેરહોલ્ડરોને જાય છે."
   },
   "flexibility": {
     "marketAdaptability": "બજાર પ્રમાણે ઢળવાની ક્ષમતા",
@@ -218,9 +219,9 @@
   "timing": {
     "timeToMarket": "બજારમાં આવવાનો સમય",
     "howAllotmentWorks": "એલોટમેન્ટ કેવી રીતે થાય છે",
-    "marketTiming": "માર્કેટ ટાઇમિંગ",
-    "listingOn": "લિસ્ટિંગ",
+    "marketTiming": "બજારનો માહોલ",
+    "listingOn": "ક્યાં લિસ્ટ થશે",
     "keyMilestones": "મુખ્ય માઇલસ્ટોન",
-    "marketTimingWord": { "good": "અનુકૂળ", "mid": "તટસ્થ", "bad": "પ્રતિકૂળ" }
+    "marketTimingWord": { "good": "અનુકૂળ", "mid": "સામાન્ય", "bad": "પ્રતિકૂળ" }
   }
 }

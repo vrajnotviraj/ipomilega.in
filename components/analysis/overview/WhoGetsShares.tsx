@@ -2,6 +2,7 @@ import type { IpoMarketLot } from "@/types/ipo";
 import { QuotaDonut } from "@/components/analysis/overview/QuotaDonut";
 import { t } from "@/lib/i18n/server";
 import { fill } from "@/lib/i18n/locales";
+import { applicationLabel } from "@/lib/ipo/format";
 
 type Slice = { name: string; value: number; color: string };
 
@@ -42,7 +43,7 @@ function ApplicationSizes({ rows }: { rows: IpoMarketLot[] }) {
         {rows.map((row, index) => (
           <li key={index} className="py-2.5 text-sm">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="font-medium">{row.application || "-"}</span>
+              <span className="font-medium">{row.application ? applicationLabel(d.quota.applicationWords, row.application) : "-"}</span>
               <span className="font-mono font-medium tabular-nums">{row.amount || "-"}</span>
             </div>
             <div className="mt-0.5 font-mono text-xs tabular-nums text-muted-foreground">
@@ -65,7 +66,7 @@ function ApplicationSizes({ rows }: { rows: IpoMarketLot[] }) {
         <tbody className="font-mono tabular-nums">
           {rows.map((row, index) => (
             <tr key={index}>
-              <td className="py-2.5 font-sans font-medium">{row.application || "-"}</td>
+              <td className="py-2.5 font-sans font-medium">{row.application ? applicationLabel(d.quota.applicationWords, row.application) : "-"}</td>
               <td className="py-2.5 text-right">{row.lot_size || "-"}</td>
               <td className="py-2.5 text-right">{row.shares || "-"}</td>
               <td className="py-2.5 text-right">{row.amount || "-"}</td>

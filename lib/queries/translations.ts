@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { DEFAULT_LOCALE, type Locale, type TranslatedFields } from '@/lib/i18n/locales';
 import { alternatesFor } from '@/lib/seo/share';
 
-export type TranslationKind = 'blog' | 'analysis';
+export type TranslationKind = 'blog' | 'analysis' | 'ipo';
 
 const collection = async () => (await getDb()).collection('translations');
 

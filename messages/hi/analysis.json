@@ -14,7 +14,7 @@
   },
   "latestOn": "{name} पर ताज़ा",
   "lotSize": "लॉट साइज़",
-  "freshIssue": "फ्रेश इश्यू",
+  "freshIssue": "नया इश्यू",
   "notStated": "नहीं बताया",
   "categories": {
     "retail": "रिटेल",
@@ -128,7 +128,8 @@
     "lotsAndShares": "{lots} लॉट, {shares} शेयर",
     "application": "आवेदन",
     "shares": "शेयर",
-    "amount": "रकम"
+    "amount": "रकम",
+    "applicationWords": { "minimum": "न्यूनतम", "maximum": "अधिकतम", "retail": "रिटेल", "shareholder": "शेयरहोल्डर", "employee": "कर्मचारी" }
   },
   "gmp": {
     "title": "GMP ट्रेंड",
@@ -183,7 +184,7 @@
     "promotersSelling": "प्रमोटर बेच रहे हैं",
     "promotersNotSelling": "प्रमोटर नहीं बेच रहे",
     "none": "कोई नहीं",
-    "freshVsOfs": "फ्रेश इश्यू कंपनी को जाता है। OFS बेचने वाले शेयरहोल्डरों को जाता है।"
+    "freshVsOfs": "नया इश्यू कंपनी को जाता है। OFS बेचने वाले शेयरहोल्डरों को जाता है।"
   },
   "flexibility": {
     "marketAdaptability": "बाज़ार के हिसाब से ढलना",
@@ -216,11 +217,11 @@
     }
   },
   "timing": {
-    "timeToMarket": "टाइम टू मार्केट",
+    "timeToMarket": "बाज़ार में आने का समय",
     "howAllotmentWorks": "अलॉटमेंट कैसे होता है",
-    "marketTiming": "मार्केट टाइमिंग",
-    "listingOn": "लिस्टिंग",
+    "marketTiming": "बाज़ार का माहौल",
+    "listingOn": "कहां लिस्ट होगा",
     "keyMilestones": "अहम पड़ाव",
-    "marketTimingWord": { "good": "अनुकूल", "mid": "न्यूट्रल", "bad": "प्रतिकूल" }
+    "marketTimingWord": { "good": "अनुकूल", "mid": "सामान्य", "bad": "प्रतिकूल" }
   }
 }

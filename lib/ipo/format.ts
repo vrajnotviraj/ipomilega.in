@@ -32,6 +32,15 @@ export const getIpoType = (ipo: {
 export const boardLabel = <T extends string | null | undefined>(words: { mainboard: string; sme: string }, board: T): string | T =>
   board === 'Mainboard' ? words.mainboard : board === 'SME' ? words.sme : board;
 
+/** An application row's name in the reader's words: "Retail Minimum" as "रिटेल न्यूनतम". S-HNI and B-HNI stay as they are. */
+export const applicationLabel = (words: Record<'minimum' | 'maximum' | 'retail' | 'shareholder' | 'employee', string>, application: string): string =>
+  application
+    .replace(/\bminimum\b/i, words.minimum)
+    .replace(/\bmaximum\b/i, words.maximum)
+    .replace(/\bretail\b/i, words.retail)
+    .replace(/\bshareholders?\b/i, words.shareholder)
+    .replace(/\bemployees?\b/i, words.employee);
+
 // Matches a figure the RHP hasn't fixed yet, printed as "[●]".
 const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
 

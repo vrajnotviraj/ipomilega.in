@@ -128,7 +128,8 @@
     "lotsAndShares": "{lots} lots, {shares} shares",
     "application": "Application",
     "shares": "Shares",
-    "amount": "Amount"
+    "amount": "Amount",
+    "applicationWords": { "minimum": "Minimum", "maximum": "Maximum", "retail": "Retail", "shareholder": "Shareholder", "employee": "Employee" }
   },
   "gmp": {
     "title": "GMP trend",
