@@ -7,13 +7,14 @@ import { t } from "@/lib/i18n/server";
 type Fundamentals = IpoComprehensiveAnalysis["fundamentals"];
 type Offer = NonNullable<Fundamentals["offer_structure"]>;
 
-/** Total debt as a figure, with the analysis note under it. */
+/** Total debt in big figures when it is a short amount, as a plain sentence when it is longer, with the analysis note under it. */
 export function DebtCard({ debt }: { debt: NonNullable<Fundamentals["debt"]> }) {
   const d = t().analysis;
+  const total = debt.total_debt || d.notStated;
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <Eyebrow className="mb-1">{d.financials.debt}</Eyebrow>
-      <div className="font-mono text-2xl font-medium tabular-nums">{debt.total_debt || d.notStated}</div>
+      <div className={total.length <= 24 ? "font-mono text-2xl font-medium tabular-nums" : "text-pretty text-lg font-medium"}>{total}</div>
       <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{debt.summary}</p>
     </div>
   );
