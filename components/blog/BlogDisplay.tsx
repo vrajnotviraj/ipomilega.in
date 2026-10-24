@@ -12,8 +12,10 @@ import MarkdownRenderer from "@/components/blog/MarkDown";
 import { RelatedIpoCard } from "@/components/blog/RelatedIpoCard";
 import { ShareLinks } from "@/components/blog/ShareLinks";
 import { ShareButton } from "@/components/ui/ShareButton";
-import { formatBlogDate, readTimeOf } from "@/lib/blog/format";
+import { categoryLabel, formatBlogDate, readTimeOf } from "@/lib/blog/format";
 import { headingsOf } from "@/components/blog/headings";
+import { fill, localePath } from "@/lib/i18n/locales";
+import { locale, t } from "@/lib/i18n/server";
 
 type Heading = { id: string; text: string };
 
@@ -28,6 +30,7 @@ function authorHrefOf(blog: Blog): string | null {
 
 /** Author, publish and update dates and read time. A writer links to their page, the research desk to /about. */
 function Byline({ blog }: { blog: Blog }) {
+  const d = t().blog;
   const published = publishedAtOf(blog);
   const modified = modifiedAtOf(blog);
   const updated = formatBlogDate(modified) !== formatBlogDate(published) ? modified : null;
@@ -36,7 +39,7 @@ function Byline({ blog }: { blog: Blog }) {
     <div className="flex flex-wrap items-center justify-between gap-4 border-y border-border py-4">
       <div className="text-sm text-muted-foreground">
         <p className="font-medium text-foreground">
-          By{" "}
+          {d.post.by}{" "}
           {href ? (
             <ProgressLink
               href={href}
@@ -52,11 +55,11 @@ function Byline({ blog }: { blog: Blog }) {
           <time dateTime={published} className="font-mono tabular-nums">{formatBlogDate(published)}</time>
           {updated && (
             <>
-              , updated <time dateTime={updated} className="font-mono tabular-nums">{formatBlogDate(updated)}</time>
+              , {d.post.updated} <time dateTime={updated} className="font-mono tabular-nums">{formatBlogDate(updated)}</time>
             </>
           )}
           {" · "}
-          <span className="font-mono tabular-nums">{readTimeOf(blog)}</span> min read
+          <span className="font-mono tabular-nums">{readTimeOf(blog)}</span> {d.minRead}
         </p>
       </div>
       {/* The phone share sheet; from lg the sidebar carries the share links. */}
@@ -83,15 +86,16 @@ function HeadingLinks({ headings }: { headings: Heading[] }) {
 
 /** The article column on phones: IPO card and a collapsed "On this page". From lg these move to the sidebar. */
 function InlineAside({ ipo, headings }: { ipo: IpoLink | null; headings: Heading[] }) {
+  const d = t().blog.post;
   if (!ipo && !headings.length) return null;
   return (
     <div className="mt-8 space-y-4 lg:hidden">
       {ipo && <RelatedIpoCard ipo={ipo} />}
       {headings.length > 0 && (
-        <nav aria-label="On this page">
+        <nav aria-label={d.onThisPage}>
           <details className="rounded-xl bg-secondary px-5 py-4">
             <summary className="cursor-pointer text-sm font-medium text-foreground">
-              On this page <span className="font-mono tabular-nums text-muted-foreground">({headings.length})</span>
+              {d.onThisPage} <span className="font-mono tabular-nums text-muted-foreground">({headings.length})</span>
             </summary>
             <div className="mt-4">
               <HeadingLinks headings={headings} />
@@ -105,18 +109,19 @@ function InlineAside({ ipo, headings }: { ipo: IpoLink | null; headings: Heading
 
 /** The lg sidebar, sticky beside the article from its first line: the IPO, the section links and the share links. */
 function Sidebar({ ipo, headings, url, title }: { ipo: IpoLink | null; headings: Heading[]; url: string; title: string }) {
+  const d = t().blog.post;
   return (
     <aside className="hidden lg:block">
       <div className="sticky top-24 max-h-[calc(100dvh-7rem)] space-y-8 overflow-y-auto pb-4">
         {ipo && <RelatedIpoCard ipo={ipo} />}
         {headings.length > 0 && (
-          <nav aria-label="On this page">
-            <p className={LABEL}>On this page</p>
+          <nav aria-label={d.onThisPage}>
+            <p className={LABEL}>{d.onThisPage}</p>
             <HeadingLinks headings={headings} />
           </nav>
         )}
-        <section aria-label="Share this article">
-          <p className={LABEL}>Share this article</p>
+        <section aria-label={d.share}>
+          <p className={LABEL}>{d.share}</p>
           <ShareLinks url={url} title={title} />
         </section>
       </div>
@@ -127,18 +132,19 @@ function Sidebar({ ipo, headings, url, title }: { ipo: IpoLink | null; headings:
 /** The IPO's entity page, or the IPO list until it has one. */
 const entityLink = (ipo: IpoLink) =>
   ipo.slug
-    ? { href: `/analysis/${ipo.slug}`, label: `${ipo.name} IPO: GMP, price, dates, lot size and allotment` }
-    : { href: "/ipos", label: "All IPOs: live, upcoming and listed" };
+    ? { href: `/analysis/${ipo.slug}`, label: fill(t().blog.post.entityLink, { name: ipo.name }) }
+    : { href: "/ipos", label: t().blog.post.allIposLink };
 
 /** A single blog post: the article with its byline, cover and body, a sidebar from lg, then more on the same IPO. */
-export default function BlogDisplay({ blog, ipo, articles }: { blog: Blog; ipo: IpoLink | null; articles: Blog[] }) {
+export default function BlogDisplay({ blog, ipo, articles, translated }: { blog: Blog; ipo: IpoLink | null; articles: Blog[]; translated: boolean }) {
+  const { common, blog: d } = t();
   const all = headingsOf(blog.content);
   const headings = all.length >= 3 ? all : [];
-  const url = `${SITE_URL}/blogs/${blog.slug}`;
+  const url = `${SITE_URL}${localePath(locale(), `/blogs/${blog.slug}`)}`;
 
   return (
     <div className="app-container min-h-screen pt-24 pb-16">
-      <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: "Blog", href: "/blogs" }, { name: blog.title, href: `/blogs/${blog.slug}` }]} />
+      <Breadcrumbs crumbs={[{ name: common.nav.home, href: "/" }, { name: d.crumb, href: "/blogs" }, { name: blog.title, href: `/blogs/${blog.slug}` }]} />
 
       <div className="mt-8 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-16 xl:gap-20">
         <div className="min-w-0">
@@ -146,7 +152,7 @@ export default function BlogDisplay({ blog, ipo, articles }: { blog: Blog; ipo: 
             <header>
               {blog.category && (
                 <p className="mb-4">
-                  <span className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">{blog.category}</span>
+                  <span className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">{categoryLabel(d.categories, blog.category)}</span>
                 </p>
               )}
               <h1 className="mb-4 max-w-[24ch] font-display text-[32px] font-bold leading-[1.05] tracking-[-0.03em] text-balance sm:text-5xl">{blog.title}</h1>
@@ -155,13 +161,13 @@ export default function BlogDisplay({ blog, ipo, articles }: { blog: Blog; ipo: 
               {/* Shows the AI note only on engine articles; an admin save sets generated_by to "admin" and those skip the figure checks. */}
               {blog.generated_by === "engine" && (
                 <p className="mt-3 max-w-[70ch] text-xs text-muted-foreground">
-                  AI wrote this article from prospectus and exchange data, and software checked its figures against that data before
-                  publishing.{" "}
+                  {d.post.aiNote}{" "}
                   <ProgressLink href="/about#how-content-is-made" className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground">
-                    How our content is made
+                    {d.post.howContentIsMade}
                   </ProgressLink>
                 </p>
               )}
+              {translated && <p className="mt-3 max-w-[70ch] text-xs text-muted-foreground">{d.post.translatedNote}</p>}
             </header>
 
             {blog.image_url && (
@@ -186,25 +192,25 @@ export default function BlogDisplay({ blog, ipo, articles }: { blog: Blog; ipo: 
 
             <footer className="mt-12 space-y-6 border-t border-border pt-6">
               {blog.tags.length > 0 && (
-                <ul aria-label="Tags" className="flex flex-wrap gap-2">
+                <ul aria-label={d.post.tags} className="flex flex-wrap gap-2">
                   {blog.tags.map((tag) => (
                     <li key={tag} className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">{tag}</li>
                   ))}
                 </ul>
               )}
-              <section aria-label="Share this article" className="lg:hidden">
-                <p className={LABEL}>Share this article</p>
+              <section aria-label={d.post.share} className="lg:hidden">
+                <p className={LABEL}>{d.post.share}</p>
                 <ShareLinks url={url} title={blog.title} />
               </section>
             </footer>
           </article>
 
           <div className="mt-12 space-y-6">
-            {ipo && <IpoArticleLinks title={`More on ${ipo.name} IPO`} lead={entityLink(ipo)} blogs={articles} />}
+            {ipo && <IpoArticleLinks title={fill(d.post.moreOn, { name: ipo.name })} lead={entityLink(ipo)} blogs={articles} />}
 
             <section className="flex flex-col items-start gap-4 rounded-[18px] bg-secondary p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-              <p className="text-lg font-medium text-pretty text-foreground">See every live, upcoming and listed IPO in one list.</p>
-              <ArrowLink href="/ipos" className="shrink-0">See all IPOs</ArrowLink>
+              <p className="text-lg font-medium text-pretty text-foreground">{d.post.cta}</p>
+              <ArrowLink href="/ipos" className="shrink-0">{common.seeAllIpos}</ArrowLink>
             </section>
           </div>
         </div>

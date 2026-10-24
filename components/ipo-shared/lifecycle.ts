@@ -47,31 +47,29 @@ function stepsOf(raw: [StepName, string | undefined][]): Step[] {
   }));
 }
 
-/** "today", "tomorrow", "in 4 days", or the date itself when it is more than a week out. */
-export function whenText(days: number, date: string): string {
-  if (days === 0) return "today";
-  if (days === 1) return "tomorrow";
-  if (days <= 7) return `in ${days} days`;
-  return `on ${date}`;
-}
+/** When a step happens, for the component showing it to word: today, tomorrow, within a week (or with no date), or on the date itself. */
+export type When = { kind: "today" | "tomorrow" | "inDays" | "onDate"; days: number; date: string };
 
-const STEP_VERB: Record<StepName, { next: string; today: string; past: string }> = {
-  Open: { next: "Opens", today: "Opens today", past: "Opened" },
-  Close: { next: "Closes", today: "Closes today", past: "Closed" },
-  Allot: { next: "Allotment", today: "Allotment today", past: "Allotted" },
-  Demat: { next: "Shares in demat", today: "Shares in demat today", past: "Shares credited" },
-  List: { next: "Lists", today: "Lists today", past: "Listed" },
-};
+export const whenOf = (days: number, date = ""): When => ({
+  kind: days === 0 ? "today" : days === 1 ? "tomorrow" : days <= 7 || !date ? "inDays" : "onDate",
+  days,
+  date,
+});
 
-/** One line for the timeline: the step due today, else the next dated step, else when it listed. */
-export function lifecycleCaption(steps: Step[]): string {
+/** The step a timeline is on: due today, else the next dated one, else the last one done. */
+export type Caption =
+  | { tense: "today"; name: StepName }
+  | { tense: "next"; name: StepName; when: When }
+  | { tense: "past"; name: StepName; date: string };
+
+/** Null when no date is known yet. */
+export function lifecycleCaption(steps: Step[]): Caption | null {
   const today = steps.find((step) => step.state === "today");
-  if (today) return STEP_VERB[today.name].today;
+  if (today) return { tense: "today", name: today.name };
 
   const next = steps.find((step) => step.state === "future" && step.days !== null);
-  if (next?.days != null) return `${STEP_VERB[next.name].next} ${whenText(next.days, next.date)}`;
+  if (next?.days != null) return { tense: "next", name: next.name, when: whenOf(next.days, next.date) };
 
   const last = steps.findLast((step) => step.state === "done");
-  if (last) return `${STEP_VERB[last.name].past} ${last.date}`;
-  return "Dates to be announced";
+  return last ? { tense: "past", name: last.name, date: last.date } : null;
 }

@@ -21,9 +21,9 @@ const IST = "Asia/Kolkata";
 export const AXIS_TICK = { fill: "var(--muted-foreground)", fontSize: 11, fontFamily: "var(--font-mono)" };
 
 export const DIRECTION = {
-  up: { word: "Up", color: "text-score-good", Icon: ArrowUpRight },
-  down: { word: "Down", color: "text-score-bad", Icon: ArrowDownRight },
-  flat: { word: "Flat", color: "text-muted-foreground", Icon: ArrowRight },
+  up: { color: "text-score-good", Icon: ArrowUpRight },
+  down: { color: "text-score-bad", Icon: ArrowDownRight },
+  flat: { color: "text-muted-foreground", Icon: ArrowRight },
 };
 
 export const formatDay = (ts: number) => new Date(ts).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: IST });

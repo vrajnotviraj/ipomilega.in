@@ -1,6 +1,7 @@
 import type { Author, Blog } from "@/types/ipo";
 import { SITE_NAME, SITE_URL } from "@/lib/seo/share";
 import { modifiedAtOf, publishedAtOf } from "@/lib/seo/news-sitemap";
+import { LANG_TAG, type Locale, localePath, LOCALES } from "@/lib/i18n/locales";
 
 export const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 export const RESEARCH_AUTHOR = "IPO Milega Research";
@@ -36,7 +37,7 @@ export const siteJsonLd = {
       url: SITE_URL,
       description: SITE_DESCRIPTION,
       publisher: { "@id": ORGANIZATION_ID },
-      inLanguage: "en-IN",
+      inLanguage: LOCALES.map((locale) => LANG_TAG[locale]),
     },
   ],
 };
@@ -44,7 +45,7 @@ export const siteJsonLd = {
 export type Crumb = { name: string; href: string };
 
 /** A BreadcrumbList for the given trail of site paths. */
-export function breadcrumbJsonLd(crumbs: Crumb[]) {
+export function breadcrumbJsonLd(crumbs: Crumb[], lang: Locale) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -52,13 +53,14 @@ export function breadcrumbJsonLd(crumbs: Crumb[]) {
       "@type": "ListItem",
       position: index + 1,
       name: crumb.name,
-      item: `${SITE_URL}${crumb.href === "/" ? "" : crumb.href}`,
+      item: `${SITE_URL}${localePath(lang, crumb.href)}`,
     })),
   };
 }
 
 /** A CollectionPage at `path` whose ItemList is the items shown on it, in page order. */
-export function collectionJsonLd({ path, name, description, items, newestFirst = false }: {
+export function collectionJsonLd({ lang, path, name, description, items, newestFirst = false }: {
+  lang: Locale;
   path: string;
   name: string;
   description: string;
@@ -70,22 +72,22 @@ export function collectionJsonLd({ path, name, description, items, newestFirst =
     "@type": "CollectionPage",
     name,
     description,
-    url: `${SITE_URL}${path}`,
-    inLanguage: "en-IN",
+    url: `${SITE_URL}${localePath(lang, path)}`,
+    inLanguage: LANG_TAG[lang],
     isPartOf: { "@id": `${SITE_URL}/#website` },
     publisher: { "@id": ORGANIZATION_ID },
     mainEntity: {
       "@type": "ItemList",
       ...(newestFirst && { itemListOrder: "https://schema.org/ItemListOrderDescending" }),
       numberOfItems: items.length,
-      itemListElement: items.map((item, index) => ({ "@type": "ListItem", position: index + 1, url: `${SITE_URL}${item.href}`, name: item.name })),
+      itemListElement: items.map((item, index) => ({ "@type": "ListItem", position: index + 1, url: `${SITE_URL}${localePath(lang, item.href)}`, name: item.name })),
     },
   };
 }
 
 /** A BlogPosting for one post. The research desk is an Organization; a writer is a Person, linked to their page when they have one. */
-export function articleJsonLd(blog: Blog) {
-  const url = `${SITE_URL}/blogs/${blog.slug}`;
+export function articleJsonLd(blog: Blog, lang: Locale) {
+  const url = `${SITE_URL}${localePath(lang, `/blogs/${blog.slug}`)}`;
   const author =
     blog.author === RESEARCH_AUTHOR
       ? researchAuthor
@@ -96,6 +98,7 @@ export function articleJsonLd(blog: Blog) {
     "@type": "BlogPosting",
     headline: blog.title,
     description: blog.meta_description,
+    inLanguage: LANG_TAG[lang],
     image: blog.image_url ? [blog.image_url] : [`${url}/opengraph-image`],
     datePublished: publishedAtOf(blog),
     dateModified: modifiedAtOf(blog),
@@ -106,13 +109,13 @@ export function articleJsonLd(blog: Blog) {
 }
 
 /** A ProfilePage for a writer. */
-export function authorJsonLd(author: Author) {
-  const url = `${SITE_URL}/authors/${author.slug}`;
+export function authorJsonLd(author: Author, lang: Locale) {
+  const url = `${SITE_URL}${localePath(lang, `/authors/${author.slug}`)}`;
   return {
     "@context": "https://schema.org",
     "@type": "ProfilePage",
     url,
-    inLanguage: "en-IN",
+    inLanguage: LANG_TAG[lang],
     isPartOf: { "@id": `${SITE_URL}/#website` },
     mainEntity: {
       "@type": "Person",

@@ -2,6 +2,7 @@ import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysi
 import type { Ipo } from "@/types/ipo";
 import { gainColor, getUseOfProceeds, parseEstListingPercent, parseGainValue } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n/server";
 import { AllotmentOddsTiles } from "@/components/ipo-shared/AllotmentOddsTiles";
 import { GmpTrendChart } from "@/components/analysis/overview/gmp-trend/GmpTrendChart";
 import { getGmp, getQuotaSplit, hasAllotmentOdds, nonBlank } from "@/components/analysis/analysis-facts";
@@ -17,12 +18,13 @@ import { WhoGetsShares } from "@/components/analysis/overview/WhoGetsShares";
 export function OverviewSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const applicationRows = analysis.investorSplit?.filter((row) => row.application.toLowerCase() !== "application") ?? [];
   const proceeds = getUseOfProceeds(ipo);
+  const d = t().analysis;
 
   return (
     <section id="overview" className="space-y-6 sm:space-y-8">
       <SummaryPanel analysis={analysis} ipo={ipo} />
       {/* Keeps the heading order h1, h2, h3 for the block titles below. */}
-      <h2 className="sr-only">Overview</h2>
+      <h2 className="sr-only">{d.sections.overview}</h2>
 
       <OddsAndGmp analysis={analysis} ipo={ipo} />
       {proceeds && <WhereTheMoneyGoes proceeds={proceeds} />}
@@ -39,7 +41,7 @@ export function OverviewSection({ analysis, ipo }: { analysis: IpoComprehensiveA
       </div>
 
       <div className="reveal pt-4">
-        <WhoGetsShares slices={getQuotaSplit(analysis, ipo)} applicationRows={applicationRows} />
+        <WhoGetsShares slices={getQuotaSplit(analysis, ipo, d.categories.retail)} applicationRows={applicationRows} />
       </div>
     </section>
   );
@@ -50,6 +52,7 @@ export function OverviewSection({ analysis, ipo }: { analysis: IpoComprehensiveA
  * so the listing strip and the trend each take the full width.
  */
 function OddsAndGmp({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
+  const d = t().analysis.odds;
   const estimatedListing = <EstimatedListing value={getGmp(analysis, ipo).estimatedListing} />;
   // Fetches its own series in the browser, so the ISR cache does not freeze it.
   const gmpTrend = (
@@ -78,8 +81,8 @@ function OddsAndGmp({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo
           companyName={analysis.company_name}
           format="ratio"
           variant="card"
-          heading="Your odds"
-          caption="Estimated from the current subscription figures. Tap a category to work it out for your application size."
+          heading={d.heading}
+          caption={d.caption}
         />
         <SubscriptionByCategory ipo={ipo} />
         {estimatedListing}
@@ -91,13 +94,12 @@ function OddsAndGmp({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo
 
 /** The GMP-implied listing price, or a note that there is no grey market quote to go on. */
 function EstimatedListing({ value }: { value: string | null }) {
+  const d = t().analysis.estimatedListing;
   if (!value) {
     return (
       <div className="rounded-xl bg-secondary px-4 py-3 sm:px-5">
-        <Eyebrow className="mb-2">Estimated listing</Eyebrow>
-        <p className="text-sm text-muted-foreground">
-          Grey market data isn&apos;t available for this issue, so the gains estimate uses fundamentals only and ignores listing-day sentiment.
-        </p>
+        <Eyebrow className="mb-2">{d.title}</Eyebrow>
+        <p className="text-sm text-muted-foreground">{d.noGmp}</p>
       </div>
     );
   }
@@ -106,7 +108,7 @@ function EstimatedListing({ value }: { value: string | null }) {
   const signed = value.replace(/\(\s*(?=\d)/, "(+");
   return (
     <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 rounded-xl bg-secondary px-4 py-3 sm:px-5">
-      <Eyebrow>Estimated listing from GMP (unofficial)</Eyebrow>
+      <Eyebrow>{d.fromGmp}</Eyebrow>
       <p className={cn("font-mono text-xl font-medium tabular-nums sm:text-2xl", gainColor(percent))}>
         ₹{signed}
       </p>

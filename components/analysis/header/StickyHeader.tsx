@@ -7,6 +7,8 @@ import { ShareButton } from "@/components/ui/ShareButton";
 import { buildShareMessage, type ShareFacts } from "@/lib/seo/share";
 import { getRiskTextColor } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
+import { useLocale, useT } from "@/lib/i18n/client";
+import { localePath } from "@/lib/i18n/locales";
 import type { SectionTab } from "@/components/analysis/analysis-facts";
 import { useActiveSection, useStickyTop } from "@/components/analysis/header/useSectionNav";
 
@@ -27,6 +29,7 @@ export function StickyHeader({
 }) {
   const stickyRef = useRef<HTMLDivElement>(null);
   const top = useStickyTop(stickyRef);
+  const d = useT();
 
   return (
     <div ref={stickyRef} className="sticky z-40 border-b border-border bg-background/95 backdrop-blur" style={{ top }}>
@@ -36,7 +39,7 @@ export function StickyHeader({
           <IpoLogo src={logoUrl} name={companyName} size="sm" />
           <span className="truncate font-display text-sm font-bold">{companyName}</span>
         </div>
-        <ShareButton title={`${companyName} IPO`} text={buildShareMessage(shareFacts)} />
+        <ShareButton text={buildShareMessage(shareFacts, d.analysis.share, useLocale())} />
       </div>
       <SectionTabs tabs={tabs} />
     </div>
@@ -48,6 +51,8 @@ export function StickyHeader({
  */
 function BackButton() {
   const router = useRouter();
+  const home = localePath(useLocale(), "/");
+  const label = useT().analysis.header.goBack;
 
   function cameFromThisSite() {
     const entry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
@@ -63,7 +68,7 @@ function BackButton() {
   }
 
   return (
-    <button onClick={() => (cameFromThisSite() ? router.back() : router.push("/"))} className={iconButton} aria-label="Go back">
+    <button onClick={() => (cameFromThisSite() ? router.back() : router.push(home))} className={iconButton} aria-label={label}>
       <ArrowLeft className="size-4" strokeWidth={2} />
     </button>
   );

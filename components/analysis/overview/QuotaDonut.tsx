@@ -1,4 +1,5 @@
 import { Eyebrow } from "@/components/analysis/primitives";
+import { t } from "@/lib/i18n/server";
 
 type Slice = { name: string; value: number; color: string };
 
@@ -12,9 +13,10 @@ const GAP = 2;
 
 /** Donut of the QIB, NII and retail quota, with a legend beside it on phones and below it on desktop. */
 export function QuotaDonut({ slices }: { slices: Slice[] }) {
+  const d = t().analysis.quota;
   const total = slices.reduce((sum, slice) => sum + slice.value, 0);
   if (!total) {
-    return <p className="py-8 text-center text-sm text-muted-foreground">Quota data unavailable.</p>;
+    return <p className="py-8 text-center text-sm text-muted-foreground">{d.unavailable}</p>;
   }
 
   // Each slice is one ring stroke, dashed to its share and started where the slices before it end.
@@ -23,7 +25,7 @@ export function QuotaDonut({ slices }: { slices: Slice[] }) {
 
   return (
     <div className="flex h-full flex-col">
-      <Eyebrow className="mb-3">Quota split</Eyebrow>
+      <Eyebrow className="mb-3">{d.split}</Eyebrow>
       <div className="flex flex-1 items-center justify-center gap-6 lg:flex-col lg:gap-4">
         <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="shrink-0" aria-hidden="true">
           {slices.map((slice, index) => (

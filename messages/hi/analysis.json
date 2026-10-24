@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "entityTitle": "{name} IPO: GMP, प्राइस, तारीखें, लॉट साइज़ और अलॉटमेंट",
+    "description": "{name} IPO का प्राइस बैंड, इश्यू की तारीखें, लॉट साइज़, ग्रे मार्केट प्रीमियम और अलॉटमेंट स्टेटस।",
+    "imageAlt": "{site} पर {name} IPO की एनालिसिस",
+    "section": "IPO एनालिसिस",
+    "pendingTitle": "{name} IPO की एनालिसिस जारी है",
+    "pendingTitleNoName": "IPO एनालिसिस जारी है",
+    "pendingDescription": "हम अभी इस IPO के प्रॉस्पेक्टस पर काम कर रहे हैं।"
+  },
+  "inProgress": {
+    "title": "एनालिसिस जारी है",
+    "hint": "हम अभी इस IPO के प्रॉस्पेक्टस पर काम कर रहे हैं। समीक्षा पूरी होते ही एनालिसिस यहां दिखेगी।"
+  },
+  "latestOn": "{name} पर ताज़ा",
+  "lotSize": "लॉट साइज़",
+  "freshIssue": "फ्रेश इश्यू",
+  "notStated": "नहीं बताया",
+  "categories": {
+    "retail": "रिटेल",
+    "shareholders": "शेयरहोल्डर"
+  },
+  "sections": {
+    "overview": "ओवरव्यू",
+    "timing": "टाइमिंग",
+    "financials": "फाइनेंशियल",
+    "risk": "रिस्क",
+    "performance": "परफॉर्मेंस",
+    "flexibility": "फ्लेक्सिबिलिटी"
+  },
+  "header": {
+    "goBack": "वापस जाएं"
+  },
+  "share": {
+    "opensTomorrow": "कल खुलेगा।",
+    "opensOn": "{date} को खुलेगा।",
+    "closed": "बोली बंद हो चुकी है।",
+    "lastDayToday": "अप्लाई करने की आखिरी तारीख आज है।",
+    "lastDayTomorrow": "अप्लाई करने की आखिरी तारीख कल है।",
+    "daysLeft": "अप्लाई करने के लिए {count} दिन बाकी, {date} को बंद।",
+    "applying": "अरे, मैंने {name} IPO में अप्लाई किया है।",
+    "fullAnalysis": "पूरी एनालिसिस → {url}",
+    "scored": "RHP से स्कोर {score}/10।",
+    "readFull": "{site} पर {name} IPO की पूरी एनालिसिस पढ़ें।"
+  },
+  "summary": {
+    "whatTheyDo": "कंपनी क्या करती है: ",
+    "by": "लेखक:",
+    "published": "प्रकाशित",
+    "updated": "अपडेट",
+    "opensInNewTab": "(नए टैब में खुलेगा)",
+    "ourScore": "हमारा स्कोर",
+    "gmpNote": "GMP अनौपचारिक ग्रे मार्केट संकेत है।",
+    "gmpUpdated": "GMP अपडेट",
+    "shares": "{count} शेयर",
+    "minInvestment": "न्यूनतम निवेश",
+    "issueTimeline": "इश्यू टाइमलाइन",
+    "figures": {
+      "total": "कुल",
+      "totalSoFar": "अब तक कुल",
+      "retailOdds": "रिटेल चांस",
+      "onceBidsComeIn": "बोली आने पर",
+      "listingGain": "लिस्टिंग गेन",
+      "listedAt": "₹{price} पर लिस्ट",
+      "gmp": "GMP (अनौपचारिक)",
+      "perShare": "₹{amount} प्रति शेयर",
+      "greyMarketPremium": "ग्रे मार्केट प्रीमियम",
+      "opens": "खुलेगा",
+      "closes": "{date} को बंद",
+      "oneLot": "एक लॉट"
+    }
+  },
+  "timeline": {
+    "unavailable": "ओपनिंग और लिस्टिंग की तारीखें पक्की होने पर टाइमलाइन दिखेगी।",
+    "open": "ओपन",
+    "close": "क्लोज़",
+    "allotment": "अलॉटमेंट",
+    "listing": "लिस्टिंग",
+    "opens": "खुलेगा",
+    "closes": "बंद होगा",
+    "lists": "लिस्ट होगा",
+    "today": "आज {verb}",
+    "tomorrow": "कल {verb}",
+    "inDays": "{count} दिन में {verb}"
+  },
+  "odds": {
+    "heading": "आपके चांस",
+    "caption": "मौजूदा सब्सक्रिप्शन आंकड़ों से अनुमानित। अपने आवेदन के साइज़ के हिसाब से निकालने के लिए किसी कैटेगरी पर टैप करें।"
+  },
+  "estimatedListing": {
+    "title": "अनुमानित लिस्टिंग",
+    "noGmp": "इस इश्यू का ग्रे मार्केट डेटा उपलब्ध नहीं है, इसलिए फायदे का अनुमान सिर्फ फंडामेंटल्स पर है और लिस्टिंग डे के सेंटीमेंट को नहीं गिनता।",
+    "fromGmp": "GMP से अनुमानित लिस्टिंग (अनौपचारिक)"
+  },
+  "subscription": {
+    "title": "कैटेगरी के हिसाब से सब्सक्रिप्शन",
+    "total": "कुल",
+    "totalSoFar": "अब तक कुल"
+  },
+  "money": {
+    "title": "पैसा कहां जाता है",
+    "ofsOnly": "यह IPO पूरी तरह ऑफर फॉर सेल है। कंपनी को इसमें से कोई पैसा नहीं मिलता",
+    "allOfIt": ": पूरे",
+    "goesToSellers": "बेचने वाले शेयरहोल्डरों को जाते हैं।",
+    "itAllGoesToSellers": ", सारा पैसा बेचने वाले शेयरहोल्डरों को जाता है।",
+    "toCompany": "कंपनी को",
+    "toSellers": "बेचने वाले शेयरहोल्डरों को",
+    "offerForSale": "ऑफर फॉर सेल",
+    "noOfferForSale": "कोई ऑफर फॉर सेल नहीं",
+    "ofsSegment": "ऑफर फॉर सेल: बेचने वाले शेयरहोल्डरों को जाता है"
+  },
+  "scoreBreakdown": {
+    "outerRing": "बाहरी रिंग: अनुमानित फायदा",
+    "title": "स्कोर कैसे जुड़ता है",
+    "note": "कुल स्कोर इन पांच का औसत है, बोली बंद होने के बाद QIB डिमांड से थोड़ा बदलता है।",
+    "estimatedGain": "अनुमानित फायदा (सिर्फ फंडामेंटल्स)",
+    "overall": "कुल"
+  },
+  "strengthsAndConcerns": {
+    "strengths": { "title": "मज़बूती", "empty": "अभी कोई खास मज़बूती नहीं।" },
+    "concerns": { "title": "चिंताएं", "empty": "अभी कोई चिंता नहीं दिखी।" }
+  },
+  "quota": {
+    "title": "शेयर किसे मिलते हैं",
+    "split": "कोटा का बंटवारा",
+    "unavailable": "कोटा का डेटा उपलब्ध नहीं।",
+    "applicationSize": "आवेदन का साइज़",
+    "lotsAndShares": "{lots} लॉट, {shares} शेयर",
+    "application": "आवेदन",
+    "shares": "शेयर",
+    "amount": "रकम"
+  },
+  "gmp": {
+    "title": "GMP ट्रेंड",
+    "unofficialQuotes": "अनौपचारिक ग्रे मार्केट भाव",
+    "asOf": ", आज",
+    "istToday": "IST तक",
+    "timesInIst": ", समय IST में",
+    "chart": "चार्ट",
+    "table": "टेबल",
+    "loadFailed": "GMP हिस्ट्री अभी लोड नहीं हो सकी।",
+    "noQuote": "इस इश्यू का अभी कोई ग्रे मार्केट भाव नहीं। पहला भाव आते ही ट्रेंड शुरू होगा।",
+    "firstPointNote": "लाइन यहां से बनती है: हर दिन एक पॉइंट, उस दिन का ताज़ा GMP।",
+    "firstDay": "पहला दिन,",
+    "since": "बनाम",
+    "direction": { "up": "ऊपर", "down": "नीचे", "flat": "स्थिर" },
+    "noChange": "कोई बदलाव नहीं",
+    "noChangeLower": "कोई बदलाव नहीं",
+    "liveAt": "लाइव {time}",
+    "estGain": "अनुमानित फायदा",
+    "tableCaption": "{company} का रोज़ का GMP, सबसे नया पहले",
+    "thisIpo": "इस IPO",
+    "date": "तारीख",
+    "change": "बदलाव"
+  },
+  "calendar": {
+    "add": "कैलेंडर में जोड़ें",
+    "steps": { "opening": "IPO खुलेगा", "closing": "IPO बंद होगा", "allotment": "IPO अलॉटमेंट", "listing": "IPO लिस्टिंग" },
+    "allDatesIcs": "सभी तारीखें .ics में"
+  },
+  "financials": {
+    "revenue": "रेवेन्यू",
+    "expense": "खर्च",
+    "profitAfterTax": "टैक्स के बाद मुनाफा",
+    "netMargin": "नेट मार्जिन",
+    "assets": "एसेट्स",
+    "pts": "पॉइंट",
+    "periodEnded": "अवधि समाप्त",
+    "changeAgainst": "बदलाव बनाम",
+    "noPriorYear": "पिछला साल नहीं",
+    "returnOnEquity": "रिटर्न ऑन इक्विटी",
+    "debtToEquity": "डेट टू इक्विटी",
+    "currentRatio": "करंट रेशियो",
+    "revenueCagr": "रेवेन्यू CAGR",
+    "returnOnNetWorth": "रिटर्न ऑन नेट वर्थ",
+    "navPerShare": "NAV प्रति शेयर (₹)",
+    "priceToBook": "प्राइस टू बुक",
+    "trendTitle": "फाइनेंशियल परफॉर्मेंस ट्रेंड",
+    "amountInCrores": "रकम ₹ करोड़ में",
+    "debt": "कंपनी पर कर्ज",
+    "whoIsSelling": "कौन बेच रहा है, और क्यों",
+    "promotersSelling": "प्रमोटर बेच रहे हैं",
+    "promotersNotSelling": "प्रमोटर नहीं बेच रहे",
+    "none": "कोई नहीं",
+    "freshVsOfs": "फ्रेश इश्यू कंपनी को जाता है। OFS बेचने वाले शेयरहोल्डरों को जाता है।"
+  },
+  "flexibility": {
+    "marketAdaptability": "बाज़ार के हिसाब से ढलना",
+    "financialStability": "फाइनेंशियल स्थिरता",
+    "operationalAgility": "ऑपरेशनल चुस्ती",
+    "productDiversification": "प्रोडक्ट डाइवर्सिफिकेशन",
+    "futureAdaptability": "भविष्य के हिसाब से ढलना"
+  },
+  "performance": {
+    "historicalGrowth": "पुरानी ग्रोथ",
+    "marketComparison": "बाज़ार से तुलना",
+    "futurePotential": "भविष्य की संभावना",
+    "operationalConsistency": "ऑपरेशनल निरंतरता",
+    "managementQuality": "मैनेजमेंट की क्वालिटी",
+    "experience": "अनुभव",
+    "trackRecord": "ट्रैक रिकॉर्ड",
+    "keyAchievements": "अहम उपलब्धियां"
+  },
+  "risk": {
+    "safetyRating": "इस स्कोर को सेफ्टी रेटिंग की तरह पढ़ें:",
+    "lowestRisk": "का मतलब सबसे कम रिस्क,",
+    "highest": "सबसे ज़्यादा।",
+    "whereRisksSit": "रिस्क कहां हैं",
+    "mitigation": "कंपनी इनसे कैसे निपटती है",
+    "categories": {
+      "financial_risks": "फाइनेंशियल रिस्क",
+      "market_risks": "मार्केट रिस्क",
+      "operational_risks": "ऑपरेशनल रिस्क",
+      "regulatory_risks": "रेगुलेटरी रिस्क"
+    }
+  },
+  "timing": {
+    "timeToMarket": "टाइम टू मार्केट",
+    "howAllotmentWorks": "अलॉटमेंट कैसे होता है",
+    "marketTiming": "मार्केट टाइमिंग",
+    "listingOn": "लिस्टिंग",
+    "keyMilestones": "अहम पड़ाव",
+    "marketTimingWord": { "good": "अनुकूल", "mid": "न्यूट्रल", "bad": "प्रतिकूल" }
+  }
+}

@@ -1,13 +1,14 @@
 import { Fragment } from "react";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { breadcrumbJsonLd, JsonLd, type Crumb } from "@/lib/seo/json-ld";
+import { locale, t } from "@/lib/i18n/server";
 
 /** The visible breadcrumb trail plus its BreadcrumbList JSON-LD. The last crumb is the current page. */
 export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
   const last = crumbs.length - 1;
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
-      <JsonLd data={breadcrumbJsonLd(crumbs)} />
+    <nav aria-label={t().common.breadcrumb} className="text-sm text-muted-foreground">
+      <JsonLd data={breadcrumbJsonLd(crumbs, locale())} />
       <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {crumbs.map((crumb, index) => (
           <Fragment key={crumb.href}>

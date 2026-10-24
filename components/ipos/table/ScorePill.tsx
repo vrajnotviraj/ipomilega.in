@@ -1,14 +1,16 @@
 import { getRiskTextColor } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n/client";
 
 /** Analysis score as a pill tinted with its band colour, or a muted "–" when there is no analysis. */
 export function ScorePill({ value }: { value: number }) {
+  const w = useT().common.score;
   if (value <= 0) {
-    return <span className="inline-block shrink-0 px-2.5 font-display text-lg font-bold text-muted-foreground" title="No analysis yet">–</span>;
+    return <span className="inline-block shrink-0 px-2.5 font-display text-lg font-bold text-muted-foreground" title={w.none}>–</span>;
   }
   return (
     <span
-      title="Analysis score"
+      title={w.title}
       className={cn(
         "inline-flex shrink-0 items-baseline whitespace-nowrap rounded-full bg-[color-mix(in_srgb,currentColor_11%,transparent)] px-2.5 py-1",
         getRiskTextColor(value)

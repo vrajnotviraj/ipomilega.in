@@ -1,0 +1,63 @@
+{
+  "crumb": "Blog",
+  "minRead": "min read",
+  "categories": {
+    "IPO Analysis": "IPO Analysis",
+    "Market News": "Market News",
+    "Investment Guide": "Investment Guide",
+    "Company Review": "Company Review"
+  },
+  "index": {
+    "meta": {
+      "title": "IPO analysis, GMP, subscription and allotment news",
+      "description": "Articles on Indian IPOs, mainboard and SME: a prospectus-based analysis before you bid, then subscription, allotment and listing updates."
+    },
+    "heading": "IPO analysis and news",
+    "intro": "Plain-English articles on Indian IPOs, mainboard and SME. Each IPO can get up to five articles: an analysis of the business, financials, valuation and GMP before you bid, a GMP page updated daily in the last 3 days of bidding, then its subscription, allotment and listing updates.",
+    "count": { "one": "article", "other": "articles" },
+    "latestOn": "latest on"
+  },
+  "list": {
+    "search": "Search articles",
+    "filterByCategory": "Filter by category",
+    "emptyTitle": "No articles found",
+    "emptyHint": "Try a different search or category."
+  },
+  "post": {
+    "notFoundTitle": "Post not found",
+    "notFoundDescription": "We couldn't find this blog post.",
+    "by": "By",
+    "updated": "updated",
+    "onThisPage": "On this page",
+    "share": "Share this article",
+    "shareOn": "Share on {name} (opens in a new tab)",
+    "tags": "Tags",
+    "aiNote": "AI wrote this article from prospectus and exchange data, and software checked its figures against that data before publishing.",
+    "howContentIsMade": "How our content is made",
+    "translatedNote": "Software translated this article from the English original. The English version is the reference.",
+    "moreOn": "More on {name} IPO",
+    "entityLink": "{name} IPO: GMP, price, dates, lot size and allotment",
+    "allIposLink": "All IPOs: live, upcoming and listed",
+    "cta": "See every live, upcoming and listed IPO in one list."
+  },
+  "ipoCard": {
+    "about": "About the {name} IPO",
+    "viewAnalysis": "View analysis"
+  },
+  "author": {
+    "notFound": "Author not found",
+    "metaTitle": "{name}, IPO articles",
+    "metaPage": ", page {page}",
+    "metaDescription": "IPO analysis, GMP, subscription, allotment and listing articles by {name} on IPO Milega.",
+    "count": { "one": "article on IPO Milega", "other": "articles on IPO Milega" },
+    "articlesBy": "Articles by {name}",
+    "emptyTitle": "No articles yet",
+    "emptyHint": "Articles by this writer show up here once they go live.",
+    "pagination": "Pagination",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next"
+  }
+}

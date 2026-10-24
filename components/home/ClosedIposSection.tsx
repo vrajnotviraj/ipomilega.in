@@ -6,7 +6,11 @@ import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
 import { Clock } from 'lucide-react';
 import { getIpoType, gmpOf } from '@/lib/ipo/format';
-import { afterCloseSteps, lifecycleCaption, type Step } from '@/components/ipo-shared/lifecycle';
+import { afterCloseSteps, type Step } from '@/components/ipo-shared/lifecycle';
+import { captionText } from '@/components/ipo-shared/LifecycleTrack';
+import { useT } from '@/lib/i18n/client';
+import { fill } from '@/lib/i18n/locales';
+import type { Dictionary } from '@/messages';
 
 /** Days to the step an IPO is on (the one due today, else the next dated one), with earlier steps first on the same day. */
 function rankOf(steps: Step[]) {
@@ -15,11 +19,11 @@ function rankOf(steps: Step[]) {
 }
 
 /** Groups IPOs by what happens next ("Lists in 2 days"), soonest first, highest GMP first within a group. */
-function groupByNextStep(ipos: HomePageIpoProps[]) {
+function groupByNextStep(ipos: HomePageIpoProps[], d: Dictionary) {
   const groups = new Map<string, { rank: number; isToday: boolean; items: HomePageIpoProps[] }>();
   for (const item of [...ipos].sort((a, b) => gmpOf(b) - gmpOf(a))) {
     const steps = afterCloseSteps(item.ipo);
-    const caption = lifecycleCaption(steps);
+    const caption = captionText(steps, d);
     const group = groups.get(caption) ?? { rank: rankOf(steps), isToday: steps.some((step) => step.state === 'today'), items: [] };
     group.items.push(item);
     groups.set(caption, group);
@@ -29,15 +33,17 @@ function groupByNextStep(ipos: HomePageIpoProps[]) {
 
 /** IPOs whose bidding has closed but which have not listed yet, for the chosen board. */
 export function ClosedIposSection({ ipos }: IpoSectionProps) {
+  const d = useT();
+  const h = d.home.closed;
   const { board } = useBoard();
   const boardIpos = ipos.filter((item) => getIpoType(item.ipo) === board);
   if (boardIpos.length === 0) return null;
 
   return (
     <section className="py-8 sm:py-12">
-      <SectionHeading title="Bidding closed" href="/ipos?filter=closed" linkLabel={`View all ${ipos.length} closed IPOs`} />
+      <SectionHeading title={h.title} href="/ipos?filter=closed" linkLabel={fill(h.viewAllLabel, { count: ipos.length })} linkText={d.common.viewAll} />
       <div className="mt-8 space-y-10">
-        {groupByNextStep(boardIpos).map(([caption, { isToday, items }]) => (
+        {groupByNextStep(boardIpos, d).map(([caption, { isToday, items }]) => (
           <div key={caption}>
             <h3 className="mb-4 flex items-center gap-2 text-sm font-medium text-muted-foreground">
               {isToday ? (

@@ -1,31 +1,42 @@
 // Share copy for one IPO. The Share dialog and the link-preview metadata both read from here so they match.
 import { daysFromToday, formatIpoDate } from "@/lib/ipo/format";
+import { fill, languageAlternates, type Locale, localePath, LOCALES, OG_LOCALE } from "@/lib/i18n/locales";
+import type { Dictionary } from "@/messages";
 
 export const SITE_URL = "https://www.ipomilega.in";
 export const SITE_NAME = "IPO Milega";
 
 /** Base Open Graph fields. A function because Next mutates the `images` array it resolves. */
-export const openGraphBase = () => ({
+export const openGraphBase = (lang: Locale) => ({
   siteName: SITE_NAME,
-  locale: "en_IN",
+  locale: OG_LOCALE[lang],
   type: "website" as const,
   images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${SITE_NAME} - Prospectus analysis for every Indian IPO` }],
+});
+
+/** Canonical and hreflang set for a page, listing only the languages it exists in. */
+export const alternatesFor = (lang: Locale, path: string, locales: readonly Locale[] = LOCALES) => ({
+  canonical: localePath(lang, path),
+  languages: languageAlternates(path, SITE_URL, locales),
 });
 
 /** Keeps the layout's " | IPO Milega" suffix only while the whole title fits Google's ~60 characters; otherwise the suffix would push the page's own words off the end. */
 export const titleFor = (title: string) => (title.length + " | IPO Milega".length > 60 ? { absolute: title } : title);
 
+/** The share sentences of one language: messages/<lang>/analysis.json, "share". */
+export type ShareWords = Dictionary["analysis"]["share"];
+
 /** How long is left to apply, e.g. "Today is the last date to apply." */
-export function closingLine(closing: string | null | undefined, opening: string | null | undefined): string | null {
+export function closingLine(closing: string | null | undefined, opening: string | null | undefined, words: ShareWords): string | null {
   const toOpen = daysFromToday(opening);
-  if (toOpen !== null && toOpen > 0) return toOpen === 1 ? "Opens tomorrow." : `Opens ${formatIpoDate(opening)}.`;
+  if (toOpen !== null && toOpen > 0) return toOpen === 1 ? words.opensTomorrow : fill(words.opensOn, { date: formatIpoDate(opening) ?? "" });
 
   const toClose = daysFromToday(closing);
   if (toClose === null) return null;
-  if (toClose < 0) return "Bidding has closed.";
-  if (toClose === 0) return "Today is the last date to apply.";
-  if (toClose === 1) return "Tomorrow is the last date to apply.";
-  return `${toClose} days left to apply, closes ${formatIpoDate(closing)}.`;
+  if (toClose < 0) return words.closed;
+  if (toClose === 0) return words.lastDayToday;
+  if (toClose === 1) return words.lastDayTomorrow;
+  return fill(words.daysLeft, { count: toClose, date: formatIpoDate(closing) ?? "" });
 }
 
 /** "GMP ₹25" for a premium amount, "GMP +6.17%" for an estimated-listing string like "430 (6.17%)". */
@@ -71,29 +82,29 @@ export interface ShareFacts {
  * The message a Share tap hands to the share sheet: GMP, deadline and link.
  * Plain text on purpose: only WhatsApp renders `*bold*`; Telegram, email and notes print the asterisks.
  */
-export function buildShareMessage({ companyName, slug, gmp, opening, closing }: ShareFacts): string {
+export function buildShareMessage({ companyName, slug, gmp, opening, closing }: ShareFacts, words: ShareWords, lang: Locale): string {
   return [
-    `Hey, I'm applying to the ${companyName} IPO.`,
-    [gmpLine(gmp), closingLine(closing, opening)].filter(Boolean).join("\n"),
-    `Full analysis → ${SITE_URL}/analysis/${slug}`,
+    fill(words.applying, { name: companyName }),
+    [gmpLine(gmp), closingLine(closing, opening, words)].filter(Boolean).join("\n"),
+    fill(words.fullAnalysis, { url: `${SITE_URL}${localePath(lang, `/analysis/${slug}`)}` }),
   ]
     .filter(Boolean)
     .join("\n\n");
 }
 
 /** The one-paragraph version for the meta, og and twitter descriptions. Google cuts at ~155 characters, so the business blurb is the first thing dropped. */
-export function buildShareDescription({ companyName, score, gmp, opening, closing, businessModel }: ShareFacts): string {
+export function buildShareDescription({ companyName, score, gmp, opening, closing, businessModel }: ShareFacts, words: ShareWords): string {
   const build = (blurb: string | null) =>
     [
       gmpLine(gmp),
-      closingLine(closing, opening),
+      closingLine(closing, opening, words),
       blurb,
-      score !== undefined && score > 0 ? `Scored ${score.toFixed(1)}/10 from the RHP.` : null,
-      `Read the full ${companyName} IPO analysis on ${SITE_NAME}.`,
+      score !== undefined && score > 0 ? fill(words.scored, { score: score.toFixed(1) }) : null,
+      fill(words.readFull, { name: companyName, site: SITE_NAME }),
     ]
       .filter((part): part is string => Boolean(part))
-      // gmpLine never ends in a stop and oneLiner may not, so each part is ended as a sentence before joining.
-      .map((part) => (/[.!?…]$/.test(part) ? part : `${part}.`))
+      // gmpLine never ends in a stop and oneLiner may not, so each part is ended as a sentence before joining. Hindi ends in a danda.
+      .map((part) => (/[.!?…।]$/.test(part) ? part : `${part}.`))
       .join(" ");
 
   const full = build(oneLiner(businessModel, 110));

@@ -1,7 +1,9 @@
+import { useT } from "@/lib/i18n/client";
+import { fill } from "@/lib/i18n/locales";
 import { formatRupees } from "@/lib/ipo/format";
 import { dateOf, formatDay } from "@/lib/ipo/planner/days";
 import type { Application } from "@/lib/ipo/planner/plan";
-import { CATEGORY_LABEL, SectionTitle } from "@/components/planner/format";
+import { SectionTitle } from "@/components/planner/format";
 import { cn } from "@/lib/utils";
 
 /**
@@ -9,6 +11,8 @@ import { cn } from "@/lib/utils";
  * the faint tail is how long it stays out if the bid is allotted.
  */
 export function MoneyTimeline({ applications, today }: { applications: Application[]; today: number }) {
+  const { planner, ipo: ipoWords } = useT();
+  const d = planner.timeline;
   const first = Math.min(today, ...applications.map((app) => app.ipo.closeDay));
   const last = Math.max(...applications.map((app) => app.ipo.cashDay));
   const days = Array.from({ length: last - first + 1 }, (_, i) => first + i);
@@ -18,11 +22,11 @@ export function MoneyTimeline({ applications, today }: { applications: Applicati
 
   return (
     <div className="mt-8">
-      <SectionTitle>When your money is blocked</SectionTitle>
+      <SectionTitle>{d.title}</SectionTitle>
       <p className="mt-1 text-sm text-muted-foreground">
-        <Swatch className="bg-primary" /> blocked until it comes back
-        <Swatch className={cn("ml-3", TAIL)} /> longer if allotted
-        <Swatch className="ml-3 bg-secondary" /> weekend
+        <Swatch className="bg-primary" /> {d.blocked}
+        <Swatch className={cn("ml-3", TAIL)} /> {d.longer}
+        <Swatch className="ml-3 bg-secondary" /> {d.weekend}
       </p>
 
       <div className="mt-3 rounded-xl border border-border bg-card p-4 sm:p-5">
@@ -61,7 +65,7 @@ export function MoneyTimeline({ applications, today }: { applications: Applicati
               <li key={`${ipo.id}-${option.category}`} className={ROW}>
                 <div className="min-w-0 justify-self-start bg-card pr-2" title={ipo.name}>
                   <p className="truncate text-sm font-medium text-foreground">{ipo.name}</p>
-                  <p className="text-xs text-muted-foreground">{CATEGORY_LABEL[option.category]}</p>
+                  <p className="text-xs text-muted-foreground">{ipoWords.categories[option.category]}</p>
                 </div>
                 <span className="justify-self-end bg-card pl-2 font-mono text-sm font-medium tabular-nums text-foreground sm:col-start-3 sm:row-start-1">
                   {formatRupees(option.cost * accounts.length)}
@@ -71,7 +75,7 @@ export function MoneyTimeline({ applications, today }: { applications: Applicati
                   <div className="grow-in absolute inset-y-0 rounded-full bg-primary" style={span(ipo.closeDay, ipo.freeDay)} />
                 </div>
                 <span className="sr-only">
-                  Blocked {formatDay(ipo.closeDay)} to {formatDay(ipo.freeDay)}, or to {formatDay(ipo.cashDay)} if allotted.
+                  {fill(d.blockedRange, { from: formatDay(ipo.closeDay), to: formatDay(ipo.freeDay), cash: formatDay(ipo.cashDay) })}
                 </span>
               </li>
             ))}

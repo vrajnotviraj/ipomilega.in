@@ -1,11 +1,12 @@
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n/server";
 
 const LIST_LIMIT = 5;
 
 const COLUMNS = {
-  strengths: { title: "Strengths", tile: "bg-score-good/8", icon: "text-score-good", Icon: Plus, empty: "No highlighted strengths yet." },
-  concerns: { title: "Concerns", tile: "bg-score-bad/8", icon: "text-score-bad", Icon: Minus, empty: "No flagged concerns yet." },
+  strengths: { tile: "bg-score-good/8", icon: "text-score-good", Icon: Plus },
+  concerns: { tile: "bg-score-bad/8", icon: "text-score-bad", Icon: Minus },
 };
 
 /** The top strengths and concerns side by side, each as a stack of tinted tiles. */
@@ -19,7 +20,8 @@ export function StrengthsAndConcerns({ strengths, concerns }: { strengths: strin
 }
 
 function TileColumn({ kind, items }: { kind: keyof typeof COLUMNS; items: string[] }) {
-  const { title, tile, icon, Icon, empty } = COLUMNS[kind];
+  const { tile, icon, Icon } = COLUMNS[kind];
+  const { title, empty } = t().analysis.strengthsAndConcerns[kind];
   const shown = items.slice(0, LIST_LIMIT);
 
   return (

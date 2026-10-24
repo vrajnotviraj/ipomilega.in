@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "title": "About IPO Milega: data, scoring and review",
+    "description": "What IPO Milega is, where its IPO data comes from, how its content is checked and reviewed, and how we score every RHP/DRHP by the same rules."
+  },
+  "titleStart": "About IPO",
+  "titleHighlight": "Milega",
+  "intro": "IPO Milega tracks every Indian IPO and turns the filings behind it into something a regular investor can read. You get the prospectus, the financials and the risks, laid out the same way for every issue. We don't give tips or tell you what to buy.",
+  "whatWeDo": {
+    "heading": "What we do",
+    "lead": "Four things, done the same way for every issue.",
+    "items": [
+      {
+        "title": "One place for every Indian IPO",
+        "body": "Live, closed, upcoming and past issues in one list: dates, price band, lot size, subscription and listing performance, updated as the calendar moves."
+      },
+      {
+        "title": "The prospectus, read for you",
+        "body": "An RHP runs to hundreds of pages. We read every filing the same way and pull out the financials, the named risks and the peer comparison, so you can get through it in a few minutes."
+      },
+      {
+        "title": "A score you can pick apart",
+        "body": "Each IPO gets an overall score backed by six modules. The breakdown sits next to the number, so you can see which parts carried it and which dragged it down."
+      },
+      {
+        "title": "Context around the numbers",
+        "body": "Allotment odds, investor quota splits, multi-year financial charts and a written take, so you know what the numbers mean for this issue."
+      }
+    ]
+  },
+  "data": {
+    "heading": "Where the data comes from",
+    "body": "IPO details, subscription figures and listing prices come from public filings and exchange disclosures. The analysis is generated from the RHP/DRHP a company files with SEBI. Grey market premium (GMP) is an unofficial estimate from the informal market. Live numbers, subscription and grey market premium especially, move through the day, so treat what you see as the latest reading."
+  },
+  "content": {
+    "heading": "How this site's content is made",
+    "paragraphs": [
+      "The IPO analyses come from the company's RHP/DRHP. The blog articles come from a fact sheet built from our IPO data, which holds the prospectus figures, exchange data and GMP. The IPO Milega research team reviews the data manually.",
+      "Software also checks every article before it goes live. Each number and date has to match the fact sheet, links can only point to the sources we supply, and the article must end with a Sources section. It also can't call GMP official or call anything guaranteed. If an article fails, the site doesn't publish it automatically.",
+      "GMP is an unofficial grey market figure. NSE and BSE don't publish it, and it doesn't predict the listing price. Nothing on the site is investment advice."
+    ]
+  },
+  "corrections": {
+    "heading": "Corrections",
+    "before": "Spotted a wrong number or date? Tell us on X at",
+    "after": "with a link to the page. When we fix an article, it shows the date it was updated under the byline."
+  },
+  "notAdvice": {
+    "heading": "A note on what this isn't",
+    "body": "Nothing on IPO Milega is investment advice, and we aren't a registered investment adviser. A score sums up what the filing says. It can't tell you what the stock will do after listing. Read the prospectus, weigh your own position, and speak to a qualified adviser before you apply."
+  }
+}

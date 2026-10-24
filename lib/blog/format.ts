@@ -12,6 +12,9 @@ function excerptOf(blog: Pick<Blog, "excerpt" | "content">, words: number): stri
   return blog.excerpt || blog.content.trim().split(" ").slice(0, words).join(" ") + "...";
 }
 
+/** The category in the reader's language, or the raw English value when the dictionary has no word for it. */
+export const categoryLabel = (words: Record<string, string>, category: string) => words[category] ?? category;
+
 /** "18 Aug 2026". */
 export function formatBlogDate(date: string): string {
   // Pinned to IST so the server render and the browser print the same day.

@@ -1,11 +1,13 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Ipo } from "@/types/ipo";
 import { ArrowUpRight } from "lucide-react";
-import { formatIssueSize, formatIstTimestamp, formatPriceBand, getAllotmentCheckUrl, getIpoType, getIssueStage, type IssueStage } from "@/lib/ipo/format";
-import { applyQibAdjustment, describeQibAdjustment, getQibSignal, getRiskTextColor, getScoreTrustLabel, scoreOf } from "@/lib/ipo/score";
+import { boardLabel, formatIssueSize, formatIstTimestamp, formatPriceBand, getAllotmentCheckUrl, getIpoType, getIssueStage, type IssueStage } from "@/lib/ipo/format";
+import { applyQibAdjustment, describeQibAdjustment, getQibSignal, getRiskTextColor, scoreBand, scoreOf } from "@/lib/ipo/score";
 import { RESEARCH_AUTHOR } from "@/lib/seo/json-ld";
 import { formatBlogDate } from "@/lib/blog/format";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n/server";
+import { fill } from "@/lib/i18n/locales";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { LiveLabel } from "@/components/ui/LiveLabel";
@@ -25,6 +27,7 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
   const { opening, closing } = issueDates;
   const allotmentUrl = getAllotmentCheckUrl(ipo);
   const gmpUpdatedAt = formatIstTimestamp(ipo.gmp_updated_at);
+  const d = t();
 
   return (
     <div className="rounded-[18px] border border-border bg-card p-5 sm:p-8">
@@ -46,11 +49,11 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
         <ScoreVerdict baseScore={scoreOf({ analysis })} qibSignal={getQibSignal(ipo)} verdict={getVerdict(analysis)} />
         <div className="min-w-0 space-y-6">
           <div>
-            <HeadlineFigures figures={getHeadlineFigures(analysis, ipo)} />
+            <HeadlineFigures figures={getHeadlineFigures(analysis, ipo, d)} />
             <p className="mt-2 text-xs text-muted-foreground">
-              GMP is an unofficial grey market indication.
+              {d.analysis.summary.gmpNote}
               {gmpUpdatedAt && (
-                <> GMP updated <span className="font-mono tabular-nums">{gmpUpdatedAt}</span>.</>
+                <> {d.analysis.summary.gmpUpdated} <span className="font-mono tabular-nums">{gmpUpdatedAt}</span>.</>
               )}
             </p>
           </div>
@@ -60,7 +63,7 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
 
       {/* Phones show the calendar button under the dates; from sm it sits in the header row. */}
       <div className="mt-8 grid gap-4 rounded-xl bg-secondary p-4 sm:grid-cols-[1fr_auto] sm:items-center sm:p-6">
-        <Eyebrow>Issue timeline</Eyebrow>
+        <Eyebrow>{d.analysis.summary.issueTimeline}</Eyebrow>
         <AddToCalendar company={analysis.company_name} dates={issueDates} className="order-last mt-1 sm:order-none sm:mt-0" />
         <div className="sm:col-span-2">
           <IssueTimeline {...issueDates} />
@@ -74,20 +77,21 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
 function Byline({ published, updated }: { published?: Date | string; updated?: Date | string }) {
   const publishedOn = published ? formatBlogDate(String(published)) : null;
   const updatedOn = updated ? formatBlogDate(String(updated)) : null;
+  const d = t().analysis.summary;
   return (
     <p className="mt-3 text-sm text-muted-foreground">
-      By{" "}
+      {d.by}{" "}
       <ProgressLink href="/about" className="underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground">
         {RESEARCH_AUTHOR}
       </ProgressLink>
       {publishedOn && (
         <>
-          {" · "}Published <time dateTime={String(published)} className="font-mono tabular-nums">{publishedOn}</time>
+          {" · "}{d.published} <time dateTime={String(published)} className="font-mono tabular-nums">{publishedOn}</time>
         </>
       )}
       {updatedOn && updatedOn !== publishedOn && (
         <>
-          {" · "}Updated <time dateTime={String(updated)} className="font-mono tabular-nums">{updatedOn}</time>
+          {" · "}{d.updated} <time dateTime={String(updated)} className="font-mono tabular-nums">{updatedOn}</time>
         </>
       )}
     </p>
@@ -99,7 +103,7 @@ function AboutLine({ text }: { text: string | null }) {
   if (!text) return null;
   return (
     <p className="mt-3 max-w-[65ch] sm:line-clamp-2 text-pretty text-base text-muted-foreground">
-      <span className="font-medium text-foreground">What they do: </span>
+      <span className="font-medium text-foreground">{t().analysis.summary.whatTheyDo}</span>
       {text}
     </p>
   );
@@ -110,6 +114,7 @@ function AboutLine({ text }: { text: string | null }) {
  * ponytail: plain anchor because ArrowLink has no target prop; switch to ArrowLink once it passes target and rel.
  */
 function AllotmentCheckLink({ href }: { href: string }) {
+  const { common, analysis } = t();
   return (
     <a
       href={href}
@@ -117,27 +122,29 @@ function AllotmentCheckLink({ href }: { href: string }) {
       rel="noopener noreferrer"
       className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium transition-[transform,background-color] hover:bg-secondary active:scale-[0.98]"
     >
-      Check allotment
+      {common.checkAllotment}
       <ArrowUpRight className="size-4" strokeWidth={2} aria-hidden="true" />
-      <span className="sr-only">(opens in a new tab)</span>
+      <span className="sr-only">{analysis.summary.opensInNewTab}</span>
     </a>
   );
 }
 
 /** The overall score with the same QIB nudge the home cards apply, and a note when the nudge moved it. */
 function ScoreVerdict({ baseScore, qibSignal, verdict }: { baseScore: number; qibSignal: ReturnType<typeof getQibSignal>; verdict: string | null }) {
+  const d = t();
   const score = applyQibAdjustment(baseScore, qibSignal);
+  const qibNote = describeQibAdjustment(baseScore, qibSignal, d.common.score);
   return (
     <div>
-      <Eyebrow>Our score</Eyebrow>
+      <Eyebrow>{d.analysis.summary.ourScore}</Eyebrow>
       <div className="mt-1 flex items-baseline gap-2">
         <span className={cn("font-display text-7xl font-bold leading-none tracking-[-0.035em] tabular-nums sm:text-8xl", getRiskTextColor(score))}>
           {score.toFixed(1)}
         </span>
         <span className="font-mono text-lg tabular-nums text-muted-foreground">/10</span>
-        <span className={cn("ml-1 text-sm font-medium", getRiskTextColor(score))}>{getScoreTrustLabel(score)}</span>
+        <span className={cn("ml-1 text-sm font-medium", getRiskTextColor(score))}>{d.common.scoreWord[scoreBand(score)]}</span>
       </div>
-      {score !== baseScore && <p className="mt-2 text-xs text-muted-foreground">{describeQibAdjustment(baseScore, qibSignal)}</p>}
+      {qibNote && <p className="mt-2 text-xs text-muted-foreground">{qibNote}</p>}
       {verdict && <p className="mt-4 max-w-[48ch] text-pretty text-base text-muted-foreground">{verdict}</p>}
     </div>
   );
@@ -162,12 +169,15 @@ function HeadlineFigures({ figures }: { figures: HeadlineFigure[] }) {
 
 /** Price band, lot, cost of one lot and issue size. */
 function KeyFacts({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
+  const { common, analysis: words } = t();
   const lotShares = getLotShares(analysis);
+  const priceBand = formatPriceBand(analysis.ipo_details?.price_band);
+  const placeholders: Record<string, string> = { "N/A": common.na, "Price TBA": common.priceTba };
   const facts = [
-    { label: "Price band", value: formatPriceBand(analysis.ipo_details?.price_band) },
-    { label: "Lot size", value: lotShares ? `${lotShares} shares` : "N/A" },
-    { label: "Min. investment", value: formatMinInvestment(analysis) },
-    { label: "Issue size", value: formatIssueSize(analysis.ipo_details?.issue_size) ?? "N/A" },
+    { label: common.priceBand, value: placeholders[priceBand] ?? priceBand },
+    { label: words.lotSize, value: lotShares ? fill(words.summary.shares, { count: lotShares }) : common.na },
+    { label: words.summary.minInvestment, value: formatMinInvestment(analysis, common.na) },
+    { label: common.issueSize, value: formatIssueSize(analysis.ipo_details?.issue_size) ?? common.na },
   ];
 
   return (
@@ -186,7 +196,7 @@ function KeyFacts({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
 
 function BoardChip({ board }: { board: string }) {
   return (
-    <span className="rounded-full border border-border px-2.5 py-0.5 text-xs font-medium uppercase tracking-[0.04em]">{board}</span>
+    <span className="rounded-full border border-border px-2.5 py-0.5 text-xs font-medium uppercase tracking-[0.04em]">{boardLabel(t().common.board, board)}</span>
   );
 }
 
@@ -195,9 +205,10 @@ function StageChip({ stage }: { stage: IssueStage | null }) {
   if (stage === "live") return <LiveLabel className="px-1" />;
 
   const isPast = stage === "past";
+  const d = t().common.status;
   return (
     <span className={cn("rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium uppercase tracking-[0.04em]", isPast && "text-muted-foreground")}>
-      {isPast ? "Closed" : "Upcoming"}
+      {isPast ? d.closed : d.upcoming}
     </span>
   );
 }

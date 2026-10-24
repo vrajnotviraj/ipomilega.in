@@ -2,16 +2,18 @@ import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysi
 import { parseGainValue } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "@/components/analysis/primitives";
+import { t } from "@/lib/i18n/server";
 
 type Fundamentals = IpoComprehensiveAnalysis["fundamentals"];
 type Offer = NonNullable<Fundamentals["offer_structure"]>;
 
 /** Total debt as a figure, with the analysis note under it. */
 export function DebtCard({ debt }: { debt: NonNullable<Fundamentals["debt"]> }) {
+  const d = t().analysis;
   return (
     <div className="rounded-xl border border-border bg-card p-5">
-      <Eyebrow className="mb-1">Debt on the company</Eyebrow>
-      <div className="font-mono text-2xl font-medium tabular-nums">{debt.total_debt || "Not stated"}</div>
+      <Eyebrow className="mb-1">{d.financials.debt}</Eyebrow>
+      <div className="font-mono text-2xl font-medium tabular-nums">{debt.total_debt || d.notStated}</div>
       <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">{debt.summary}</p>
     </div>
   );
@@ -21,14 +23,15 @@ const chip = "rounded-full border border-border px-2.5 py-0.5 font-mono text-xs 
 
 /** Fresh issue against offer for sale, whether promoters are selling, who sells and why. */
 export function OfferStructureCard({ offer }: { offer: Offer }) {
+  const d = t().analysis.financials;
   return (
     <div className="rounded-xl border border-border bg-card p-5">
-      <Eyebrow className="mb-1">Who is selling, and why</Eyebrow>
+      <Eyebrow className="mb-1">{d.whoIsSelling}</Eyebrow>
       <OfferSplit offer={offer} />
       <div className="my-2 flex flex-wrap gap-2">
         {offer.promoters_selling !== null && (
           <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-medium", offer.promoters_selling ? "bg-score-bad/8 text-score-bad" : "bg-score-good/8 text-score-good")}>
-            {offer.promoters_selling ? "Promoters selling" : "Promoters not selling"}
+            {offer.promoters_selling ? d.promotersSelling : d.promotersNotSelling}
           </span>
         )}
       </div>
@@ -45,6 +48,7 @@ export function OfferStructureCard({ offer }: { offer: Offer }) {
  * Falls back to two text chips when either amount can't be read as a number.
  */
 function OfferSplit({ offer }: { offer: Offer }) {
+  const d = t().analysis;
   const fresh = parseGainValue(offer.fresh_issue ?? undefined);
   const ofs = parseGainValue(offer.offer_for_sale ?? undefined);
   const total = (fresh ?? 0) + (ofs ?? 0);
@@ -54,8 +58,8 @@ function OfferSplit({ offer }: { offer: Offer }) {
   if (!bothInCrores || fresh === null || ofs === null || fresh < 0 || ofs < 0 || total === 0) {
     return (
       <div className="my-2 flex flex-wrap gap-2">
-        <span className={chip}>Fresh issue: {offer.fresh_issue || "None"}</span>
-        <span className={chip}>OFS: {offer.offer_for_sale || "None"}</span>
+        <span className={chip}>{d.freshIssue}: {offer.fresh_issue || d.financials.none}</span>
+        <span className={chip}>OFS: {offer.offer_for_sale || d.financials.none}</span>
       </div>
     );
   }
@@ -64,14 +68,14 @@ function OfferSplit({ offer }: { offer: Offer }) {
   return (
     <div className="my-3">
       <div className="mb-1.5 flex items-baseline justify-between gap-3 text-xs">
-        <SplitLabel name="Fresh issue" amount={offer.fresh_issue} percent={freshPercent} />
+        <SplitLabel name={d.freshIssue} amount={offer.fresh_issue} percent={freshPercent} />
         <SplitLabel name="OFS" amount={offer.offer_for_sale} percent={100 - freshPercent} alignRight />
       </div>
       <div className="flex h-2 gap-0.5" aria-hidden="true">
         {fresh > 0 && <span className="rounded-full bg-chart-1" style={{ width: `${freshPercent}%` }} />}
         {ofs > 0 && <span className="rounded-full bg-chart-5" style={{ width: `${100 - freshPercent}%` }} />}
       </div>
-      <p className="mt-1.5 text-xs text-muted-foreground">Fresh issue goes to the company. OFS goes to the selling shareholders.</p>
+      <p className="mt-1.5 text-xs text-muted-foreground">{d.financials.freshVsOfs}</p>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { FinancialReport, Ipo } from "@/types/ipo";
 import { formatRupees } from "@/lib/ipo/format";
+import { t } from "@/lib/i18n/server";
 import { Prose, SectionHeading } from "@/components/analysis/primitives";
 import { FinancialTrendChart } from "@/components/analysis/sections/financials/FinancialTrendChart";
 import { getFinancialHighlights, sortReports } from "@/components/analysis/sections/financials/financial-figures";
@@ -13,6 +14,7 @@ import { Highlights, RatioList } from "@/components/analysis/sections/financials
  */
 export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { fundamentals } = analysis;
+  const d = t();
   // Scraped issue amounts replace the analysis's own.
   const freshCr = ipo.issue?.fresh_issue_cr;
   const ofsCr = ipo.issue?.offer_for_sale_cr;
@@ -26,9 +28,9 @@ export function FinancialsSection({ analysis, ipo }: { analysis: IpoComprehensiv
 
   return (
     <section id="financials" className="reveal">
-      <SectionHeading title="Financials" score={fundamentals.score ?? 0} />
+      <SectionHeading title={d.analysis.sections.financials} score={fundamentals.score ?? 0} />
 
-      {reports.length > 0 && <Highlights {...getFinancialHighlights(reports, dated)} />}
+      {reports.length > 0 && <Highlights {...getFinancialHighlights(reports, dated, d)} />}
       <RatioList fundamentals={fundamentals} valuation={ipo.ipo_valuation} />
 
       <TrendAndSummary reports={reports} summary={fundamentals.summary} />
@@ -56,11 +58,12 @@ function TrendAndSummary({ reports, summary }: { reports: FinancialReport[]; sum
 }
 
 function TrendPanel({ reports }: { reports: FinancialReport[] }) {
+  const d = t().analysis.financials;
   return (
     <div className="min-w-0 rounded-[18px] bg-secondary p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">Financial performance trend</h3>
-        <span className="font-mono text-xs text-muted-foreground">Amount ₹ in crores</span>
+        <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">{d.trendTitle}</h3>
+        <span className="font-mono text-xs text-muted-foreground">{d.amountInCrores}</span>
       </div>
       <FinancialTrendChart reports={reports} />
     </div>

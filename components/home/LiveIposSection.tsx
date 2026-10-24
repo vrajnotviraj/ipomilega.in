@@ -9,15 +9,16 @@ import { useBoard } from '@/components/home/BoardContext';
 import { NothingOpen } from '@/components/home/NothingOpen';
 import { LiveLabel } from '@/components/ui/LiveLabel';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
-import { BOARDS, getDaysUntilClosing, getIpoType, gmpOf } from '@/lib/ipo/format';
+import { BOARDS, boardLabel, getDaysUntilClosing, getIpoType, gmpOf } from '@/lib/ipo/format';
+import { useT } from '@/lib/i18n/client';
+import { fill } from '@/lib/i18n/locales';
+import type { Dictionary } from '@/messages';
 import { cn } from '@/lib/utils';
+import { whenOf } from '@/components/ipo-shared/lifecycle';
+import { whenText } from '@/components/ipo-shared/LifecycleTrack';
 
-const closingGroupLabel = (days: number) => {
-  if (days === Infinity) return 'Close date TBA';
-  if (days === 0) return 'Closes today';
-  if (days === 1) return 'Closes tomorrow';
-  return `Closes in ${days} days`;
-};
+const closingGroupLabel = (days: number, d: Dictionary) =>
+  days === Infinity ? d.home.live.closeDateTba : days === 0 ? d.ipo.lifecycle.close.today : fill(d.ipo.lifecycle.close.next, { when: whenText(whenOf(days), d) });
 
 /** Groups IPOs by days left to bid, soonest first and unknown close dates last; highest GMP first within a group. */
 function groupByClosingDay(ipos: HomePageIpoProps[]) {
@@ -31,6 +32,9 @@ function groupByClosingDay(ipos: HomePageIpoProps[]) {
 
 /** Live IPO cards for the chosen board, with the Mainboard/SME switch that filters every home section. */
 export function LiveIposSection({ ipos, upcoming, closed }: IpoSectionProps & { upcoming: HomePageIpoProps[]; closed: HomePageIpoProps[] }) {
+  const dict = useT();
+  const { common: c } = dict;
+  const d = dict.home.live;
   const { board, setBoard } = useBoard();
   // Fades only on board switches, never on first paint.
   const mounted = useRef(false);
@@ -44,14 +48,15 @@ export function LiveIposSection({ ipos, upcoming, closed }: IpoSectionProps & { 
   return (
     <section id="live" className="scroll-mt-24 pb-8 pt-8 sm:pb-12 sm:pt-12">
       <SectionHeading
-        title="IPOs open now"
+        title={d.title}
         badge={<LiveLabel />}
         href="/ipos?filter=live"
-        linkLabel={`View all ${ipos.length} live IPOs`}
+        linkLabel={fill(d.viewAllLabel, { count: ipos.length })}
+        linkText={c.viewAll}
       />
       <SegmentedControl
-        label="Board"
-        options={BOARDS.map((b) => ({ value: b, label: b }))}
+        label={d.board}
+        options={BOARDS.map((b) => ({ value: b, label: boardLabel(c.board, b) }))}
         value={board}
         onChange={setBoard}
         className="mt-6 inline-flex"
@@ -60,14 +65,14 @@ export function LiveIposSection({ ipos, upcoming, closed }: IpoSectionProps & { 
 
       <div key={board} className={cn('mt-8', mounted.current && 'animate-in fade-in duration-150')}>
         {boardIpos.length === 0 ? (
-          <NothingOpen board={board} upcoming={onBoard(upcoming)} closed={onBoard(closed)} />
+          <NothingOpen board={boardLabel(c.board, board)} upcoming={onBoard(upcoming)} closed={onBoard(closed)} />
         ) : (
           <div className="space-y-10">
             {groupByClosingDay(boardIpos).map(([days, items]) => (
               <div key={days}>
                 <h3 className={cn('mb-4 flex items-center gap-2 text-sm font-medium', days === 0 ? 'text-score-bad' : 'text-muted-foreground')}>
                   <Clock className="size-4" strokeWidth={2} />
-                  {closingGroupLabel(days)}
+                  {closingGroupLabel(days, dict)}
                   <span className="font-mono text-xs tabular-nums text-muted-foreground">({items.length})</span>
                 </h3>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">

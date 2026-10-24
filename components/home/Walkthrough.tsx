@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Compass } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
+import { useT } from '@/lib/i18n/client';
 
 const PAD = 6;
 const GUTTER = 16;
@@ -15,47 +16,19 @@ interface Step {
   body: string;
 }
 
-/** Tour steps in page order, each pointing at a `data-tour` element. */
-const STEPS: Step[] = [
-  {
-    target: 'board-tabs',
-    title: 'Mainboard or SME',
-    body: 'Switch between regular IPOs and small-company (SME) IPOs.',
-  },
-  {
-    target: 'ipo-name',
-    title: 'Tap the name for full analysis',
-    body: 'Underlined names open the detailed report: financials, risks and our score.',
-  },
-  {
-    target: 'demand',
-    title: 'GMP and demand',
-    body: 'GMP is the unofficial grey market premium, a rough guide to the listing gain. QIB is big-institution demand. A high QIB on the last day is a strong sign.',
-  },
-  {
-    target: 'odds',
-    title: 'Your allotment odds',
-    body: '"1 in 40" means about 1 out of every 40 applicants gets shares. Tap any box to see the details.',
-  },
-  {
-    target: 'check-allotment',
-    title: 'Closed IPOs',
-    body: 'Bidding is over for these. Once allotment is out, tap "Check allotment" to see if you got shares.',
-  },
-];
-
 const findTarget = (step: Step): HTMLElement | null =>
   document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
 
 /** A "Take a quick tour" button that walks through the home page. Steps whose target is missing are left out. */
 export function Walkthrough() {
+  const d = useT().home.tour;
   const [steps, setSteps] = useState<Step[]>([]);
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
 
   const start = () => {
     setIndex(0);
-    setSteps(STEPS.filter((s) => findTarget(s)));
+    setSteps(Object.entries(d.steps).map(([target, words]) => ({ target, ...words })).filter(findTarget));
   };
 
   const step = steps[index];
@@ -106,7 +79,7 @@ export function Walkthrough() {
       className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground press hover:bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <Compass className="size-4" strokeWidth={2} aria-hidden />
-      Take a quick tour
+      {d.start}
     </button>
   );
   if (!active) return trigger;
@@ -130,7 +103,7 @@ export function Walkthrough() {
     <>
       {trigger}
       {createPortal(
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Quick tour">
+        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={d.title}>
           {/* Blocks clicks to the page while the tour is up. */}
           <div className="absolute inset-0" onClick={(e) => e.stopPropagation()} />
 
@@ -155,16 +128,16 @@ export function Walkthrough() {
             style={{ top: 0, left: 0, transform: `translate(${tipLeft}px, ${tipTop}px)`, width: tipWidth }}
           >
             <div className="mb-1 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
-              Quick tour <span className="font-mono tabular-nums">{index + 1}/{steps.length}</span>
+              {d.title} <span className="font-mono tabular-nums">{index + 1}/{steps.length}</span>
             </div>
             <h3 className="mb-1 font-display text-lg font-bold tracking-[-0.015em]">{step.title}</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">{step.body}</p>
             <div className="flex items-center justify-between mt-4">
               <Button variant="ghost" onClick={finish} className="-ml-4 text-muted-foreground hover:text-foreground">
-                Skip tour
+                {d.skip}
               </Button>
               <Button onClick={next} autoFocus>
-                {isLast ? 'Got it' : 'Next'}
+                {isLast ? d.done : d.next}
               </Button>
             </div>
           </div>

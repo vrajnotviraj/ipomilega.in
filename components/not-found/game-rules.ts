@@ -1,3 +1,7 @@
+import type { Dictionary } from "@/messages";
+
+export type GameWords = Dictionary["errors"]["game"];
+
 export const ISSUE_PRICE = 404;
 export const LOT = 300;
 export const TICK_MS = 100;
@@ -11,19 +15,21 @@ const NEWS_CHANCE = 0.035;
 const NOISE = 0.03;
 const STATS_KEY = "ipomilega-404-stats";
 
-const NEWS = [
-  { text: "Anchor book oversubscribed 80x", move: 0.08 },
-  { text: "HNIs spotted buying on the open", move: 0.05 },
-  { text: "GMP jumps on Telegram", move: 0.06 },
-  { text: "Brokerage slaps a Buy rating", move: 0.04 },
-  { text: "Promoter pledge rumours", move: -0.08 },
-  { text: "Market-wide sell-off", move: -0.06 },
-  { text: "Operators exit early", move: -0.1 },
-  { text: "Auditor resigns (allegedly)", move: -0.07 },
+export type Phase = "ready" | "drawing" | "rejected" | "live" | "sold";
+/** A headline's dictionary key and its price move. */
+export type News = { key: keyof GameWords["news"]; move: number };
+
+const NEWS: News[] = [
+  { key: "anchorBook", move: 0.08 },
+  { key: "hniBuying", move: 0.05 },
+  { key: "gmpJumps", move: 0.06 },
+  { key: "buyRating", move: 0.04 },
+  { key: "promoterPledge", move: -0.08 },
+  { key: "sellOff", move: -0.06 },
+  { key: "operatorsExit", move: -0.1 },
+  { key: "auditorResigns", move: -0.07 },
 ];
 
-export type Phase = "ready" | "drawing" | "rejected" | "live" | "sold";
-export type News = { text: string; move: number };
 export type Stats = { trades: number; wins: number; streak: number; bestStreak: number; pnl: number; bestPct: number | null };
 export type Candle = { open: number; close: number; high: number; low: number };
 
@@ -81,20 +87,22 @@ export function recordTrade(stats: Stats, soldAt: number): Stats {
   };
 }
 
-export function verdict(gain: number) {
-  if (gain >= 40) return "Stag of the year. Your broker wants your autograph.";
-  if (gain >= 15) return "A solid listing pop. Dalal Street approves.";
-  if (gain >= 0) return "You made money. Most people can't say that on a 404.";
-  if (gain >= -10) return "A small cut. At least the page wasn't real either.";
-  return "You held all the way down. Classic retail.";
+/** The dictionary key of the one-line verdict on a sold trade. */
+export function verdict(gain: number): keyof GameWords["verdicts"] {
+  if (gain >= 40) return "stag";
+  if (gain >= 15) return "solidPop";
+  if (gain >= 0) return "profit";
+  if (gain >= -10) return "smallCut";
+  return "heldDown";
 }
 
-export function rankFor(pnl: number) {
-  if (pnl >= 200000) return "Dalal Street legend";
-  if (pnl >= 50000) return "Stag";
-  if (pnl >= 0) return "Grey market regular";
-  if (pnl >= -50000) return "Retail rookie";
-  return "Certified bagholder";
+/** The dictionary key of the player's rank for their running P&L. */
+export function rankFor(pnl: number): keyof GameWords["ranks"] {
+  if (pnl >= 200000) return "legend";
+  if (pnl >= 50000) return "stag";
+  if (pnl >= 0) return "regular";
+  if (pnl >= -50000) return "rookie";
+  return "bagholder";
 }
 
 // localStorage throws in private mode and some embeds; stats are a nicety, so failures are ignored.

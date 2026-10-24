@@ -5,6 +5,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useT } from "@/lib/i18n/client"
 
 function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
@@ -12,6 +13,7 @@ function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
 
 /** Centred modal panel over an ink-tinted overlay, with a close button. */
 function DialogContent({ className, children, ...props }: React.ComponentProps<typeof DialogPrimitive.Content>) {
+  const d = useT().common
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay
@@ -32,7 +34,7 @@ function DialogContent({ className, children, ...props }: React.ComponentProps<t
           className="absolute top-4 right-4 grid size-8 place-items-center rounded-full text-muted-foreground outline-none transition-[background-color,color,transform] hover:bg-secondary hover:text-foreground active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-ring"
         >
           <XIcon className="size-4" strokeWidth={2} />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{d.close}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>

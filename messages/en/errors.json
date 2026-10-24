@@ -1,0 +1,85 @@
+{
+  "notFound": {
+    "title": "Page not found",
+    "error": "Error",
+    "rejected": "Application rejected",
+    "heading": "This page wasn't allotted",
+    "body": "It was oversubscribed, withdrawn, or never filed a DRHP. While you're here, try trading its listing day.",
+    "pages": "Pages",
+    "seeIpos": "See IPOs"
+  },
+  "error": {
+    "heading": "Couldn't load this page",
+    "body": "The latest data didn't come through. Please try again.",
+    "retry": "Try again"
+  },
+  "game": {
+    "preOpen": "Pre-open",
+    "closingBellIn": "Closing bell in {seconds}s",
+    "marketClosed": "Market closed",
+    "drawingLots": "Registrar drawing lots",
+    "notAllotted": "Not allotted",
+    "hintRejected": "Oversubscribed 312x and your name wasn't drawn. Refund initiated. Try again?",
+    "hintDrawing": "Fingers crossed. Allotment is a lottery here too.",
+    "hintLockedDown": "Stuck at the lower circuit. No buyers, so your sell order won't fill.",
+    "hintLockedUp": "Upper circuit. Everyone wants in. Sell now or hope it holds.",
+    "hintLive": "Watch the news and sell before the bell. Space works too.",
+    "hintReady": "Apply for 1 lot ({lot} shares at ₹{price}). If you're allotted, pick your moment to sell.",
+    "noBuyers": "No buyers",
+    "sellAt": "Sell at",
+    "applyOneLot": "Apply for 1 lot",
+    "drawing": "Drawing lots",
+    "applyAgain": "Apply again",
+    "soldAt": "Sold at",
+    "lastTraded": "Last traded",
+    "profitOnShares": "{amount} on {lot} shares",
+    "lotIs": "1 lot = {lot} shares · ₹{amount}",
+    "bellNotRung": "The bell hasn't rung yet. Apply to see if you get shares.",
+    "breaking": "BREAKING: {headline}",
+    "upperCircuit": "UPPER CIRCUIT",
+    "lowerCircuit": "LOWER CIRCUIT",
+    "issue": "Issue",
+    "open": "Open",
+    "circuits": "Circuits ₹{lower} to ₹{upper}",
+    "news": {
+      "anchorBook": "Anchor book oversubscribed 80x",
+      "hniBuying": "HNIs spotted buying on the open",
+      "gmpJumps": "GMP jumps on Telegram",
+      "buyRating": "Brokerage slaps a Buy rating",
+      "promoterPledge": "Promoter pledge rumours",
+      "sellOff": "Market-wide sell-off",
+      "operatorsExit": "Operators exit early",
+      "auditorResigns": "Auditor resigns (allegedly)"
+    },
+    "verdicts": {
+      "stag": "Stag of the year. Your broker wants your autograph.",
+      "solidPop": "A solid listing pop. Dalal Street approves.",
+      "profit": "You made money. Most people can't say that on a 404.",
+      "smallCut": "A small cut. At least the page wasn't real either.",
+      "heldDown": "You held all the way down. Classic retail."
+    },
+    "ranks": {
+      "legend": "Dalal Street legend",
+      "stag": "Stag",
+      "regular": "Grey market regular",
+      "rookie": "Retail rookie",
+      "bagholder": "Certified bagholder"
+    }
+  },
+  "portfolio": {
+    "rules": [
+      "Allotment is a lottery: about 7 in 10 get shares.",
+      "Breaking news can swing the price either way.",
+      "Circuits cap it at 20% either side of the open. At the lower one, nobody buys.",
+      "At the bell you sell at whatever the price is."
+    ],
+    "trades": "Trades",
+    "winRate": "Win rate",
+    "streak": "Streak",
+    "streakValue": "{streak} (best {best})",
+    "bestTrade": "Best trade",
+    "yourRank": "Your rank",
+    "totalPnl": "Total P&L",
+    "resetPortfolio": "Reset portfolio"
+  }
+}

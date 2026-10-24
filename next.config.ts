@@ -34,15 +34,28 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    // /analysis has no index page, so it redirects to /ipos. Each IPO keeps its page at /analysis/[slug].
-    return [{ source: "/analysis", destination: "/ipos", permanent: true }];
+    return [
+      // /analysis has no index page, so it redirects to /ipos. Each IPO keeps its page at /analysis/[slug].
+      { source: "/analysis", destination: "/ipos", permanent: true },
+      { source: "/:lang(hi|gu)/analysis", destination: "/:lang/ipos", permanent: true },
+      // English lives at the bare path; /en is only the internal route name.
+      { source: "/en", destination: "/", permanent: true },
+      { source: "/en/:path*", destination: "/:path*", permanent: true },
+    ];
   },
   async rewrites() {
-    return [
-      { source: "/ingest/static/:path*", destination: "https://us-assets.i.posthog.com/static/:path*" },
-      { source: "/ingest/array/:path*", destination: "https://us-assets.i.posthog.com/array/:path*" },
-      { source: "/ingest/:path*", destination: "https://us.i.posthog.com/:path*" },
-    ];
+    return {
+      beforeFiles: [],
+      // After static files and route handlers, so only page paths reach the [lang] segment.
+      afterFiles: [
+        { source: "/ingest/static/:path*", destination: "https://us-assets.i.posthog.com/static/:path*" },
+        { source: "/ingest/array/:path*", destination: "https://us-assets.i.posthog.com/array/:path*" },
+        { source: "/ingest/:path*", destination: "https://us.i.posthog.com/:path*" },
+        { source: "/", destination: "/en" },
+        { source: "/:path((?!api/|ingest/|_next/|hi$|hi/|gu$|gu/).*)", destination: "/en/:path" },
+      ],
+      fallback: [],
+    };
   },
   images: {
     // S3 objects send no Cache-Control and logos/covers are keyed by id, so cache them for 30 days.

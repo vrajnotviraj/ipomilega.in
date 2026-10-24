@@ -8,6 +8,8 @@ import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { stripCitations } from '@/lib/queries/citations';
 import { daysFromToday, formatIssueSize, getIpoType, isPastFivePmIst, parseIpoDate } from '@/lib/ipo/format';
+import { localize, type Locale } from '@/lib/i18n/locales';
+import { getTranslation } from '@/lib/queries/translations';
 
 // The IPO fields the site may read: an allowlist, so where the engine scraped each fact from (raw captures, source
 // names, source links, scrape times) never leaves the database, and a field the engine adds stays private until listed here.
@@ -128,9 +130,9 @@ export const getIpoBuckets = cache(loadIpoBuckets);
 
 type AnalysisPage = { ipos_analysis: IpoComprehensiveAnalysis; ipo: Ipo };
 
-/** Analysis + its parent IPO for /analysis/[slug]. */
+/** Analysis + its parent IPO for /analysis/[slug], with the analysis text in `lang` where translated. */
 export const getAnalysisBySlug = cache(cached(
-  async (slug: string): Promise<AnalysisPage | null> => {
+  async (slug: string, lang: Locale): Promise<AnalysisPage | null> => {
     const db = await getDb();
 
     const ipo = await db.collection('ipos').findOne({ slug }, { projection: PUBLIC_IPO_PROJECTION });
@@ -143,7 +145,8 @@ export const getAnalysisBySlug = cache(cached(
     if (!analysis) return null;
 
     const plain = toPlain({ analysis, ipo });
-    return { ipos_analysis: stripCitations(plain.analysis), ipo: plain.ipo } as unknown as AnalysisPage;
+    const translation = await getTranslation('analysis', String(plain.analysis._id), lang);
+    return { ipos_analysis: stripCitations(localize(plain.analysis, translation)), ipo: plain.ipo } as unknown as AnalysisPage;
   },
   'analysis-by-slug'
 ));
@@ -155,14 +158,14 @@ export const getIpoNameBySlug = cache(cached(async (slug: string): Promise<strin
   return ipo ? ipo.upcoming_ipo_2025 || '' : null;
 }, 'ipo-name-by-slug'));
 
-type AnalysisSlug = { slug: string; updated_at?: string };
+type AnalysisSlug = { _id: string; slug: string; updated_at?: string };
 
-/** Every analysis slug with its last edit, for prerendering and the sitemap. */
+/** Every analysis id and slug with its last edit, for prerendering and the sitemap. */
 export const getAnalysisSlugs = cache(cached(async (): Promise<AnalysisSlug[]> => {
   const db = await getDb();
   const docs = await db
     .collection('ipo_comprehensive_analysis')
-    .find({ slug: { $nin: [null, ''] } }, { projection: { _id: 0, slug: 1, updated_at: 1 } })
+    .find({ slug: { $nin: [null, ''] } }, { projection: { slug: 1, updated_at: 1 } })
     .toArray();
   return toPlain(docs) as unknown as AnalysisSlug[];
 }, 'analysis-slugs'));

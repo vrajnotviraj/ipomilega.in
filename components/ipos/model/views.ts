@@ -4,43 +4,38 @@ import type { Filters, QuickKey, Row, Sort, SortBy } from "@/components/ipos/mod
 
 const STATUS_RANK = { Open: 0, Upcoming: 1, Closed: 2, Listed: 3 };
 
-type Metric = { label: string; kind: "text" | "number" | "date"; of: (row: Row) => number | string | null };
+type Metric = { kind: "text" | "number" | "date"; of: (row: Row) => number | string | null };
 
-/** Every value a list can be sorted by. */
+/** Every value a list can be sorted by. Its words are in ipos.json under filters.sortBy. */
 const METRICS: Record<SortBy, Metric> = {
-  stage: { label: "Stage", kind: "date", of: (row) => STATUS_RANK[row.status] * 10_000 + Math.max(daysToStep(row, "Close") ?? 9_999, 0) },
-  opening: { label: "Open date", kind: "date", of: (row) => daysToStep(row, "Open") },
-  closing: { label: "Close date", kind: "date", of: (row) => daysToStep(row, "Close") },
-  listing: { label: "Listing date", kind: "date", of: (row) => daysToStep(row, "List") },
-  name: { label: "Name", kind: "text", of: nameOf },
-  size: { label: "Issue size", kind: "number", of: sizeOf },
-  subscribed: { label: "Subscribed", kind: "number", of: subscribedTimesOf },
-  gmp: { label: "GMP", kind: "number", of: gmpOf },
-  score: { label: "Score", kind: "number", of: (row) => scoreOf(row) || null },
-  listingGain: { label: "Listing day gain", kind: "number", of: listingGainOf },
-  heldGain: { label: "Held till today", kind: "number", of: heldGainOf },
-};
-
-const DIRECTION_WORDS = {
-  text: { asc: "A to Z", desc: "Z to A" },
-  number: { asc: "low to high", desc: "high to low" },
-  date: { asc: "earliest first", desc: "latest first" },
+  stage: { kind: "date", of: (row) => STATUS_RANK[row.status] * 10_000 + Math.max(daysToStep(row, "Close") ?? 9_999, 0) },
+  opening: { kind: "date", of: (row) => daysToStep(row, "Open") },
+  closing: { kind: "date", of: (row) => daysToStep(row, "Close") },
+  listing: { kind: "date", of: (row) => daysToStep(row, "List") },
+  name: { kind: "text", of: nameOf },
+  size: { kind: "number", of: sizeOf },
+  subscribed: { kind: "number", of: subscribedTimesOf },
+  gmp: { kind: "number", of: gmpOf },
+  score: { kind: "number", of: (row) => scoreOf(row) || null },
+  listingGain: { kind: "number", of: listingGainOf },
+  heldGain: { kind: "number", of: heldGainOf },
 };
 
 /** Direction a column starts in when first clicked: biggest first for numbers, earliest or A to Z otherwise. */
 const firstDirection = (by: SortBy): Sort["dir"] => (METRICS[by].kind === "number" ? "desc" : "asc");
 
-const QUICK: Record<QuickKey, { label: string; test: (row: Row) => boolean }> = {
-  gmpUp: { label: "GMP above 0", test: (row) => (gmpOf(row) ?? 0) > 0 },
-  oversubscribed: { label: "Oversubscribed", test: (row) => (subscribedTimesOf(row) ?? 0) >= 1 },
-  strongScore: { label: "Strong score", test: (row) => scoreBand(scoreOf(row)) === "good" },
-  allotmentDue: { label: "Allotment not yet done", test: (row) => (daysToStep(row, "Allot") ?? -1) >= 0 },
-  listsThisWeek: { label: "Lists this week", test: (row) => { const days = daysToStep(row, "List"); return days !== null && days >= 0 && days <= 7; } },
-  heldUp: { label: "Above issue price", test: (row) => (heldGainOf(row) ?? 0) > 0 },
-  heldDown: { label: "Below issue price", test: (row) => (heldGainOf(row) ?? 0) < 0 },
-  held25: { label: "Up 25%+ till today", test: (row) => (heldGainOf(row) ?? 0) >= 25 },
-  held50: { label: "Up 50%+ till today", test: (row) => (heldGainOf(row) ?? 0) >= 50 },
-  listing25: { label: "Up 25%+ on listing day", test: (row) => (listingGainOf(row) ?? 0) >= 25 },
+/** Quick filter tests. Their words are in ipos.json under filters.quick. */
+const QUICK: Record<QuickKey, (row: Row) => boolean> = {
+  gmpUp: (row) => (gmpOf(row) ?? 0) > 0,
+  oversubscribed: (row) => (subscribedTimesOf(row) ?? 0) >= 1,
+  strongScore: (row) => scoreBand(scoreOf(row)) === "good",
+  allotmentDue: (row) => (daysToStep(row, "Allot") ?? -1) >= 0,
+  listsThisWeek: (row) => { const days = daysToStep(row, "List"); return days !== null && days >= 0 && days <= 7; },
+  heldUp: (row) => (heldGainOf(row) ?? 0) > 0,
+  heldDown: (row) => (heldGainOf(row) ?? 0) < 0,
+  held25: (row) => (heldGainOf(row) ?? 0) >= 25,
+  held50: (row) => (heldGainOf(row) ?? 0) >= 50,
+  listing25: (row) => (listingGainOf(row) ?? 0) >= 25,
 };
 
 const BIDDING_QUICK: QuickKey[] = ["gmpUp", "oversubscribed", "strongScore"];
@@ -58,23 +53,17 @@ export const VIEWS: Record<Filters["status"], { sortBy: SortBy[]; stageSort: Sor
 
 export const defaultSortOf = (status: Filters["status"]): Sort => ({ by: VIEWS[status].sortBy[0], dir: VIEWS[status].defaultDir });
 
-export const quickOptionsOf = (status: Filters["status"]) => VIEWS[status].quick.map((value) => ({ value, label: QUICK[value].label }));
-
-/** One dropdown entry per sortable column and direction, labelled like "Subscribed, high to low". */
+/** One dropdown entry per sortable column and direction. The control labels each from its column and kind. */
 export const sortOptionsOf = (status: Filters["status"]) =>
   VIEWS[status].sortBy.flatMap((by) =>
-    (["asc", "desc"] as const).map((dir) => ({
-      key: `${by}:${dir}`,
-      label: `${METRICS[by].label}, ${DIRECTION_WORDS[METRICS[by].kind][dir]}`,
-      sort: { by, dir },
-    }))
+    (["asc", "desc"] as const).map((dir) => ({ key: `${by}:${dir}`, kind: METRICS[by].kind, sort: { by, dir } }))
   );
 
 /** The sort after clicking a column: flips the direction, or starts a new column in its first direction. */
 export const clickSort = (current: Sort, by: SortBy): Sort =>
   current.by === by ? { by, dir: current.dir === "asc" ? "desc" : "asc" } : { by, dir: firstDirection(by) };
 
-export const matchesQuick = (row: Row, quick: QuickKey | null) => quick === null || QUICK[quick].test(row);
+export const matchesQuick = (row: Row, quick: QuickKey | null) => quick === null || QUICK[quick](row);
 
 /** Comparator for the sort: rows without a value last, ties by higher score. */
 export function compareBy({ by, dir }: Sort) {

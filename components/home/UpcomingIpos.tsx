@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { ProgressLink } from '@/components/progress/ProgressLink';
 import { CalendarDays } from 'lucide-react';
 import type { QuotaIpo } from '@/lib/queries/shareholder-quota';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
@@ -12,44 +12,51 @@ import { Score } from '@/components/ui/Score';
 import { SectionHeading } from '@/components/home/SectionHeading';
 import { useBoard } from '@/components/home/BoardContext';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { formatIpoDate, formatShortDateOrToday, getIpoType, getPriceBand } from '@/lib/ipo/format';
+import { boardLabel, formatIpoDate, formatShortDateOrToday, getIpoType, getPriceBand } from '@/lib/ipo/format';
 import { scoreOf } from '@/lib/ipo/score';
+import { useT } from '@/lib/i18n/client';
+import { fill } from '@/lib/i18n/locales';
+import type { Dictionary } from '@/messages';
 
 const MAX_ROWS = 6;
 type Tab = 'all' | 'quota';
 
 /** What to show on the right of a quota row: the buying deadline when known, else the bidding window or "dates TBA". */
-function quotaWhen(ipo: QuotaIpo) {
-  if (ipo.lastBuyDate) return { label: 'Buy by', value: formatIpoDate(ipo.lastBuyDate) };
-  if (ipo.openDate) return { label: 'Bidding', value: formatIpoDate(ipo.openDate) };
-  return { label: 'Dates', value: 'TBA' };
+function quotaWhen(ipo: QuotaIpo, d: Dictionary) {
+  if (ipo.lastBuyDate) return { label: d.home.upcoming.buyBy, value: formatIpoDate(ipo.lastBuyDate) };
+  if (ipo.openDate) return { label: d.home.upcoming.bidding, value: formatIpoDate(ipo.openDate) };
+  return { label: d.home.upcoming.dates, value: d.common.tba };
 }
 
 /** One shareholder-quota IPO: the parent to hold, the IPO it reserves shares in, and the date that matters. */
 function QuotaRow({ ipo }: { ipo: QuotaIpo }) {
-  const when = quotaWhen(ipo);
+  const d = useT();
+  const when = quotaWhen(ipo, d);
   return (
     <li className="row-hover border-b border-border">
-      <Link href="/ipos/shareholder-quota" className="flex items-center gap-3 py-4 sm:gap-4">
+      <ProgressLink href="/ipos/shareholder-quota" className="flex items-center gap-3 py-4 sm:gap-4">
         <div className="min-w-0 flex-1">
-          <div className="truncate font-display font-bold tracking-[-0.015em] text-foreground">{ipo.parents.join(' or ')}</div>
-          <div className="truncate text-sm text-muted-foreground">Hold 1 share for the quota in {ipo.name}</div>
+          <div className="truncate font-display font-bold tracking-[-0.015em] text-foreground">{ipo.parents.join(` ${d.common.or} `)}</div>
+          <div className="truncate text-sm text-muted-foreground">{fill(d.home.upcoming.holdOneShare, { name: ipo.name })}</div>
         </div>
         <div className="shrink-0 text-right">
           <div className="text-xs text-muted-foreground">{when.label}</div>
           <div className="font-mono text-sm font-medium tabular-nums text-foreground">{when.value}</div>
         </div>
-      </Link>
+      </ProgressLink>
     </li>
   );
 }
 
 /** One upcoming IPO: logo, name, open date, price band and score. */
 function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
+  const { common: c, home } = useT();
+  const d = home.upcoming;
   const { ipo } = item;
   const score = scoreOf(item);
   const priceBand = getPriceBand(ipo);
-  const priceText = priceBand ? `₹${priceBand}` : 'N/A';
+  const priceText = priceBand ? `₹${priceBand}` : c.na;
+  const openDate = ipo?.ipo_dates?.ipo_open_date;
 
   return (
     <li className="row-hover flex items-center gap-3 border-b border-border py-4 sm:gap-4">
@@ -59,12 +66,12 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
           <IpoTitleLink ipo={ipo} hasAnalysis={score > 0} />
         </div>
         <div className="truncate text-sm text-muted-foreground">
-          Opens <span className="font-mono tabular-nums">{formatShortDateOrToday(ipo?.ipo_dates?.ipo_open_date)}</span>
+          {d.opens} <span className="font-mono tabular-nums">{formatShortDateOrToday(openDate, c)}</span>
           {priceBand && <span className="font-mono tabular-nums sm:hidden">, {priceText}</span>}
         </div>
       </div>
       <div className="hidden shrink-0 text-right sm:block">
-        <div className="text-xs text-muted-foreground">Price band</div>
+        <div className="text-xs text-muted-foreground">{c.priceBand}</div>
         <div className="font-mono text-sm font-medium tabular-nums text-foreground">{priceText}</div>
       </div>
       <div className="w-14 shrink-0 text-right">
@@ -76,6 +83,8 @@ function UpcomingIpoRow({ item }: { item: HomePageIpoProps }) {
 
 /** The next few IPOs opening on the chosen board. */
 export function UpcomingIposSection({ ipos, quota }: IpoSectionProps & { quota: QuotaIpo[] }) {
+  const { common: c, home } = useT();
+  const d = home.upcoming;
   const { board } = useBoard();
   const [tab, setTab] = useState<Tab>('all');
   const visibleIpos = ipos.filter((item) => getIpoType(item.ipo) === board).slice(0, MAX_ROWS);
@@ -83,14 +92,15 @@ export function UpcomingIposSection({ ipos, quota }: IpoSectionProps & { quota: 
   return (
     <section className="py-8 sm:py-12">
       <SectionHeading
-        title="Upcoming"
+        title={c.status.upcoming}
         href={tab === 'quota' ? '/ipos/shareholder-quota' : '/ipos?filter=upcoming'}
-        linkLabel={tab === 'quota' ? `View all ${quota.length} IPOs with a shareholder quota` : `View all ${ipos.length} upcoming IPOs`}
+        linkLabel={tab === 'quota' ? fill(d.viewAllQuotaLabel, { count: quota.length }) : fill(d.viewAllLabel, { count: ipos.length })}
+        linkText={c.viewAll}
       />
       {quota.length > 0 && (
         <SegmentedControl
-          label="Upcoming IPOs"
-          options={[{ value: 'all', label: 'All' }, { value: 'quota', label: 'Shareholder quota', count: quota.length }]}
+          label={d.tabsLabel}
+          options={[{ value: 'all', label: c.all }, { value: 'quota', label: c.nav.quota, count: quota.length }]}
           value={tab}
           onChange={setTab}
           className="mt-6 inline-flex"
@@ -103,7 +113,7 @@ export function UpcomingIposSection({ ipos, quota }: IpoSectionProps & { quota: 
           ))}
         </ul>
       ) : visibleIpos.length === 0 ? (
-        <EmptyState icon={CalendarDays} title={`No ${board} IPOs announced yet`} hint="New issues show up here as soon as their dates are out." />
+        <EmptyState icon={CalendarDays} title={fill(d.emptyTitle, { board: boardLabel(c.board, board) })} hint={d.emptyHint} />
       ) : (
         <ul className="mt-8 border-t border-border">
           {visibleIpos.map((item) => (

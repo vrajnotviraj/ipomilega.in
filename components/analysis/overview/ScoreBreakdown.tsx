@@ -4,12 +4,14 @@ import { getScoreAxes } from "@/components/analysis/analysis-facts";
 import { gainColorOnInk, gainMotion } from "@/lib/ipo/format";
 import { overallScoreOf, scoreColorOnInk } from "@/lib/ipo/score";
 import { DotScale } from "@/components/analysis/primitives";
+import { t } from "@/lib/i18n/server";
 
 type Axis = { label: string; score: number };
 
 /** The page's one ink panel: the radar of section scores, each score spelled out on a dot scale, and the gains estimate beside them. */
 export function ScoreBreakdown({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
-  const axes = getScoreAxes(analysis);
+  const d = t().analysis;
+  const axes = getScoreAxes(analysis, d.sections);
   const gainsPotential = analysis.ipo_details?.approximate_gains_potential ?? 0;
   const gainsRationale = analysis.ipo_details?.gains_rationale?.trim();
 
@@ -17,12 +19,12 @@ export function ScoreBreakdown({ analysis }: { analysis: IpoComprehensiveAnalysi
     <div className="grid grid-cols-1 items-center gap-6 rounded-[18px] bg-primary p-5 text-primary-foreground sm:grid-cols-[auto_1fr] sm:gap-10 sm:p-8">
       <div className="flex flex-col items-center">
         <ScoreRadar axes={axes} overallScore={overallScoreOf(analysis)} gainsPotential={gainsPotential} />
-        <p className="mt-2 text-center text-xs text-primary-foreground/70">Outer ring: estimated gain</p>
+        <p className="mt-2 text-center text-xs text-primary-foreground/70">{d.scoreBreakdown.outerRing}</p>
       </div>
       <div className="grid min-w-0 grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10">
         <div className="min-w-0">
-          <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">How the score adds up</h3>
-          <p className="mt-1 text-sm text-primary-foreground/70">The overall score is the average of these five, nudged by QIB demand once bidding closes.</p>
+          <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">{d.scoreBreakdown.title}</h3>
+          <p className="mt-1 text-sm text-primary-foreground/70">{d.scoreBreakdown.note}</p>
           {/* The radar has no axis labels, so the scores behind it are listed here. */}
           <ul className="reveal-stagger mt-5 divide-y divide-primary-foreground/10">
             {axes.map((axis) => (
@@ -44,7 +46,7 @@ export function ScoreBreakdown({ analysis }: { analysis: IpoComprehensiveAnalysi
 function EstimatedGain({ gainsPotential, rationale }: { gainsPotential: number; rationale?: string }) {
   return (
     <div className="min-w-0 border-t border-primary-foreground/10 pt-6 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10">
-      <div className="text-xs font-medium uppercase tracking-[0.04em] text-primary-foreground/70">Estimated gain (fundamentals only)</div>
+      <div className="text-xs font-medium uppercase tracking-[0.04em] text-primary-foreground/70">{t().analysis.scoreBreakdown.estimatedGain}</div>
       <div className={cn("mt-1 font-mono text-4xl font-medium tabular-nums", gainColorOnInk(gainsPotential), gainMotion(gainsPotential))}>
         {gainsPotential > 0 ? "+" : ""}
         {gainsPotential}%
@@ -111,7 +113,7 @@ function ScoreRadar({ axes, overallScore, gainsPotential }: { axes: Axis[]; over
       ))}
 
       <text x={CENTER} y={CENTER - 6} textAnchor="middle" fill={CHALK} fillOpacity={0.7} style={{ fontSize: 12, letterSpacing: 1, fontWeight: 500 }}>
-        OVERALL
+        {t().analysis.scoreBreakdown.overall}
       </text>
       <text x={CENTER} y={CENTER + 22} textAnchor="middle" fill={CHALK} style={{ fontSize: 34, fontWeight: 700, fontFamily: "var(--font-display)" }}>
         {overallScore.toFixed(1)}

@@ -1,11 +1,12 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n/server";
 import { nonBlank } from "@/components/analysis/analysis-facts";
 import { Prose, SectionHeading } from "@/components/analysis/primitives";
 
 type RiskCategory = { title: string; items: string[] };
 
-/** "financial_risks" as "Financial risks". */
+/** "financial_risks" as "Financial risks", for a category the dictionary does not name. */
 function categoryTitle(key: string) {
   const words = key.replace(/_/g, " ");
   return words.charAt(0).toUpperCase() + words.slice(1);
@@ -13,16 +14,18 @@ function categoryTitle(key: string) {
 
 /** How many risks sit in each category beside the summary and how the company offsets them, then the risks themselves. */
 export function RiskSection({ risk }: { risk: IpoComprehensiveAnalysis["risk_meter"] }) {
+  const d = t().analysis;
+  const categoryNames: Record<string, string> = d.risk.categories;
   const categories = Object.entries(risk.risk_categories ?? {})
-    .map(([key, items]) => ({ title: categoryTitle(key), items: nonBlank(items) }))
+    .map(([key, items]) => ({ title: categoryNames[key] ?? categoryTitle(key), items: nonBlank(items) }))
     .filter((category) => category.items.length > 0);
 
   return (
     <section id="risk" className="reveal">
-      <SectionHeading title="Risk" score={risk.score} />
+      <SectionHeading title={d.sections.risk} score={risk.score} />
       <p className="mb-6 text-xs text-muted-foreground">
-        Read this score as a safety rating: <span className="font-mono tabular-nums">10/10</span> means the lowest risk,{" "}
-        <span className="font-mono tabular-nums">1/10</span> the highest.
+        {d.risk.safetyRating} <span className="font-mono tabular-nums">10/10</span> {d.risk.lowestRisk}{" "}
+        <span className="font-mono tabular-nums">1/10</span> {d.risk.highest}
       </p>
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10">
@@ -44,7 +47,7 @@ function RiskMix({ categories }: { categories: RiskCategory[] }) {
 
   return (
     <div>
-      <h3 className="mb-3 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">Where the risks sit</h3>
+      <h3 className="mb-3 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">{t().analysis.risk.whereRisksSit}</h3>
       <ul className="reveal-stagger space-y-3">
         {categories.map(({ title, items }) => (
           <li key={title}>
@@ -85,7 +88,7 @@ function RiskCategories({ categories }: { categories: RiskCategory[] }) {
 function Mitigation({ text }: { text: string }) {
   return (
     <div className="rounded-lg bg-score-good/8 p-5">
-      <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">How the company offsets these</h3>
+      <h3 className="font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">{t().analysis.risk.mitigation}</h3>
       <p className="mt-1.5 whitespace-pre-wrap text-sm text-pretty">{text}</p>
     </div>
   );

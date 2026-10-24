@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "title": "બધા IPO: લાઇવ, આગામી અને લિસ્ટેડ",
+    "pagedTitle": "{title}, પેજ {page}",
+    "description": "દરેક મેઇનબોર્ડ અને SME IPO જુઓ: પ્રાઇસ બેન્ડ, ઇશ્યૂ સાઇઝ, મહત્વની તારીખો અને એનાલિસિસ સ્કોર. સ્ટેટસ અને પ્રકાર પ્રમાણે ફિલ્ટર કરો."
+  },
+  "page": {
+    "heading": "બધા IPO",
+    "of": "કુલ",
+    "ipos": "IPO",
+    "noneFound": "કોઈ IPO મળ્યો નથી",
+    "tryAnother": "બીજું સર્ચ કે ફિલ્ટર અજમાવો."
+  },
+  "status": {
+    "open": "ઓપન"
+  },
+  "tiles": {
+    "group": "IPO સ્ટેટસ",
+    "boards": "{mainboard} મેઇનબોર્ડ, {sme} SME",
+    "noneNow": "અત્યારે એકેય નથી",
+    "closeDatesTba": "બંધ તારીખો જાહેર થશે",
+    "closingSoonest": "સૌથી પહેલાં બંધ {when}",
+    "nextOpens": "આગળનો IPO {when} ખૂલે છે",
+    "allotmentsToday": {
+      "one": "આજે {count} એલોટમેન્ટ",
+      "other": "આજે {count} એલોટમેન્ટ"
+    },
+    "nextAllotment": "આગળનું એલોટમેન્ટ {when}",
+    "nextLists": "આગળનું લિસ્ટિંગ {when}",
+    "listingDatesTba": "લિસ્ટિંગ તારીખો જાહેર થશે",
+    "listedAbove": "{total}માંથી {up} ઇશ્યૂ ભાવથી ઉપર લિસ્ટ થયા",
+    "latestListed": "છેલ્લું લિસ્ટિંગ {date}",
+    "listingDatesUnknown": "લિસ્ટિંગ તારીખો અજાણ"
+  },
+  "filters": {
+    "search": "કંપનીનું નામ શોધો",
+    "board": "બોર્ડ",
+    "bothBoards": "બંને",
+    "sort": "IPO સોર્ટ કરો",
+    "sortOption": "{column}, {direction}",
+    "sortBy": {
+      "stage": "સ્ટેજ",
+      "opening": "ઓપન તારીખ",
+      "closing": "બંધ તારીખ",
+      "listing": "લિસ્ટિંગ તારીખ",
+      "name": "નામ",
+      "size": "ઇશ્યૂ સાઇઝ",
+      "subscribed": "સબ્સ્ક્રાઇબ્ડ",
+      "gmp": "GMP",
+      "score": "સ્કોર",
+      "listingGain": "લિસ્ટિંગ દિવસનો ગેઇન",
+      "heldGain": "આજ સુધી રાખ્યા હોય તો"
+    },
+    "direction": {
+      "text": { "asc": "A થી Z", "desc": "Z થી A" },
+      "number": { "asc": "ઓછાથી વધુ", "desc": "વધુથી ઓછા" },
+      "date": { "asc": "સૌથી જૂના પહેલા", "desc": "સૌથી નવા પહેલા" }
+    },
+    "quickFilters": "ઝડપી ફિલ્ટર",
+    "quick": {
+      "gmpUp": "GMP 0થી ઉપર",
+      "oversubscribed": "ઓવરસબ્સ્ક્રાઇબ્ડ",
+      "strongScore": "મજબૂત સ્કોર",
+      "allotmentDue": "એલોટમેન્ટ હજી બાકી",
+      "listsThisWeek": "આ અઠવાડિયે લિસ્ટ થાય છે",
+      "heldUp": "ઇશ્યૂ ભાવથી ઉપર",
+      "heldDown": "ઇશ્યૂ ભાવથી નીચે",
+      "held25": "આજ સુધી 25%+ ઉપર",
+      "held50": "આજ સુધી 50%+ ઉપર",
+      "listing25": "લિસ્ટિંગ દિવસે 25%+ ઉપર"
+    }
+  },
+  "table": {
+    "listedOn": "લિસ્ટ થયો",
+    "listingDay": "લિસ્ટિંગ દિવસ",
+    "heldTillToday": "આજ સુધી રાખ્યા હોય તો",
+    "timeline": "ટાઇમલાઇન",
+    "timelineGains": "ટાઇમલાઇન / ગેઇન",
+    "gmpBeforeListing": "લિસ્ટિંગ પહેલાંનો GMP",
+    "sortByColumn": "{column} પ્રમાણે સોર્ટ કરો"
+  },
+  "pager": {
+    "label": "પેજિનેશન",
+    "showing": "બતાવ્યા:",
+    "to": "થી",
+    "of": "કુલ",
+    "previous": "પાછળ",
+    "next": "આગળ"
+  },
+  "openNow": {
+    "title": "અત્યારે ખુલ્લા",
+    "moreBelow": "વધુ નીચેના ટેબલમાં",
+    "closes": "બંધ થાય છે",
+    "days": {
+      "one": "{count} દિવસ",
+      "other": "{count} દિવસ"
+    }
+  }
+}

@@ -2,24 +2,27 @@ import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Too
 import { DAY_MS, gainColor } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { formatRupees } from "@/lib/ipo/format";
+import { useT } from "@/lib/i18n/client";
+import { fill } from "@/lib/i18n/locales";
 import { AXIS_TICK, dotFill, formatDay, formatDelta, formatTime, niceAxis, type ChartPoint } from "@/components/analysis/overview/gmp-trend/gmp-history";
 
 function GmpTooltip({ point }: { point: ChartPoint }) {
+  const d = useT().analysis.gmp;
   return (
     <div className="rounded-lg border border-border bg-card px-3 py-2 shadow-(--shadow-lift)">
       <p className="font-mono text-xs tabular-nums text-muted-foreground">
         {formatDay(point.ts)}
-        {point.live && `, live ${formatTime(point.as_of)}`}
+        {point.live && `, ${fill(d.liveAt, { time: formatTime(point.as_of) })}`}
       </p>
       <p className="font-mono text-sm font-medium tabular-nums">
         GMP {formatRupees(point.gmp)}
         {point.delta !== null && (
-          <span className={cn("ml-1.5 text-xs", gainColor(point.delta))}>{point.delta === 0 ? "no change" : formatDelta(point.delta)}</span>
+          <span className={cn("ml-1.5 text-xs", gainColor(point.delta))}>{point.delta === 0 ? d.noChangeLower : formatDelta(point.delta)}</span>
         )}
       </p>
       {point.est_listing_percent !== null && (
         <p className="font-mono text-xs tabular-nums text-muted-foreground">
-          Est. gain {point.est_listing_percent > 0 ? "+" : ""}
+          {d.estGain} {point.est_listing_percent > 0 ? "+" : ""}
           {point.est_listing_percent.toFixed(2)}%
         </p>
       )}

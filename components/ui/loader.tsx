@@ -1,3 +1,6 @@
+"use client";
+
+import { useT } from "@/lib/i18n/client";
 /** Full-height centred spinner for route-level loading and retry states. */
 export function PageLoader() {
   return (
@@ -6,7 +9,7 @@ export function PageLoader() {
         <span className="absolute inset-0 rounded-full border-2 border-border" />
         <span className="absolute inset-0 animate-spin rounded-full border-2 border-transparent border-t-primary [animation-duration:0.7s]" />
       </span>
-      <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">Loading</span>
+      <span className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">{useT().common.loading}</span>
     </div>
   );
 }

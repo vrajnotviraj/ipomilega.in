@@ -1,8 +1,9 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Ipo } from "@/types/ipo";
+import type { Dictionary } from "@/messages";
 import {
   ALLOTMENT_CATEGORIES,
-  formatAllotmentOdds,
+  allotmentOddsN,
   getAllotmentRatio,
   parseEstListingPercent,
   formatRupees,
@@ -11,6 +12,7 @@ import {
 import { gmpFigure, type ShareFacts } from "@/lib/seo/share";
 
 type SectionKey = "overview" | "timing" | "financials" | "risk" | "performance" | "flexibility";
+type SectionNames = Dictionary["analysis"]["sections"];
 
 export interface SectionTab {
   key: SectionKey;
@@ -19,30 +21,30 @@ export interface SectionTab {
 }
 
 /** The page's sections in reading order, leaving out any the analysis has no data for. Timing leads: "apply now?" is the first question. */
-export function getSectionTabs(analysis: IpoComprehensiveAnalysis): SectionTab[] {
+export function getSectionTabs(analysis: IpoComprehensiveAnalysis, names: SectionNames): SectionTab[] {
   const sections = [
-    { key: "timing", label: "Timing", data: analysis.time },
-    { key: "financials", label: "Financials", data: analysis.fundamentals },
-    { key: "risk", label: "Risk", data: analysis.risk_meter },
-    { key: "performance", label: "Performance", data: analysis.performance },
-    { key: "flexibility", label: "Flexibility", data: analysis.flexibility },
+    { key: "timing", label: names.timing, data: analysis.time },
+    { key: "financials", label: names.financials, data: analysis.fundamentals },
+    { key: "risk", label: names.risk, data: analysis.risk_meter },
+    { key: "performance", label: names.performance, data: analysis.performance },
+    { key: "flexibility", label: names.flexibility, data: analysis.flexibility },
   ] as const;
 
   const scoredTabs = sections
     .filter((section) => section.data)
     .map(({ key, label, data }) => ({ key, label, score: data.score ?? 0 }));
 
-  return [{ key: "overview", label: "Overview" }, ...scoredTabs];
+  return [{ key: "overview", label: names.overview }, ...scoredTabs];
 }
 
 /** The five section scores in the fixed order the radar draws them. */
-export function getScoreAxes(analysis: IpoComprehensiveAnalysis) {
+export function getScoreAxes(analysis: IpoComprehensiveAnalysis, names: SectionNames) {
   return [
-    { label: "Financials", score: analysis.fundamentals?.score ?? 0 },
-    { label: "Performance", score: analysis.performance?.score ?? 0 },
-    { label: "Flexibility", score: analysis.flexibility?.score ?? 0 },
-    { label: "Timing", score: analysis.time?.score ?? 0 },
-    { label: "Risk", score: analysis.risk_meter?.score ?? 0 },
+    { label: names.financials, score: analysis.fundamentals?.score ?? 0 },
+    { label: names.performance, score: analysis.performance?.score ?? 0 },
+    { label: names.flexibility, score: analysis.flexibility?.score ?? 0 },
+    { label: names.timing, score: analysis.time?.score ?? 0 },
+    { label: names.risk, score: analysis.risk_meter?.score ?? 0 },
   ];
 }
 
@@ -64,10 +66,10 @@ export function getMinInvestment(analysis: IpoComprehensiveAnalysis): number | n
   return cutOffPrice && lotShares ? cutOffPrice * lotShares : null;
 }
 
-/** The cost of one lot as "₹1,49,760", or "N/A". */
-export const formatMinInvestment = (analysis: IpoComprehensiveAnalysis) => {
+/** The cost of one lot as "₹1,49,760", or the N/A word. */
+export const formatMinInvestment = (analysis: IpoComprehensiveAnalysis, na: string) => {
   const value = getMinInvestment(analysis);
-  return value ? formatRupees(value) : "N/A";
+  return value ? formatRupees(value) : na;
 };
 
 /** Shares per lot, from ipo_details.shares or else lot_size. */
@@ -92,7 +94,7 @@ export function getGmp(analysis: IpoComprehensiveAnalysis, ipo: Ipo) {
 
 /** Whether any investor category has allotment odds yet. */
 export function hasAllotmentOdds(ipo: Ipo): boolean {
-  return ALLOTMENT_CATEGORIES.some((category) => formatAllotmentOdds(getAllotmentRatio(ipo, category).lottery) !== "N/A");
+  return ALLOTMENT_CATEGORIES.some((category) => allotmentOddsN(getAllotmentRatio(ipo, category).lottery) !== null);
 }
 
 /** What the company does, from the business model or else its market position. */
@@ -116,12 +118,12 @@ function firstNumber(value: string): number {
 }
 
 /** QIB, NII and retail quota in percent, from the analysis or else the scraped IPO details. */
-export function getQuotaSplit(analysis: IpoComprehensiveAnalysis, ipo: Ipo) {
+export function getQuotaSplit(analysis: IpoComprehensiveAnalysis, ipo: Ipo, retail: string) {
   const allocation = analysis.ipo_details?.allocation_details;
   return [
     { name: "QIB", value: allocation?.qib || firstNumber(ipo.ipo_details?.qib_quota || "50"), color: "var(--chart-1)" },
     { name: "NII", value: allocation?.nii || firstNumber(ipo.ipo_details?.nii_quota || "15"), color: "var(--chart-5)" },
-    { name: "Retail", value: allocation?.retail || firstNumber(ipo.ipo_details?.retail_quota || "35"), color: "var(--chart-3)" },
+    { name: retail, value: allocation?.retail || firstNumber(ipo.ipo_details?.retail_quota || "35"), color: "var(--chart-3)" },
   ];
 }
 

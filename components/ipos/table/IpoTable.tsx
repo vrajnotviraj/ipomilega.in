@@ -3,6 +3,7 @@
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
 import { scoreOf } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n/client";
 import { ScorePill } from "@/components/ipos/table/ScorePill";
 import { gmpOf, hasAnalysis, isListed, isPastBidding, issueSizeOf, listingDateOf, priceBandOf, subscribedOf } from "@/components/ipos/model/cells";
 import { VIEWS } from "@/components/ipos/model/views";
@@ -16,6 +17,8 @@ const TH = "px-4 py-3 text-xs font-medium uppercase tracking-[0.04em] text-muted
 /** IPO list: a table on wide screens, stacked rows on phones. Rows with an analysis open it on click, column titles sort. */
 export function IpoTable({ rows, filters, onSort }: { rows: Row[]; filters: Filters; onSort: (by: SortBy) => void }) {
   const router = useProgressRouter();
+  const d = useT();
+  const w = d.ipos.table;
   const { sort } = filters;
   const openAnalysis = (row: Row) => {
     if (hasAnalysis(row)) router.push(`/analysis/${row.ipo.slug}`);
@@ -30,20 +33,20 @@ export function IpoTable({ rows, filters, onSort }: { rows: Row[]; filters: Filt
       <table className="hidden w-full lg:table">
         <thead>
           <tr className="border-b border-border text-left">
-            <th className={TH}>{header("name", "Company")}</th>
-            {showBidding && <th className={TH}>Price band</th>}
-            <th className={TH}>{header("size", "Issue size")}</th>
-            {showListed && <th className={TH}>{header("listing", "Listed on")}</th>}
-            <th className={cn(TH, "text-right")}>{header("subscribed", "Subscribed", "right")}</th>
+            <th className={TH}>{header("name", d.common.company)}</th>
+            {showBidding && <th className={TH}>{d.common.priceBand}</th>}
+            <th className={TH}>{header("size", d.common.issueSize)}</th>
+            {showListed && <th className={TH}>{header("listing", w.listedOn)}</th>}
+            <th className={cn(TH, "text-right")}>{header("subscribed", d.common.subscribed, "right")}</th>
             <th className={cn(TH, "text-right")}>{header("gmp", "GMP", "right")}</th>
             <th className={cn(TH, "w-[232px]")}>
               {onlyListed ? (
                 <div className="grid grid-cols-2 gap-3">
-                  {header("listingGain", "Listing day")}
-                  {header("heldGain", "Held till today")}
+                  {header("listingGain", w.listingDay)}
+                  {header("heldGain", w.heldTillToday)}
                 </div>
               ) : (
-                header(VIEWS[filters.status].stageSort, showListed ? "Timeline / gains" : "Timeline")
+                header(VIEWS[filters.status].stageSort, showListed ? w.timelineGains : w.timeline)
               )}
             </th>
           </tr>
@@ -56,9 +59,9 @@ export function IpoTable({ rows, filters, onSort }: { rows: Row[]; filters: Filt
               className={cn("border-b border-border last:border-b-0", hasAnalysis(row) && "cursor-pointer transition-colors duration-150 hover:bg-secondary/60")}
             >
               <td className="px-4 py-4"><Company row={row} /></td>
-              {showBidding && <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{isPastBidding(row) ? null : priceBandOf(row)}</td>}
-              <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{issueSizeOf(row)}</td>
-              {showListed && <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{isListed(row) ? listingDateOf(row) : null}</td>}
+              {showBidding && <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{isPastBidding(row) ? null : (priceBandOf(row) ?? d.common.na)}</td>}
+              <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{issueSizeOf(row) ?? d.common.sizeTba}</td>
+              {showListed && <td className="px-4 py-4 font-mono text-sm tabular-nums text-foreground">{isListed(row) ? (listingDateOf(row) ?? d.common.tba) : null}</td>}
               <td className="px-4 py-4 text-right font-mono text-sm tabular-nums text-foreground">{subscribedOf(row)}</td>
               <td className="px-4 py-4 text-right"><Gain value={gmpOf(row)} /></td>
               <td className="px-4 py-4"><Stage row={row} /></td>
@@ -75,11 +78,11 @@ export function IpoTable({ rows, filters, onSort }: { rows: Row[]; filters: Filt
               {!isPastBidding(row) && <ScorePill value={scoreOf(row)} />}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2">
-              {!isPastBidding(row) && <Figure label="Price band">{priceBandOf(row)}</Figure>}
-              <Figure label="Issue size">{issueSizeOf(row)}</Figure>
-              <Figure label="Subscribed">{subscribedOf(row)}</Figure>
-              <Figure label={isListed(row) ? "GMP before listing" : "GMP"}><Gain value={gmpOf(row)} /></Figure>
-              {isListed(row) && <Figure label="Listed on">{listingDateOf(row)}</Figure>}
+              {!isPastBidding(row) && <Figure label={d.common.priceBand}>{priceBandOf(row) ?? d.common.na}</Figure>}
+              <Figure label={d.common.issueSize}>{issueSizeOf(row) ?? d.common.sizeTba}</Figure>
+              <Figure label={d.common.subscribed}>{subscribedOf(row)}</Figure>
+              <Figure label={isListed(row) ? w.gmpBeforeListing : "GMP"}><Gain value={gmpOf(row)} /></Figure>
+              {isListed(row) && <Figure label={w.listedOn}>{listingDateOf(row) ?? d.common.tba}</Figure>}
             </div>
             <div className="mt-3 rounded-lg bg-secondary px-3 py-2.5"><Stage row={row} /></div>
           </li>

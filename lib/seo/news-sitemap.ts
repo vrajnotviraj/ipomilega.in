@@ -1,4 +1,5 @@
 import type { Blog } from '@/types/ipo';
+import { type Locale, localePath } from '@/lib/i18n/locales';
 
 const TWO_DAYS_MS = 48 * 60 * 60 * 1000;
 
@@ -18,11 +19,11 @@ export const modifiedAtOf = (blog: Blog) => {
 export const isFreshNews = (blog: Blog, now: number) =>
   Boolean(blog.article_type) && blog.article_type !== 'analysis' && now - new Date(publishedAtOf(blog)).getTime() <= TWO_DAYS_MS;
 
-/** One Google News <url> entry. */
-export const newsEntry = (blog: Blog, siteUrl: string, siteName: string) => `<url>
-<loc>${siteUrl}/blogs/${escapeXml(blog.slug)}</loc>
+/** One Google News <url> entry for the article in `lang`. */
+export const newsEntry = (blog: Blog, siteUrl: string, siteName: string, lang: Locale = 'en') => `<url>
+<loc>${siteUrl}${localePath(lang, `/blogs/${escapeXml(blog.slug)}`)}</loc>
 <news:news>
-<news:publication><news:name>${siteName}</news:name><news:language>en</news:language></news:publication>
+<news:publication><news:name>${siteName}</news:name><news:language>${lang}</news:language></news:publication>
 <news:publication_date>${new Date(publishedAtOf(blog)).toISOString()}</news:publication_date>
 <news:title>${escapeXml(blog.title)}</news:title>
 </news:news>

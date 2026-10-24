@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "title": "IPO Milega | हर भारतीय IPO का स्कोर",
+    "template": "%s | IPO Milega",
+    "description": "लाइव IPO, आने वाली लिस्टिंग और पुराने प्रदर्शन को ट्रैक करें, हर RHP/DRHP की मैन्युअल रूप से जांची गई एनालिसिस के साथ।"
+  },
+  "tagline": "मिलेगा? पहले चेक करें।",
+  "languages": "भाषा",
+  "skipToContent": "सीधे कंटेंट पर जाएं",
+  "homeLink": "IPO Milega होम",
+  "openMenu": "मेन्यू खोलें",
+  "closeMenu": "मेन्यू बंद करें",
+  "close": "बंद करें",
+  "notifications": "सूचनाएं",
+  "breadcrumb": "ब्रेडक्रम्ब",
+  "nav": {
+    "home": "होम",
+    "ipos": "IPO",
+    "planner": "प्लानर",
+    "quota": "शेयरहोल्डर कोटा",
+    "blogs": "ब्लॉग"
+  },
+  "footer": {
+    "read": "पढ़ें",
+    "live": "लाइव IPO",
+    "upcoming": "आने वाले IPO",
+    "closed": "बंद हो चुके IPO",
+    "listed": "लिस्टेड IPO",
+    "quotaIpos": "शेयरहोल्डर कोटा वाले IPO",
+    "all": "सभी IPO",
+    "about": "हमारे बारे में",
+    "rights": "IPO Milega. सर्वाधिकार सुरक्षित।"
+  },
+  "disclaimer": "इस पेज का डेटा IPO Milega रिसर्च टीम ने मैन्युअल रूप से जांचा है। यह निवेश सलाह नहीं है, और किसी भी निवेश फैसले से हुए नुकसान की जिम्मेदारी IPO Milega नहीं लेता। सिक्योरिटीज़ मार्केट में निवेश बाज़ार जोखिम के अधीन है। निवेश से पहले पूरे प्रॉस्पेक्टस समेत सभी संबंधित दस्तावेज़ ध्यान से पढ़ें।",
+  "share": {
+    "button": "शेयर करें",
+    "linkCopied": "लिंक कॉपी हो गया",
+    "detailsCopied": "IPO की जानकारी कॉपी हो गई",
+    "pasteLink": "किसी भी चैट में पेस्ट करके शेयर करें।",
+    "pasteDetails": "किसी भी चैट में पेस्ट करके शेयर करें।",
+    "copyLink": "लिंक कॉपी करें",
+    "copyFailed": "लिंक कॉपी नहीं हो सका। एड्रेस बार से कॉपी कर लें।"
+  },
+  "live": "लाइव",
+  "score": {
+    "title": "एनालिसिस स्कोर",
+    "none": "अभी एनालिसिस नहीं",
+    "withQib": "{qib}x QIB सब्सक्रिप्शन के लिए एनालिसिस स्कोर {score} {delta}",
+    "closingDay": "(बंद होने का दिन)"
+  },
+  "loading": "लोड हो रहा है",
+  "board": {
+    "mainboard": "मेनबोर्ड",
+    "sme": "SME"
+  },
+  "status": {
+    "upcoming": "आने वाले",
+    "closed": "बंद",
+    "listed": "लिस्टेड"
+  },
+  "na": "N/A",
+  "tba": "तय नहीं",
+  "priceTba": "प्राइस तय नहीं",
+  "sizeTba": "साइज़ तय नहीं",
+  "datesTba": "तारीखें घोषित होनी बाकी",
+  "today": "आज",
+  "tomorrow": "कल",
+  "inDays": {
+    "one": "{count} दिन में",
+    "other": "{count} दिन में"
+  },
+  "ipoCount": {
+    "one": "{count} IPO",
+    "other": "{count} IPO"
+  },
+  "oneIn": "{n} में 1",
+  "scoreWord": {
+    "good": "मज़बूत",
+    "mid": "मिला-जुला",
+    "bad": "कमज़ोर"
+  },
+  "viewAll": "सभी देखें",
+  "seeAllIpos": "सभी IPO देखें",
+  "backToHome": "होम पर वापस जाएं",
+  "priceBand": "प्राइस बैंड",
+  "issueSize": "इश्यू साइज़",
+  "subscribed": "सब्सक्राइब्ड",
+  "company": "कंपनी",
+  "checkAllotment": "अलॉटमेंट चेक करें",
+  "all": "सभी",
+  "or": "या"
+}

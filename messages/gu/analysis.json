@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "entityTitle": "{name} IPO: GMP, ભાવ, તારીખો, લોટ સાઇઝ અને એલોટમેન્ટ",
+    "description": "{name} IPO પ્રાઇસ બેન્ડ, ઇશ્યૂ તારીખો, લોટ સાઇઝ, ગ્રે માર્કેટ પ્રીમિયમ અને એલોટમેન્ટ સ્ટેટસ.",
+    "imageAlt": "{site} પર {name} IPO એનાલિસિસ",
+    "section": "IPO એનાલિસિસ",
+    "pendingTitle": "{name} IPO એનાલિસિસ ચાલુ છે",
+    "pendingTitleNoName": "IPO એનાલિસિસ ચાલુ છે",
+    "pendingDescription": "અમે હજી આ IPOનો પ્રોસ્પેક્ટસ વાંચી રહ્યા છીએ."
+  },
+  "inProgress": {
+    "title": "એનાલિસિસ ચાલુ છે",
+    "hint": "અમે હજી આ IPOનો પ્રોસ્પેક્ટસ વાંચી રહ્યા છીએ. રિવ્યૂ થયા પછી એનાલિસિસ અહીં દેખાશે."
+  },
+  "latestOn": "{name} પર તાજું",
+  "lotSize": "લોટ સાઇઝ",
+  "freshIssue": "ફ્રેશ ઇશ્યૂ",
+  "notStated": "જણાવ્યું નથી",
+  "categories": {
+    "retail": "રિટેલ",
+    "shareholders": "શેરહોલ્ડરો"
+  },
+  "sections": {
+    "overview": "ઓવરવ્યૂ",
+    "timing": "ટાઇમિંગ",
+    "financials": "ફાઇનાન્શિયલ્સ",
+    "risk": "જોખમ",
+    "performance": "પરફોર્મન્સ",
+    "flexibility": "ફ્લેક્સિબિલિટી"
+  },
+  "header": {
+    "goBack": "પાછા જાઓ"
+  },
+  "share": {
+    "opensTomorrow": "આવતીકાલે ખૂલે છે.",
+    "opensOn": "{date} ખૂલે છે.",
+    "closed": "બિડિંગ બંધ થઈ ગયું છે.",
+    "lastDayToday": "અરજી કરવાનો આજે છેલ્લો દિવસ છે.",
+    "lastDayTomorrow": "અરજી કરવાનો આવતીકાલે છેલ્લો દિવસ છે.",
+    "daysLeft": "અરજી માટે {count} દિવસ બાકી, {date} બંધ થાય છે.",
+    "applying": "હાય, હું {name} IPOમાં અરજી કરું છું.",
+    "fullAnalysis": "પૂરું એનાલિસિસ → {url}",
+    "scored": "RHP પરથી સ્કોર {score}/10.",
+    "readFull": "{site} પર {name} IPOનું પૂરું એનાલિસિસ વાંચો."
+  },
+  "summary": {
+    "whatTheyDo": "કંપની શું કરે છે: ",
+    "by": "લેખક",
+    "published": "પ્રકાશિત",
+    "updated": "અપડેટ",
+    "opensInNewTab": "(નવી ટેબમાં ખૂલે છે)",
+    "ourScore": "અમારો સ્કોર",
+    "gmpNote": "GMP અનઓફિશિયલ ગ્રે માર્કેટ સંકેત છે.",
+    "gmpUpdated": "GMP અપડેટ",
+    "shares": "{count} શેર",
+    "minInvestment": "ઓછામાં ઓછું રોકાણ",
+    "issueTimeline": "ઇશ્યૂ ટાઇમલાઇન",
+    "figures": {
+      "total": "કુલ",
+      "totalSoFar": "અત્યાર સુધી કુલ",
+      "retailOdds": "રિટેલ ચાન્સ",
+      "onceBidsComeIn": "બિડ આવે પછી",
+      "listingGain": "લિસ્ટિંગ ગેઇન",
+      "listedAt": "₹{price} પર લિસ્ટ થયો",
+      "gmp": "GMP (અનઓફિશિયલ)",
+      "perShare": "શેર દીઠ ₹{amount}",
+      "greyMarketPremium": "ગ્રે માર્કેટ પ્રીમિયમ",
+      "opens": "ખૂલે છે",
+      "closes": "{date} બંધ થાય છે",
+      "oneLot": "એક લોટ"
+    }
+  },
+  "timeline": {
+    "unavailable": "ઓપનિંગ અને લિસ્ટિંગ તારીખો નક્કી થયા પછી ટાઇમલાઇન દેખાશે.",
+    "open": "ઓપન",
+    "close": "બંધ",
+    "allotment": "એલોટમેન્ટ",
+    "listing": "લિસ્ટિંગ",
+    "opens": "ખૂલે છે",
+    "closes": "બંધ થાય છે",
+    "lists": "લિસ્ટ થાય છે",
+    "today": "આજે {verb}",
+    "tomorrow": "આવતીકાલે {verb}",
+    "inDays": "{count} દિવસમાં {verb}"
+  },
+  "odds": {
+    "heading": "તમારા ચાન્સ",
+    "caption": "હાલના સબ્સ્ક્રિપ્શન આંકડા પરથી અંદાજેલું. તમારી અરજીની સાઇઝ માટે ગણવા કેટેગરી પર ટેપ કરો."
+  },
+  "estimatedListing": {
+    "title": "અંદાજિત લિસ્ટિંગ",
+    "noGmp": "આ ઇશ્યૂ માટે ગ્રે માર્કેટ ડેટા નથી, એટલે ગેઇનનો અંદાજ ફક્ત ફન્ડામેન્ટલ્સ પરથી છે અને લિસ્ટિંગ દિવસના સેન્ટિમેન્ટને ગણતો નથી.",
+    "fromGmp": "GMP પરથી અંદાજિત લિસ્ટિંગ (અનઓફિશિયલ)"
+  },
+  "subscription": {
+    "title": "કેટેગરી પ્રમાણે સબ્સ્ક્રિપ્શન",
+    "total": "કુલ",
+    "totalSoFar": "અત્યાર સુધી કુલ"
+  },
+  "money": {
+    "title": "પૈસા ક્યાં જાય છે",
+    "ofsOnly": "આ IPO પૂરેપૂરો ઓફર ફોર સેલ છે. કંપનીને આમાંથી કોઈ પૈસા મળતા નથી",
+    "allOfIt": ": આખા",
+    "goesToSellers": "વેચનાર શેરહોલ્ડરોને જાય છે.",
+    "itAllGoesToSellers": ", બધા પૈસા વેચનાર શેરહોલ્ડરોને જાય છે.",
+    "toCompany": "કંપનીને",
+    "toSellers": "વેચનાર શેરહોલ્ડરોને",
+    "offerForSale": "ઓફર ફોર સેલ",
+    "noOfferForSale": "ઓફર ફોર સેલ નથી",
+    "ofsSegment": "ઓફર ફોર સેલ: વેચનાર શેરહોલ્ડરોને જાય છે"
+  },
+  "scoreBreakdown": {
+    "outerRing": "બહારની રિંગ: અંદાજિત ગેઇન",
+    "title": "સ્કોર કેવી રીતે બને છે",
+    "note": "કુલ સ્કોર આ પાંચની સરેરાશ છે, બિડિંગ બંધ થયા પછી QIB માંગથી થોડો બદલાય છે.",
+    "estimatedGain": "અંદાજિત ગેઇન (ફક્ત ફન્ડામેન્ટલ્સ)",
+    "overall": "કુલ"
+  },
+  "strengthsAndConcerns": {
+    "strengths": { "title": "ખૂબીઓ", "empty": "હજી કોઈ ખૂબી નોંધાઈ નથી." },
+    "concerns": { "title": "ચિંતાઓ", "empty": "હજી કોઈ ચિંતા નોંધાઈ નથી." }
+  },
+  "quota": {
+    "title": "શેર કોને મળે છે",
+    "split": "ક્વોટા વહેંચણી",
+    "unavailable": "ક્વોટા ડેટા ઉપલબ્ધ નથી.",
+    "applicationSize": "અરજીની સાઇઝ",
+    "lotsAndShares": "{lots} લોટ, {shares} શેર",
+    "application": "અરજી",
+    "shares": "શેર",
+    "amount": "રકમ"
+  },
+  "gmp": {
+    "title": "GMP ટ્રેન્ડ",
+    "unofficialQuotes": "અનઓફિશિયલ ગ્રે માર્કેટ ભાવ",
+    "asOf": ", આજે",
+    "istToday": "IST સુધીના",
+    "timesInIst": ", સમય IST માં",
+    "chart": "ચાર્ટ",
+    "table": "ટેબલ",
+    "loadFailed": "GMP હિસ્ટરી અત્યારે લોડ થઈ શકી નહીં.",
+    "noQuote": "આ ઇશ્યૂ માટે હજી ગ્રે માર્કેટ ભાવ નથી. પહેલા ભાવ સાથે ટ્રેન્ડ શરૂ થશે.",
+    "firstPointNote": "લાઇન અહીંથી બને છે: દિવસ દીઠ એક પોઇન્ટ, એ દિવસનો છેલ્લો GMP બતાવતો.",
+    "firstDay": "પહેલો દિવસ,",
+    "since": "પહેલા દિવસથી,",
+    "direction": { "up": "ઉપર", "down": "નીચે", "flat": "સ્થિર" },
+    "noChange": "કોઈ ફેરફાર નહીં",
+    "noChangeLower": "કોઈ ફેરફાર નહીં",
+    "liveAt": "લાઇવ {time}",
+    "estGain": "અંદાજિત ગેઇન",
+    "tableCaption": "{company} માટે રોજનો GMP, સૌથી નવો પહેલા",
+    "thisIpo": "આ IPO",
+    "date": "તારીખ",
+    "change": "ફેરફાર"
+  },
+  "calendar": {
+    "add": "કેલેન્ડરમાં ઉમેરો",
+    "steps": { "opening": "IPO ખૂલે છે", "closing": "IPO બંધ થાય છે", "allotment": "IPO એલોટમેન્ટ", "listing": "IPO લિસ્ટ થાય છે" },
+    "allDatesIcs": "બધી તારીખો .ics તરીકે"
+  },
+  "financials": {
+    "revenue": "આવક",
+    "expense": "ખર્ચ",
+    "profitAfterTax": "ટેક્સ પછીનો નફો",
+    "netMargin": "નેટ માર્જિન",
+    "assets": "સંપત્તિ",
+    "pts": "પોઇન્ટ",
+    "periodEnded": "સમયગાળો:",
+    "changeAgainst": "સરખામણી:",
+    "noPriorYear": "અગાઉનું વર્ષ નથી",
+    "returnOnEquity": "રિટર્ન ઓન ઇક્વિટી",
+    "debtToEquity": "ડેટ ટુ ઇક્વિટી",
+    "currentRatio": "કરન્ટ રેશિયો",
+    "revenueCagr": "આવક CAGR",
+    "returnOnNetWorth": "રિટર્ન ઓન નેટ વર્થ",
+    "navPerShare": "શેર દીઠ NAV (₹)",
+    "priceToBook": "પ્રાઇસ ટુ બુક",
+    "trendTitle": "નાણાકીય પરફોર્મન્સનો ટ્રેન્ડ",
+    "amountInCrores": "રકમ ₹ કરોડમાં",
+    "debt": "કંપની પરનું દેવું",
+    "whoIsSelling": "કોણ વેચે છે, અને કેમ",
+    "promotersSelling": "પ્રમોટર્સ વેચે છે",
+    "promotersNotSelling": "પ્રમોટર્સ વેચતા નથી",
+    "none": "કોઈ નહીં",
+    "freshVsOfs": "ફ્રેશ ઇશ્યૂ કંપનીને જાય છે. OFS વેચનાર શેરહોલ્ડરોને જાય છે."
+  },
+  "flexibility": {
+    "marketAdaptability": "બજાર પ્રમાણે ઢળવાની ક્ષમતા",
+    "financialStability": "નાણાકીય સ્થિરતા",
+    "operationalAgility": "કામકાજમાં ચપળતા",
+    "productDiversification": "પ્રોડક્ટનું વૈવિધ્ય",
+    "futureAdaptability": "ભવિષ્યમાં ઢળવાની ક્ષમતા"
+  },
+  "performance": {
+    "historicalGrowth": "ભૂતકાળનો ગ્રોથ",
+    "marketComparison": "બજાર સાથે સરખામણી",
+    "futurePotential": "ભવિષ્યની શક્યતા",
+    "operationalConsistency": "કામકાજમાં સાતત્ય",
+    "managementQuality": "મેનેજમેન્ટની ગુણવત્તા",
+    "experience": "અનુભવ",
+    "trackRecord": "ટ્રેક રેકોર્ડ",
+    "keyAchievements": "મુખ્ય સિદ્ધિઓ"
+  },
+  "risk": {
+    "safetyRating": "આ સ્કોરને સેફ્ટી રેટિંગ તરીકે વાંચો:",
+    "lowestRisk": "એટલે સૌથી ઓછું જોખમ,",
+    "highest": "એટલે સૌથી વધુ.",
+    "whereRisksSit": "જોખમો ક્યાં છે",
+    "mitigation": "કંપની આને કેવી રીતે સંભાળે છે",
+    "categories": {
+      "financial_risks": "નાણાકીય જોખમો",
+      "market_risks": "બજારનાં જોખમો",
+      "operational_risks": "કામકાજનાં જોખમો",
+      "regulatory_risks": "રેગ્યુલેટરી જોખમો"
+    }
+  },
+  "timing": {
+    "timeToMarket": "બજારમાં આવવાનો સમય",
+    "howAllotmentWorks": "એલોટમેન્ટ કેવી રીતે થાય છે",
+    "marketTiming": "માર્કેટ ટાઇમિંગ",
+    "listingOn": "લિસ્ટિંગ",
+    "keyMilestones": "મુખ્ય માઇલસ્ટોન",
+    "marketTimingWord": { "good": "અનુકૂળ", "mid": "તટસ્થ", "bad": "પ્રતિકૂળ" }
+  }
+}

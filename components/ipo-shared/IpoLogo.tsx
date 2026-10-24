@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import { useState } from 'react';
+import { useT } from '@/lib/i18n/client';
+import { fill } from '@/lib/i18n/locales';
 import { cn } from '@/lib/utils';
 
 const getInitials = (name: string) =>
@@ -26,6 +28,7 @@ export function IpoLogo({
   name?: string | null;
   size?: keyof typeof SIZES;
 }) {
+  const d = useT().ipo.logo;
   const [failed, setFailed] = useState(false);
   const url = src?.trim();
   const showImage = !!url && !failed;
@@ -44,7 +47,7 @@ export function IpoLogo({
         <Image
           src={url}
           // The tile is aria-hidden, so screen readers skip this; image search and SEO tools read it.
-          alt={name ? `${name} logo` : ""}
+          alt={name ? fill(d.alt, { name }) : ""}
           width={44}
           height={44}
           unoptimized={!url.startsWith(OPTIMIZABLE)}

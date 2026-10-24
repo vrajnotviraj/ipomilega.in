@@ -1,6 +1,7 @@
 import type { Ipo } from "@/types/ipo";
 import { parseGainValue } from "@/lib/ipo/format";
 import { Eyebrow } from "@/components/analysis/primitives";
+import { t } from "@/lib/i18n/server";
 
 type Row = { label: string; times: number };
 
@@ -8,12 +9,13 @@ const row = (label: string, figure: string | undefined) => ({ label, times: pars
 
 /** Each investor category's subscription multiple, as bars scaled to the most-bid category. */
 export function SubscriptionByCategory({ ipo }: { ipo: Ipo }) {
+  const d = t().analysis;
   const hasNiiSplit = ipo.snii_sr || ipo.bnii_sr;
   const rows = [
     row("QIB", ipo.qib_sr),
     ...(hasNiiSplit ? [row("S-HNI", ipo.snii_sr), row("B-HNI", ipo.bnii_sr)] : [row("NII", ipo.nii_sr)]),
-    row("Retail", ipo.rii_sr),
-    row("Shareholders", ipo.shareholder_sr),
+    row(d.categories.retail, ipo.rii_sr),
+    row(d.categories.shareholders, ipo.shareholder_sr),
   ].filter((r): r is Row => r.times !== null);
   const total = parseGainValue(ipo.total_sr);
   if (rows.length === 0 || total === null) return null;
@@ -22,9 +24,9 @@ export function SubscriptionByCategory({ ipo }: { ipo: Ipo }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <Eyebrow>Subscription by category</Eyebrow>
+        <Eyebrow>{d.subscription.title}</Eyebrow>
         <span className="font-mono text-sm font-medium tabular-nums">
-          {total}x <span className="text-xs font-normal text-muted-foreground">total{ipo.subscription_is_provisional ? " so far" : ""}</span>
+          {total}x <span className="text-xs font-normal text-muted-foreground">{ipo.subscription_is_provisional ? d.subscription.totalSoFar : d.subscription.total}</span>
         </span>
       </div>
       <dl className="reveal-stagger space-y-2.5">

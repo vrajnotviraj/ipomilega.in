@@ -1,6 +1,7 @@
 import type { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import type { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { getDaysUntilClosing, getIpoType, parseGainValue } from '@/lib/ipo/format';
+import { fill } from '@/lib/i18n/locales';
 
 // ---------- Scores ----------
 
@@ -14,13 +15,9 @@ export const scoreBand = (score: number): ScoreBand => {
 };
 
 const SCORE_TEXT_COLOR: Record<ScoreBand, string> = { good: 'text-score-good', mid: 'text-score-mid', bad: 'text-score-bad' };
-const SCORE_WORD: Record<ScoreBand, string> = { good: 'Strong', mid: 'Mixed', bad: 'Weak' };
 
 /** Text colour for a score, by band. */
 export const getRiskTextColor = (score: number) => SCORE_TEXT_COLOR[scoreBand(score)];
-
-/** Word for a score, on the same bands as its colour. */
-export const getScoreTrustLabel = (score: number): string => SCORE_WORD[scoreBand(score)];
 
 const SCORE_TEXT_COLOR_ON_INK: Record<ScoreBand, string> = { good: 'text-score-good-on-ink', mid: 'text-score-mid-on-ink', bad: 'text-score-bad-on-ink' };
 
@@ -103,9 +100,9 @@ export const getQibColor = (signal: QibSignal | null): string => {
   return 'text-foreground';
 };
 
-/** Tooltip text: "Analysis score 6.2 +1 for 24x QIB subscription". */
-export const describeQibAdjustment = (baseScore: number, signal: QibSignal | null): string => {
-  if (!baseScore || !signal || signal.delta === 0) return 'Analysis score';
-  const sign = signal.delta > 0 ? '+' : '';
-  return `Analysis score ${baseScore} ${sign}${signal.delta} for ${signal.qib}x QIB subscription${signal.final ? '' : ' (closing day)'}`;
+/** "Analysis score 6.2 +1 for 24x QIB subscription (closing day)", or null when QIB did not move the score. */
+export const describeQibAdjustment = (baseScore: number, signal: QibSignal | null, words: { withQib: string; closingDay: string }): string | null => {
+  if (!baseScore || !signal || signal.delta === 0) return null;
+  const sentence = fill(words.withQib, { score: baseScore, delta: `${signal.delta > 0 ? '+' : ''}${signal.delta}`, qib: signal.qib });
+  return signal.final ? sentence : `${sentence} ${words.closingDay}`;
 };

@@ -15,6 +15,17 @@ How ipomilega.in is laid out for search, and the rules new pages follow. `SEO_AU
 
 URLs never change once live. If one has to move, add a permanent redirect in `next.config.ts` to the closest page, never to the home page.
 
+## Languages
+
+English is the reference and lives at the bare path. Hindi is the same path under `/hi/` and Gujarati under `/gu/`; slugs are shared, so a page's URL only ever gains a prefix. `/en` is the internal route name and redirects to the bare path.
+
+- `<html lang>` is `en-IN`, `hi-IN` or `gu-IN`. Every page sets its canonical and an hreflang set (each language it exists in plus `x-default`, the English page) through `alternatesFor` in `lib/seo/share.ts`. The sitemap repeats the same set as `xhtml:link`.
+- UI words come from `messages/<lang>/*.json`. Analysis documents and articles are translated once by the engine's `translate` job into the `translations` collection and laid over the English document when the page is read, so a translation costs one model call and is then served from the cache like everything else.
+- A Hindi or Gujarati entity or article page with no stored translation yet shows the English text with `noindex` (no canonical, since a canonical to another URL on top of `noindex` is a mixed signal), and stays out of both sitemaps and every hreflang set, until the translation lands.
+- Company names, exchange names, IPO, GMP, RHP and every number, date and currency stay in Latin script. Finance terms use the transliterated words readers search for (प्राइस बैंड, લોટ સાઇઝ), never purist coinages.
+- Open Graph images and `/api/*` stay English. The news sitemap lists each fresh article once per language it is translated into, with that language's `news:language`. Translated articles say so under the byline and name the English version as the reference.
+- No redirect by browser language. The header switcher links each page to its other versions, so users and crawlers choose.
+
 ## Page types and intents
 
 Each IPO has one entity page and up to four articles. Each article owns a different question:
@@ -60,7 +71,7 @@ There are no per-day or per-hour pages. A new subscription figure updates the ex
 ## Sitemap rules
 
 - `/sitemap.xml` lists only canonical, indexable URLs: static pages, entity pages and published articles, with `lastModified` from the real update time.
-- `/news-sitemap.xml` lists engine news articles (subscription, allotment, listing) first published in the last 48 hours, as Google News requires.
+- `/news-sitemap.xml` lists engine news articles (subscription, allotment, listing) first published in the last 48 hours, as Google News requires, in English and in every language they are translated into.
 - Drafts, 404s, redirects and filter URLs are never listed.
 
 ## IPO lifecycle

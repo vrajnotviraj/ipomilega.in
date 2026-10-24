@@ -2,29 +2,28 @@ import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysi
 import { formatShortDate } from "@/lib/ipo/format";
 import { getRiskTextColor, scoreBand } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n/server";
 import { DotScale, Eyebrow, FactList, Prose, SectionHeading } from "@/components/analysis/primitives";
 
 type Time = IpoComprehensiveAnalysis["time"];
-
-// Market timing in words, on the same bands as the score colour.
-const MARKET_TIMING_WORD = { good: "Favourable", mid: "Neutral", bad: "Unfavourable" };
 
 /** Why the market timing does or does not suit the issue and how allotment works, beside the timing facts and milestones. */
 export function TimingSection({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
   const time = analysis.time;
   const milestones = (time.key_milestones ?? []).filter((milestone) => milestone.event?.trim());
+  const d = t().analysis;
 
   return (
     <section id="timing" className="reveal">
-      <SectionHeading title="Timing" score={time.score ?? 0} />
+      <SectionHeading title={d.sections.timing} score={time.score ?? 0} />
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-10">
         <div className="min-w-0 space-y-8">
           {time.market_timing_assessment && <Prose>{time.market_timing_assessment}</Prose>}
           <FactList
             className="max-w-[65ch]"
             facts={[
-              { term: "Time to market", detail: time.time_to_market?.rationale },
-              { term: "How allotment works", detail: time.allotment_timeline?.process },
+              { term: d.timing.timeToMarket, detail: time.time_to_market?.rationale },
+              { term: d.timing.howAllotmentWorks, detail: time.allotment_timeline?.process },
             ]}
           />
         </div>
@@ -42,19 +41,20 @@ function TimingFacts({ time }: { time: Time }) {
   const timeScore = time.score ?? 0;
   const timeToMarket = time.time_to_market?.score;
   const exchanges = time.listing_details?.exchanges?.filter(Boolean).join(", ");
+  const d = t().analysis.timing;
 
   const facts = [
     {
-      label: "Market timing",
-      value: MARKET_TIMING_WORD[scoreBand(timeScore)],
+      label: d.marketTiming,
+      value: d.marketTimingWord[scoreBand(timeScore)],
       className: cn("font-display font-bold", getRiskTextColor(timeScore)),
     },
     {
-      label: "Time to market",
+      label: d.timeToMarket,
       value: timeToMarket == null ? null : <ScoreWithDots score={timeToMarket} />,
       className: getRiskTextColor(timeToMarket ?? 0),
     },
-    { label: "Listing on", value: exchanges, className: "font-display font-bold" },
+    { label: d.listingOn, value: exchanges, className: "font-display font-bold" },
   ].filter((fact) => fact.value);
 
   return (
@@ -82,13 +82,14 @@ function ScoreWithDots({ score }: { score: number }) {
 
 /** Key dates from the prospectus as a mono date beside each event. */
 function Milestones({ milestones }: { milestones: Time["key_milestones"] }) {
+  const d = t();
   return (
     <div>
-      <h3 className="mb-3 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">Key milestones</h3>
+      <h3 className="mb-3 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">{d.analysis.timing.keyMilestones}</h3>
       <ol className="reveal-stagger divide-y divide-border">
         {milestones.map((milestone, index) => (
           <li key={index} className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3 py-2.5 text-sm">
-            <span className="break-words font-mono tabular-nums text-muted-foreground">{formatMilestoneDate(milestone.date)}</span>
+            <span className="break-words font-mono tabular-nums text-muted-foreground">{formatMilestoneDate(milestone.date, d.common.tba)}</span>
             <span className="text-pretty">{milestone.event}</span>
           </li>
         ))}
@@ -97,9 +98,9 @@ function Milestones({ milestones }: { milestones: Time["key_milestones"] }) {
   );
 }
 
-/** "18 Aug 2026" when the date parses, else the date as written. */
-function formatMilestoneDate(date: string) {
+/** "18 Aug 2026" when the date parses, else the date as written, or the TBA word when there is none. */
+function formatMilestoneDate(date: string, tba: string) {
   const formatted = formatShortDate(date, true);
-  if (formatted === "TBA") return date || "TBA";
+  if (formatted === "TBA") return date || tba;
   return formatted;
 }

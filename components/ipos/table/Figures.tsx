@@ -1,12 +1,14 @@
-import { formatGmp, gainColor, gainMotion } from "@/lib/ipo/format";
+import { gainColor, gainMotion, signedPercent } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n/client";
 import { LifecycleTrack } from "@/components/ipo-shared/LifecycleTrack";
 import { heldGainOf, isListed, listingGainOf } from "@/components/ipos/model/cells";
 import type { Row } from "@/components/ipos/model/types";
 
 /** A gain % in green or red, or "N/A" when unknown. */
 export function Gain({ value }: { value: number | null }) {
-  return <span className={cn("font-mono text-sm font-medium tabular-nums", gainColor(value), gainMotion(value))}>{formatGmp(value)}</span>;
+  const na = useT().common.na;
+  return <span className={cn("font-mono text-sm font-medium tabular-nums", gainColor(value), gainMotion(value))}>{value === null ? na : signedPercent(value)}</span>;
 }
 
 /** A small label above a figure. */
@@ -21,10 +23,11 @@ export function Figure({ label, children }: { label: string; children: React.Rea
 
 /** Listing-day gain and gain at the last close. */
 function Returns({ row }: { row: Row }) {
+  const w = useT().ipos.table;
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Figure label="Listing day"><Gain value={listingGainOf(row)} /></Figure>
-      <Figure label="Held till today"><Gain value={heldGainOf(row)} /></Figure>
+      <Figure label={w.listingDay}><Gain value={listingGainOf(row)} /></Figure>
+      <Figure label={w.heldTillToday}><Gain value={heldGainOf(row)} /></Figure>
     </div>
   );
 }

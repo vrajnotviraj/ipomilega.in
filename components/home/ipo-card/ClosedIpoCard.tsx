@@ -1,10 +1,12 @@
+'use client';
+
 import { ArrowUpRight, Clock } from 'lucide-react';
 import { Ipo } from '@/types/ipo';
 import {
   daysFromToday,
   estimatedListing,
+  formatIpoDate,
   formatRupees,
-  formatShortDate,
   formatTimes,
   gainColor,
   gainMotion,
@@ -14,6 +16,7 @@ import {
   signedPercent,
 } from '@/lib/ipo/format';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/client';
 import { LifecycleTrack } from '@/components/ipo-shared/LifecycleTrack';
 import { afterCloseSteps } from '@/components/ipo-shared/lifecycle';
 import { CardHeader, IpoCardProps } from './CardParts';
@@ -44,36 +47,38 @@ export function ClosedIpoCard({ ipo, analysis }: IpoCardProps) {
 
 /** Total subscription as a mono figure for the card's top right. */
 function Subscribed({ times }: { times: number | null }) {
+  const d = useT().home.closedCard;
   return (
     <div className="shrink-0 text-right">
       <div className="font-mono text-lg font-medium leading-tight tabular-nums">{formatTimes(times)}</div>
-      <div className="text-xs text-muted-foreground">subscribed</div>
+      <div className="text-xs text-muted-foreground">{d.subscribed}</div>
     </div>
   );
 }
 
 /** The GMP-implied listing price and gain, with what that comes to on the minimum retail application. */
 function ExpectedListing({ ipo }: { ipo: Ipo | null }) {
+  const d = useT().home.closedCard;
   const { price, gain } = estimatedListing(ipo);
   const perApplication = gmpGainPerApplication(ipo);
 
   if (price === null && gain === null) {
-    return <p className="text-sm text-muted-foreground">No grey market quote for this issue yet.</p>;
+    return <p className="text-sm text-muted-foreground">{d.noGmp}</p>;
   }
 
   return (
     <div className="flex items-end justify-between gap-3">
       <div className="min-w-0">
-        <div className="text-xs text-muted-foreground">Expected listing (GMP)</div>
+        <div className="text-xs text-muted-foreground">{d.expectedListing}</div>
         <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
           {price !== null && <span className="font-mono text-2xl font-medium tabular-nums">{formatRupees(price)}</span>}
           {gain !== null && <span className={cn('font-mono text-sm font-medium tabular-nums', gainColor(gain), gainMotion(gain))}>{signedPercent(gain)}</span>}
         </div>
       </div>
       {perApplication !== null && (
-        <div className="shrink-0 text-right" title="GMP gain on the minimum retail application">
+        <div className="shrink-0 text-right" title={d.perApplicationHint}>
           <div className="text-xs text-muted-foreground">
-            Per application<span className="sr-only">, GMP gain on the minimum retail application</span>
+            {d.perApplication}<span className="sr-only">, {d.perApplicationHint}</span>
           </div>
           <div className={cn('mt-1 font-mono text-sm font-medium tabular-nums', gainColor(perApplication), gainMotion(perApplication))}>
             {perApplication > 0 ? '+' : perApplication < 0 ? '−' : ''}
@@ -87,6 +92,8 @@ function ExpectedListing({ ipo }: { ipo: Ipo | null }) {
 
 /** "Check allotment" pill once the basis of allotment is out (solid on the day), else "out soon" on the day, else the allotment date. */
 function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDays: number | null }) {
+  const { common: c, home } = useT();
+  const d = home.closedCard;
   const checkUrl = getAllotmentCheckUrl(ipo);
 
   if (!checkUrl) {
@@ -94,12 +101,12 @@ function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDay
       <div className="inline-flex items-center justify-center gap-1.5 rounded-full border border-dashed border-primary/20 py-2 text-xs text-muted-foreground">
         <Clock className="size-3.5" strokeWidth={2} />
         {allotmentDays === null ? (
-          'Allotment date TBA'
+          d.allotmentDateTba
         ) : allotmentDays === 0 ? (
-          'Allotment out soon'
+          d.allotmentOutSoon
         ) : (
           <span>
-            Allotment <span className="font-mono tabular-nums">{formatShortDate(ipo?.ipo_dates?.basis_of_allotment)}</span>
+            {d.allotment} <span className="font-mono tabular-nums">{formatIpoDate(ipo?.ipo_dates?.basis_of_allotment) ?? c.tba}</span>
           </span>
         )}
       </div>
@@ -119,7 +126,7 @@ function AllotmentAction({ ipo, allotmentDays }: { ipo: Ipo | null; allotmentDay
           : 'border border-primary/25 text-foreground hover:border-primary/40 hover:bg-card'
       )}
     >
-      Check allotment
+      {c.checkAllotment}
       <ArrowUpRight className="size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" strokeWidth={2} />
     </a>
   );

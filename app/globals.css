@@ -8,8 +8,8 @@
 @source not "../CLAUDE.md";
 
 @theme inline {
-  --font-display: var(--font-schibsted), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-schibsted), var(--font-devanagari), var(--font-gujarati), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), var(--font-devanagari), var(--font-gujarati), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-dm-mono), ui-monospace, SFMono-Regular, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -459,4 +459,11 @@
   .glint::after {
     animation: none;
   }
+}
+
+/* Devanagari and Gujarati carry marks above and below the line, so headings get room and no tight tracking. Unlayered, so it wins over tracking utilities. */
+:lang(hi) :is(h1, h2, h3, .type-hero, .type-h2),
+:lang(gu) :is(h1, h2, h3, .type-hero, .type-h2) {
+  letter-spacing: 0;
+  line-height: 1.2;
 }

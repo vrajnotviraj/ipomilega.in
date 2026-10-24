@@ -1,9 +1,11 @@
 import { IpoLogo } from "@/components/ipo-shared/IpoLogo";
 import { IpoTitleLink } from "@/components/ipo-shared/IpoTitleLink";
 import { LiveLabel } from "@/components/ui/LiveLabel";
-import { formatGmp, gainColor } from "@/lib/ipo/format";
+import { gainColor, signedPercent } from "@/lib/ipo/format";
 import { scoreOf } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n/client";
+import { plural } from "@/lib/i18n/locales";
 import { ScorePill } from "@/components/ipos/table/ScorePill";
 import { daysToStep, gmpOf, hasAnalysis, subscribedOf } from "@/components/ipos/model/cells";
 import type { Row } from "@/components/ipos/model/types";
@@ -12,6 +14,7 @@ const MAX_CARDS = 6;
 
 /** Surface panel of the IPOs closing soonest, the rest are in the table below. Scrolls sideways on phones. */
 export function OpenNowStrip({ rows }: { rows: Row[] }) {
+  const w = useT().ipos.openNow;
   if (rows.length === 0) return null;
   const byClosing = [...rows].sort((a, b) => (daysToStep(a, "Close") ?? Infinity) - (daysToStep(b, "Close") ?? Infinity));
   const shown = byClosing.slice(0, MAX_CARDS);
@@ -20,11 +23,11 @@ export function OpenNowStrip({ rows }: { rows: Row[] }) {
   return (
     <section aria-labelledby="open-now-title" className="rounded-[18px] bg-secondary p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <h2 id="open-now-title" className="font-display text-xl font-bold tracking-[-0.015em] text-foreground">Open now</h2>
+        <h2 id="open-now-title" className="font-display text-xl font-bold tracking-[-0.015em] text-foreground">{w.title}</h2>
         <LiveLabel />
         {hiddenCount > 0 && (
           <p className="ml-auto text-sm text-muted-foreground">
-            <span className="font-mono tabular-nums">{hiddenCount}</span> more in the table below
+            <span className="font-mono tabular-nums">{hiddenCount}</span> {w.moreBelow}
           </p>
         )}
       </div>
@@ -41,6 +44,7 @@ export function OpenNowStrip({ rows }: { rows: Row[] }) {
 
 /** Compact card: company, score, then time left, GMP and subscription as large figures. */
 function OpenCard({ row }: { row: Row }) {
+  const d = useT();
   const gmp = gmpOf(row);
   const score = scoreOf(row);
   return (
@@ -53,9 +57,9 @@ function OpenCard({ row }: { row: Row }) {
         <ScorePill value={score} />
       </div>
       <dl className="mt-auto grid grid-cols-3 gap-2 border-t border-border pt-3">
-        <BigFigure label="Closes"><ClosesValue days={daysToStep(row, "Close")} /></BigFigure>
-        <BigFigure label="GMP" className={gainColor(gmp)}>{formatGmp(gmp)}</BigFigure>
-        <BigFigure label="Subscribed">{subscribedOf(row)}</BigFigure>
+        <BigFigure label={d.ipos.openNow.closes}><ClosesValue days={daysToStep(row, "Close")} /></BigFigure>
+        <BigFigure label="GMP" className={gainColor(gmp)}>{gmp === null ? d.common.na : signedPercent(gmp)}</BigFigure>
+        <BigFigure label={d.common.subscribed}>{subscribedOf(row)}</BigFigure>
       </dl>
     </article>
   );
@@ -63,10 +67,10 @@ function OpenCard({ row }: { row: Row }) {
 
 /** Days left to bid, in the loss colour when it closes today. */
 function ClosesValue({ days }: { days: number | null }) {
-  if (days === 0) return <span className="text-score-bad">Today</span>;
-  if (days === null) return <>TBA</>;
-  if (days === 1) return <>1 day</>;
-  return <>{days} days</>;
+  const d = useT();
+  if (days === 0) return <span className="text-score-bad">{d.common.today}</span>;
+  if (days === null) return <>{d.common.tba}</>;
+  return <>{plural(d.ipos.openNow.days, days)}</>;
 }
 
 function BigFigure({ label, className, children }: { label: string; className?: string; children: React.ReactNode }) {

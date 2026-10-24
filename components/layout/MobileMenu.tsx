@@ -1,13 +1,17 @@
+"use client";
+
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { Logo } from "@/components/layout/Logo";
 import { NAV_LINKS } from "@/components/layout/nav-links";
+import { useT } from "@/lib/i18n/client";
 
-const MENU_LINKS = [{ href: "/", label: "Home" }, ...NAV_LINKS];
+const MENU_LINKS = [{ href: "/", key: "home" }, ...NAV_LINKS] as const;
 
 /** Slide-in nav panel for phones, over an ink-tinted overlay. */
 export function MobileMenu({ isOpen, onClose, pathname }: { isOpen: boolean; onClose: () => void; pathname: string }) {
+  const d = useT().common;
   return (
     <>
       <div
@@ -30,7 +34,7 @@ export function MobileMenu({ isOpen, onClose, pathname }: { isOpen: boolean; onC
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close menu"
+            aria-label={d.closeMenu}
             className="grid size-9 place-items-center rounded-full text-foreground transition-colors hover:bg-secondary active:scale-[0.98]"
           >
             <X className="size-5" strokeWidth={2} />
@@ -46,12 +50,12 @@ export function MobileMenu({ isOpen, onClose, pathname }: { isOpen: boolean; onC
               aria-current={pathname === link.href ? "page" : undefined}
               className="rounded-lg px-4 py-3 font-display text-lg font-bold tracking-tight text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground active:scale-[0.98] aria-[current=page]:bg-secondary aria-[current=page]:text-foreground"
             >
-              {link.label}
+              {d.nav[link.key]}
             </ProgressLink>
           ))}
         </nav>
 
-        <p className="mt-auto border-t border-border p-4 text-sm text-muted-foreground">Milega? Check first.</p>
+        <p className="mt-auto border-t border-border p-4 text-sm text-muted-foreground">{d.tagline}</p>
       </div>
     </>
   );

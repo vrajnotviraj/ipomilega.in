@@ -1,8 +1,13 @@
 import { getIpoType, parseEstListingPercent } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n/client";
+import { fill, plural } from "@/lib/i18n/locales";
+import type { Dictionary } from "@/messages";
 import { matchesStatus } from "@/components/ipos/model/query";
+import { statusWordOf } from "@/components/ipos/model/cells";
 import type { Filters, Row } from "@/components/ipos/model/types";
-import { Step, StepName, whenText } from "@/components/ipo-shared/lifecycle";
+import { Step, StepName, whenOf } from "@/components/ipo-shared/lifecycle";
+import { whenText } from "@/components/ipo-shared/LifecycleTrack";
 
 type TileValue = Filters["status"];
 
@@ -18,58 +23,62 @@ function nearestStep(rows: Row[], step: StepName, pick: "soonest" | "latest") {
 }
 
 /** One line of context under each count. */
-function subtitleFor(value: TileValue, rows: Row[]): string {
+function subtitleFor(value: TileValue, rows: Row[], d: Dictionary): string {
+  const w = d.ipos.tiles;
   if (value === "all") {
     const sme = rows.filter((row) => getIpoType(row.ipo) === "SME").length;
-    return `${rows.length - sme} mainboard, ${sme} SME`;
+    return fill(w.boards, { mainboard: rows.length - sme, sme });
   }
-  if (rows.length === 0) return "None right now";
+  if (rows.length === 0) return w.noneNow;
   if (value === "Open") {
     const days = nearestStep(rows, "Close", "soonest")?.days ?? null;
-    if (days === null) return "Close dates to be announced";
-    return days > 7 ? `Closing soonest in ${days} days` : `Closing soonest ${whenText(days, "")}`;
+    if (days === null) return w.closeDatesTba;
+    return fill(w.closingSoonest, { when: whenText(whenOf(days), d) });
   }
   if (value === "Upcoming") {
     const next = nearestStep(rows, "Open", "soonest");
-    return next ? `Next opens ${whenText(next.days, next.date)}` : "Dates to be announced";
+    return next ? fill(w.nextOpens, { when: whenText(whenOf(next.days, next.date), d) }) : d.common.datesTba;
   }
-  if (value === "Closed") return closedSubtitle(rows);
-  return listedSubtitle(rows);
+  if (value === "Closed") return closedSubtitle(rows, d);
+  return listedSubtitle(rows, d);
 }
 
 /** Allotments due today, else the next allotment, else the next listing. */
-function closedSubtitle(rows: Row[]): string {
+function closedSubtitle(rows: Row[], d: Dictionary): string {
+  const w = d.ipos.tiles;
   const allottingToday = rows.filter((row) => row.steps.some((s) => s.name === "Allot" && s.state === "today")).length;
-  if (allottingToday > 0) return `${allottingToday} allotment${allottingToday > 1 ? "s" : ""} today`;
+  if (allottingToday > 0) return plural(w.allotmentsToday, allottingToday);
 
   const nextAllot = nearestStep(rows, "Allot", "soonest");
-  if (nextAllot) return `Next allotment ${whenText(nextAllot.days, nextAllot.date)}`;
+  if (nextAllot) return fill(w.nextAllotment, { when: whenText(whenOf(nextAllot.days, nextAllot.date), d) });
 
   const nextList = nearestStep(rows, "List", "soonest");
-  return nextList ? `Next lists ${whenText(nextList.days, nextList.date)}` : "Listing dates to be announced";
+  return nextList ? fill(w.nextLists, { when: whenText(whenOf(nextList.days, nextList.date), d) }) : w.listingDatesTba;
 }
 
 /** How many listed above issue price, else when the latest one listed. */
-function listedSubtitle(rows: Row[]): string {
+function listedSubtitle(rows: Row[], d: Dictionary): string {
+  const w = d.ipos.tiles;
   const gains = rows.map((row) => parseEstListingPercent(row.ipo?.listing_gain)).filter((g): g is number => g !== null);
-  if (gains.length > 0) return `${gains.filter((g) => g > 0).length} of ${gains.length} listed above issue price`;
+  if (gains.length > 0) return fill(w.listedAbove, { up: gains.filter((g) => g > 0).length, total: gains.length });
 
   const latest = nearestStep(rows, "List", "latest");
-  return latest ? `Latest listed ${latest.date}` : "Listing dates unknown";
+  return latest ? fill(w.latestListed, { date: latest.date }) : w.listingDatesUnknown;
 }
 
 /** Clickable status tiles, each with its count and one line of context. The active tile is ink; clicking it again clears the filter. */
 export function StatusTiles({ rows, value, onChange }: { rows: Row[]; value: TileValue; onChange: (status: TileValue) => void }) {
+  const d = useT();
   return (
-    <div role="group" aria-label="IPO status" className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
+    <div role="group" aria-label={d.ipos.tiles.group} className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
       {TILES.map((tile) => {
         const tileRows = rows.filter((row) => matchesStatus(row, tile));
         return (
           <Tile
             key={tile}
-            label={tile === "all" ? "All" : tile}
+            label={tile === "all" ? d.common.all : statusWordOf(tile, d)}
             count={tileRows.length}
-            subtitle={subtitleFor(tile, tileRows)}
+            subtitle={subtitleFor(tile, tileRows, d)}
             isLive={tile === "Open"}
             isActive={value === tile}
             onClick={() => onChange(value === tile ? "all" : tile)}

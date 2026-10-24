@@ -1,5 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Blog, Ipo } from "@/types/ipo";
+import { t } from "@/lib/i18n/server";
+import { fill } from "@/lib/i18n/locales";
 import { getSectionTabs, getShareFacts } from "./analysis-facts";
 import { FinancialsSection } from "@/components/analysis/sections/financials/FinancialsSection";
 import { FlexibilitySection } from "@/components/analysis/sections/FlexibilitySection";
@@ -14,18 +16,19 @@ import { IpoArticleLinks } from "@/components/blog/IpoArticleLinks";
 
 /** One IPO's full analysis: the sticky header and tabs, the breadcrumb, each scored section in order, then the IPO's articles. */
 export function AnalysisDetail({ analysis, ipo, articles }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo; articles: Blog[] }) {
+  const d = t();
   const name = `${analysis.company_name} IPO`;
   return (
     <div className="min-h-screen bg-background pt-16">
       <StickyHeader
         companyName={analysis.company_name}
         logoUrl={ipo.image_url}
-        tabs={getSectionTabs(analysis)}
+        tabs={getSectionTabs(analysis, d.analysis.sections)}
         shareFacts={getShareFacts(analysis, ipo)}
       />
 
       <div className="app-container pt-6">
-        <Breadcrumbs crumbs={[{ name: "Home", href: "/" }, { name: "IPOs", href: "/ipos" }, { name, href: `/analysis/${ipo.slug}` }]} />
+        <Breadcrumbs crumbs={[{ name: d.common.nav.home, href: "/" }, { name: d.common.nav.ipos, href: "/ipos" }, { name, href: `/analysis/${ipo.slug}` }]} />
       </div>
 
       <div className="app-container space-y-16 pt-6 pb-10 sm:space-y-24 sm:pb-14">
@@ -35,7 +38,7 @@ export function AnalysisDetail({ analysis, ipo, articles }: { analysis: IpoCompr
         {analysis.risk_meter && <RiskSection risk={analysis.risk_meter} />}
         {analysis.performance && <PerformanceSection performance={analysis.performance} />}
         {analysis.flexibility && <FlexibilitySection flexibility={analysis.flexibility} />}
-        <IpoArticleLinks title={`Latest on ${name}`} blogs={articles} />
+        <IpoArticleLinks title={fill(d.analysis.latestOn, { name })} blogs={articles} />
 
         <Disclaimer className="border-t border-border pt-6 text-pretty" />
       </div>

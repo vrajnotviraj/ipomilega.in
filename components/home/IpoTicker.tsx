@@ -1,13 +1,14 @@
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { ProgressLink } from '@/components/progress/ProgressLink';
 import { adjustedScoreOf, scoreColorOnInk } from '@/lib/ipo/score';
+import { t } from '@/lib/i18n/server';
 
 interface TickerEntry {
   key: string;
   slug: string;
   name: string;
   score: number | null;
-  status: 'Open' | 'Upcoming';
+  status: 'open' | 'upcoming';
 }
 
 const entry = (item: HomePageIpoProps, status: TickerEntry['status']) => ({
@@ -20,13 +21,14 @@ const entry = (item: HomePageIpoProps, status: TickerEntry['status']) => ({
 
 function toEntries(live: HomePageIpoProps[], upcoming: HomePageIpoProps[]): TickerEntry[] {
   return [
-    ...live.map((item) => entry(item, 'Open')),
-    ...upcoming.map((item) => entry(item, 'Upcoming')),
+    ...live.map((item) => entry(item, 'open')),
+    ...upcoming.map((item) => entry(item, 'upcoming')),
   ].filter((entry): entry is TickerEntry => !!entry.slug && !!entry.name);
 }
 
 /** Full-bleed ink band scrolling every live and upcoming IPO with its score. Pauses on hover. */
 export function IpoTicker({ live, upcoming }: { live: HomePageIpoProps[]; upcoming: HomePageIpoProps[] }) {
+  const d = t().home.ticker;
   const entries = toEntries(live, upcoming);
   if (entries.length === 0) return null;
 
@@ -54,7 +56,7 @@ export function IpoTicker({ live, upcoming }: { live: HomePageIpoProps[]; upcomi
                     {entry.score.toFixed(1)}
                   </span>
                 )}
-                <span className="text-xs font-medium uppercase tracking-[0.04em] text-primary-foreground/60">{entry.status}</span>
+                <span className="text-xs font-medium uppercase tracking-[0.04em] text-primary-foreground/60">{d[entry.status]}</span>
               </ProgressLink>
             ))}
           </div>

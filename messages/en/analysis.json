@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "entityTitle": "{name} IPO: GMP, Price, Dates, Lot Size & Allotment",
+    "description": "{name} IPO price band, issue dates, lot size, grey market premium and allotment status.",
+    "imageAlt": "{name} IPO analysis on {site}",
+    "section": "IPO Analysis",
+    "pendingTitle": "{name} IPO analysis in progress",
+    "pendingTitleNoName": "IPO analysis in progress",
+    "pendingDescription": "We're still working through this IPO's prospectus."
+  },
+  "inProgress": {
+    "title": "Analysis in progress",
+    "hint": "We're still working through this IPO's prospectus. The analysis shows up here once we've reviewed it."
+  },
+  "latestOn": "Latest on {name}",
+  "lotSize": "Lot size",
+  "freshIssue": "Fresh issue",
+  "notStated": "Not stated",
+  "categories": {
+    "retail": "Retail",
+    "shareholders": "Shareholders"
+  },
+  "sections": {
+    "overview": "Overview",
+    "timing": "Timing",
+    "financials": "Financials",
+    "risk": "Risk",
+    "performance": "Performance",
+    "flexibility": "Flexibility"
+  },
+  "header": {
+    "goBack": "Go back"
+  },
+  "share": {
+    "opensTomorrow": "Opens tomorrow.",
+    "opensOn": "Opens {date}.",
+    "closed": "Bidding has closed.",
+    "lastDayToday": "Today is the last date to apply.",
+    "lastDayTomorrow": "Tomorrow is the last date to apply.",
+    "daysLeft": "{count} days left to apply, closes {date}.",
+    "applying": "Hey, I'm applying to the {name} IPO.",
+    "fullAnalysis": "Full analysis → {url}",
+    "scored": "Scored {score}/10 from the RHP.",
+    "readFull": "Read the full {name} IPO analysis on {site}."
+  },
+  "summary": {
+    "whatTheyDo": "What they do: ",
+    "by": "By",
+    "published": "Published",
+    "updated": "Updated",
+    "opensInNewTab": "(opens in a new tab)",
+    "ourScore": "Our score",
+    "gmpNote": "GMP is an unofficial grey market indication.",
+    "gmpUpdated": "GMP updated",
+    "shares": "{count} shares",
+    "minInvestment": "Min. investment",
+    "issueTimeline": "Issue timeline",
+    "figures": {
+      "total": "Total",
+      "totalSoFar": "Total so far",
+      "retailOdds": "Retail odds",
+      "onceBidsComeIn": "Once bids come in",
+      "listingGain": "Listing gain",
+      "listedAt": "Listed at ₹{price}",
+      "gmp": "GMP (unofficial)",
+      "perShare": "₹{amount} a share",
+      "greyMarketPremium": "Grey market premium",
+      "opens": "Opens",
+      "closes": "Closes {date}",
+      "oneLot": "One lot"
+    }
+  },
+  "timeline": {
+    "unavailable": "Timeline will be available once opening and listing dates are confirmed.",
+    "open": "Open",
+    "close": "Close",
+    "allotment": "Allotment",
+    "listing": "Listing",
+    "opens": "Opens",
+    "closes": "Closes",
+    "lists": "Lists",
+    "today": "{verb} today",
+    "tomorrow": "{verb} tomorrow",
+    "inDays": "{verb} in {count} days"
+  },
+  "odds": {
+    "heading": "Your odds",
+    "caption": "Estimated from the current subscription figures. Tap a category to work it out for your application size."
+  },
+  "estimatedListing": {
+    "title": "Estimated listing",
+    "noGmp": "Grey market data isn't available for this issue, so the gains estimate uses fundamentals only and ignores listing-day sentiment.",
+    "fromGmp": "Estimated listing from GMP (unofficial)"
+  },
+  "subscription": {
+    "title": "Subscription by category",
+    "total": "total",
+    "totalSoFar": "total so far"
+  },
+  "money": {
+    "title": "Where the money goes",
+    "ofsOnly": "This IPO is entirely an offer for sale. The company receives none of the money",
+    "allOfIt": ": all",
+    "goesToSellers": "goes to the selling shareholders.",
+    "itAllGoesToSellers": ", it all goes to the selling shareholders.",
+    "toCompany": "To the company",
+    "toSellers": "To selling shareholders",
+    "offerForSale": "Offer for sale",
+    "noOfferForSale": "No offer for sale",
+    "ofsSegment": "Offer for sale: goes to selling shareholders"
+  },
+  "scoreBreakdown": {
+    "outerRing": "Outer ring: estimated gain",
+    "title": "How the score adds up",
+    "note": "The overall score is the average of these five, nudged by QIB demand once bidding closes.",
+    "estimatedGain": "Estimated gain (fundamentals only)",
+    "overall": "OVERALL"
+  },
+  "strengthsAndConcerns": {
+    "strengths": { "title": "Strengths", "empty": "No highlighted strengths yet." },
+    "concerns": { "title": "Concerns", "empty": "No flagged concerns yet." }
+  },
+  "quota": {
+    "title": "Who gets shares",
+    "split": "Quota split",
+    "unavailable": "Quota data unavailable.",
+    "applicationSize": "Application size",
+    "lotsAndShares": "{lots} lots, {shares} shares",
+    "application": "Application",
+    "shares": "Shares",
+    "amount": "Amount"
+  },
+  "gmp": {
+    "title": "GMP trend",
+    "unofficialQuotes": "Unofficial grey market quotes",
+    "asOf": ", as of",
+    "istToday": "IST today",
+    "timesInIst": ", times in IST",
+    "chart": "Chart",
+    "table": "Table",
+    "loadFailed": "GMP history couldn't be loaded right now.",
+    "noQuote": "No grey market quote for this issue yet. The trend starts with the first one.",
+    "firstPointNote": "The line builds from here: one point per day, showing that day's latest GMP.",
+    "firstDay": "First day,",
+    "since": "since",
+    "direction": { "up": "Up", "down": "Down", "flat": "Flat" },
+    "noChange": "No change",
+    "noChangeLower": "no change",
+    "liveAt": "live {time}",
+    "estGain": "Est. gain",
+    "tableCaption": "Daily GMP for {company}, newest first",
+    "thisIpo": "this IPO",
+    "date": "Date",
+    "change": "Change"
+  },
+  "calendar": {
+    "add": "Add to calendar",
+    "steps": { "opening": "IPO opens", "closing": "IPO closes", "allotment": "IPO allotment", "listing": "IPO lists" },
+    "allDatesIcs": "All dates as .ics"
+  },
+  "financials": {
+    "revenue": "Revenue",
+    "expense": "Expense",
+    "profitAfterTax": "Profit after tax",
+    "netMargin": "Net margin",
+    "assets": "Assets",
+    "pts": "pts",
+    "periodEnded": "Period ended",
+    "changeAgainst": "Change against",
+    "noPriorYear": "No prior year",
+    "returnOnEquity": "Return on equity",
+    "debtToEquity": "Debt to equity",
+    "currentRatio": "Current ratio",
+    "revenueCagr": "Revenue CAGR",
+    "returnOnNetWorth": "Return on net worth",
+    "navPerShare": "NAV per share (₹)",
+    "priceToBook": "Price to book",
+    "trendTitle": "Financial performance trend",
+    "amountInCrores": "Amount ₹ in crores",
+    "debt": "Debt on the company",
+    "whoIsSelling": "Who is selling, and why",
+    "promotersSelling": "Promoters selling",
+    "promotersNotSelling": "Promoters not selling",
+    "none": "None",
+    "freshVsOfs": "Fresh issue goes to the company. OFS goes to the selling shareholders."
+  },
+  "flexibility": {
+    "marketAdaptability": "Market adaptability",
+    "financialStability": "Financial stability",
+    "operationalAgility": "Operational agility",
+    "productDiversification": "Product diversification",
+    "futureAdaptability": "Future adaptability"
+  },
+  "performance": {
+    "historicalGrowth": "Historical growth",
+    "marketComparison": "Market comparison",
+    "futurePotential": "Future potential",
+    "operationalConsistency": "Operational consistency",
+    "managementQuality": "Management quality",
+    "experience": "Experience",
+    "trackRecord": "Track record",
+    "keyAchievements": "Key achievements"
+  },
+  "risk": {
+    "safetyRating": "Read this score as a safety rating:",
+    "lowestRisk": "means the lowest risk,",
+    "highest": "the highest.",
+    "whereRisksSit": "Where the risks sit",
+    "mitigation": "How the company offsets these",
+    "categories": {
+      "financial_risks": "Financial risks",
+      "market_risks": "Market risks",
+      "operational_risks": "Operational risks",
+      "regulatory_risks": "Regulatory risks"
+    }
+  },
+  "timing": {
+    "timeToMarket": "Time to market",
+    "howAllotmentWorks": "How allotment works",
+    "marketTiming": "Market timing",
+    "listingOn": "Listing on",
+    "keyMilestones": "Key milestones",
+    "marketTimingWord": { "good": "Favourable", "mid": "Neutral", "bad": "Unfavourable" }
+  }
+}

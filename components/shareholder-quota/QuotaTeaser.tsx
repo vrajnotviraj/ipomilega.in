@@ -1,8 +1,13 @@
+"use client";
+
 import { ArrowRight } from "lucide-react";
 import { ProgressLink } from "@/components/progress/ProgressLink";
+import { useT } from "@/lib/i18n/client";
+import { plural } from "@/lib/i18n/locales";
 
 /** The /ipos link to the shareholder-quota page, with how many upcoming IPOs it lists. Hidden when there are none. */
 export function QuotaTeaser({ count }: { count: number }) {
+  const d = useT().quota.teaser;
   if (count === 0) return null;
   return (
     <ProgressLink
@@ -13,10 +18,7 @@ export function QuotaTeaser({ count }: { count: number }) {
         {count}
       </span>
       <span className="min-w-0 flex-1 text-sm text-muted-foreground">
-        <span className="font-medium text-foreground">
-          {count === 1 ? "1 upcoming IPO reserves" : `${count} upcoming IPOs reserve`} shares for the parent&apos;s shareholders.
-        </span>{" "}
-        See which shares to hold.
+        <span className="font-medium text-foreground">{plural(d.reserves, count)}</span> {d.seeWhich}
       </span>
       <ArrowRight aria-hidden className="size-4 shrink-0 text-primary transition-transform duration-(--duration-base) ease-(--ease-out) group-hover:translate-x-0.5" strokeWidth={2} />
     </ProgressLink>

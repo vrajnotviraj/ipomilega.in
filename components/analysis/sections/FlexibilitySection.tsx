@@ -1,21 +1,23 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { getRiskTextColor } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n/server";
 import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from "@/components/analysis/primitives";
 
 type Metric = { score: number | null; description: string | null } | undefined;
 
 /** How well the business can adapt: three scored metrics as tiles first, then the summary beside diversification and outlook notes. */
 export function FlexibilitySection({ flexibility }: { flexibility: IpoComprehensiveAnalysis["flexibility"] }) {
+  const d = t().analysis;
   const metrics = [
-    { label: "Market adaptability", metric: flexibility.market_adaptability },
-    { label: "Financial stability", metric: flexibility.financial_stability },
-    { label: "Operational agility", metric: flexibility.operational_agility },
+    { label: d.flexibility.marketAdaptability, metric: flexibility.market_adaptability },
+    { label: d.flexibility.financialStability, metric: flexibility.financial_stability },
+    { label: d.flexibility.operationalAgility, metric: flexibility.operational_agility },
   ].filter(({ metric }) => metric?.score != null);
 
   return (
     <section id="flexibility" className="reveal">
-      <SectionHeading title="Flexibility" score={flexibility.score} />
+      <SectionHeading title={d.sections.flexibility} score={flexibility.score} />
       {metrics.length > 0 && (
         <div className="reveal-stagger mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {metrics.map(({ label, metric }) => (
@@ -29,8 +31,8 @@ export function FlexibilitySection({ flexibility }: { flexibility: IpoComprehens
         <FactList
           className="rounded-[18px] bg-secondary p-5 sm:p-6"
           facts={[
-            { term: "Product diversification", detail: flexibility.product_diversification },
-            { term: "Future adaptability", detail: flexibility.future_adaptability_potential },
+            { term: d.flexibility.productDiversification, detail: flexibility.product_diversification },
+            { term: d.flexibility.futureAdaptability, detail: flexibility.future_adaptability_potential },
           ]}
         />
       </div>

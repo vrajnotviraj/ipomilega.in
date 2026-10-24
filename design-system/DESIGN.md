@@ -81,8 +81,9 @@ One ink and one accent. Data colours are separate and only mean up, down or caut
 | Display | Schibsted Grotesk (variable) | 700 headings, 900 hero and wordmark | `font-display` |
 | Body | Figtree (variable) | 400, 500, 600 | `font-sans` (default) |
 | Figures | DM Mono | 400, 500 | `font-mono` |
+| Hindi and Gujarati text | Noto Sans Devanagari, Noto Sans Gujarati (variable) | fallbacks in both stacks | after Figtree and Schibsted in `font-sans` and `font-display` |
 
-Load all three with `next/font/google` in `app/layout.tsx`. Preload only Figtree, which is the LCP text; set `preload: false` on the other two. That's four font files in total: two variable, plus DM Mono's two weights.
+Load them with `next/font/google` in `app/[lang]/layout.tsx`. Preload only Figtree, which is the LCP text; set `preload: false` on the rest. English pages fetch four font files: two variable, plus DM Mono's two weights. A Hindi or Gujarati page fetches one more, the Noto face for its script, because the Latin faces have no glyphs for it; the browser only downloads it when that script appears. Headings in those scripts drop the negative tracking and use line-height 1.2 (`:lang()` rule at the end of `globals.css`): the marks above and below the line need the room.
 
 **Scale** (mobile to desktop)
 
@@ -179,7 +180,7 @@ Every design change has to keep these numbers:
 - Homepage Lighthouse (mobile) performance must not drop below master's. Accessibility 100, best practices 100, SEO 100. CLS 0.
 - CSS is inlined into the HTML (`experimental.inlineCss`), so every KB is paid on every page. Keep utilities compact and don't let Tailwind scan docs folders (see the `@source not` lines in `app/globals.css`).
 - Charts (recharts) load through `next/dynamic` and stay out of the first-load bundle. Analytics load on idle.
-- Four font files at most. Only the LCP font is preloaded.
+- Four font files at most on English pages, five on Hindi and Gujarati pages. Only the LCP font is preloaded.
 - Animations are CSS only and move only `transform` and `opacity`. Don't add a JS animation library. Infinite animations (`pulse-ring`, `glint`) stay small and composited.
 
 ## 10. Checklist for any UI change

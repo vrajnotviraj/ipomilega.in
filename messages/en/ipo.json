@@ -1,0 +1,48 @@
+{
+  "logo": {
+    "alt": "{name} logo"
+  },
+  "categories": {
+    "retail": "Retail",
+    "shni": "S-HNI",
+    "bhni": "B-HNI",
+    "shareholder": "Shareholder"
+  },
+  "lifecycle": {
+    "open": { "name": "Open", "next": "Opens {when}", "today": "Opens today", "past": "Opened {date}" },
+    "close": { "name": "Close", "next": "Closes {when}", "today": "Closes today", "past": "Closed {date}" },
+    "allot": { "name": "Allot", "next": "Allotment {when}", "today": "Allotment today", "past": "Allotted {date}" },
+    "demat": { "name": "Demat", "next": "Shares in demat {when}", "today": "Shares in demat today", "past": "Shares credited {date}" },
+    "list": { "name": "List", "next": "Lists {when}", "today": "Lists today", "past": "Listed {date}" },
+    "when": {
+      "today": "today",
+      "tomorrow": "tomorrow",
+      "inDays": "in {days} days",
+      "onDate": "on {date}"
+    },
+    "timeline": "IPO timeline. {caption}",
+    "state": {
+      "done": "done",
+      "today": "today"
+    }
+  },
+  "odds": {
+    "later": "Allotment odds show up once subscription numbers come in.",
+    "showDetails": "allotment odds, show details"
+  },
+  "predictor": {
+    "title": "Allotment predictor",
+    "categoryLabel": "Investor category",
+    "subscription": "Subscription ({category})",
+    "yourOdds": "Your odds",
+    "fullySubscribedNote": "Not fully subscribed yet, so every valid application should get shares.",
+    "oddsSentence": "Roughly 1 out of every {n} applicants gets allotment.",
+    "applicationSize": "Application size",
+    "minimumLot": "Minimum lot",
+    "maximumLot": "Maximum lot",
+    "shares": "{shares} shares",
+    "combinedNiiNote": "This IPO's S-HNI and B-HNI subscription isn't split yet, so this uses the combined NII figure.",
+    "bhniNote": "B-HNI winners get the S-HNI minimum (about ₹2 lakh) by draw of lots, so the odds assume everyone applies at the ₹10 lakh minimum: roughly 5x better than the subscription alone suggests. Applying bigger doesn't raise your chance.",
+    "lotteryNote": "Estimated with the standard lottery approximation: at 40x subscription, about 1 in 40 applicants wins. Applying bigger doesn't raise your chance. The registrar's draw decides, and it may differ."
+  }
+}

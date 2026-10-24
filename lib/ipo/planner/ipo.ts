@@ -45,7 +45,10 @@ export type PlannerIpo = {
   options: BidOption[];
 };
 
-export type SkippedIpo = { id: string; name: string; reason: string };
+export type SkipReason = 'noDates' | 'noGmp' | 'noGain' | 'noLot';
+
+/** `gmpPercent` comes with `noGain`, so the reason can show the figure. */
+export type SkippedIpo = { id: string; name: string; reason: SkipReason; gmpPercent?: number };
 
 /**
  * Final subscription per GMP point for an issue of about `REFERENCE_ISSUE_CR`, from the medians of 77 listed IPOs.
@@ -67,18 +70,18 @@ function sizeFactor(ipo: Ipo): number {
 /** The IPO as the planner sees it, or the reason it can't be planned. */
 export function toPlannerIpo(id: string, ipo: Ipo, slug: string | null, quotaParents: string[] | null = null, today: number | null = null): PlannerIpo | SkippedIpo {
   const name = ipo.upcoming_ipo_2025 || ipo.ipo_name || 'IPO';
-  const skip = (reason: string): SkippedIpo => ({ id, name, reason });
+  const skip = (reason: SkipReason, gmpPercent?: number): SkippedIpo => ({ id, name, reason, gmpPercent });
 
   const closeDay = dayOf(ipo.ipo_dates?.ipo_close_date || ipo.closing_date);
-  if (closeDay === null) return skip('Dates not announced yet');
+  if (closeDay === null) return skip('noDates');
 
   const gmpPercent = parseEstListingPercent(ipo.gmp_price_gain);
-  if (gmpPercent === null) return skip('No GMP yet');
-  if (gmpPercent <= 0) return skip(`GMP is ${gmpPercent}%, no listing gain expected`);
+  if (gmpPercent === null) return skip('noGmp');
+  if (gmpPercent <= 0) return skip('noGain', gmpPercent);
 
   const quota = quotaParents ?? (parseGainValue(ipo.shareholder_sr) !== null ? [] : null);
   const options = bidOptions(ipo, gmpPercent, quota !== null, closeDay === today);
-  if (!options.length) return skip('Lot size not out yet');
+  if (!options.length) return skip('noLot');
 
   return {
     id,

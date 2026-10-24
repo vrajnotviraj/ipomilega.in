@@ -5,6 +5,8 @@ import { cached } from '@/lib/db/cache';
 import { liveFilter, NEWEST_FIRST } from '@/lib/queries/blogs';
 import { toSummary, type PostSummary } from '@/lib/blog/format';
 import { Author, Blog } from '@/types/ipo';
+import { localize, type Locale } from '@/lib/i18n/locales';
+import { getTranslationMap } from '@/lib/queries/translations';
 
 export const AUTHOR_PAGE_SIZE = 12;
 
@@ -22,12 +24,13 @@ export const getAuthors = cache(cached(async (): Promise<Author[]> => {
 }, 'getAuthors'));
 
 /** One page of a writer's live posts as card summaries, newest first, with their total. */
-export const getAuthorPosts = cache(cached(async (slug: string, page: number): Promise<{ posts: PostSummary[]; total: number }> => {
+export const getAuthorPosts = cache(cached(async (slug: string, page: number, lang: Locale): Promise<{ posts: PostSummary[]; total: number }> => {
   const db = await getDb();
   const filter = { author_slug: slug, ...liveFilter() };
-  const [total, blogs] = await Promise.all([
+  const [total, blogs, translations] = await Promise.all([
     db.collection('blogs').countDocuments(filter),
     db.collection('blogs').find(filter).sort(NEWEST_FIRST).skip((page - 1) * AUTHOR_PAGE_SIZE).limit(AUTHOR_PAGE_SIZE).toArray(),
+    getTranslationMap('blog', lang),
   ]);
-  return { posts: (toPlain(blogs) as unknown as Blog[]).map(toSummary), total };
+  return { posts: (toPlain(blogs) as unknown as Blog[]).map((blog) => toSummary(localize(blog, translations[blog._id]))), total };
 }, 'getAuthorPosts'));

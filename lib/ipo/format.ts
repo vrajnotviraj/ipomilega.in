@@ -28,6 +28,10 @@ export const getIpoType = (ipo: {
   return 'N/A';
 };
 
+/** The board in the reader's language: "Mainboard" and "SME" translated, anything else as is. */
+export const boardLabel = <T extends string | null | undefined>(words: { mainboard: string; sme: string }, board: T): string | T =>
+  board === 'Mainboard' ? words.mainboard : board === 'SME' ? words.sme : board;
+
 // Matches a figure the RHP hasn't fixed yet, printed as "[●]".
 const UNFIXED_VALUE_RE = /\[[^\]\d]{0,3}\]|[●•]/;
 
@@ -179,9 +183,9 @@ export const formatIstTimestamp = (raw: string | null | undefined): string | nul
 /** "18 Aug" (or "18 Aug 2026" with the year), or "TBA". */
 export const formatShortDate = (raw: string | undefined, withYear = false): string => formatIpoDate(raw, withYear) ?? 'TBA';
 
-/** "Today", "18 Aug" or "TBA". */
-export const formatShortDateOrToday = (raw: string | undefined): string =>
-  daysFromToday(raw) === 0 ? 'Today' : formatShortDate(raw);
+/** "Today", "18 Aug" or "TBA" in the reader's words. */
+export const formatShortDateOrToday = (raw: string | undefined, words: { today: string; tba: string }): string =>
+  daysFromToday(raw) === 0 ? words.today : formatIpoDate(raw) ?? words.tba;
 
 /**
  * The exchange's allotment checker once the basis of allotment is out (5 PM IST on the day), else null.
@@ -249,18 +253,12 @@ export const signedPercent = (value: number) => `${value >= 0 ? '+' : ''}${value
 /** A rupee amount in Indian grouping: "₹1,49,760". */
 export const formatRupees = (value: number) => `₹${value.toLocaleString('en-IN')}`;
 
-/** GMP with its sign ("+38.23%"), or "N/A" when there is none. */
-export const formatGmp = (percent: number | null) => (percent === null ? 'N/A' : signedPercent(percent));
-
 /** A subscription ratio as "101.86x", or "–" when unknown. */
 export const formatTimes = (ratio: number | null) => (ratio === null ? '–' : `${ratio}x`);
 
-/** "1 in 40". One decimal below 10x so small books don't all read "1 in 1". */
-export const formatAllotmentOdds = (subscriptionRatio: number | null): string => {
-  if (!isValidRatio(subscriptionRatio)) return 'N/A';
-  if (subscriptionRatio <= 1) return '1 in 1';
-  return `1 in ${oddsN(subscriptionRatio)}`;
-};
+/** The N in "1 in 40", or null without a ratio. One decimal below 10x so small books don't all read "1 in 1". */
+export const allotmentOddsN = (subscriptionRatio: number | null): string | null =>
+  !isValidRatio(subscriptionRatio) ? null : subscriptionRatio <= 1 ? '1' : oddsN(subscriptionRatio);
 
 /** "2.5%". More decimals at the low end so big books don't all read "0%". */
 export const formatAllotmentPercent = (subscriptionRatio: number | null): string => {
@@ -270,13 +268,6 @@ export const formatAllotmentPercent = (subscriptionRatio: number | null): string
   if (pct < 0.01) return '<0.01%';
   const decimals = pct >= 10 ? 0 : pct >= 1 ? 1 : 2;
   return `${Number(pct.toFixed(decimals))}%`;
-};
-
-/** One plain sentence explaining the odds, or null without a ratio. */
-export const describeAllotmentOdds = (subscriptionRatio: number | null): string | null => {
-  if (!isValidRatio(subscriptionRatio)) return null;
-  if (subscriptionRatio <= 1) return 'Not fully subscribed yet, so every valid application should get shares.';
-  return `Roughly 1 out of every ${oddsN(subscriptionRatio)} applicants gets allotment.`;
 };
 
 /** Odds colour: 60% and up good, 25% and up mid, else bad. */
@@ -291,25 +282,22 @@ type RatioField = 'rii_sr' | 'snii_sr' | 'bnii_sr' | 'shareholder_sr';
 
 export interface AllotmentCategoryDef {
   key: 'retail' | 'shni' | 'bhni' | 'shareholder';
-  label: string;
   /** Regex fragment matched against ipo_market_lot[].application. */
   matchKeyword: string;
   ratioField: RatioField;
 }
 
 export const ALLOTMENT_CATEGORIES: AllotmentCategoryDef[] = [
-  { key: 'retail', label: 'Retail', matchKeyword: 'retail', ratioField: 'rii_sr' },
-  { key: 'shni', label: 'S-HNI', matchKeyword: 's[- ]?hni', ratioField: 'snii_sr' },
-  { key: 'bhni', label: 'B-HNI', matchKeyword: 'b[- ]?hni', ratioField: 'bnii_sr' },
+  { key: 'retail', matchKeyword: 'retail', ratioField: 'rii_sr' },
+  { key: 'shni', matchKeyword: 's[- ]?hni', ratioField: 'snii_sr' },
+  { key: 'bhni', matchKeyword: 'b[- ]?hni', ratioField: 'bnii_sr' },
   // Shareholders bid in retail-sized applications (up to ₹2L), so they share the retail rows.
-  { key: 'shareholder', label: 'Shareholder', matchKeyword: 'retail', ratioField: 'shareholder_sr' },
+  { key: 'shareholder', matchKeyword: 'retail', ratioField: 'shareholder_sr' },
 ];
 
 /** The categories to show for an IPO: the shareholder one only when the exchange reports a quota. */
 export const allotmentCategoriesOf = (ipo: Pick<Ipo, 'shareholder_sr'> | null | undefined): AllotmentCategoryDef[] =>
   ALLOTMENT_CATEGORIES.filter((cat) => cat.key !== 'shareholder' || parseGainValue(ipo?.shareholder_sr) !== null);
-
-export const COMBINED_NII_NOTE = "This IPO's S-HNI and B-HNI subscription isn't split yet, so this uses the combined NII figure.";
 
 /** The Minimum and Maximum application-size rows for one category. */
 export const getMarketLotRows = (

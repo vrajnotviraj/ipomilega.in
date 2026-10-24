@@ -6,6 +6,8 @@ import { estimatedListing, formatShortDateOrToday, gainMotion, issuePrice, lastL
 import { scoreOf } from '@/lib/ipo/score';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SectionHeading } from '@/components/home/SectionHeading';
+import { t } from '@/lib/i18n/server';
+import { fill } from '@/lib/i18n/locales';
 
 type Ipo = HomePageIpoProps['ipo'];
 
@@ -49,9 +51,12 @@ const ROW_GRID = 'grid grid-cols-3 gap-x-4 gap-y-3 sm:grid-cols-[minmax(0,2fr)_1
 
 /** One recently listed IPO: company, then the GMP estimate, the actual listing and the latest close. */
 function ListedRow({ item }: { item: HomePageIpoProps }) {
+  const { common: c, home } = t();
+  const d = home.past;
   const { ipo } = item;
   const hasAnalysis = scoreOf(item) > 0;
   const issue = issuePrice(ipo);
+  const listingDate = ipo?.ipo_dates?.ipo_listing_date;
 
   return (
     <li className={`${ROW_GRID} px-4 py-4 sm:px-5`}>
@@ -62,44 +67,47 @@ function ListedRow({ item }: { item: HomePageIpoProps }) {
             <IpoTitleLink ipo={ipo} hasAnalysis={hasAnalysis} />
           </h3>
           <div className="text-xs text-muted-foreground">
-            Listed <span className="font-mono tabular-nums">{formatShortDateOrToday(ipo?.ipo_dates?.ipo_listing_date)}</span>
+            {d.listed} <span className="font-mono tabular-nums">{formatShortDateOrToday(listingDate, c)}</span>
             {issue !== null && (
               <>
-                {' · '}Issue <span className="font-mono tabular-nums">₹{formatPrice(issue)}</span>
+                {' · '}{d.issue} <span className="font-mono tabular-nums">₹{formatPrice(issue)}</span>
               </>
             )}
           </div>
         </div>
       </div>
-      <ListingFigure label="Est. listing (GMP)" listing={estimatedListing(ipo)} fallback="N/A" className="sm:text-right" />
-      <ListingFigure label="Actual listing" listing={actualListing(ipo)} fallback="Awaiting" className="sm:text-right" />
-      <ListingFigure label="Last close" listing={lastListing(ipo)} fallback="Awaiting" className="text-right" />
+      <ListingFigure label={d.estListing} listing={estimatedListing(ipo)} fallback={c.na} className="sm:text-right" />
+      <ListingFigure label={d.actualListing} listing={actualListing(ipo)} fallback={d.awaiting} className="sm:text-right" />
+      <ListingFigure label={d.lastClose} listing={lastListing(ipo)} fallback={d.awaiting} className="text-right" />
     </li>
   );
 }
 
 /** Last four listings: the GMP estimate, how each one actually listed, and where it trades now. */
 export function PastIposSection({ ipos }: { ipos: HomePageIpoProps[] }) {
+  const { common: c, home } = t();
+  const d = home.past;
   const visibleIpos = ipos.slice(0, 4);
 
   return (
     <section className="py-8 sm:py-12">
       <SectionHeading
-        title="Recently listed"
-        subtitle="What GMP predicted vs what happened"
+        title={d.title}
+        subtitle={d.subtitle}
         href="/ipos?filter=past"
-        linkLabel={`View all ${ipos.length} listed IPOs`}
+        linkLabel={fill(d.viewAllLabel, { count: ipos.length })}
+        linkText={c.viewAll}
       />
 
       {visibleIpos.length === 0 ? (
-        <EmptyState icon={CalendarDays} title="No recent listings yet" hint="Listed IPOs land here with our call next to how they actually did." />
+        <EmptyState icon={CalendarDays} title={d.emptyTitle} hint={d.emptyHint} />
       ) : (
         <div className="mt-8 rounded-xl border border-border bg-card">
           <div className={`${ROW_GRID} hidden border-b border-border px-5 py-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground sm:grid`}>
-            <span>Company</span>
-            <span className="text-right">Est. listing (GMP)</span>
-            <span className="text-right">Actual listing</span>
-            <span className="text-right">Last close</span>
+            <span>{c.company}</span>
+            <span className="text-right">{d.estListing}</span>
+            <span className="text-right">{d.actualListing}</span>
+            <span className="text-right">{d.lastClose}</span>
           </div>
           <ul className="reveal-stagger divide-y divide-border">
             {visibleIpos.map((item) => (

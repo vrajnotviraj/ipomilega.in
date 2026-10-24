@@ -10,6 +10,7 @@ It's built on Next.js 15 (App Router), TypeScript, MongoDB and Tailwind CSS. The
 - Shows each IPO's score on fundamentals, risk, flexibility, performance and timing.
 - Charts GMP history and financials with Recharts.
 - Serves published blog posts.
+- Serves every page in English, Hindi (`/hi`) and Gujarati (`/gu`). UI words live in `messages/`; the engine translates analyses and posts once into the `translations` collection.
 
 Everything that writes data (scrapers, AI analysis, the admin panel and blog editor) lives in the separate `ipomilega-engine` service. On a fresh database you'll see empty lists until the engine loads some `ipos` documents.
 
@@ -54,7 +55,8 @@ The engine calls `POST /api/revalidate` with `Authorization: Bearer <REVALIDATE_
 app/          Routes: pages, layouts, read-only API handlers, OG images
 components/   UI, grouped by area (home, ipo, blog, charts, layout, ui)
 hooks/        React hooks
-lib/          Server helpers: Mongo, queries, formatting
+lib/          Server helpers: Mongo, queries, formatting, i18n
+messages/     UI words per language (en, hi, gu), one JSON per site area
 types/        Data models
 public/       Static assets
 ```

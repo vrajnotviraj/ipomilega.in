@@ -1,22 +1,22 @@
-import { RULES, STEPS } from "@/components/shareholder-quota/content";
+import { t } from "@/lib/i18n/server";
 
 /** Page title and the answer in one paragraph (which IPOs, which parents), with the rules in numbers beside them. */
 export function Hero({ summary }: { summary: string }) {
+  const d = t().quota.hero;
   return (
     <header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end lg:gap-12">
       <div>
         <h1 className="type-hero text-[44px] text-balance text-foreground sm:text-[60px]">
-          Upcoming <span className="highlight">shareholder quota</span> IPOs
+          {d.before} <span className="highlight">{d.highlight}</span> {d.after}
         </h1>
         <p className="mt-5 max-w-[65ch] text-lg text-pretty text-muted-foreground">
-          {summary} Hold one share of the listed parent before the RHP date to apply in the shareholder category, a second shot at
-          allotment on top of retail.
+          {summary} {d.lede}
         </p>
       </div>
       <section aria-labelledby="rules-title" className="rounded-[18px] border border-border bg-card p-5">
-        <h2 id="rules-title" className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">The rules in numbers</h2>
+        <h2 id="rules-title" className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{d.rulesTitle}</h2>
         <dl className="mt-3 divide-y divide-border">
-          {RULES.map((rule) => (
+          {d.rules.map((rule) => (
             <div key={rule.label} className="flex items-baseline justify-between gap-4 py-3 first:pt-0 last:pb-0">
               <dt className="text-sm text-muted-foreground">{rule.label}</dt>
               <dd className="whitespace-nowrap font-mono text-xl font-medium tabular-nums text-foreground">{rule.value}</dd>
@@ -30,11 +30,12 @@ export function Hero({ summary }: { summary: string }) {
 
 /** The four steps from holding the parent to being allotted. */
 export function HowItWorks() {
+  const d = t().quota.how;
   return (
     <section aria-labelledby="how-title" className="mt-10 rounded-[18px] bg-secondary p-4 sm:p-6">
-      <h2 id="how-title" className="font-display text-xl font-bold tracking-[-0.015em] text-foreground">How it works</h2>
+      <h2 id="how-title" className="font-display text-xl font-bold tracking-[-0.015em] text-foreground">{d.title}</h2>
       <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {STEPS.map((step, index) => (
+        {d.steps.map((step, index) => (
           <li key={step.title} className="flex gap-3 sm:block">
             <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary font-mono text-sm font-medium tabular-nums text-primary-foreground">
               {index + 1}

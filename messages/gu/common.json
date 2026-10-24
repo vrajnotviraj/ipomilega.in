@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "title": "IPO Milega | દરેક ભારતીય IPO, સ્કોર સાથે",
+    "template": "%s | IPO Milega",
+    "description": "લાઇવ IPO, આગામી લિસ્ટિંગ અને જૂના IPOનું પરફોર્મન્સ ટ્રેક કરો, દરેક RHP/DRHP ફાઇલિંગના મેન્યુઅલી રિવ્યૂ થયેલા એનાલિસિસ સાથે."
+  },
+  "tagline": "મળશે? પહેલાં ચેક કરો.",
+  "languages": "ભાષા",
+  "skipToContent": "સીધા કન્ટેન્ટ પર જાઓ",
+  "homeLink": "IPO Milega હોમ",
+  "openMenu": "મેનુ ખોલો",
+  "closeMenu": "મેનુ બંધ કરો",
+  "close": "બંધ કરો",
+  "notifications": "સૂચનાઓ",
+  "breadcrumb": "બ્રેડક્રમ્બ",
+  "nav": {
+    "home": "હોમ",
+    "ipos": "IPO",
+    "planner": "પ્લાનર",
+    "quota": "શેરહોલ્ડર ક્વોટા",
+    "blogs": "બ્લોગ્સ"
+  },
+  "footer": {
+    "read": "વાંચો",
+    "live": "લાઇવ IPO",
+    "upcoming": "આગામી IPO",
+    "closed": "બંધ થયેલા IPO",
+    "listed": "લિસ્ટેડ IPO",
+    "quotaIpos": "શેરહોલ્ડર ક્વોટા IPO",
+    "all": "બધા IPO",
+    "about": "અમારા વિશે",
+    "rights": "IPO Milega. બધા હક્ક સુરક્ષિત."
+  },
+  "disclaimer": "આ પેજનો ડેટા IPO Milega રિસર્ચ ટીમે મેન્યુઅલી રિવ્યૂ કર્યો છે. આ રોકાણની સલાહ નથી, અને કોઈપણ રોકાણના નિર્ણયથી થતા નુકસાનની જવાબદારી IPO Milega લેતું નથી. સિક્યોરિટીઝ માર્કેટમાં રોકાણ બજારના જોખમને આધીન છે. રોકાણ કરતાં પહેલાં પૂરા પ્રોસ્પેક્ટસ સહિત બધા સંબંધિત દસ્તાવેજો ધ્યાનથી વાંચો.",
+  "share": {
+    "button": "શેર કરો",
+    "linkCopied": "લિંક કોપી થઈ",
+    "detailsCopied": "IPO વિગતો કોપી થઈ",
+    "pasteLink": "શેર કરવા કોઈપણ ચેટમાં પેસ્ટ કરો.",
+    "pasteDetails": "શેર કરવા કોઈપણ ચેટમાં પેસ્ટ કરો.",
+    "copyLink": "લિંક કોપી કરો",
+    "copyFailed": "લિંક કોપી થઈ શકી નહીં. એડ્રેસ બારમાંથી કોપી કરો."
+  },
+  "live": "લાઇવ",
+  "score": {
+    "title": "એનાલિસિસ સ્કોર",
+    "none": "હજી એનાલિસિસ નથી",
+    "withQib": "{qib}x QIB સબ્સ્ક્રિપ્શન માટે એનાલિસિસ સ્કોર {score} {delta}",
+    "closingDay": "(બંધ થવાનો દિવસ)"
+  },
+  "loading": "લોડ થઈ રહ્યું છે",
+  "board": {
+    "mainboard": "મેઇનબોર્ડ",
+    "sme": "SME"
+  },
+  "status": {
+    "upcoming": "આગામી",
+    "closed": "બંધ",
+    "listed": "લિસ્ટેડ"
+  },
+  "na": "N/A",
+  "tba": "જાહેર થશે",
+  "priceTba": "ભાવ જાહેર થશે",
+  "sizeTba": "સાઇઝ જાહેર થશે",
+  "datesTba": "તારીખો જાહેર થશે",
+  "today": "આજે",
+  "tomorrow": "આવતીકાલે",
+  "inDays": {
+    "one": "{count} દિવસમાં",
+    "other": "{count} દિવસમાં"
+  },
+  "ipoCount": {
+    "one": "{count} IPO",
+    "other": "{count} IPO"
+  },
+  "oneIn": "{n}માંથી 1",
+  "scoreWord": {
+    "good": "મજબૂત",
+    "mid": "મિશ્ર",
+    "bad": "નબળો"
+  },
+  "viewAll": "બધા જુઓ",
+  "seeAllIpos": "બધા IPO જુઓ",
+  "backToHome": "હોમ પર પાછા જાઓ",
+  "priceBand": "પ્રાઇસ બેન્ડ",
+  "issueSize": "ઇશ્યૂ સાઇઝ",
+  "subscribed": "સબ્સ્ક્રાઇબ્ડ",
+  "company": "કંપની",
+  "checkAllotment": "એલોટમેન્ટ ચેક કરો",
+  "all": "બધા",
+  "or": "અથવા"
+}

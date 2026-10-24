@@ -2,6 +2,7 @@
 import { Bar, BarChart, CartesianGrid, Cell, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { FinancialReport } from "@/types/ipo";
 import { croresOf, periodLabel } from "@/components/analysis/sections/financials/financial-figures";
+import { useT } from "@/lib/i18n/client";
 
 const AXIS_TICK = { fontSize: 12, fill: "var(--muted-foreground)", fontFamily: "var(--font-mono)" };
 
@@ -12,11 +13,12 @@ const profitFill = (value: number) => (value < 0 ? "var(--score-bad)" : "var(--s
 
 /** Revenue, expense and profit after tax per period, as grouped bars. Profit is coloured by its sign. */
 export default function FinancialBars({ reports }: { reports: FinancialReport[] }) {
+  const d = useT().analysis.financials;
   const data = reports.map((report) => ({
     year: periodLabel(report.period_ended || ""),
-    Revenue: croresOf(report.revenue),
-    Expense: croresOf(report.expense),
-    "Profit after tax": croresOf(report.profit_after_tax),
+    revenue: croresOf(report.revenue),
+    expense: croresOf(report.expense),
+    profit: croresOf(report.profit_after_tax),
   }));
 
   return (
@@ -39,11 +41,11 @@ export default function FinancialBars({ reports }: { reports: FinancialReport[] 
             }}
           />
           <Legend wrapperStyle={{ fontSize: 13 }} iconType="circle" iconSize={8} />
-          <Bar dataKey="Revenue" fill="var(--chart-1)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-          <Bar dataKey="Expense" fill="var(--chart-5)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-          <Bar dataKey="Profit after tax" fill="var(--score-good)" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+          <Bar dataKey="revenue" name={d.revenue} fill="var(--chart-1)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+          <Bar dataKey="expense" name={d.expense} fill="var(--chart-5)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+          <Bar dataKey="profit" name={d.profitAfterTax} fill="var(--score-good)" radius={[4, 4, 0, 0]} isAnimationActive={false}>
             {data.map((entry, index) => (
-              <Cell key={index} fill={profitFill(entry["Profit after tax"])} />
+              <Cell key={index} fill={profitFill(entry.profit)} />
             ))}
           </Bar>
         </BarChart>

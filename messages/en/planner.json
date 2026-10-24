@@ -1,0 +1,123 @@
+{
+  "meta": {
+    "title": "IPO planner: where to bid with your money and accounts",
+    "description": "Enter your money and family accounts. The planner picks which open and upcoming IPOs to bid on, in which category, and when your blocked money comes back."
+  },
+  "hero": {
+    "before": "Plan your",
+    "highlight": "IPO bids",
+    "lede": "Tell us your money and how many family accounts can bid. We pick the IPOs, the category and the accounts that give the best expected gain, and line up the dates so money freed from one IPO pays for the next."
+  },
+  "yourPlan": "Your plan",
+  "bidCount": { "one": "{count} bid", "other": "{count} bids" },
+  "accountCount": { "one": "{count} account", "other": "{count} accounts" },
+  "plan": {
+    "nothingTitle": "Nothing to plan right now",
+    "nothingHint": "No open or upcoming IPO has dates, a lot size and a positive GMP yet.",
+    "allOutTitle": "Every IPO is left out",
+    "allOutHint": "Switch on SME IPOs, or untick some IPOs under Advanced.",
+    "tooLittleTitle": "Not enough for one bid",
+    "tooLittleHint": "The cheapest bid right now needs {amount}."
+  },
+  "form": {
+    "label": "Your money and accounts",
+    "funds": "Money you can block",
+    "fundsHint": "Across all accounts. Move it into each account's own bank before its bid; IPOs don't accept a third-party bank account.",
+    "accounts": "Accounts that can bid",
+    "oneFewer": "One account fewer",
+    "oneMore": "One account more",
+    "accountsHint": "Each with its own PAN, demat and bank, such as a spouse or parent. One PAN bids once per IPO.",
+    "planFor": "Plan for",
+    "goals": {
+      "gain": { "label": "Most profit", "hint": "Expected listing gain: your odds times the gain at today's GMP." },
+      "allotments": { "label": "Most allotments", "hint": "The most allotments you can expect, from IPOs with a positive GMP." }
+    },
+    "quotaHint": "How many of your accounts hold the parent company's shares in demat on the record date. Each can bid up to {amount} in the quota, on top of its retail bid.",
+    "parentCompany": "Parent company",
+    "holdersFor": "Accounts holding the parent shares for {name}",
+    "includeSme": "Include SME IPOs",
+    "smeHint": "An SME bid needs 2 lots, over {amount} per account, and SME shares trade thinly after listing.",
+    "advanced": "Advanced: leave IPOs out",
+    "advancedHint": "Ticked IPOs stay out of the plan, like ones you've already bid on or don't want.",
+    "closes": "closes {day}"
+  },
+  "loader": {
+    "title": "Working out your best plan",
+    "hint": "Trying every mix of IPOs, categories and accounts."
+  },
+  "verdict": {
+    "place": "Place {bids} across {ipos} from {accounts}. On average that's about",
+    "inGains": "in listing gains, with a",
+    "allotments": "allotments, with a",
+    "chanceOfAny": "chance at least one bid is allotted.",
+    "atMost": "At most",
+    "blockedAtOnce": "is blocked at once.",
+    "accountsLimit": "Accounts are your limit: {spare} stays free even on the busiest day, so another family account would add bids.",
+    "moneyLimit": "Money is your limit: the IPOs left out below need more on the day their bidding closes.",
+    "possiblePlans": "Possible plans",
+    "checked": "Checked",
+    "most": "Most",
+    "searchTime": "Search time",
+    "units": { "lakh": "lakh", "crore": "crore", "lakhCrore": "lakh crore" },
+    "proven": "Every possible split of your money and accounts was checked. Most were ruled out in bulk the moment they couldn't beat this plan.",
+    "cutShort": "So many IPOs are open that we stopped searching; a slightly better plan may exist."
+  },
+  "bidCard": {
+    "each": "{amount} each",
+    "odds": "Odds",
+    "oddsEstimated": "Odds (est.)",
+    "bidBy": "Bid by",
+    "threePm": "3 PM",
+    "moneyBack": "Money back",
+    "account": "Account {n}",
+    "accounts": "Accounts {from}–{to}",
+    "bhniNote": "If you win the draw you get about {allotted} of shares, the S-HNI minimum, while {cost} stays blocked until the refund.",
+    "quotaNote": "Quota for {parents} shareholders, in addition to the retail bid. Hold the shares in demat on the record date.",
+    "theParentCompany": "the parent company",
+    "atRisk": "This uses money an earlier bid frees. If that bid is allotted, the money stays in shares until listing, so skip this one or add money."
+  },
+  "gain": {
+    "title": "Where the {amount} comes from",
+    "lede": "Each bid's listing gain at today's GMP, times its chance of allotment. Most lottery bids miss, so the average sits well below the gain if every bid lands.",
+    "row": "{gain} if allotted × {chance} chance",
+    "average": "Average you can expect",
+    "ifAll": "If every bid is allotted"
+  },
+  "days": {
+    "title": "Day by day",
+    "freeAfter": "free after",
+    "backFrom": "back from {name}, unless allotted"
+  },
+  "timeline": {
+    "title": "When your money is blocked",
+    "blocked": "blocked until it comes back",
+    "longer": "longer if allotted",
+    "weekend": "weekend",
+    "blockedRange": "Blocked {from} to {to}, or to {cash} if allotted."
+  },
+  "leftOut": {
+    "title": "Left out",
+    "reasons": {
+      "elsewhere": "Your money and accounts do more elsewhere",
+      "excluded": "You left this out",
+      "sme": "SME: switch on SME IPOs to include",
+      "noDates": "Dates not announced yet",
+      "noGmp": "No GMP yet",
+      "noGain": "GMP is {gmp}%, no listing gain expected",
+      "noLot": "Lot size not out yet"
+    }
+  },
+  "how": {
+    "summary": "How the plan is worked out",
+    "rules": [
+      "Every bid goes in on the last day, so your money stays free as long as it can. Brokers stop taking bids around 3 PM.",
+      "Retail, S-HNI and shareholder-quota winners are drawn by lottery, one minimum application each, so each account bids the minimum. Your odds are about 1 in the subscription.",
+      "B-HNI bids start at about ₹10 lakh, but a lottery winner gets only the S-HNI minimum, about ₹2 lakh of shares, so the gain is counted on that. Odds are 1 in the subscription times that fifth. Under about 5x, everyone is allotted, pro rata.",
+      "An account bids in one of retail, S-HNI or B-HNI per IPO. The shareholder quota is extra: tell us how many accounts hold the parent's shares on the record date, and each can bid up to ₹2 lakh there as well.",
+      "On the last day the live subscription is used. Before that it is estimated from the GMP, or the live figure if that's higher. In past IPOs of about ₹300 crore, retail ended near 1.2x the GMP % and S-HNI near 4x; bigger issues draw less, smaller ones more. B-HNI (6x) and the quota (1.2x) are our guesses.",
+      "Money comes back on the refund date (about T+2) and pays for later IPOs. An allotted bid's money comes back the day after listing, once you sell.",
+      "Weekends are skipped, exchange holidays aren't."
+    ],
+    "disclaimer": "GMP is unofficial and changes daily. This plan is an estimate and not investment advice. Investments in the securities market are subject to market risks; read the offer document before investing."
+  }
+}

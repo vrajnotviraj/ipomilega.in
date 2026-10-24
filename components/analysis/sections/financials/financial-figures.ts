@@ -1,4 +1,5 @@
 import type { FinancialReport } from "@/types/ipo";
+import type { Dictionary } from "@/messages";
 import { DAY_MS, formatIpoDate, parseGainValue, parseIpoDate } from "@/lib/ipo/format";
 
 export interface FinancialHighlight {
@@ -82,7 +83,8 @@ const marginOf = (report: FinancialReport) => {
 };
 
 /** Revenue, profit, net margin and assets for the latest year, each with its change on the year before. */
-export function getFinancialHighlights(reports: FinancialReport[], dated: boolean) {
+export function getFinancialHighlights(reports: FinancialReport[], dated: boolean, d: Dictionary) {
+  const words = d.analysis.financials;
   const { current, previous } = latestYearPair(reports, dated);
   const previousOf = (field: "revenue" | "profit_after_tax" | "assets") => (previous ? croresOf(previous[field]) : null);
 
@@ -93,25 +95,25 @@ export function getFinancialHighlights(reports: FinancialReport[], dated: boolea
 
   const highlights: FinancialHighlight[] = [
     {
-      label: "Revenue",
+      label: words.revenue,
       value: formatCrores(croresOf(current.revenue)),
       change: percentChange(croresOf(current.revenue), previousOf("revenue")),
       isLoss: false,
     },
     {
-      label: "Profit after tax",
+      label: words.profitAfterTax,
       value: formatCrores(profit),
       change: percentChange(profit, previousOf("profit_after_tax")),
       isLoss: profit < 0,
     },
     {
-      label: "Net margin",
-      value: margin === null ? "N/A" : `${margin.toFixed(1)}%`,
-      change: marginChange === null ? null : { text: signed(marginChange, " pts"), value: marginChange },
+      label: words.netMargin,
+      value: margin === null ? d.common.na : `${margin.toFixed(1)}%`,
+      change: marginChange === null ? null : { text: signed(marginChange, ` ${words.pts}`), value: marginChange },
       isLoss: margin !== null && margin < 0,
     },
     {
-      label: "Assets",
+      label: words.assets,
       value: formatCrores(croresOf(current.assets)),
       change: percentChange(croresOf(current.assets), previousOf("assets")),
       isLoss: false,

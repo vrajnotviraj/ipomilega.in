@@ -1,18 +1,20 @@
 import { CalendarClock } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { QuotaCard } from "@/components/shareholder-quota/QuotaCard";
+import { t } from "@/lib/i18n/server";
 import type { QuotaIpo } from "@/lib/queries/shareholder-quota";
 
 type Props = { id: string; title: string; hint: string; empty: string; ipos: QuotaIpo[]; highlighted: boolean };
 
 /** A titled grid of quota cards, or an empty state. */
 export function QuotaSection({ id, title, hint, empty, ipos, highlighted }: Props) {
+  const d = t().quota.sections;
   return (
     <section aria-labelledby={`${id}-title`} className="mt-12">
       <h2 id={`${id}-title`} className="type-h2 text-balance">{title}</h2>
       <p className="mt-2 max-w-[65ch] text-muted-foreground">{hint}</p>
       {ipos.length === 0 ? (
-        <EmptyState icon={CalendarClock} title="Nothing here yet" hint={empty} />
+        <EmptyState icon={CalendarClock} title={d.nothingYet} hint={empty} />
       ) : (
         <ul className="reveal-stagger mt-6 grid gap-x-4 sm:grid-cols-2 lg:grid-cols-3">
           {ipos.map((ipo) => (

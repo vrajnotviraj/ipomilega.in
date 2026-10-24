@@ -1,6 +1,4 @@
-import type { Category } from "@/lib/ipo/planner/ipo";
-
-export const CATEGORY_LABEL: Record<Category, string> = { retail: "Retail", shni: "S-HNI", bhni: "B-HNI", shareholder: "Shareholder" };
+import { fill } from "@/lib/i18n/locales";
 
 /** "26%", "<1%" or "100%". */
 export function percent(chance: number): string {
@@ -9,21 +7,21 @@ export function percent(chance: number): string {
   return `${Math.round(chance * 100)}%`;
 }
 
-/** "1 in 38". */
-export const oneIn = (odds: number) => `1 in ${Math.max(1, Math.round(1 / odds)).toLocaleString("en-IN")}`;
+/** "1 in 38", from the "1 in {n}" template. */
+export const oneIn = (odds: number, template: string) => fill(template, { n: Math.max(1, Math.round(1 / odds)).toLocaleString("en-IN") });
 
 /** "38,512", "4.2 lakh", "1,300 crore" or "4 lakh crore": Indian words once the digits get long. */
-export function countInWords(count: number): string {
+export function countInWords(count: number, units: { lakh: string; crore: string; lakhCrore: string }): string {
   const grouped = (n: number) => n.toLocaleString("en-IN", { maximumFractionDigits: n < 10 ? 1 : 0 });
-  if (count >= 1e12) return `${grouped(count / 1e12)} lakh crore`;
-  if (count >= 1e7) return `${grouped(count / 1e7)} crore`;
-  if (count >= 1e5) return `${grouped(count / 1e5)} lakh`;
+  if (count >= 1e12) return `${grouped(count / 1e12)} ${units.lakhCrore}`;
+  if (count >= 1e7) return `${grouped(count / 1e7)} ${units.crore}`;
+  if (count >= 1e5) return `${grouped(count / 1e5)} ${units.lakh}`;
   return grouped(Math.round(count));
 }
 
-/** "Account 2" or "Accounts 1–3". */
-export const accountRange = (accounts: number[]) =>
-  accounts.length === 1 ? `Account ${accounts[0]}` : `Accounts ${accounts[0]}–${accounts[accounts.length - 1]}`;
+/** "Account 2" or "Accounts 1–3", from the "Account {n}" and "Accounts {from}–{to}" templates. */
+export const accountRange = (accounts: number[], words: { account: string; accounts: string }) =>
+  accounts.length === 1 ? fill(words.account, { n: accounts[0] }) : fill(words.accounts, { from: accounts[0], to: accounts[accounts.length - 1] });
 
 export function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h3 className="font-display text-xl font-bold tracking-[-0.015em] text-foreground">{children}</h3>;

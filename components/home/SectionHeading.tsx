@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { ProgressLink } from '@/components/progress/ProgressLink';
 import { ArrowRight } from 'lucide-react';
 
 /** Home section title on the left, with an optional badge and subtitle, and an optional "View all" link on the right. */
@@ -8,7 +8,7 @@ export function SectionHeading({
   subtitle,
   href,
   linkLabel,
-  linkText = 'View all',
+  linkText,
 }: {
   title: string;
   badge?: React.ReactNode;
@@ -28,14 +28,14 @@ export function SectionHeading({
         {subtitle && <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       {href && (
-        <Link
+        <ProgressLink
           href={href}
           aria-label={linkLabel}
           className="group inline-flex shrink-0 items-center gap-1 pb-1 text-sm font-medium text-primary press sm:text-base"
         >
           {linkText}
           <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
-        </Link>
+        </ProgressLink>
       )}
     </div>
   );

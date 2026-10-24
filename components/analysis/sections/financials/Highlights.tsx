@@ -2,21 +2,23 @@ import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysi
 import { gainColor, gainMotion } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "@/components/analysis/primitives";
+import { t } from "@/lib/i18n/server";
 import type { FinancialHighlight } from "@/components/analysis/sections/financials/financial-figures";
 
 type Fundamentals = IpoComprehensiveAnalysis["fundamentals"];
 
 /** The latest year's figures as large mono tiles, each with its signed change on the year before. */
 export function Highlights({ highlights, period, previousPeriod }: { highlights: FinancialHighlight[]; period: string; previousPeriod: string | null }) {
+  const d = t().analysis.financials;
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
         <Eyebrow>
-          Period ended <span className="font-mono tabular-nums">{period}</span>
+          {d.periodEnded} <span className="font-mono tabular-nums">{period}</span>
         </Eyebrow>
         {previousPeriod && (
           <span className="text-xs text-muted-foreground">
-            Change against <span className="font-mono tabular-nums">{previousPeriod}</span>
+            {d.changeAgainst} <span className="font-mono tabular-nums">{previousPeriod}</span>
           </span>
         )}
       </div>
@@ -37,7 +39,7 @@ function HighlightTile({ highlight: { label, value, change, isLoss } }: { highli
       </dt>
       <dd className={cn("mt-1.5 break-words font-mono text-lg font-medium tabular-nums sm:text-3xl", isLoss && "text-score-bad")}>{value}</dd>
       <dd className={cn("mt-1 font-mono text-sm tabular-nums", change ? cn(gainColor(change.value), gainMotion(change.value)) : "text-muted-foreground")}>
-        {change ? change.text : "No prior year"}
+        {change ? change.text : t().analysis.financials.noPriorYear}
       </dd>
     </div>
   );
@@ -56,15 +58,16 @@ function ratioText(value: string | number | null | undefined, unit = ""): string
  * and a valuation ratio the analysis already gives is not repeated.
  */
 export function RatioList({ fundamentals, valuation }: { fundamentals: Fundamentals; valuation?: Record<string, string> }) {
+  const d = t().analysis.financials;
   const ratios = [
-    { label: "Return on equity", value: ratioText(fundamentals.financial_ratios?.return_on_equity) ?? ratioText(valuation?.roe) },
-    { label: "Debt to equity", value: ratioText(fundamentals.assets_and_liabilities?.debt_to_equity_ratio) ?? ratioText(valuation?.debt_to_equity_ratio) },
-    { label: "Current ratio", value: ratioText(fundamentals.financial_ratios?.current_ratio) },
-    { label: "Revenue CAGR", value: ratioText(fundamentals.revenue_details?.revenue_cagr || null, "%") },
+    { label: d.returnOnEquity, value: ratioText(fundamentals.financial_ratios?.return_on_equity) ?? ratioText(valuation?.roe) },
+    { label: d.debtToEquity, value: ratioText(fundamentals.assets_and_liabilities?.debt_to_equity_ratio) ?? ratioText(valuation?.debt_to_equity_ratio) },
+    { label: d.currentRatio, value: ratioText(fundamentals.financial_ratios?.current_ratio) },
+    { label: d.revenueCagr, value: ratioText(fundamentals.revenue_details?.revenue_cagr || null, "%") },
     { label: "ROCE", value: ratioText(valuation?.roce) },
-    { label: "Return on net worth", value: ratioText(valuation?.return_on_net_worth_ronw) },
-    { label: "NAV per share (₹)", value: ratioText(valuation?.net_asset_value_nav) },
-    { label: "Price to book", value: ratioText(valuation?.price_to_book_value) },
+    { label: d.returnOnNetWorth, value: ratioText(valuation?.return_on_net_worth_ronw) },
+    { label: d.navPerShare, value: ratioText(valuation?.net_asset_value_nav) },
+    { label: d.priceToBook, value: ratioText(valuation?.price_to_book_value) },
   ].filter((ratio) => ratio.value);
   if (ratios.length === 0) return null;
 

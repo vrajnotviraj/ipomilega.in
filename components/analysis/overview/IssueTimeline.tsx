@@ -2,6 +2,9 @@
 import { useEffect, useState } from "react";
 import { dayNumberInIndia, daysFromToday, formatShortDate, parseIpoDate } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
+import type { Dictionary } from "@/messages";
+import { useT } from "@/lib/i18n/client";
+import { fill } from "@/lib/i18n/locales";
 
 type Align = "left" | "center" | "right";
 
@@ -39,13 +42,13 @@ function progressAt(todayRaw: number | null, truePositions: number[], railPositi
 }
 
 /** "Closes in 3 days", "Lists tomorrow": the next issue date from today, or null once listed. */
-function countdownLabel(steps: { verb: string; date: string }[]): string | null {
+function countdownLabel(steps: { verb: string; date: string }[], words: Dictionary["analysis"]["timeline"]): string | null {
   for (const { verb, date } of steps) {
     const days = daysFromToday(date);
     if (days === null || days < 0) continue;
-    if (days === 0) return `${verb} today`;
-    if (days === 1) return `${verb} tomorrow`;
-    return `${verb} in ${days} days`;
+    if (days === 0) return fill(words.today, { verb });
+    if (days === 1) return fill(words.tomorrow, { verb });
+    return fill(words.inDays, { verb, count: days });
   }
   return null;
 }
@@ -77,21 +80,22 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
   // Read after mount: the page is ISR-cached, so a server-side date would be stale and break hydration.
   const [today, setToday] = useState<Date | null>(null);
   useEffect(() => setToday(new Date()), []);
+  const words = useT().analysis.timeline;
 
   const openDate = parseIpoDate(opening);
   const listDate = parseIpoDate(listing);
   if (!openDate || !listDate || dayNumberInIndia(listDate) <= dayNumberInIndia(openDate)) {
-    return <p className="py-6 text-center text-sm text-muted-foreground">Timeline will be available once opening and listing dates are confirmed.</p>;
+    return <p className="py-6 text-center text-sm text-muted-foreground">{words.unavailable}</p>;
   }
 
   const { percentThrough, truePositions, railPositions } = railLayout(closing, allotment, openDate, listDate);
   const todayDay = today ? dayNumberInIndia(today) : null;
   const stations: Station[] = (
     [
-      { label: "Open", date: opening, align: "left" },
-      { label: "Close", date: closing, align: "center" },
-      { label: "Allotment", date: allotment, align: "center" },
-      { label: "Listing", date: listing, align: "right" },
+      { label: words.open, date: opening, align: "left" },
+      { label: words.close, date: closing, align: "center" },
+      { label: words.allotment, date: allotment, align: "center" },
+      { label: words.listing, date: listing, align: "right" },
     ] as const
   ).map((station, index) => {
     const date = parseIpoDate(station.date);
@@ -105,11 +109,14 @@ export function IssueTimeline({ opening, closing, allotment, listing }: Record<"
   // The chip shows only between stations: a station's own day marks that station, and after listing nothing is left.
   const showTodayChip = !!today && !stations.some((station) => station.isToday) && !stations[3].reached;
   const countdown = today
-    ? countdownLabel([
-        { verb: "Opens", date: opening },
-        { verb: "Closes", date: closing },
-        { verb: "Lists", date: listing },
-      ])
+    ? countdownLabel(
+        [
+          { verb: words.opens, date: opening },
+          { verb: words.closes, date: closing },
+          { verb: words.lists, date: listing },
+        ],
+        words
+      )
     : null;
   // Today's row sits after the last station reached.
   const todayIndex = today ? stations.filter((station) => station.reached).length : stations.length;
@@ -200,10 +207,11 @@ function chipOffset(progress: number) {
 /** A station's date; on the station's own day it becomes the marigold today chip. */
 function StationDate({ date, today }: { date: string; today: boolean }) {
   const formatted = formatShortDate(date, true);
+  const todayWord = useT().common.today;
   if (!today) return <span className="whitespace-nowrap font-mono text-sm font-medium tabular-nums">{formatted}</span>;
   return (
     <span className="-mx-2 whitespace-nowrap rounded-full bg-brand-accent px-2 py-0.5 font-mono text-sm font-medium tabular-nums text-primary">
-      <span className="sr-only">Today, </span>
+      <span className="sr-only">{todayWord}, </span>
       {formatted}
     </span>
   );
@@ -222,7 +230,7 @@ function StationDot({ reached, today = false, className, style }: { reached: boo
 function TodayChip({ label }: { label: string }) {
   return (
     <span className="whitespace-nowrap rounded-full bg-brand-accent px-2.5 py-0.5 text-xs font-medium text-primary">
-      Today <span className="font-mono tabular-nums">{label}</span>
+      {useT().common.today} <span className="font-mono tabular-nums">{label}</span>
     </span>
   );
 }

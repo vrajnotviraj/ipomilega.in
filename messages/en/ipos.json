@@ -1,0 +1,99 @@
+{
+  "meta": {
+    "title": "All IPOs: live, upcoming and listed",
+    "pagedTitle": "{title}, page {page}",
+    "description": "Browse every mainboard and SME IPO: price bands, issue sizes, key dates and analysis scores. Filter by status and type."
+  },
+  "page": {
+    "heading": "All IPOs",
+    "of": "of",
+    "ipos": "IPOs",
+    "noneFound": "No IPOs found",
+    "tryAnother": "Try a different search or filter."
+  },
+  "status": {
+    "open": "Open"
+  },
+  "tiles": {
+    "group": "IPO status",
+    "boards": "{mainboard} mainboard, {sme} SME",
+    "noneNow": "None right now",
+    "closeDatesTba": "Close dates to be announced",
+    "closingSoonest": "Closing soonest {when}",
+    "nextOpens": "Next opens {when}",
+    "allotmentsToday": {
+      "one": "{count} allotment today",
+      "other": "{count} allotments today"
+    },
+    "nextAllotment": "Next allotment {when}",
+    "nextLists": "Next lists {when}",
+    "listingDatesTba": "Listing dates to be announced",
+    "listedAbove": "{up} of {total} listed above issue price",
+    "latestListed": "Latest listed {date}",
+    "listingDatesUnknown": "Listing dates unknown"
+  },
+  "filters": {
+    "search": "Search company name",
+    "board": "Board",
+    "bothBoards": "Both",
+    "sort": "Sort IPOs",
+    "sortOption": "{column}, {direction}",
+    "sortBy": {
+      "stage": "Stage",
+      "opening": "Open date",
+      "closing": "Close date",
+      "listing": "Listing date",
+      "name": "Name",
+      "size": "Issue size",
+      "subscribed": "Subscribed",
+      "gmp": "GMP",
+      "score": "Score",
+      "listingGain": "Listing day gain",
+      "heldGain": "Held till today"
+    },
+    "direction": {
+      "text": { "asc": "A to Z", "desc": "Z to A" },
+      "number": { "asc": "low to high", "desc": "high to low" },
+      "date": { "asc": "earliest first", "desc": "latest first" }
+    },
+    "quickFilters": "Quick filters",
+    "quick": {
+      "gmpUp": "GMP above 0",
+      "oversubscribed": "Oversubscribed",
+      "strongScore": "Strong score",
+      "allotmentDue": "Allotment not yet done",
+      "listsThisWeek": "Lists this week",
+      "heldUp": "Above issue price",
+      "heldDown": "Below issue price",
+      "held25": "Up 25%+ till today",
+      "held50": "Up 50%+ till today",
+      "listing25": "Up 25%+ on listing day"
+    }
+  },
+  "table": {
+    "listedOn": "Listed on",
+    "listingDay": "Listing day",
+    "heldTillToday": "Held till today",
+    "timeline": "Timeline",
+    "timelineGains": "Timeline / gains",
+    "gmpBeforeListing": "GMP before listing",
+    "sortByColumn": "Sort by {column}"
+  },
+  "pager": {
+    "label": "Pagination",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "openNow": {
+    "title": "Open now",
+    "moreBelow": "more in the table below",
+    "closes": "Closes",
+    "days": {
+      "one": "{count} day",
+      "other": "{count} days"
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "title": "IPO Milega | Every Indian IPO, scored",
+    "template": "%s | IPO Milega",
+    "description": "Track live IPOs, upcoming listings and past performance with a manually reviewed analysis of every RHP/DRHP filing."
+  },
+  "tagline": "Milega? Check first.",
+  "languages": "Language",
+  "skipToContent": "Skip to content",
+  "homeLink": "IPO Milega home",
+  "openMenu": "Open menu",
+  "closeMenu": "Close menu",
+  "close": "Close",
+  "notifications": "Notifications",
+  "breadcrumb": "Breadcrumb",
+  "nav": {
+    "home": "Home",
+    "ipos": "IPOs",
+    "planner": "Planner",
+    "quota": "Shareholder quota",
+    "blogs": "Blogs"
+  },
+  "footer": {
+    "read": "Read",
+    "live": "Live IPOs",
+    "upcoming": "Upcoming IPOs",
+    "closed": "Closed IPOs",
+    "listed": "Listed IPOs",
+    "quotaIpos": "Shareholder quota IPOs",
+    "all": "All IPOs",
+    "about": "About",
+    "rights": "IPO Milega. All rights reserved."
+  },
+  "disclaimer": "The data on this page has been reviewed manually by the IPO Milega research team. It is not investment advice, and IPO Milega accepts no responsibility for losses arising from any investment decision. Investments in the securities market are subject to market risks. Read all the related documents, including the full prospectus, carefully before investing.",
+  "share": {
+    "button": "Share",
+    "linkCopied": "Link copied",
+    "detailsCopied": "IPO details copied",
+    "pasteLink": "Paste it into any chat to share.",
+    "pasteDetails": "Paste them into any chat to share.",
+    "copyLink": "Copy link",
+    "copyFailed": "Couldn't copy the link. Copy it from the address bar instead."
+  },
+  "live": "Live",
+  "score": {
+    "title": "Analysis score",
+    "none": "No analysis yet",
+    "withQib": "Analysis score {score} {delta} for {qib}x QIB subscription",
+    "closingDay": "(closing day)"
+  },
+  "loading": "Loading",
+  "board": {
+    "mainboard": "Mainboard",
+    "sme": "SME"
+  },
+  "status": {
+    "upcoming": "Upcoming",
+    "closed": "Closed",
+    "listed": "Listed"
+  },
+  "na": "N/A",
+  "tba": "TBA",
+  "priceTba": "Price TBA",
+  "sizeTba": "Size TBA",
+  "datesTba": "Dates to be announced",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "inDays": {
+    "one": "in {count} day",
+    "other": "in {count} days"
+  },
+  "ipoCount": {
+    "one": "{count} IPO",
+    "other": "{count} IPOs"
+  },
+  "oneIn": "1 in {n}",
+  "scoreWord": {
+    "good": "Strong",
+    "mid": "Mixed",
+    "bad": "Weak"
+  },
+  "viewAll": "View all",
+  "seeAllIpos": "See all IPOs",
+  "backToHome": "Back to home",
+  "priceBand": "Price band",
+  "issueSize": "Issue size",
+  "subscribed": "Subscribed",
+  "company": "Company",
+  "checkAllotment": "Check allotment",
+  "all": "All",
+  "or": "or"
+}

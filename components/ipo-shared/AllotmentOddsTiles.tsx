@@ -6,13 +6,15 @@ import type { Ipo } from "@/types/ipo";
 import { AllotmentPredictorModal } from "@/components/ipo-shared/AllotmentPredictorModal";
 import {
   allotmentCategoriesOf,
-  formatAllotmentOdds,
+  allotmentOddsN,
   formatAllotmentPercent,
   getAllotmentProbability,
   getAllotmentRatio,
   getProbabilityColor,
   type AllotmentCategoryDef,
 } from "@/lib/ipo/format";
+import { useT } from "@/lib/i18n/client";
+import { fill } from "@/lib/i18n/locales";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_ICONS: Record<AllotmentCategoryDef["key"], typeof User> = { retail: User, shni: Users, bhni: Landmark, shareholder: UserCheck };
@@ -55,26 +57,29 @@ export function AllotmentOddsTiles({
 }) {
   const [openCategory, setOpenCategory] = useState<AllotmentCategoryDef["key"] | null>(null);
   const style = VARIANTS[variant];
+  const d = useT();
+  const c = d.common;
 
   const categories = allotmentCategoriesOf(ipo).map((category) => {
     const { lottery } = getAllotmentRatio(ipo, category);
+    const n = allotmentOddsN(lottery);
     return {
       ...category,
       Icon: CATEGORY_ICONS[category.key],
-      odds: format === "percent" ? formatAllotmentPercent(lottery) : formatAllotmentOdds(lottery),
+      odds: n === null ? null : format === "percent" ? formatAllotmentPercent(lottery) : fill(c.oneIn, { n }),
       oddsColor: getProbabilityColor(getAllotmentProbability(lottery)),
     };
   });
 
-  if (categories.every((category) => category.odds === "N/A")) {
-    return <p className="text-xs text-muted-foreground">Allotment odds show up once subscription numbers come in.</p>;
+  if (categories.every((category) => category.odds === null)) {
+    return <p className="text-xs text-muted-foreground">{d.ipo.odds.later}</p>;
   }
 
   return (
     <div data-tour="odds">
       <div className={style.heading}>{heading}</div>
       <div className={cn("grid", categories.length === 4 ? "grid-cols-4" : "grid-cols-3", style.grid)}>
-        {categories.map(({ key, label, Icon, odds, oddsColor }) => (
+        {categories.map(({ key, Icon, odds, oddsColor }) => (
           <button
             key={key}
             type="button"
@@ -86,9 +91,9 @@ export function AllotmentOddsTiles({
               strokeWidth={2}
             />
             <Icon className="size-3.5 text-muted-foreground" strokeWidth={2} />
-            <span className={cn("whitespace-nowrap font-mono font-medium tabular-nums", style.odds, oddsColor)}>{odds}</span>
-            <span className="text-xs font-medium uppercase leading-tight tracking-[0.04em] text-muted-foreground">{label}</span>
-            <span className="sr-only">allotment odds, show details</span>
+            <span className={cn("whitespace-nowrap font-mono font-medium tabular-nums", style.odds, oddsColor)}>{odds ?? c.na}</span>
+            <span className="text-xs font-medium uppercase leading-tight tracking-[0.04em] text-muted-foreground">{d.ipo.categories[key]}</span>
+            <span className="sr-only">{d.ipo.odds.showDetails}</span>
           </button>
         ))}
       </div>

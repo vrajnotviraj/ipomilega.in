@@ -1,6 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import { getRiskTextColor } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n/server";
 import { nonBlank } from "@/components/analysis/analysis-facts";
 import { DotScale, Eyebrow, FactList, Prose, ScoreFigure, SectionHeading } from "@/components/analysis/primitives";
 
@@ -10,17 +11,18 @@ type Performance = IpoComprehensiveAnalysis["performance"];
 export function PerformanceSection({ performance }: { performance: Performance }) {
   const growth = performance.historical_growth;
   const achievements = nonBlank(performance.key_achievements);
+  const d = t().analysis;
 
   const facts = [
-    { term: "Historical growth", detail: growth?.pattern && [growth.pattern, growth.rate].filter(Boolean).join(", ") },
-    { term: "Market comparison", detail: performance.market_comparison },
-    { term: "Future potential", detail: performance.future_potential?.growth_forecast },
-    { term: "Operational consistency", detail: performance.consistency_analysis?.rationale },
+    { term: d.performance.historicalGrowth, detail: growth?.pattern && [growth.pattern, growth.rate].filter(Boolean).join(", ") },
+    { term: d.performance.marketComparison, detail: performance.market_comparison },
+    { term: d.performance.futurePotential, detail: performance.future_potential?.growth_forecast },
+    { term: d.performance.operationalConsistency, detail: performance.consistency_analysis?.rationale },
   ];
 
   return (
     <section id="performance" className="reveal">
-      <SectionHeading title="Performance" score={performance.score} />
+      <SectionHeading title={d.sections.performance} score={performance.score} />
       <SummaryAndManagement summary={performance.summary} management={performance.management_quality}>
         <FactList columns facts={facts} className="rounded-[18px] bg-secondary px-5 py-2 sm:px-6 [&>div]:border-t-0" />
       </SummaryAndManagement>
@@ -58,9 +60,10 @@ function SummaryAndManagement({
 /** Management score as a large figure with its dot scale, then experience and track record. */
 function ManagementPanel({ management }: { management: Performance["management_quality"] }) {
   const score = management.score || 0;
+  const d = t().analysis.performance;
   return (
     <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
-      <Eyebrow>Management quality</Eyebrow>
+      <Eyebrow>{d.managementQuality}</Eyebrow>
       <div className={cn("mt-2 flex items-center gap-4", getRiskTextColor(score))}>
         <ScoreFigure score={score} />
         <DotScale score={score} />
@@ -68,8 +71,8 @@ function ManagementPanel({ management }: { management: Performance["management_q
       <FactList
         className="mt-5 border-t border-border pt-4"
         facts={[
-          { term: "Experience", detail: management.experience },
-          { term: "Track record", detail: management.track_record },
+          { term: d.experience, detail: management.experience },
+          { term: d.trackRecord, detail: management.track_record },
         ]}
       />
     </div>
@@ -80,7 +83,7 @@ function ManagementPanel({ management }: { management: Performance["management_q
 function Achievements({ items }: { items: string[] }) {
   return (
     <div className="mt-10">
-      <h3 className="mb-4 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">Key achievements</h3>
+      <h3 className="mb-4 font-display text-lg font-bold tracking-[-0.015em] sm:text-xl">{t().analysis.performance.keyAchievements}</h3>
       <ol className="reveal-stagger grid grid-cols-1 gap-x-8 md:grid-cols-2">
         {items.map((achievement, index) => (
           <li key={index} className="flex items-start gap-3 border-t border-border py-3 text-sm text-pretty">

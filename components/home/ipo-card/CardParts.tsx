@@ -1,9 +1,12 @@
+'use client';
+
 import { Ipo } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { IpoLogo } from '@/components/ipo-shared/IpoLogo';
 import { IpoTitleLink } from '@/components/ipo-shared/IpoTitleLink';
 import { Score } from '@/components/ui/Score';
 import { applyQibAdjustment, describeQibAdjustment, getQibSignal, scoreOf } from '@/lib/ipo/score';
+import { useT } from '@/lib/i18n/client';
 import { cn } from '@/lib/utils';
 
 export interface IpoCardProps {
@@ -35,6 +38,7 @@ export function Stat({
 
 /** Top row of a home IPO card: logo, company name, and the QIB-adjusted analysis score unless `aside` replaces it. */
 export function CardHeader({ ipo, analysis, aside }: IpoCardProps & { aside?: React.ReactNode }) {
+  const words = useT().common.score;
   const baseScore = scoreOf({ analysis });
   const qibSignal = getQibSignal(ipo);
   const score = applyQibAdjustment(baseScore, qibSignal);
@@ -45,7 +49,7 @@ export function CardHeader({ ipo, analysis, aside }: IpoCardProps & { aside?: Re
       <h4 data-tour="ipo-name" className="min-w-0 flex-1 font-display text-lg font-bold leading-tight tracking-[-0.015em] text-foreground sm:text-xl">
         <IpoTitleLink ipo={ipo} hasAnalysis={score > 0} />
       </h4>
-      {aside ?? <Score value={score} title={describeQibAdjustment(baseScore, qibSignal)} />}
+      {aside ?? <Score value={score} title={describeQibAdjustment(baseScore, qibSignal, words) ?? words.title} />}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Building2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import { QuotaTeaser } from "@/components/shareholder-quota/QuotaTeaser";
+import { useT } from "@/lib/i18n/client";
 import { FilterUrlSync } from "@/components/ipos/filters/FilterUrlSync";
 import { IpoFilters } from "@/components/ipos/filters/IpoFilters";
 import { StatusTiles } from "@/components/ipos/filters/StatusTiles";
@@ -17,6 +18,7 @@ import type { Filters, Row, SortBy } from "@/components/ipos/model/types";
 
 /** The /ipos page: status tiles, the IPOs open now, then every IPO with search, filters, sorting and pages. */
 export default function IposClient({ rows, initialPage, quotaCount }: { rows: Row[]; initialPage: number; quotaCount: number }) {
+  const w = useT().ipos.page;
   const [filters, setFilters] = useState<Filters>({ status: "all", board: "all", query: "", sort: defaultSortOf("all"), quick: null });
   const [page, setPage] = useState(initialPage);
 
@@ -40,10 +42,10 @@ export default function IposClient({ rows, initialPage, quotaCount }: { rows: Ro
       </Suspense>
 
       <header className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
-        <h1 className="type-hero text-[44px] text-balance text-foreground sm:text-[60px]">All IPOs</h1>
+        <h1 className="type-hero text-[44px] text-balance text-foreground sm:text-[60px]">{w.heading}</h1>
         <p className="text-sm text-muted-foreground">
-          <span className="font-mono tabular-nums text-foreground">{matchingRows.length}</span> of{" "}
-          <span className="font-mono tabular-nums">{rows.length}</span> IPOs
+          <span className="font-mono tabular-nums text-foreground">{matchingRows.length}</span> {w.of}{" "}
+          <span className="font-mono tabular-nums">{rows.length}</span> {w.ipos}
         </p>
       </header>
 
@@ -64,7 +66,7 @@ export default function IposClient({ rows, initialPage, quotaCount }: { rows: Ro
       </div>
 
       {matchingRows.length === 0 ? (
-        <EmptyState icon={Building2} title="No IPOs found" hint="Try a different search or filter." />
+        <EmptyState icon={Building2} title={w.noneFound} hint={w.tryAnother} />
       ) : (
         <div className="overflow-hidden rounded-xl border border-border bg-card">
           <IpoTable rows={pageRows} filters={filters} onSort={sortBy} />

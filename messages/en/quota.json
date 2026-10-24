@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "title": "Upcoming IPOs with Shareholder Quota {year}"
+  },
+  "summary": {
+    "none": "No upcoming IPO has a shareholder quota right now.",
+    "item": "{name} (hold {parents})",
+    "sentence": {
+      "one": "{count} upcoming IPO has a shareholder quota: {list}.",
+      "other": "{count} upcoming IPOs have a shareholder quota: {list}."
+    }
+  },
+  "hero": {
+    "before": "Upcoming",
+    "highlight": "shareholder quota",
+    "after": "IPOs",
+    "lede": "Hold one share of the listed parent before the RHP date to apply in the shareholder category, a second shot at allotment on top of retail.",
+    "rulesTitle": "The rules in numbers",
+    "rules": [
+      { "label": "Parent shares you need", "value": "1" },
+      { "label": "Shareholder bid at cut-off", "value": "₹2 lakh" },
+      { "label": "Quota, at most", "value": "10% of issue" },
+      { "label": "Eligibility date", "value": "RHP date" }
+    ]
+  },
+  "how": {
+    "title": "How it works",
+    "steps": [
+      {
+        "title": "Hold one share of the parent",
+        "body": "A single share of the listed parent is usually enough. The RHP sets the exact rule, so check it for each IPO."
+      },
+      {
+        "title": "Have it in demat by the RHP date",
+        "body": "Eligibility is fixed on the date of the red herring prospectus, often about a week before the IPO opens. Buy at least a day before so the trade settles."
+      },
+      {
+        "title": "Apply in the shareholder category",
+        "body": "Bid up to ₹2 lakh as a shareholder. You can still apply as retail or HNI too, and the two are not counted as multiple bids."
+      },
+      {
+        "title": "A separate pool to be allotted from",
+        "body": "The quota, up to 10% of the issue, is allotted only among eligible shareholders. That pool is apart from retail, not instead of it."
+      }
+    ]
+  },
+  "sections": {
+    "nothingYet": "Nothing here yet",
+    "soon": {
+      "title": "Closest to launch",
+      "hint": "SEBI has approved these, or their dates are set. Highest chance of opening soon.",
+      "empty": "No shareholder-quota IPO has SEBI approval or dates right now."
+    },
+    "later": {
+      "title": "Further out",
+      "hint": "Draft filed with SEBI, or announced by the company. These can take months, and the quota can still change.",
+      "empty": "No other upcoming IPO with a shareholder quota right now."
+    },
+    "closed": {
+      "title": "Closed",
+      "hint": "Bidding has shut for these. Buying the parent now will not get you the quota.",
+      "empty": ""
+    }
+  },
+  "lastChecked": "Updated daily. Last checked",
+  "faq": {
+    "title": "Questions",
+    "items": [
+      {
+        "q": "What is a shareholder quota in an IPO?",
+        "a": "When a listed company takes a subsidiary or group company public, the IPO can set aside up to 10% of the issue for the listed parent's shareholders. Only people who hold the parent's shares on the eligibility date can bid in that portion."
+      },
+      {
+        "q": "When do I need to own the parent's shares?",
+        "a": "On the date of the red herring prospectus (RHP), or the record date the RHP names. The shares must be in your demat account by then, so a purchase on that day may be too late."
+      },
+      {
+        "q": "Can the shareholder quota be dropped?",
+        "a": "Yes. A draft offer document (DRHP) can change before the final RHP, and a company that only announced an IPO has not committed to anything yet. That is why each IPO here shows its stage and a link to its offer document."
+      },
+      {
+        "q": "How is this list made?",
+        "a": "We check offer documents filed with SEBI, NSE and BSE every day for a shareholder reservation and the parent it names. IPOs drop off once they list, or when a SEBI approval lapses without dates."
+      }
+    ]
+  },
+  "disclaimer": "This list is gathered automatically from offer documents and exchange filings and is not reviewed by hand. It is not a recommendation to buy any share, and IPO Milega accepts no responsibility for losses arising from any investment decision. A shareholder quota is only final once it appears in the RHP. Investments in the securities market are subject to market risks. Read the offer document carefully before investing.",
+  "stages": {
+    "announced": "Announced",
+    "filed": "DRHP filed",
+    "approved": "SEBI approved",
+    "dates": "Dates set"
+  },
+  "stageLabel": "Stage: {name}, step {step} of {total}",
+  "card": {
+    "hold": "Hold 1 share of",
+    "forQuotaIn": "for the shareholder quota in",
+    "bidding": "Bidding",
+    "approvedOn": "Approved on",
+    "filedOn": "Filed on",
+    "lastDayWas": "Last day to buy was",
+    "lastDay": "Last day to buy",
+    "offerDocument": "Offer document",
+    "documentFor": "for {name} (opens in a new tab)",
+    "closedNote": "Bidding has closed, so the quota is no longer open.",
+    "eligibilityClosedNote": "The last day to buy the parent has passed. Buying it now will not make you eligible. Only holders from before that day can use the quota.",
+    "buyByNote": "Buy the parent by the last day shown below. Shares settle the next trading day, so a later purchase misses the record date.",
+    "stageNote": {
+      "dates": "The RHP is out, so the eligibility date may already have passed. Check the RHP before you buy the parent.",
+      "approved": "SEBI has cleared the draft. Dates usually follow within months. Hold the parent before the RHP date.",
+      "filed": "The draft offer document has a shareholder quota. It is waiting for SEBI's approval.",
+      "announced": "The quota comes from the company's announcement. There is no offer document yet, so it could still change."
+    }
+  },
+  "teaser": {
+    "reserves": {
+      "one": "{count} upcoming IPO reserves shares for the parent's shareholders.",
+      "other": "{count} upcoming IPOs reserve shares for the parent's shareholders."
+    },
+    "seeWhich": "See which shares to hold."
+  }
+}

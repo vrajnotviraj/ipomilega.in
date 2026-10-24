@@ -1,19 +1,20 @@
 "use client";
 
-import Link from "next/link";
+import { ProgressLink } from "@/components/progress/ProgressLink";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 import { BookOpen, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
-import type { PostSummary } from "@/lib/blog/format";
+import { categoryLabel, type PostSummary } from "@/lib/blog/format";
+import { useT } from "@/lib/i18n/client";
 import { Byline, MetaLine, PostCard } from "@/components/blog/PostCard";
 
 /** The newest matching post, wide, with its cover image when there is one. */
 function FeaturedPost({ post }: { post: PostSummary }) {
   return (
-    <Link
+    <ProgressLink
       href={`/blogs/${post.slug}`}
       className="card-lift mb-6 grid grid-cols-1 items-center gap-6 overflow-hidden rounded-xl border border-border bg-card p-5 sm:p-6 lg:grid-cols-[1fr_320px]"
     >
@@ -28,12 +29,13 @@ function FeaturedPost({ post }: { post: PostSummary }) {
           <Image src={post.image_url} alt="" fill priority sizes="(min-width: 1024px) 320px, calc(100vw - 72px)" className="object-cover" />
         </div>
       )}
-    </Link>
+    </ProgressLink>
   );
 }
 
 /** Search and category filters over every published post. The server renders the full list, so crawlers see every link. */
 export default function BlogsClient({ posts }: { posts: PostSummary[] }) {
+  const { blog: d, common } = useT();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
 
@@ -57,15 +59,15 @@ export default function BlogsClient({ posts }: { posts: PostSummary[] }) {
           <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" strokeWidth={2} aria-hidden="true" />
           <Input
             type="search"
-            aria-label="Search articles"
-            placeholder="Search articles"
+            aria-label={d.list.search}
+            placeholder={d.list.search}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="h-10 rounded-full bg-card pl-10 text-sm"
           />
         </div>
         {categories.length > 2 && (
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+          <div className="flex flex-wrap gap-2" role="group" aria-label={d.list.filterByCategory}>
             {categories.map((category) => (
               <button
                 key={category}
@@ -79,7 +81,7 @@ export default function BlogsClient({ posts }: { posts: PostSummary[] }) {
                     : "border border-border text-foreground hover:bg-secondary"
                 )}
               >
-                {category}
+                {category === "All" ? common.all : categoryLabel(d.categories, category)}
               </button>
             ))}
           </div>
@@ -87,7 +89,7 @@ export default function BlogsClient({ posts }: { posts: PostSummary[] }) {
       </div>
 
       {!featured ? (
-        <EmptyState icon={BookOpen} title="No articles found" hint="Try a different search or category." />
+        <EmptyState icon={BookOpen} title={d.list.emptyTitle} hint={d.list.emptyHint} />
       ) : (
         <>
           <FeaturedPost post={featured} />

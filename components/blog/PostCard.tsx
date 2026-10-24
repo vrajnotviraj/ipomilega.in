@@ -1,11 +1,16 @@
+"use client";
+
 import { ProgressLink } from "@/components/progress/ProgressLink";
-import { formatBlogDate, type PostSummary } from "@/lib/blog/format";
+import { categoryLabel, formatBlogDate, type PostSummary } from "@/lib/blog/format";
+import { useT } from "@/lib/i18n/client";
 
 /** "IPO Analysis · 4 min read" */
 export function MetaLine({ post }: { post: PostSummary }) {
+  const d = useT().blog;
+  const category = post.category || "IPO Analysis";
   return (
     <p className="mb-2 text-xs text-muted-foreground">
-      {post.category || "IPO Analysis"} · <span className="font-mono tabular-nums">{post.readTime}</span> min read
+      {categoryLabel(d.categories, category)} · <span className="font-mono tabular-nums">{post.readTime}</span> {d.minRead}
     </p>
   );
 }
