@@ -25,6 +25,8 @@ export type Plan = {
   chanceOfAny: number;
   /** Most money blocked at once. */
   peakBlocked: number;
+  /** False when the search hit its limit, so a slightly better plan may exist. */
+  proven: boolean;
 };
 
 /** A set of bids and what it costs and is worth. */
@@ -35,18 +37,21 @@ type Batch = { closeDay: number; freeDay: number; choices: Choice[] };
 
 const NO_BIDS: Choice = { cost: 0, worth: 0, applications: [] };
 
-// shortcut: past this many branches the plan is the best found so far, not proven best. Raise it if plans look weak.
-const MAX_BRANCHES = 200_000;
+/** Branches the search tries before it settles for the best plan found so far: a quick limit, and a deep one for a worker. */
+export const QUICK_SEARCH = 200_000;
+export const DEEP_SEARCH = 3_000_000;
+
+export type PlanRequest = { ipos: PlannerIpo[]; funds: number; accounts: number; goal: Goal; holders: Holders };
 
 /** The bids worth the most for the goal, never blocking more than `funds` at once and bidding once per account per IPO. */
-export function planIpos(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders = {}): Plan {
+export function planIpos(ipos: PlannerIpo[], funds: number, accounts: number, goal: Goal, holders: Holders = {}, maxBranches = QUICK_SEARCH): Plan {
   const batches = batchBySchedule(ipos).map((batchIpos) => ({
     closeDay: batchIpos[0].closeDay,
     freeDay: batchIpos[0].freeDay,
     choices: bestChoices(batchIpos, funds, accounts, goal, holders),
   }));
-  const picked = pickOnePerBatch(batches, funds);
-  return describe(ipos, picked.flatMap((choice) => choice.applications), funds);
+  const { picks, proven } = pickOnePerBatch(batches, funds, maxBranches);
+  return { ...describe(ipos, picks.flatMap((choice) => choice.applications), funds), proven };
 }
 
 function batchBySchedule(ipos: PlannerIpo[]): PlannerIpo[][] {
@@ -121,7 +126,7 @@ function keepBestPerCost(choices: Choice[]): Choice[] {
  * One choice per batch, worth the most in total while the money blocked on every close day fits the funds.
  * Branch and bound: a branch stops once even the best choices that still fit can't beat the best plan so far.
  */
-function pickOnePerBatch(batches: Batch[], funds: number): Choice[] {
+function pickOnePerBatch(batches: Batch[], funds: number, maxBranches: number): { picks: Choice[]; proven: boolean } {
   const picked: Choice[] = [];
   let best = { worth: -1, picks: [] as Choice[] };
 
@@ -135,7 +140,7 @@ function pickOnePerBatch(batches: Batch[], funds: number): Choice[] {
   let branches = 0;
 
   function tryBatch(i: number, worthSoFar: number) {
-    if (++branches > MAX_BRANCHES) return;
+    if (++branches > maxBranches) return;
     if (i === batches.length) {
       if (worthSoFar > best.worth + 1e-9) best = { worth: worthSoFar, picks: [...picked] };
       return;
@@ -150,13 +155,13 @@ function pickOnePerBatch(batches: Batch[], funds: number): Choice[] {
   }
 
   tryBatch(0, 0);
-  return best.picks;
+  return { picks: best.picks, proven: branches <= maxBranches };
 }
 
 const holdsMoneyOn = (span: { closeDay: number; freeDay: number }, day: number) => span.closeDay <= day && day < span.freeDay;
 
 /** The picked bids in date order, with the risk flags and totals the page shows. */
-function describe(ipos: PlannerIpo[], picked: Omit<Application, 'atRisk'>[], funds: number): Plan {
+function describe(ipos: PlannerIpo[], picked: Omit<Application, 'atRisk'>[], funds: number): Omit<Plan, 'proven'> {
   const blockedOn = (day: number) =>
     picked.reduce((sum, app) => (holdsMoneyOn(app.ipo, day) ? sum + app.option.cost * app.accounts.length : sum), 0);
   const isAtRisk = (app: Omit<Application, 'atRisk'>) =>

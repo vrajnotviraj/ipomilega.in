@@ -1,12 +1,13 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CalendarClock } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatRupees } from "@/lib/ipo/format";
 import type { PlannerIpo, SkippedIpo } from "@/lib/ipo/planner/ipo";
-import { planIpos } from "@/lib/ipo/planner/plan";
 import { PlannerForm, type PlannerInputs } from "@/components/planner/PlannerForm";
+import { PlanLoader } from "@/components/planner/PlanLoader";
+import { usePlan } from "@/components/planner/usePlan";
 import { Verdict } from "@/components/planner/Verdict";
 import { DayByDay } from "@/components/planner/DayByDay";
 import { MoneyTimeline } from "@/components/planner/MoneyTimeline";
@@ -20,17 +21,18 @@ function leftOutReason(ipo: PlannerIpo, { includeSme, excluded }: Pick<PlannerIn
   return null;
 }
 
-/** The inputs beside the plan. The plan is worked out again whenever an input changes. */
+/** The inputs beside the plan. Once the reader pauses typing, the plan is searched again with a loader in its place. */
 export function PlannerClient({ ipos, skipped, today }: { ipos: PlannerIpo[]; skipped: SkippedIpo[]; today: number }) {
   const [inputs, setInputs] = useState<PlannerInputs>({ funds: 100000, accounts: 2, goal: "gain", includeSme: false, excluded: [], holders: {} });
-  const { funds, accounts, goal, includeSme, excluded, holders } = useDeferredValue(inputs);
+  const { funds, accounts, goal, includeSme, excluded, holders } = inputs;
 
   const choosable = useMemo(() => ipos.filter((ipo) => !leftOutReason(ipo, { includeSme, excluded })), [ipos, includeSme, excluded]);
   const leftOutByYou = ipos.flatMap((ipo) => {
     const reason = leftOutReason(ipo, { includeSme, excluded });
     return reason ? [{ id: ipo.id, name: ipo.name, reason }] : [];
   });
-  const plan = useMemo(() => planIpos(choosable, funds, accounts, goal, holders), [choosable, funds, accounts, goal, holders]);
+  const request = useMemo(() => ({ ipos: choosable, funds, accounts, goal, holders }), [choosable, funds, accounts, goal, holders]);
+  const { plan, working } = usePlan(request);
   const cheapestBid = Math.min(...choosable.flatMap((ipo) => ipo.options.map((option) => option.cost)));
 
   return (
@@ -43,6 +45,8 @@ export function PlannerClient({ ipos, skipped, today }: { ipos: PlannerIpo[]; sk
           <EmptyState icon={CalendarClock} title="Nothing to plan right now" hint="No open or upcoming IPO has dates, a lot size and a positive GMP yet." />
         ) : choosable.length === 0 ? (
           <EmptyState icon={CalendarClock} title="Every IPO is left out" hint="Switch on SME IPOs, or untick some IPOs under Advanced." />
+        ) : working || !plan ? (
+          <PlanLoader />
         ) : plan.applications.length === 0 ? (
           <EmptyState icon={CalendarClock} title="Not enough for one bid" hint={`The cheapest bid right now needs ${formatRupees(cheapestBid)}.`} />
         ) : (
@@ -52,7 +56,7 @@ export function PlannerClient({ ipos, skipped, today }: { ipos: PlannerIpo[]; sk
             <MoneyTimeline applications={plan.applications} today={today} />
           </>
         )}
-        <LeftOut unused={plan.unused} skipped={[...leftOutByYou, ...skipped]} />
+        <LeftOut unused={plan?.unused ?? []} skipped={[...leftOutByYou, ...skipped]} />
         <HowItWorks />
       </section>
     </div>

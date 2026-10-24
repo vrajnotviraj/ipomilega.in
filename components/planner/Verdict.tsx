@@ -29,6 +29,9 @@ export function Verdict({ plan, funds, accounts, goal, cheapestBid }: { plan: Pl
             ? "Money is your limit: the IPOs left out below need more on the day their bidding closes."
             : ""}
       </p>
+      {!plan.proven && (
+        <p className="mt-2 text-xs text-primary-foreground/70">So many IPOs are open that we stopped searching; a slightly better plan may exist.</p>
+      )}
     </div>
   );
 }
