@@ -156,6 +156,7 @@
   "calendar": {
     "add": "Add to calendar",
     "steps": { "opening": "IPO opens", "closing": "IPO closes", "allotment": "IPO allotment", "listing": "IPO lists" },
+    "notes": {"opening": "Bidding opens today.", "closing": "Last day to bid, until 3 PM. Approve the UPI mandate before the cut-off.", "allotment": "Allotment is out today. Check if you got shares.", "listing": "Shares list on the exchange today."},
     "allDatesIcs": "All dates as .ics"
   },
   "financials": {

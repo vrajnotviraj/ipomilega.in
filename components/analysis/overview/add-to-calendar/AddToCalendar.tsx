@@ -58,15 +58,16 @@ export function AddToCalendar({ company, dates, className }: { company: string; 
 /** The IPO's events from today on, plus its slug from the page URL. Built after mount, since the page is cached. */
 function useUpcomingEvents(company: string, dates: IssueDates) {
   const [state, setState] = useState<{ slug: string; events: CalendarEvent[] }>({ slug: "", events: [] });
+  const words = useT().analysis.calendar;
 
   useEffect(() => {
     const url = window.location.origin + window.location.pathname;
     const slug = window.location.pathname.split("/").pop() || "ipo";
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const events = issueEvents({ company, slug, url, dates }).filter((event) => event.date >= today);
+    const events = issueEvents({ company, slug, url, dates }, words).filter((event) => event.date >= today);
     setState({ slug, events });
-  }, [company, dates]);
+  }, [company, dates, words]);
 
   return state;
 }

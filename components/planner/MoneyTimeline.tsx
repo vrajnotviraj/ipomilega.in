@@ -1,5 +1,5 @@
-import { useT } from "@/lib/i18n/client";
-import { fill } from "@/lib/i18n/locales";
+import { useLocale, useT } from "@/lib/i18n/client";
+import { fill, LANG_TAG } from "@/lib/i18n/locales";
 import { formatRupees } from "@/lib/ipo/format";
 import { dateOf, formatDay } from "@/lib/ipo/planner/days";
 import type { Application } from "@/lib/ipo/planner/plan";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
  */
 export function MoneyTimeline({ applications, today }: { applications: Application[]; today: number }) {
   const { planner, ipo: ipoWords } = useT();
+  const langTag = LANG_TAG[useLocale()];
   const d = planner.timeline;
   const first = Math.min(today, ...applications.map((app) => app.ipo.closeDay));
   const last = Math.max(...applications.map((app) => app.ipo.cashDay));
@@ -46,7 +47,7 @@ export function MoneyTimeline({ applications, today }: { applications: Applicati
             <div aria-hidden className={cn(CHART, "grid text-center")} style={grid}>
               {days.map((day) => (
                 <div key={day} className="flex flex-col items-center gap-0.5 pb-3">
-                  <span className="font-mono text-xs text-muted-foreground">{dateOf(day).toLocaleDateString("en-GB", { weekday: "narrow", timeZone: "UTC" })}</span>
+                  <span className="font-mono text-xs text-muted-foreground">{dateOf(day).toLocaleDateString(langTag, { weekday: "narrow", timeZone: "UTC" })}</span>
                   <span
                     className={cn(
                       "grid size-7 place-items-center rounded-full font-mono text-sm font-medium tabular-nums",

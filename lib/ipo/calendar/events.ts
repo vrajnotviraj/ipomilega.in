@@ -13,19 +13,23 @@ export type CalendarEvent = {
   hours?: [number, number];
 };
 
-const STEPS: { step: keyof IssueDates; label: string; note: string; hours?: [number, number] }[] = [
-  { step: "opening", label: "IPO opens", note: "Bidding opens today." },
-  { step: "closing", label: "IPO closes", note: "Last day to bid, until 3 PM. Approve the UPI mandate before the cut-off.", hours: [10, 15] },
-  { step: "allotment", label: "IPO allotment", note: "Allotment is out today. Check if you got shares." },
-  { step: "listing", label: "IPO lists", note: "Shares list on the exchange today." },
+const STEPS: { step: keyof IssueDates; hours?: [number, number] }[] = [
+  { step: "opening" },
+  { step: "closing", hours: [10, 15] },
+  { step: "allotment" },
+  { step: "listing" },
 ];
 
+/** Each step's label and note in the reader's language: messages/<lang>/analysis.json, "calendar". */
+export type CalendarWords = { steps: Record<keyof IssueDates, string>; notes: Record<keyof IssueDates, string> };
+
 /** Turns an IPO's dates into calendar events, skipping any date that isn't known yet. */
-export function issueEvents({ company, slug, url, dates }: { company: string; slug: string; url: string; dates: IssueDates }): CalendarEvent[] {
-  return STEPS.flatMap(({ step, label, note, hours }) => {
+export function issueEvents({ company, slug, url, dates }: { company: string; slug: string; url: string; dates: IssueDates }, words: CalendarWords): CalendarEvent[] {
+  return STEPS.flatMap(({ step, hours }) => {
     const date = parseIpoDate(dates[step]);
     if (!date) return [];
-    return [{ step, uid: `${slug}-${step}@ipomilega.in`, label, title: `${company} ${label}`, details: `${note}\n${url}`, date, hours }];
+    const label = words.steps[step];
+    return [{ step, uid: `${slug}-${step}@ipomilega.in`, label, title: `${company} ${label}`, details: `${words.notes[step]}\n${url}`, date, hours }];
   });
 }
 

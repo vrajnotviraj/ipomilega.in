@@ -8,9 +8,9 @@ import { buildShareMessage, type ShareFacts } from "@/lib/seo/share";
 import { getRiskTextColor } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
 import { useLocale, useT } from "@/lib/i18n/client";
-import { localePath } from "@/lib/i18n/locales";
 import type { SectionTab } from "@/components/analysis/analysis-facts";
 import { useActiveSection, useStickyTop } from "@/components/analysis/header/useSectionNav";
+import { useProgressRouter } from "@/components/progress/useProgressRouter";
 
 const iconButton =
   "grid size-9 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-secondary active:scale-[0.98]";
@@ -51,7 +51,7 @@ export function StickyHeader({
  */
 function BackButton() {
   const router = useRouter();
-  const home = localePath(useLocale(), "/");
+  const progressRouter = useProgressRouter();
   const label = useT().analysis.header.goBack;
 
   function cameFromThisSite() {
@@ -68,7 +68,7 @@ function BackButton() {
   }
 
   return (
-    <button onClick={() => (cameFromThisSite() ? router.back() : router.push(home))} className={iconButton} aria-label={label}>
+    <button onClick={() => (cameFromThisSite() ? router.back() : progressRouter.push("/"))} className={iconButton} aria-label={label}>
       <ArrowLeft className="size-4" strokeWidth={2} />
     </button>
   );

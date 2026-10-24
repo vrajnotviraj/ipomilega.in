@@ -59,5 +59,6 @@ function setPath(target: object, path: string, value: string) {
     if (!next || typeof next !== "object") return;
     node = next as Record<string, unknown>;
   }
-  node[last] = value;
+  // A field the English no longer has (a list that got shorter) is left out, not added back.
+  if (last in node) node[last] = value;
 }
