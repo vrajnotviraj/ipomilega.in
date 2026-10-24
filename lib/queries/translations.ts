@@ -35,7 +35,7 @@ export const getTranslatedKeys = cached(async (): Promise<string[]> => {
   return docs.map((doc) => `${doc.kind}|${doc.source_id}|${doc.lang}`);
 }, 'translated-keys');
 
-/** Canonical and hreflang for the languages a document exists in. An untranslated language is noindex only: a canonical to the English URL on top would send Google two conflicting signals. */
+/** Canonical and hreflang for the languages a document exists in; an untranslated language gets noindex alone, since a canonical to English as well would contradict it. */
 export async function indexingFor(kind: TranslationKind, sourceId: string, lang: Locale, path: string): Promise<Metadata> {
   const locales = await getTranslatedLocales(kind, sourceId);
   if (locales.includes(lang)) return { alternates: alternatesFor(lang, path, locales) };
