@@ -8,6 +8,7 @@ import { buildShareMessage, type ShareFacts } from "@/lib/seo/share";
 import { getRiskTextColor } from "@/lib/ipo/score";
 import { cn } from "@/lib/utils";
 import { useLocale, useT } from "@/lib/i18n/client";
+import { bareSitePath } from "@/lib/i18n/locales";
 import type { SectionTab } from "@/components/analysis/analysis-facts";
 import { useActiveSection, useStickyTop } from "@/components/analysis/header/useSectionNav";
 import { useProgressRouter } from "@/components/progress/useProgressRouter";
@@ -47,7 +48,7 @@ export function StickyHeader({
 }
 
 /**
- * Goes back when the visitor came from within the site, otherwise home.
+ * Goes back when the visitor came from another page of the site, otherwise home, including right after a language switch.
  */
 function BackButton() {
   const router = useRouter();
@@ -61,7 +62,9 @@ function BackButton() {
     if (navigatedInApp) return true;
 
     try {
-      return !!document.referrer && new URL(document.referrer).origin === window.location.origin;
+      // The same page in another language means the reader just switched languages; going back would only undo that.
+      const referrer = new URL(document.referrer);
+      return referrer.origin === window.location.origin && bareSitePath(referrer.pathname) !== bareSitePath(window.location.pathname);
     } catch {
       return false;
     }

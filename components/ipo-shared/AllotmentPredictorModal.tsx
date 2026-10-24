@@ -49,7 +49,14 @@ export function AllotmentPredictorModal({
 
   return (
     <Dialog open={!!initialCategory} onOpenChange={(open) => { if (!open) close(); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        // Focuses the chosen tab, not the first button, so Safari never rings a tab that isn't selected.
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          (event.currentTarget as HTMLElement).querySelector<HTMLElement>('[aria-pressed="true"]')?.focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl tracking-[-0.015em]">{d.title}</DialogTitle>
           <DialogDescription>{companyName}</DialogDescription>
