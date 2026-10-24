@@ -55,7 +55,7 @@ export type SkippedIpo = { id: string; name: string; reason: string };
 const SUBSCRIPTION_PER_GMP_POINT: Record<Category, number> = { retail: 1.2, shni: 4, bhni: 6, shareholder: 1.2 };
 
 /** The IPO as the planner sees it, or the reason it can't be planned. */
-export function toPlannerIpo(id: string, ipo: Ipo, slug: string | null, quotaParents: string[] | null = null): PlannerIpo | SkippedIpo {
+export function toPlannerIpo(id: string, ipo: Ipo, slug: string | null, quotaParents: string[] | null = null, today: number | null = null): PlannerIpo | SkippedIpo {
   const name = ipo.upcoming_ipo_2025 || ipo.ipo_name || 'IPO';
   const skip = (reason: string): SkippedIpo => ({ id, name, reason });
 
@@ -67,7 +67,7 @@ export function toPlannerIpo(id: string, ipo: Ipo, slug: string | null, quotaPar
   if (gmpPercent <= 0) return skip(`GMP is ${gmpPercent}%, no listing gain expected`);
 
   const quota = quotaParents ?? (parseGainValue(ipo.shareholder_sr) !== null ? [] : null);
-  const options = bidOptions(ipo, gmpPercent, quota !== null);
+  const options = bidOptions(ipo, gmpPercent, quota !== null, closeDay === today);
   if (!options.length) return skip('Lot size not out yet');
 
   return {
@@ -88,23 +88,27 @@ export function toPlannerIpo(id: string, ipo: Ipo, slug: string | null, quotaPar
 export const isSkipped = (item: PlannerIpo | SkippedIpo): item is SkippedIpo => 'reason' in item;
 
 /** The minimum application in each category the IPO offers. */
-function bidOptions(ipo: Ipo, gmpPercent: number, hasQuota: boolean): BidOption[] {
+function bidOptions(ipo: Ipo, gmpPercent: number, hasQuota: boolean, lastDay: boolean): BidOption[] {
   return ALLOTMENT_CATEGORIES.filter((cat) => cat.key !== 'shareholder' || hasQuota).flatMap((cat) => {
     const cost = parseGainValue(getMarketLotRows(ipo.ipo_market_lot, cat.matchKeyword).min?.amount);
-    return cost ? [bidOption(ipo, cat, cost, gmpPercent)] : [];
+    return cost ? [bidOption(ipo, cat, cost, gmpPercent, lastDay)] : [];
   });
 }
 
 /**
- * Odds and value of one minimum application. The subscription is the live figure or the GMP estimate, whichever is higher.
+ * Odds and value of one minimum application.
+ * The subscription is the live figure on the last day, when most of the book is in. Before that it is the live figure or the GMP estimate,
+ * whichever is higher, since a live figure only grows.
  *
  * Retail, S-HNI and shareholder winners get the whole application, so the odds are 1 in the subscription.
  * A B-HNI lottery winner gets only the S-HNI minimum, a `slot` share of the application, so the odds are 1 in subscription x slot.
  * Under that, nobody is drawn out: everyone gets their pro-rata share, which is never below the slot.
  */
-function bidOption(ipo: Ipo, cat: AllotmentCategoryDef, cost: number, gmpPercent: number): BidOption {
-  const live = getAllotmentRatio(ipo, cat).subscription ?? 0;
-  const subscription = Math.max(live, 1, gmpPercent * SUBSCRIPTION_PER_GMP_POINT[cat.key]);
+function bidOption(ipo: Ipo, cat: AllotmentCategoryDef, cost: number, gmpPercent: number, lastDay: boolean): BidOption {
+  const live = getAllotmentRatio(ipo, cat).subscription;
+  const estimate = gmpPercent * SUBSCRIPTION_PER_GMP_POINT[cat.key];
+  const useLive = lastDay && live !== null;
+  const subscription = useLive ? Math.max(live, 1) : Math.max(live ?? 0, 1, estimate);
   const slot = cat.key === 'bhni' ? slotShare(ipo, cost) : 1;
   const allotted = Math.round(cost * Math.max(slot, 1 / subscription));
   return {
@@ -113,7 +117,7 @@ function bidOption(ipo: Ipo, cat: AllotmentCategoryDef, cost: number, gmpPercent
     odds: Math.min(1, 1 / (subscription * slot)),
     allotted,
     gain: Math.round((allotted * gmpPercent) / 100),
-    estimated: subscription > live,
+    estimated: !useLive && subscription > (live ?? 0),
   };
 }
 

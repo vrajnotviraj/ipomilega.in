@@ -2,6 +2,7 @@ import 'server-only';
 import { createHash } from 'node:crypto';
 import { unstable_cache } from 'next/cache';
 import { getIpoBuckets } from '@/lib/queries/ipos';
+import { dayNumberInIndia } from '@/lib/ipo/format';
 import { getShareholderQuotaIpos } from '@/lib/queries/shareholder-quota';
 import { isSkipped, toPlannerIpo, type PlannerIpo, type SkippedIpo } from '@/lib/ipo/planner/ipo';
 import type { PlanInputs } from '@/lib/ipo/planner/inputs';
@@ -12,10 +13,11 @@ const A_DAY = 24 * 60 * 60;
 /** Open and upcoming IPOs in planner terms: the ones that can be planned and the ones that can't, with why. */
 export async function getPlannerIpos(): Promise<{ ipos: PlannerIpo[]; skipped: SkippedIpo[] }> {
   const [{ live, upcoming }, { ipos: quotaIpos }] = await Promise.all([getIpoBuckets(), getShareholderQuotaIpos()]);
+  const today = dayNumberInIndia(new Date());
   const items = [...live, ...upcoming].map(({ _id, ipo, analysis }) => {
     const slug = analysis ? analysis.slug || ipo.slug || null : null;
     const parents = quotaIpos.find((quota) => slug && quota.slug === slug)?.parents ?? null;
-    return toPlannerIpo(_id, ipo, slug, parents);
+    return toPlannerIpo(_id, ipo, slug, parents, today);
   });
   return { ipos: items.filter((item): item is PlannerIpo => !isSkipped(item)), skipped: items.filter(isSkipped) };
 }
