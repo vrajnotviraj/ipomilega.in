@@ -10,6 +10,7 @@ registerHooks({
 });
 
 const { compareBy, matchesQuick, clickSort } = await import("./views.ts");
+const { issueSizeOf, sizeOf } = await import("./cells.ts");
 
 const listed = (name, held) => ({ status: "Listed", steps: [], analysis: null, ipo: { upcoming_ipo_2025: name, ipo_price: "100", last_price: held === null ? "" : String(100 + held) } });
 const rows = [listed("B", 10), listed("A", 60), listed("C", -5), listed("D", null)];
@@ -26,4 +27,10 @@ assert.equal(names(null), "BACD", "no quick filter keeps every row");
 
 assert.deepEqual(clickSort({ by: "gmp", dir: "desc" }, "gmp"), { by: "gmp", dir: "asc" }, "second click flips");
 assert.deepEqual(clickSort({ by: "gmp", dir: "desc" }, "name"), { by: "name", dir: "asc" }, "a new text column starts A to Z");
+const sized = (ipo) => ({ status: "Open", steps: [], analysis: null, ipo });
+assert.equal(issueSizeOf(sized({ ipo_size: "500 Cr." })), "₹500 Cr.", "the feed's amount");
+const core4 = sized({ ipo_size: "", ipo_details: { issue_size: "58,94,400 shares (agg. up to 55 Cr)" } });
+assert.equal(issueSizeOf(core4), "₹55 Cr.", "no feed size falls back to the detail page's");
+assert.equal(sizeOf(core4), 55, "and sorts by it");
+assert.equal(issueSizeOf(sized({ ipo_size: "Approx 108.42 Crores" })), "₹108.42 Cr.", "an Approx feed size reads as an amount");
 console.log("views.check ok");

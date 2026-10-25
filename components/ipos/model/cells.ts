@@ -33,16 +33,20 @@ export function priceBandOf(row: Row): string | null {
   return band ? `₹${band}` : null;
 }
 
+/** The feed's issue size, else the detail page's, with "Approx 55 Crores" shortened to "55 Cr.". */
+const issueSizeTextOf = (row: Row) =>
+  (formatIssueSize(row.ipo?.ipo_size) ?? formatIssueSize(row.ipo?.ipo_details?.issue_size))?.replace(/^Approx\s+([\d,.]+)\s+Crores$/i, "$1 Cr.") ?? null;
+
 /** The issue size when the feed gave an amount, null when it gave a share count or nothing. */
 function issueAmountOf(row: Row): string | null {
-  const size = formatIssueSize(row.ipo?.ipo_size);
+  const size = issueSizeTextOf(row);
   return size && /^[\d.]/.test(size) && !/share/i.test(size) ? size : null;
 }
 
 /** Issue size with a rupee sign, or the share count, null when unknown. */
 export function issueSizeOf(row: Row): string | null {
   const amount = issueAmountOf(row);
-  return amount ? `₹${amount}` : formatIssueSize(row.ipo?.ipo_size);
+  return amount ? `₹${amount}` : issueSizeTextOf(row);
 }
 
 /** Issue size as a number for sorting, null without an amount. */

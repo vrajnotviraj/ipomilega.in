@@ -98,11 +98,11 @@ function Byline({ published, updated }: { published?: Date | string; updated?: D
   );
 }
 
-/** What the company does, under the name: in full on phones, two lines from sm. */
+/** What the company does, under the name, in full. */
 function AboutLine({ text }: { text: string | null }) {
   if (!text) return null;
   return (
-    <p className="mt-3 max-w-[65ch] sm:line-clamp-2 text-pretty text-base text-muted-foreground">
+    <p className="mt-3 max-w-[65ch] text-pretty text-base text-muted-foreground">
       <span className="font-medium text-foreground">{t().analysis.summary.whatTheyDo}</span>
       {text}
     </p>

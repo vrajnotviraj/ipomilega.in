@@ -78,11 +78,14 @@ export const formatPriceBand = (priceBand: string | undefined): string => {
 
 /**
  * The issue size without clauses that are still "[●]" ("Approx [●] Crores, 1,43,00,000 Equity Shares"
- * keeps the share count). Null when nothing real is left, so the card shows "TBA".
+ * keeps the share count), and chittorgarh's "58,94,400 shares (agg. up to 55 Cr)" as "Approx 55 Crores".
+ * Null when nothing real is left, so the card shows "TBA".
  */
 export const formatIssueSize = (raw: string | undefined | null): string | null => {
   const text = raw?.trim();
   if (!text) return null;
+  const aggregate = text.match(/\(agg\. up to ([\d,.]+) Cr\)/i)?.[1];
+  if (aggregate) return `Approx ${aggregate} Crores`;
   if (['n/a', 'tba', 'tbd', '-'].includes(text.toLowerCase())) return null;
 
   // Comma plus whitespace: the commas inside "1,43,00,000" have none, so numbers stay whole.
