@@ -376,7 +376,7 @@ type ListingFields = Pick<Ipo, 'gmp_price_band' | 'ipo_price' | 'gmp_est_listing
 
 /** Issue price: the GMP feed's upper band, else the performance row's issue price. */
 export const issuePrice = (ipo: ListingFields): number | null =>
-  parseGainValue(ipo?.gmp_price_band) || parseGainValue(ipo?.ipo_price) || null;
+  parseGainValue(ipo?.gmp_price_band?.split('-').at(-1)) || parseGainValue(ipo?.ipo_price) || null;
 
 /** GMP-implied listing from "584 (37.74%)". The price is "-" when no GMP was quoted, so it is derived from the gain. */
 export function estimatedListing(ipo: ListingFields): Listing {
