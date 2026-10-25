@@ -30,7 +30,7 @@ export const blogPagePath = (page: number) => (page === 1 ? "/blogs" : `/blogs/p
 export const postsOnPage = <T>(posts: T[], page: number) => posts.slice((page - 1) * BLOG_PAGE_SIZE, page * BLOG_PAGE_SIZE);
 
 /** What a post card needs. Built on the server so the /blogs page never ships post bodies to the browser. */
-export type PostSummary = Pick<Blog, "_id" | "slug" | "title" | "category" | "author" | "image_url"> & {
+export type PostSummary = Pick<Blog, "_id" | "slug" | "title" | "category" | "author" | "image_url" | "article_type"> & {
   excerpt: string;
   publishedAt: string;
   readTime: number;
@@ -43,6 +43,7 @@ export const toSummary = (blog: Blog): PostSummary => ({
   category: blog.category,
   author: blog.author,
   image_url: blog.image_url,
+  article_type: blog.article_type,
   excerpt: excerptOf(blog, 40),
   publishedAt: publishedAtOf(blog),
   readTime: readTimeOf(blog),

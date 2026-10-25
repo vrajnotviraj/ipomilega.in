@@ -7,13 +7,20 @@
     "Investment Guide": "Investment Guide",
     "Company Review": "Company Review"
   },
+  "kinds": {
+    "analysis": "Analysis",
+    "gmp": "GMP",
+    "subscription": "Subscription",
+    "allotment": "Allotment",
+    "listing": "Listing"
+  },
   "index": {
     "meta": {
       "title": "IPO analysis, GMP, subscription and allotment news",
       "description": "Articles on Indian IPOs, mainboard and SME: a prospectus-based analysis before you bid, then subscription, allotment and listing updates."
     },
     "heading": "IPO analysis and news",
-    "intro": "Plain-English articles on Indian IPOs, mainboard and SME. Each IPO can get up to five articles: an analysis of the business, financials, valuation and GMP before you bid, a GMP page updated daily in the last 3 days of bidding, then its subscription, allotment and listing updates.",
+    "intro": "Plain-English reads on every Indian IPO, mainboard and SME. The analysis before you bid, then GMP, subscription, allotment and listing as they happen.",
     "count": { "one": "article", "other": "articles" },
     "latestOn": "latest on"
   },
@@ -21,7 +28,9 @@
     "search": "Search articles",
     "filterByCategory": "Filter by category",
     "emptyTitle": "No articles found",
-    "emptyHint": "Try a different search or category."
+    "emptyHint": "Try a different search or category.",
+    "alsoNew": "Also new",
+    "latest": "Latest"
   },
   "post": {
     "notFoundTitle": "Post not found",
