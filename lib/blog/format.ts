@@ -21,6 +21,11 @@ export function formatBlogDate(date: string): string {
   return new Date(date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
 }
 
+export const BLOG_PAGE_SIZE = 12;
+
+/** /blogs for page 1, /blogs/page/<n> after; /blogs/<n> would clash with post slugs. */
+export const blogPagePath = (page: number) => (page === 1 ? "/blogs" : `/blogs/page/${page}`);
+
 /** What a post card needs. Built on the server so the /blogs page never ships post bodies to the browser. */
 export type PostSummary = Pick<Blog, "_id" | "slug" | "title" | "category" | "author" | "image_url"> & {
   excerpt: string;

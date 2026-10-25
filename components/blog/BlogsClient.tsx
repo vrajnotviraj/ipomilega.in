@@ -3,11 +3,12 @@
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { BookOpen, Search } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
-import { categoryLabel, type PostSummary } from "@/lib/blog/format";
+import { BLOG_PAGE_SIZE, blogPagePath, categoryLabel, type PostSummary } from "@/lib/blog/format";
+import { PAGER } from "@/components/ui/pager";
 import { useT } from "@/lib/i18n/client";
 import { Byline, MetaLine, PostCard } from "@/components/blog/PostCard";
 
@@ -33,8 +34,27 @@ function FeaturedPost({ post }: { post: PostSummary }) {
   );
 }
 
-/** Search and category filters over every published post. The server renders the full list, so crawlers see every link. */
-export default function BlogsClient({ posts }: { posts: PostSummary[] }) {
+/** Previous and next links between pages of /blogs. Plain links, so crawlers walk every page. */
+function BlogPager({ page, pages }: { page: number; pages: number }) {
+  const w = useT().ipos.pager;
+  const link = (to: number, rel: "prev" | "next", children: React.ReactNode) =>
+    to < 1 || to > pages ? (
+      <span aria-disabled="true" className={cn(PAGER, "pointer-events-none opacity-40")}>{children}</span>
+    ) : (
+      <ProgressLink href={blogPagePath(to)} rel={rel} className={PAGER}>{children}</ProgressLink>
+    );
+
+  return (
+    <nav aria-label={w.label} className="mt-10 flex items-center justify-center gap-3">
+      {link(page - 1, "prev", <><ChevronLeft className="size-4" strokeWidth={2} aria-hidden="true" /> {w.previous}</>)}
+      <span className="font-mono text-sm tabular-nums text-muted-foreground">{page} / {pages}</span>
+      {link(page + 1, "next", <>{w.next} <ChevronRight className="size-4" strokeWidth={2} aria-hidden="true" /></>)}
+    </nav>
+  );
+}
+
+/** One page of posts, or every match while a search or category filter is on. The server renders only the page's cards. */
+export default function BlogsClient({ posts, page, pages }: { posts: PostSummary[]; page: number; pages: number }) {
   const { blog: d, common } = useT();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -50,7 +70,12 @@ export default function BlogsClient({ posts }: { posts: PostSummary[] }) {
     });
   }, [posts, activeCategory, query]);
 
-  const [featured, ...rest] = matchingPosts;
+  const filtering = Boolean(query.trim()) || activeCategory !== "All";
+  const shown = filtering ? matchingPosts : posts.slice((page - 1) * BLOG_PAGE_SIZE, page * BLOG_PAGE_SIZE);
+  // Only the first page and search results lead with the wide card.
+  const lead = filtering || page === 1;
+  const featured = lead ? shown[0] : undefined;
+  const rest = lead ? shown.slice(1) : shown;
 
   return (
     <>
@@ -88,11 +113,11 @@ export default function BlogsClient({ posts }: { posts: PostSummary[] }) {
         )}
       </div>
 
-      {!featured ? (
+      {shown.length === 0 ? (
         <EmptyState icon={BookOpen} title={d.list.emptyTitle} hint={d.list.emptyHint} />
       ) : (
         <>
-          <FeaturedPost post={featured} />
+          {featured && <FeaturedPost post={featured} />}
           {rest.length > 0 && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               {rest.map((post) => (
@@ -100,6 +125,7 @@ export default function BlogsClient({ posts }: { posts: PostSummary[] }) {
               ))}
             </div>
           )}
+          {!filtering && pages > 1 && <BlogPager page={page} pages={pages} />}
         </>
       )}
     </>
