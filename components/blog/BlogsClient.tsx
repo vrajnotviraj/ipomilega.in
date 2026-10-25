@@ -7,7 +7,7 @@ import { BookOpen, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
-import { BLOG_PAGE_SIZE, blogPagePath, categoryLabel, type PostSummary } from "@/lib/blog/format";
+import { blogPagePath, categoryLabel, postsOnPage, type PostSummary } from "@/lib/blog/format";
 import { PAGER } from "@/components/ui/pager";
 import { useT } from "@/lib/i18n/client";
 import { Byline, MetaLine, PostCard } from "@/components/blog/PostCard";
@@ -71,7 +71,7 @@ export default function BlogsClient({ posts, page, pages }: { posts: PostSummary
   }, [posts, activeCategory, query]);
 
   const filtering = Boolean(query.trim()) || activeCategory !== "All";
-  const shown = filtering ? matchingPosts : posts.slice((page - 1) * BLOG_PAGE_SIZE, page * BLOG_PAGE_SIZE);
+  const shown = filtering ? matchingPosts : postsOnPage(posts, page);
   // Only the first page and search results lead with the wide card.
   const lead = filtering || page === 1;
   const featured = lead ? shown[0] : undefined;

@@ -7,9 +7,9 @@ import { getPublishedBlogs } from "@/lib/queries/blogs";
 import { collectionJsonLd, JsonLd } from "@/lib/seo/json-ld";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import BlogsClient from "@/components/blog/BlogsClient";
-import { BLOG_PAGE_SIZE, blogPagePath, formatBlogDate, toSummary } from "@/lib/blog/format";
+import { BLOG_PAGE_SIZE, blogPagePath, formatBlogDate, postsOnPage, toSummary } from "@/lib/blog/format";
 
-/** Title and canonical for one page of /blogs. Each page is its own canonical, as Google asks for paged lists. */
+/** Title and canonical for one page of /blogs. Each page is its own canonical. */
 export function blogsMetadata(lang: Locale, page: number): Metadata {
   const { meta } = t().blog.index;
   const title = page > 1 ? fill(t().ipos.meta.pagedTitle, { title: meta.title, page }) : meta.title;
@@ -22,14 +22,14 @@ export function blogsMetadata(lang: Locale, page: number): Metadata {
   };
 }
 
-/** The /blogs page: an answer-first intro, then one page of posts. Search and category filters still cover every post. */
+/** One page of /blogs: the intro, then 12 posts. Search and category filters cover every post. */
 export async function BlogsIndex({ lang, page }: { lang: Locale; page: number }) {
   const { common, blog: d } = t();
-  // Newest first by first publication, the date every card and the ItemList show; older posts without published_at fall back to created_at.
+  // Newest first, by the date each card shows.
   const posts = (await getPublishedBlogs(lang)).map(toSummary).sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
   const pages = Math.max(1, Math.ceil(posts.length / BLOG_PAGE_SIZE));
   if (page > pages) notFound();
-  const onPage = posts.slice((page - 1) * BLOG_PAGE_SIZE, page * BLOG_PAGE_SIZE);
+  const onPage = postsOnPage(posts, page);
   const latest = posts[0]?.publishedAt;
 
   return (

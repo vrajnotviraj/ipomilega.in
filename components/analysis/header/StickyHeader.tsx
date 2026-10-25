@@ -47,9 +47,7 @@ export function StickyHeader({
   );
 }
 
-/**
- * Goes back when the visitor came from another page of the site, otherwise home, including right after a language switch.
- */
+/** Goes back when the visitor came from another page of this site; otherwise goes home. */
 function BackButton() {
   const router = useRouter();
   const progressRouter = useProgressRouter();
@@ -62,7 +60,7 @@ function BackButton() {
     if (navigatedInApp) return true;
 
     try {
-      // The same page in another language means the reader switched languages, and going back would undo that.
+      // The same page in another language counts as a language switch, so back goes home instead.
       const referrer = new URL(document.referrer);
       return referrer.origin === window.location.origin && bareSitePath(referrer.pathname) !== bareSitePath(window.location.pathname);
     } catch {

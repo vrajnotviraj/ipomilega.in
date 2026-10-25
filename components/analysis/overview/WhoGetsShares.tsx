@@ -36,6 +36,7 @@ function QuotaAndSizes({ slices, applicationRows }: { slices: Slice[]; applicati
 /** Application sizes: a table from sm up, stacked rows on phones. */
 function ApplicationSizes({ rows }: { rows: IpoMarketLot[] }) {
   const d = t().analysis;
+  const nameOf = (row: IpoMarketLot) => (row.application ? applicationLabel(d.quota.applicationWords, row.application) : "-");
   return (
     <div className="rounded-xl border border-border bg-card px-4 py-3 sm:px-6 sm:py-4">
       <div className="mb-2 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground sm:hidden">{d.quota.applicationSize}</div>
@@ -43,7 +44,7 @@ function ApplicationSizes({ rows }: { rows: IpoMarketLot[] }) {
         {rows.map((row, index) => (
           <li key={index} className="py-2.5 text-sm">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="font-medium">{row.application ? applicationLabel(d.quota.applicationWords, row.application) : "-"}</span>
+              <span className="font-medium">{nameOf(row)}</span>
               <span className="font-mono font-medium tabular-nums">{row.amount || "-"}</span>
             </div>
             <div className="mt-0.5 font-mono text-xs tabular-nums text-muted-foreground">
@@ -66,7 +67,7 @@ function ApplicationSizes({ rows }: { rows: IpoMarketLot[] }) {
         <tbody className="font-mono tabular-nums">
           {rows.map((row, index) => (
             <tr key={index}>
-              <td className="py-2.5 font-sans font-medium">{row.application ? applicationLabel(d.quota.applicationWords, row.application) : "-"}</td>
+              <td className="py-2.5 font-sans font-medium">{nameOf(row)}</td>
               <td className="py-2.5 text-right">{row.lot_size || "-"}</td>
               <td className="py-2.5 text-right">{row.shares || "-"}</td>
               <td className="py-2.5 text-right">{row.amount || "-"}</td>

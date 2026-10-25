@@ -34,8 +34,10 @@ export function priceBandOf(row: Row): string | null {
 }
 
 /** The feed's issue size, else the detail page's, with "Approx 55 Crores" shortened to "55 Cr.". */
-const issueSizeTextOf = (row: Row) =>
-  (formatIssueSize(row.ipo?.ipo_size) ?? formatIssueSize(row.ipo?.ipo_details?.issue_size))?.replace(/^Approx\s+([\d,.]+)\s+Crores$/i, "$1 Cr.") ?? null;
+function issueSizeTextOf(row: Row): string | null {
+  const size = formatIssueSize(row.ipo?.ipo_size) ?? formatIssueSize(row.ipo?.ipo_details?.issue_size);
+  return size?.replace(/^Approx\s+([\d,.]+)\s+Crores$/i, "$1 Cr.") ?? null;
+}
 
 /** The issue size when the feed gave an amount, null when it gave a share count or nothing. */
 function issueAmountOf(row: Row): string | null {

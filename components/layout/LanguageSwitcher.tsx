@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useLocale, useT } from "@/lib/i18n/client";
+import { cn } from "@/lib/utils";
 import { bareSitePath, LANG_TAG, LANGUAGE_NAMES, LOCALES, localePath } from "@/lib/i18n/locales";
 
 /** The same page in each language, as a pill strip with the current one raised. Plain links, so crawlers follow them. */
@@ -27,8 +28,11 @@ export function LanguageSwitcher() {
               location.assign(e.currentTarget.href + location.search);
             }
           }}
-          // Another script's label draws in the system font: its Noto face would cost ~110 KB on every page just for two letters.
-          className={`${locale !== current && locale !== "en" ? "font-[family-name:system-ui,sans-serif] " : ""}grid min-h-8 min-w-9 place-items-center rounded-full px-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground press aria-[current]:bg-card aria-[current]:text-foreground aria-[current]:shadow-(--shadow-card)`}
+          className={cn(
+            "grid min-h-8 min-w-9 place-items-center rounded-full px-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground press aria-[current]:bg-card aria-[current]:text-foreground aria-[current]:shadow-(--shadow-card)",
+            // A label in another page's script uses the system font, so this page skips that script's web font.
+            locale !== current && locale !== "en" && "font-[family-name:system-ui,sans-serif]"
+          )}
         >
           {LANGUAGE_NAMES[locale].short}
         </a>

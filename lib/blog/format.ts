@@ -26,6 +26,9 @@ export const BLOG_PAGE_SIZE = 12;
 /** /blogs for page 1, /blogs/page/<n> after; /blogs/<n> would clash with post slugs. */
 export const blogPagePath = (page: number) => (page === 1 ? "/blogs" : `/blogs/page/${page}`);
 
+/** The posts on one page of /blogs. */
+export const postsOnPage = <T>(posts: T[], page: number) => posts.slice((page - 1) * BLOG_PAGE_SIZE, page * BLOG_PAGE_SIZE);
+
 /** What a post card needs. Built on the server so the /blogs page never ships post bodies to the browser. */
 export type PostSummary = Pick<Blog, "_id" | "slug" | "title" | "category" | "author" | "image_url"> & {
   excerpt: string;

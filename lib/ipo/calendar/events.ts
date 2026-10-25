@@ -13,23 +13,21 @@ export type CalendarEvent = {
   hours?: [number, number];
 };
 
-const STEPS: { step: keyof IssueDates; hours?: [number, number] }[] = [
-  { step: "opening" },
-  { step: "closing", hours: [10, 15] },
-  { step: "allotment" },
-  { step: "listing" },
-];
+const STEPS = ["opening", "closing", "allotment", "listing"] as const;
+
+/** Bidding closes at 3 PM, so the closing day is a 10 AM to 3 PM event; the rest are all-day. */
+const hoursOf = (step: keyof IssueDates): [number, number] | undefined => (step === "closing" ? [10, 15] : undefined);
 
 /** Each step's label and note in the reader's language: messages/<lang>/analysis.json, "calendar". */
 export type CalendarWords = { steps: Record<keyof IssueDates, string>; notes: Record<keyof IssueDates, string> };
 
 /** Turns an IPO's dates into calendar events, skipping any date that isn't known yet. */
 export function issueEvents({ company, slug, url, dates }: { company: string; slug: string; url: string; dates: IssueDates }, words: CalendarWords): CalendarEvent[] {
-  return STEPS.flatMap(({ step, hours }) => {
+  return STEPS.flatMap((step) => {
     const date = parseIpoDate(dates[step]);
     if (!date) return [];
     const label = words.steps[step];
-    return [{ step, uid: `${slug}-${step}@ipomilega.in`, label, title: `${company} ${label}`, details: `${words.notes[step]}\n${url}`, date, hours }];
+    return [{ step, uid: `${slug}-${step}@ipomilega.in`, label, title: `${company} ${label}`, details: `${words.notes[step]}\n${url}`, date, hours: hoursOf(step) }];
   });
 }
 
