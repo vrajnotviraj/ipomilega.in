@@ -109,7 +109,8 @@ export function getAboutLine(analysis: IpoComprehensiveAnalysis): string | null 
 export function getVerdict(analysis: IpoComprehensiveAnalysis): string | null {
   const summary = (analysis.fundamentals?.summary || "").replace(/\s+/g, " ").trim();
   if (!summary) return null;
-  return summary.split(/(?<=[.!?])\s+(?=[A-Z])/)[0];
+  // A single capital before the period is an initial ("M. K. Sons"), not a sentence end.
+  return summary.split(/(?<=[.!?])(?<!\b[A-Z]\.)\s+(?=[A-Z])/)[0];
 }
 
 function firstNumber(value: string): number {
