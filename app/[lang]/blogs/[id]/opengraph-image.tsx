@@ -9,7 +9,7 @@ import RootImage from "@/app/[lang]/opengraph-image";
 export const alt = "Article on IPO Milega";
 export const size = OG_SIZE;
 export const contentType = "image/png";
-export const revalidate = 1800;
+export const revalidate = 600;
 
 // Nothing is built ahead; each image renders on its first visit and is cached from then on.
 export function generateStaticParams() {

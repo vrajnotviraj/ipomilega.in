@@ -10,7 +10,7 @@ import { getIpoLink } from "@/lib/queries/ipos";
 import { articleJsonLd, JsonLd } from "@/lib/seo/json-ld";
 import { modifiedAtOf, publishedAtOf } from "@/lib/seo/news-sitemap";
 
-export const revalidate = 1800;
+export const revalidate = 600;
 
 // Nothing is built ahead; each page renders on its first visit and is cached from then on.
 export function generateStaticParams() {

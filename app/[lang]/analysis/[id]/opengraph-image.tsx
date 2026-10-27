@@ -12,7 +12,7 @@ import en from "@/messages/en";
 export const alt = "IPO analysis on IPO Milega";
 export const size = OG_SIZE;
 export const contentType = "image/png";
-export const revalidate = 1800;
+export const revalidate = 300;
 
 // Nothing is built ahead; each image renders on its first visit and is cached from then on.
 export function generateStaticParams() {
