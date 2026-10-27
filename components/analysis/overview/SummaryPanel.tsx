@@ -167,7 +167,7 @@ function HeadlineFigures({ figures }: { figures: HeadlineFigure[] }) {
   );
 }
 
-/** Price band, lot, cost of one lot and issue size; the size is the IPO's live one, as on the cards, since the analysis keeps the size from when it ran. */
+/** Price band, lot, cost of one lot and issue size. The size comes from the IPO record, falling back to the analysis. */
 function KeyFacts({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { common, analysis: words } = t();
   const lotShares = getLotShares(analysis);
