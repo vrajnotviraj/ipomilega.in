@@ -57,7 +57,7 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
               )}
             </p>
           </div>
-          <KeyFacts analysis={analysis} />
+          <KeyFacts analysis={analysis} ipo={ipo} />
         </div>
       </div>
 
@@ -167,8 +167,8 @@ function HeadlineFigures({ figures }: { figures: HeadlineFigure[] }) {
   );
 }
 
-/** Price band, lot, cost of one lot and issue size. */
-function KeyFacts({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
+/** Price band, lot, cost of one lot and issue size; the size is the IPO's live one, as on the cards, since the analysis keeps the size from when it ran. */
+function KeyFacts({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { common, analysis: words } = t();
   const lotShares = getLotShares(analysis);
   const priceBand = formatPriceBand(analysis.ipo_details?.price_band);
@@ -177,7 +177,10 @@ function KeyFacts({ analysis }: { analysis: IpoComprehensiveAnalysis }) {
     { label: common.priceBand, value: placeholders[priceBand] ?? priceBand },
     { label: words.lotSize, value: lotShares ? fill(words.summary.shares, { count: lotShares }) : common.na },
     { label: words.summary.minInvestment, value: formatMinInvestment(analysis, common.na) },
-    { label: common.issueSize, value: formatIssueSize(analysis.ipo_details?.issue_size) ?? common.na },
+    {
+      label: common.issueSize,
+      value: formatIssueSize(ipo.ipo_details?.issue_size) ?? formatIssueSize(ipo.ipo_size) ?? formatIssueSize(analysis.ipo_details?.issue_size) ?? common.na,
+    },
   ];
 
   return (
