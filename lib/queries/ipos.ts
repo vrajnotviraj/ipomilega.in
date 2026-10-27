@@ -98,7 +98,7 @@ const readCardIpoDocs = cached(async () => {
     db.collection('ipo_comprehensive_analysis').find({}, { projection: ANALYSIS_CARD_PROJECTION }).toArray(),
   ]);
   return toPlain({ ipos, analyses });
-}, 'ipo-card-docs');
+}, 'ipo-card-docs', ['ipos']);
 
 /** Buckets the card documents and attaches each IPO's analysis. */
 async function loadIpoBuckets() {
@@ -151,7 +151,8 @@ export const getAnalysisBySlug = cache(cached(
     ]);
     return { ipos_analysis: stripCitations(localize(plain.analysis, translation)), ipo: localize(plain.ipo, ipoTranslation) } as unknown as AnalysisPage;
   },
-  'analysis-by-slug'
+  'analysis-by-slug',
+  ['ipos', 'translations']
 ));
 
 /** The IPO's name for a slug, or null when no IPO has it. Tells "analysis pending" apart from "no such IPO". */
@@ -159,7 +160,7 @@ export const getIpoNameBySlug = cache(cached(async (slug: string): Promise<strin
   const db = await getDb();
   const ipo = await db.collection('ipos').findOne({ slug }, { projection: { upcoming_ipo_2025: 1 } });
   return ipo ? ipo.upcoming_ipo_2025 || '' : null;
-}, 'ipo-name-by-slug'));
+}, 'ipo-name-by-slug', ['ipos']));
 
 type AnalysisSlug = { _id: string; slug: string; updated_at?: string };
 
@@ -171,7 +172,7 @@ export const getAnalysisSlugs = cache(cached(async (): Promise<AnalysisSlug[]> =
     .find({ slug: { $nin: [null, ''] } }, { projection: { slug: 1, updated_at: 1 } })
     .toArray();
   return toPlain(docs) as unknown as AnalysisSlug[];
-}, 'analysis-slugs'));
+}, 'analysis-slugs', ['ipos']));
 
 /** An IPO's name, its entity-page slug (null until the IPO has an analysis page) and the facts its summary card shows. */
 export type IpoLink = { name: string; slug: string | null; logo: string | null; board: string | null; issueSize: string | null };
@@ -198,4 +199,4 @@ export const getIpoLink = cache(cached(async (ipoId: string): Promise<IpoLink | 
     board: ipo ? getIpoType(ipo as unknown as Ipo) : null,
     issueSize: formatIssueSize(ipo?.ipo_details?.issue_size),
   };
-}, 'ipo-link'));
+}, 'ipo-link', ['ipos']));

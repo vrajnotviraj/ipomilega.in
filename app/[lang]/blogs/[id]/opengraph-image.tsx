@@ -11,6 +11,11 @@ export const size = OG_SIZE;
 export const contentType = "image/png";
 export const revalidate = 1800;
 
+// Nothing is built ahead; each image renders on its first visit and is cached from then on.
+export function generateStaticParams() {
+  return [];
+}
+
 // The default OG font has no ₹ glyph (it renders as a box), so money reads "Rs" on the card.
 const rupees = (text: string) => text.replace(/₹\s*/g, "Rs ");
 

@@ -12,6 +12,11 @@ import { modifiedAtOf, publishedAtOf } from "@/lib/seo/news-sitemap";
 
 export const revalidate = 1800;
 
+// Nothing is built ahead; each page renders on its first visit and is cached from then on.
+export function generateStaticParams() {
+  return [];
+}
+
 type Params = { params: Promise<{ lang: string; id: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

@@ -15,13 +15,13 @@ export const getAuthor = cache(cached(async (slug: string): Promise<Author | nul
   const db = await getDb();
   const author = await db.collection('authors').findOne({ slug }, { projection: { _id: 0, slug: 1, name: 1, bio: 1 } });
   return author as Author | null;
-}, 'getAuthor'));
+}, 'getAuthor', ['blogs']));
 
 /** Every writer, for the sitemap. */
 export const getAuthors = cache(cached(async (): Promise<Author[]> => {
   const db = await getDb();
   return (await db.collection('authors').find({}, { projection: { _id: 0, slug: 1, name: 1 } }).toArray()) as unknown as Author[];
-}, 'getAuthors'));
+}, 'getAuthors', ['blogs']));
 
 /** One page of a writer's live posts as card summaries, newest first, with their total. */
 export const getAuthorPosts = cache(cached(async (slug: string, page: number, lang: Locale): Promise<{ posts: PostSummary[]; total: number }> => {
@@ -33,4 +33,4 @@ export const getAuthorPosts = cache(cached(async (slug: string, page: number, la
     getTranslationMap('blog', lang),
   ]);
   return { posts: (toPlain(blogs) as unknown as Blog[]).map((blog) => toSummary(localize(blog, translations[blog._id]))), total };
-}, 'getAuthorPosts', CLOCK_TTL));
+}, 'getAuthorPosts', ['blogs', 'translations'], CLOCK_TTL));
