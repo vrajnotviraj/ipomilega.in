@@ -12,5 +12,5 @@ export type DataTag = (typeof DATA_TAGS)[number];
 export const cached = <A extends unknown[], R>(fn: (...args: A) => Promise<R>, key: string, tags: DataTag[], seconds = 86400) =>
   unstable_cache(fn, [key], { revalidate: seconds, tags: [SITE_DATA_TAG, ...tags] });
 
-/** Cache time for reads that depend on the clock, such as scheduled posts going live. Same as the pages' 30 minutes. */
-export const CLOCK_TTL = 1800;
+/** Cache time for reads that depend on the clock, such as scheduled posts going live. */
+export const CLOCK_TTL = 300;
