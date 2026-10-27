@@ -35,6 +35,8 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // The bare domain moves to www, the canonical host.
+      { source: "/:path*", has: [{ type: "host", value: "ipomilega.in" }], destination: "https://www.ipomilega.in/:path*", permanent: true },
       // /analysis has no index page, so it redirects to /ipos. Each IPO keeps its page at /analysis/[slug].
       { source: "/analysis", destination: "/ipos", permanent: true },
       { source: "/:lang(hi|gu)/analysis", destination: "/:lang/ipos", permanent: true },
