@@ -63,23 +63,37 @@ export function niceAxis(values: number[]) {
   return { domain: [min, max] as [number, number], ticks };
 }
 
+// In-flight requests by IPO, so the chart and the summary's "GMP updated" time share one fetch.
+const requests = new Map<string, Promise<ChartPoint[]>>();
+
+function loadGmpHistory(ipoId: string): Promise<ChartPoint[]> {
+  const pending = requests.get(ipoId);
+  if (pending) return pending;
+  const request = fetch(`/api/ipo/${ipoId}/gmp-history`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (!data?.success) throw new Error(data?.message || "Request failed");
+      const series: GmpDay[] = Array.isArray(data.series) ? data.series : [];
+      return series.map((day, i) => ({
+        ...day,
+        ts: new Date(day.t).getTime(),
+        delta: i === 0 ? null : day.gmp - series[i - 1].gmp,
+      }));
+    })
+    .finally(() => requests.delete(ipoId));
+  requests.set(ipoId, request);
+  return request;
+}
+
 /** Loads the day-by-day GMP series, or null while loading and "failed" on error. */
 export function useGmpHistory(ipoId: string) {
   const [points, setPoints] = useState<ChartPoint[] | null | "failed">(null);
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/ipo/${ipoId}/gmp-history`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data?.success) throw new Error(data?.message || "Request failed");
-        const series: GmpDay[] = Array.isArray(data.series) ? data.series : [];
-        const withDeltas = series.map((day, i) => ({
-          ...day,
-          ts: new Date(day.t).getTime(),
-          delta: i === 0 ? null : day.gmp - series[i - 1].gmp,
-        }));
-        if (!cancelled) setPoints(withDeltas);
+    loadGmpHistory(ipoId)
+      .then((series) => {
+        if (!cancelled) setPoints(series);
       })
       .catch(() => {
         if (!cancelled) setPoints("failed");
