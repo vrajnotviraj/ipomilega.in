@@ -15,7 +15,6 @@ import { getAboutLine, getIssueDates, getLotShares, formatMinInvestment, getVerd
 import { getHeadlineFigures, type HeadlineFigure } from "@/components/analysis/overview/headline-figures";
 import { IssueTimeline } from "@/components/analysis/overview/IssueTimeline";
 import { AddToCalendar } from "@/components/analysis/overview/add-to-calendar/AddToCalendar";
-import { GmpUpdatedTime } from "@/components/analysis/overview/GmpUpdatedTime";
 import { Eyebrow } from "@/components/analysis/primitives";
 
 /**
@@ -54,7 +53,7 @@ export function SummaryPanel({ analysis, ipo }: { analysis: IpoComprehensiveAnal
             <p className="mt-2 text-xs text-muted-foreground">
               {d.analysis.summary.gmpNote}
               {gmpUpdatedAt && (
-                <> {d.analysis.summary.gmpUpdated} <span className="font-mono tabular-nums"><GmpUpdatedTime ipoId={ipo._id} cachedAt={ipo.gmp_updated_at} /></span>.</>
+                <> {d.analysis.summary.gmpUpdated} <span className="font-mono tabular-nums">{gmpUpdatedAt}</span>.</>
               )}
             </p>
           </div>
