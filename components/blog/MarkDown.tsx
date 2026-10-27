@@ -10,12 +10,15 @@ import { locale } from "@/lib/i18n/server";
 const textOf = (node: Element | ElementContent): string =>
   node.type === "text" ? node.value : "children" in node ? node.children.map(textOf).join("") : "";
 
-/** Site-relative or ipomilega.in links stay in the tab; everything else opens a new one. */
-const isInternal = (href?: string) => !!href && /^(\/(?!\/)|#|https:\/\/(www\.)?ipomilega\.in(\/|$))/.test(href);
+/** "/blogs/x" is a site path; "//cdn.com/x" and "https://..." are not. */
+const isSitePath = (href: string) => /^\/(?!\/)/.test(href);
 
-/** Translated posts keep the English body's site paths, so "/blogs/x" in a Hindi post becomes "/hi/blogs/x". A path that already names a language stays. */
+/** Site paths, anchors and ipomilega.in links stay in the tab; everything else opens a new one. */
+const isInternal = (href?: string) => !!href && (isSitePath(href) || /^(#|https:\/\/(www\.)?ipomilega\.in(\/|$))/.test(href));
+
+/** Adds the page's language to a site path: "/blogs/x" in Hindi becomes "/hi/blogs/x". A path that already has a language is left alone. */
 const siteHref = (lang: Locale, href?: string) =>
-  href && /^\/(?!\/)/.test(href) && bareSitePath(href) === href ? localePath(lang, href) : href;
+  href && isSitePath(href) && bareSitePath(href) === href ? localePath(lang, href) : href;
 
 type HeadingProps = { children?: React.ReactNode; node?: Element };
 

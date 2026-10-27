@@ -7,26 +7,41 @@ import { SITE_URL } from '@/lib/seo/share';
 
 export const dynamic = 'force-dynamic';
 
-// The busiest pages, re-rendered right after a purge so the first visitor doesn't get the stale copy.
+// Home and /ipos in every language, re-rendered after each purge.
 const WARM_PATHS = LOCALES.flatMap((lang) => ['/', '/ipos'].map((path) => localePath(lang, path)));
 
 const digest = (value: string) => createHash('sha256').update(value).digest();
 
 const isDataTag = (tag: string): tag is DataTag => (DATA_TAGS as readonly string[]).includes(tag);
 
-/**
- * Called by the engine with `Authorization: Bearer <REVALIDATE_SECRET>` after it writes.
- * `?tag=ipos&tag=translations` purges the reads with those tags and every page that used them; with no tag it purges every page and read.
- * Either way it then re-renders the home and /ipos pages in every language.
- */
+/** True when the request carries `Authorization: Bearer <secret>`. */
+function isAuthorized(req: NextRequest, secret: string) {
+  const token = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
+  return timingSafeEqual(digest(token), digest(secret));
+}
+
+/** Purges the pages that read the tagged data, or every page when no tag is given. */
+function purge(tags: DataTag[]) {
+  try {
+    if (tags.length) {
+      tags.forEach((tag) => revalidateTag(tag));
+      return;
+    }
+    // From the root layout down, so dynamic pages such as /analysis/[id] go too.
+    revalidatePath('/', 'layout');
+    revalidateTag(SITE_DATA_TAG);
+  } catch (error) {
+    console.warn('Revalidation error:', error);
+  }
+}
+
+/** The engine calls this after it writes: `POST /api/revalidate?tag=ipos&tag=translations`, or no tag to purge everything. */
 export async function POST(req: NextRequest) {
   const secret = process.env.REVALIDATE_SECRET;
   if (!secret) {
     return NextResponse.json({ success: false, message: 'REVALIDATE_SECRET not configured' }, { status: 500 });
   }
-
-  const header = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
-  if (!timingSafeEqual(digest(header), digest(secret))) {
+  if (!isAuthorized(req, secret)) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
 
@@ -36,18 +51,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, message: `Unknown tag: ${unknown.join(', ')}. Known: ${DATA_TAGS.join(', ')}` }, { status: 400 });
   }
 
-  try {
-    if (tags.length) {
-      tags.forEach((tag) => revalidateTag(tag));
-    } else {
-      // Purges from the root layout down, which covers the dynamic /analysis/[slug] pages that revalidatePath('/analysis') misses.
-      revalidatePath('/', 'layout');
-      revalidateTag(SITE_DATA_TAG);
-    }
-  } catch (error) {
-    console.warn('Revalidation error:', error);
-  }
-  // The first request after a purge is served stale and triggers the re-render.
+  purge(tags as DataTag[]);
   after(() => Promise.allSettled(WARM_PATHS.map((path) => fetch(`${SITE_URL}${path}`, { cache: 'no-store' }))));
   return NextResponse.json({ success: true, revalidated: true, tags: tags.length ? tags : 'all', at: new Date().toISOString() });
 }
