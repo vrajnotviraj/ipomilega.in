@@ -4,7 +4,7 @@ import { setLocale } from "@/lib/i18n/server";
 import { pageFromSegments } from "@/components/ui/pager";
 import { BlogsIndex, blogsMetadata } from "@/components/blog/BlogsIndex";
 
-export const revalidate = 600;
+export const revalidate = 1800;
 
 // Builds no pages ahead; each renders on its first visit and is then cached.
 export function generateStaticParams() {

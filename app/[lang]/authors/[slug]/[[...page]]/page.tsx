@@ -13,7 +13,7 @@ import { PostCard } from "@/components/blog/PostCard";
 import { PAGER, pageFromSegments } from "@/components/ui/pager";
 
 // Pages are /authors/<slug> and /authors/<slug>/<n>. A path segment keeps each page in the ISR cache, where ?page= would not.
-export const revalidate = 600;
+export const revalidate = 1800;
 
 // Nothing is built ahead; each page renders on its first visit and is cached from then on.
 export function generateStaticParams() {

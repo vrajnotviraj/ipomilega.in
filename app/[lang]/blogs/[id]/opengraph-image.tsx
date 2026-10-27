@@ -9,7 +9,7 @@ import RootImage from "@/app/[lang]/opengraph-image";
 export const alt = "Article on IPO Milega";
 export const size = OG_SIZE;
 export const contentType = "image/png";
-export const revalidate = 600;
+export const revalidate = 1800;
 
 // The default OG font has no ₹ glyph (it renders as a box), so money reads "Rs" on the card.
 const rupees = (text: string) => text.replace(/₹\s*/g, "Rs ");

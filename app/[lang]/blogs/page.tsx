@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { setLocale } from "@/lib/i18n/server";
 import { BlogsIndex, blogsMetadata } from "@/components/blog/BlogsIndex";
 
-export const revalidate = 600;
+export const revalidate = 1800;
 
 type Params = { params: Promise<{ lang: string }> };
 

@@ -7,8 +7,8 @@ import { dayNumberInIndia } from "@/lib/ipo/format";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { PlannerClient } from "@/components/planner/PlannerClient";
 
-// Matches the 5-minute cache on the IPO read; the engine purges both after each write.
-export const revalidate = 300;
+// Thirty minutes as a fallback; the engine purges the page and the IPO read after each write.
+export const revalidate = 1800;
 
 const path = "/ipos/planner";
 

@@ -12,7 +12,7 @@ import en from "@/messages/en";
 export const alt = "IPO analysis on IPO Milega";
 export const size = OG_SIZE;
 export const contentType = "image/png";
-export const revalidate = 300;
+export const revalidate = 1800;
 
 // The default OG font has no ₹ glyph (it renders as a box), so money reads "Rs" on the card.
 const rupees = (value: string) => value.replace(/₹\s*/g, "").replace(/^(?=\d)/, "Rs ");
