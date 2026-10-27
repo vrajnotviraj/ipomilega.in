@@ -4,6 +4,8 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import type { Element, ElementContent } from "hast";
 import { headingIds } from "@/components/blog/headings";
+import { bareSitePath, localePath, type Locale } from "@/lib/i18n/locales";
+import { locale } from "@/lib/i18n/server";
 
 const textOf = (node: Element | ElementContent): string =>
   node.type === "text" ? node.value : "children" in node ? node.children.map(textOf).join("") : "";
@@ -11,12 +13,17 @@ const textOf = (node: Element | ElementContent): string =>
 /** Site-relative or ipomilega.in links stay in the tab; everything else opens a new one. */
 const isInternal = (href?: string) => !!href && /^(\/(?!\/)|#|https:\/\/(www\.)?ipomilega\.in(\/|$))/.test(href);
 
+/** Translated posts keep the English body's site paths, so "/blogs/x" in a Hindi post becomes "/hi/blogs/x". A path that already names a language stays. */
+const siteHref = (lang: Locale, href?: string) =>
+  href && /^\/(?!\/)/.test(href) && bareSitePath(href) === href ? localePath(lang, href) : href;
+
 type HeadingProps = { children?: React.ReactNode; node?: Element };
 
 /** Renders a blog post's markdown with the site's type styles, at a readable line length. */
 export default function MarkdownRenderer({ content }: { content: string }) {
   // One id counter per render, in document order, so the ids match `headingsOf` in headings.ts.
   const idFor = headingIds();
+  const lang = locale();
   const idOf = (node?: Element) => (node ? idFor(textOf(node)) : undefined);
   const sectionHeading = ({ children, node }: HeadingProps) => (
     <h2 id={idOf(node)} className="mt-12 mb-4 scroll-mt-24 font-display text-2xl font-bold leading-[1.15] tracking-[-0.03em] text-balance sm:text-3xl">
@@ -45,7 +52,7 @@ export default function MarkdownRenderer({ content }: { content: string }) {
           ),
           a: ({ children, href }) => (
             <a
-              href={href}
+              href={siteHref(lang, href)}
               {...(isInternal(href) ? {} : { target: "_blank", rel: "noopener noreferrer" })}
               className="text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary"
             >
