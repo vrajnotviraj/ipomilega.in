@@ -44,7 +44,7 @@ The engine calls `POST /api/revalidate` with `Authorization: Bearer <REVALIDATE_
 
 | Command | What it does |
 | :--- | :--- |
-| `npm run dev` | Dev server (builds into `.next-dev`) |
+| `npm run dev` | Dev server |
 | `npm run build` | Production build |
 | `npm run start` | Serves the production build |
 | `npm run lint` | ESLint |
@@ -63,4 +63,4 @@ public/       Static assets
 
 ## Deploying
 
-Railway runs the site as one service in Singapore; its settings live in `.railway/railway.ts`. `next build` runs at start, because Railway builds cannot reach MongoDB on the private network. Set the same variables there.
+Railway runs the site as one service in Singapore; its settings live in `.railway/railway.ts` and go live with `npx railway config apply`. The build reads no database: every page renders on its first visit and is then cached. Set the same variables there.

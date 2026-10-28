@@ -6,6 +6,11 @@ export const alt = "IPO Milega - Prospectus analysis for every Indian IPO";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
+// Builds no images ahead; each renders on its first visit and is then cached.
+export function generateStaticParams() {
+  return [];
+}
+
 /** Link-preview card for every page: mark, wordmark and tagline on chalk. */
 export default function OpengraphImage() {
   return new ImageResponse(

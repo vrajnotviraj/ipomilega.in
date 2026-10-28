@@ -4,9 +4,6 @@ const nextConfig: NextConfig = {
   // Pin the project root so a stray lockfile in a parent folder isn't picked as the workspace root.
   outputFileTracingRoot: __dirname,
   turbopack: { root: __dirname },
-  // `next dev` wipes its build dir on boot, so it builds into `.next-dev` to not break a `next start` in the same folder.
-  distDir:
-    process.env.NEXT_DIST_DIR || (process.env.NODE_ENV === "development" ? ".next-dev" : ".next"),
   // Caps stale-while-revalidate at an hour; the default of a year lets CDNs serve a stale homepage for too long.
   expireTime: 3600,
   // PostHog reverse proxy. Its API paths end in a slash (`/e/`), so Next must not redirect them.

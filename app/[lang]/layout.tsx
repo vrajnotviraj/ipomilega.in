@@ -4,7 +4,7 @@ import { DM_Mono, Figtree, Noto_Sans_Devanagari, Noto_Sans_Gujarati, Schibsted_G
 import SiteChrome from "@/components/layout/SiteChrome";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { notFound } from "next/navigation";
-import { isLocale, LANG_TAG, LOCALES } from "@/lib/i18n/locales";
+import { isLocale, LANG_TAG } from "@/lib/i18n/locales";
 import { setLocale, t } from "@/lib/i18n/server";
 import { DICTIONARIES } from "@/messages";
 import { openGraphBase, SITE_NAME, SITE_URL } from "@/lib/seo/share";
@@ -20,7 +20,8 @@ const FONT_CLASSES = [figtree, schibsted, dmMono, devanagari, gujarati].map((fon
 
 type Params = { params: Promise<{ lang: string }> };
 
-export const generateStaticParams = () => LOCALES.map((lang) => ({ lang }));
+// Builds no pages ahead, so the build needs no database; each renders on its first visit and is then cached.
+export const generateStaticParams = () => [];
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const lang = setLocale((await params).lang);

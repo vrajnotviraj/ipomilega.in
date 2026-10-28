@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { AnalysisDetail } from "@/components/analysis/AnalysisDetail"
 import { getShareFacts } from "@/components/analysis/analysis-facts"
 import { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis"
-import { getAnalysisBySlug, getAnalysisSlugs, getIpoNameBySlug } from '@/lib/queries/ipos';
+import { getAnalysisBySlug, getIpoNameBySlug } from '@/lib/queries/ipos';
 import { getIpoArticles } from '@/lib/queries/blogs';
 import { buildShareDescription, openGraphBase, SITE_NAME, SITE_URL, titleFor } from '@/lib/seo/share';
 import { fill, LANG_TAG, type Locale, localePath } from '@/lib/i18n/locales';
@@ -19,15 +19,9 @@ export const revalidate = 60
 
 type Params = { params: Promise<{ lang: string; id: string }> }
 
-// English pages are built ahead; Hindi and Gujarati render on their first visit.
-export async function generateStaticParams({ params }: { params: { lang: string } }) {
-  if (params.lang !== 'en') return []
-  try {
-    const analyses = await getAnalysisSlugs()
-    return analyses.map(({ slug }) => ({ id: slug }))
-  } catch {
-    return []
-  }
+// Builds no pages ahead; each renders on its first visit and is then cached.
+export function generateStaticParams() {
+  return []
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

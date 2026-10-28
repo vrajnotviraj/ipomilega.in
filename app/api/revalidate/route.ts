@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   // From the root layout down, so dynamic pages such as /analysis/[id] go too.
   revalidatePath('/', 'layout');
-  revalidateTag(SITE_DATA_TAG);
+  revalidateTag(SITE_DATA_TAG, { expire: 0 });
   after(() => Promise.allSettled(WARM_PATHS.map((path) => fetch(`${SITE_URL}${path}`, { cache: 'no-store' }))));
   return NextResponse.json({ success: true, revalidated: true, at: new Date().toISOString() });
 }

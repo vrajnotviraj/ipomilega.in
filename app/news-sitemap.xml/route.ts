@@ -4,7 +4,8 @@ import { SITE_NAME, SITE_URL } from '@/lib/seo/share';
 import { isFreshNews, newsEntry } from '@/lib/seo/news-sitemap';
 import { LOCALES } from '@/lib/i18n/locales';
 
-export const revalidate = 600;
+// Rendered per request from the cached reads, so the build needs no database.
+export const dynamic = 'force-dynamic';
 
 /** Google News sitemap: engine news articles (subscription, allotment, listing) published in the last 48 hours, in each language they are translated into. */
 export async function GET() {

@@ -8,7 +8,8 @@ import { getTranslatedKeys, type TranslationKind } from '@/lib/queries/translati
 import { modifiedAtOf } from '@/lib/seo/news-sitemap';
 import { languageAlternates, type Locale, localePath, LOCALES } from '@/lib/i18n/locales';
 
-export const revalidate = 3600;
+// Rendered per request from the cached reads, so the build needs no database.
+export const dynamic = 'force-dynamic';
 
 type Entry = Omit<MetadataRoute.Sitemap[number], 'url' | 'alternates'>;
 
