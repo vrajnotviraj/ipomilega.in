@@ -46,7 +46,8 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return {
-      beforeFiles: [],
+      // /404 would otherwise hit Next's built-in page, which skips the site's own not-found page.
+      beforeFiles: [{ source: "/404", destination: "/en/404" }],
       // After static files and route handlers, so only page paths reach the [lang] segment.
       afterFiles: [
         { source: "/ingest/static/:path*", destination: "https://us-assets.i.posthog.com/static/:path*" },
