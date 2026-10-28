@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import type { Dictionary } from "@/messages";
 import { useT } from "@/lib/i18n/client";
 import { fill } from "@/lib/i18n/locales";
-import { useBrowserValue } from "@/lib/useBrowserValue";
+import { useBrowserValue } from "@/lib/hooks/useBrowserValue";
 
 type Align = "left" | "center" | "right";
 

@@ -6,9 +6,8 @@ export const partial = "ipomilega.in";
 export default defineRailway(() => {
   const site = service("ipomilega.in", {
     source: github("vrajnotviraj/ipomilega.in", { branch: "master" }),
-    // The build reads no database (pages render on first visit), so it runs in Railway's build step.
     build: { buildCommand: "npm run build", buildEnvironment: "V3", builder: "RAILPACK" },
-    // The standalone server runs without npm in front, so it gets Railway's SIGTERM directly. :: listens on IPv4 and IPv6.
+    // No npm in front, so the server gets Railway's SIGTERM. :: listens on IPv4 and IPv6.
     start: "env HOSTNAME=:: node .next/standalone/server.js",
     healthcheck: "/robots.txt",
     healthcheckTimeout: 60,

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // A self-contained server in .next/standalone that loads only the files it uses: ~40 MB less memory than next start.
+  // Builds a self-contained server into .next/standalone; npm start runs it.
   output: "standalone",
   // Pin the project root so a stray lockfile in a parent folder isn't picked as the workspace root.
   outputFileTracingRoot: __dirname,
@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return {
-      // /404 would otherwise hit Next's built-in page, which skips the site's own not-found page.
+      // Sends /404 to the site's not-found page; Next's built-in one would answer it first.
       beforeFiles: [{ source: "/404", destination: "/en/404" }],
       // After static files and route handlers, so only page paths reach the [lang] segment.
       afterFiles: [

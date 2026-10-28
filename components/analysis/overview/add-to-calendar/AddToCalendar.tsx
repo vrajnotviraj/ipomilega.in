@@ -7,7 +7,7 @@ import { isPhone, openIcsFile } from "@/components/analysis/overview/add-to-cale
 import { trackCalendarClick } from "@/components/analysis/overview/add-to-calendar/track";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
-import { useBrowserValue } from "@/lib/useBrowserValue";
+import { useBrowserValue } from "@/lib/hooks/useBrowserValue";
 
 /**
  * Adds the IPO's upcoming dates to the visitor's calendar.

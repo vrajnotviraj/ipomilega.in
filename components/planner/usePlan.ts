@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import type { PlannerIpo } from "@/lib/ipo/planner/ipo";
 import type { PlanInputs } from "@/lib/ipo/planner/inputs";
 import { planIpos, type Goal, type Holders, type Plan } from "@/lib/ipo/planner/plan";
@@ -14,6 +14,7 @@ const TYPING_PAUSE_MS = 600;
  */
 export function usePlan(request: PlanRequest): { plan: Plan | null; working: boolean } {
   const [answer, setAnswer] = useState<{ plan: Plan; request: PlanRequest } | null>(null);
+  const delay = useEffectEvent(() => (answer ? TYPING_PAUSE_MS : 0));
 
   useEffect(() => {
     const controller = new AbortController();
@@ -31,14 +32,12 @@ export function usePlan(request: PlanRequest): { plan: Plan | null; working: boo
           if (!controller.signal.aborted) finish(planIpos(ipos, request.funds, request.accounts, request.goal, request.holders));
         }
       },
-      answer ? TYPING_PAUSE_MS : 0
+      delay()
     );
     return () => {
       clearTimeout(timer);
       controller.abort();
     };
-    // `answer` only decides the first delay; a result arriving must not restart the search.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request]);
 
   return { plan: answer?.plan ?? null, working: answer?.request !== request };

@@ -4,7 +4,7 @@ import {
   isAllotted, maybeBreakingNews, nextPrice, openingPrice, parseStats, recordTrade, saveStats, storedStats,
   type News, type Phase, type Stats,
 } from "@/components/not-found/game-rules";
-import { useBrowserValue } from "@/lib/useBrowserValue";
+import { useBrowserValue } from "@/lib/hooks/useBrowserValue";
 
 const DRAW_MS = 900;
 
@@ -25,6 +25,9 @@ export function useListingDay() {
   const stopTimer = () => clearTimeout(timer.current);
 
   useEffect(() => stopTimer, []);
+  useEffect(() => {
+    if (played) saveStats(played);
+  }, [played]);
 
   const last = prices[prices.length - 1];
   const lower = open * (1 - CIRCUIT);
@@ -38,11 +41,7 @@ export function useListingDay() {
     setSoldAt(price);
     setPhase("sold");
     setNews(null);
-    setPlayed((current) => {
-      const next = recordTrade(current ?? parseStats(saved), price);
-      saveStats(next);
-      return next;
-    });
+    setPlayed((current) => recordTrade(current ?? parseStats(saved), price));
   }
 
   function tick() {
@@ -85,7 +84,6 @@ export function useListingDay() {
 
   function resetStats() {
     setPlayed(EMPTY_STATS);
-    saveStats(null);
   }
 
   function mainAction() {

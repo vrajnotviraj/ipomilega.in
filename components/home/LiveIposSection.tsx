@@ -36,7 +36,6 @@ export function LiveIposSection({ ipos, upcoming, closed }: IpoSectionProps & { 
   const { common: c } = dict;
   const d = dict.home.live;
   const { board, setBoard } = useBoard();
-  // Fades only on board switches, never on first paint.
   // Fades the list in when the board changes, not on first render.
   const [shownBoard, setShownBoard] = useState(board);
   const [switched, setSwitched] = useState(false);

@@ -123,9 +123,8 @@ export function parseStats(stored: string | null): Stats {
   }
 }
 
-export function saveStats(stats: Stats | null) {
+export function saveStats(stats: Stats) {
   try {
-    if (stats) localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-    else localStorage.removeItem(STATS_KEY);
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
   } catch {}
 }
