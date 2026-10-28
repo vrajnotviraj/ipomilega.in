@@ -1,7 +1,7 @@
 import type { IpoComprehensiveAnalysis } from "@/types/ipo-comprehensive-analysis";
 import type { Ipo } from "@/types/ipo";
 import { ArrowUpRight } from "lucide-react";
-import { boardLabel, formatIssueSize, formatIstTimestamp, formatPriceBand, getAllotmentCheckUrl, getIpoType, getIssueStage, type IssueStage } from "@/lib/ipo/format";
+import { boardLabel, formatIssueSize, formatIstTimestamp, formatPriceBand, ipoIssueSize, getAllotmentCheckUrl, getIpoType, getIssueStage, type IssueStage } from "@/lib/ipo/format";
 import { applyQibAdjustment, describeQibAdjustment, getQibSignal, getRiskTextColor, scoreBand, scoreOf } from "@/lib/ipo/score";
 import { RESEARCH_AUTHOR } from "@/lib/seo/json-ld";
 import { formatBlogDate } from "@/lib/blog/format";
@@ -167,7 +167,7 @@ function HeadlineFigures({ figures }: { figures: HeadlineFigure[] }) {
   );
 }
 
-/** Price band, lot, cost of one lot and issue size. The size comes from the IPO record, falling back to the analysis. */
+/** Price band, lot, cost of one lot and issue size. */
 function KeyFacts({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: Ipo }) {
   const { common, analysis: words } = t();
   const lotShares = getLotShares(analysis);
@@ -177,10 +177,7 @@ function KeyFacts({ analysis, ipo }: { analysis: IpoComprehensiveAnalysis; ipo: 
     { label: common.priceBand, value: placeholders[priceBand] ?? priceBand },
     { label: words.lotSize, value: lotShares ? fill(words.summary.shares, { count: lotShares }) : common.na },
     { label: words.summary.minInvestment, value: formatMinInvestment(analysis, common.na) },
-    {
-      label: common.issueSize,
-      value: formatIssueSize(ipo.ipo_details?.issue_size) ?? formatIssueSize(ipo.ipo_size) ?? formatIssueSize(analysis.ipo_details?.issue_size) ?? common.na,
-    },
+    { label: common.issueSize, value: ipoIssueSize(ipo) ?? formatIssueSize(analysis.ipo_details?.issue_size) ?? common.na },
   ];
 
   return (

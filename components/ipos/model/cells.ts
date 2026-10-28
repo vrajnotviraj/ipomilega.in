@@ -1,4 +1,4 @@
-import { formatIssueSize, formatTimes, getPriceBand, lastListing, parseEstListingPercent, parseGainValue } from "@/lib/ipo/format";
+import { formatTimes, ipoIssueSize, getPriceBand, lastListing, parseEstListingPercent, parseGainValue } from "@/lib/ipo/format";
 import { scoreOf } from "@/lib/ipo/score";
 import type { StepName } from "@/components/ipo-shared/lifecycle";
 import type { Row, Status } from "@/components/ipos/model/types";
@@ -33,9 +33,9 @@ export function priceBandOf(row: Row): string | null {
   return band ? `₹${band}` : null;
 }
 
-/** The feed's issue size, else the detail page's, with "Approx 55 Crores" shortened to "55 Cr.". */
+/** The issue size with "Approx 55 Crores" shortened to "55 Cr.". */
 function issueSizeTextOf(row: Row): string | null {
-  const size = formatIssueSize(row.ipo?.ipo_size) ?? formatIssueSize(row.ipo?.ipo_details?.issue_size);
+  const size = ipoIssueSize(row.ipo);
   return size?.replace(/^Approx\s+([\d,.]+)\s+Crores$/i, "$1 Cr.") ?? null;
 }
 

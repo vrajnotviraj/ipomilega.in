@@ -70,7 +70,7 @@ const getQuotaRows = cached(async () => {
   }));
   const checkedAt = docs.length ? new Date(Math.max(...docs.map((doc) => doc.checked_at.getTime()))).toISOString() : null;
   return { ipos, checkedAt };
-}, 'shareholder-quota', ['shareholder-quota']);
+}, 'shareholder-quota');
 
 /** Open IPOs plus the ones whose bidding has shut (5 PM IST on the close date). Split per request, not inside the cache. */
 export async function getShareholderQuotaIpos() {

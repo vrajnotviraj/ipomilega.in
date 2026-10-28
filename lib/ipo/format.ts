@@ -97,6 +97,12 @@ export const formatIssueSize = (raw: string | undefined | null): string | null =
   return kept.length ? kept.join(', ') : null;
 };
 
+/** The IPO's issue size, preferring a rupee amount over a share count, and the detail page's figure over the list feed's. */
+export const ipoIssueSize = (ipo?: Pick<Ipo, 'ipo_size' | 'ipo_details'> | null): string | null => {
+  const sizes = [ipo?.ipo_details?.issue_size, ipo?.ipo_size].map(formatIssueSize).filter((size) => size !== null);
+  return sizes.find((size) => !/share/i.test(size)) ?? sizes[0] ?? null;
+};
+
 // ---------- Gains ----------
 
 /** Gain or loss colour for a signed figure on the ink panel, plain chalk for zero. */

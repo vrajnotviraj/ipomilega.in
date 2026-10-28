@@ -25,9 +25,9 @@ async function findPublishedBlogs(lang: Locale, limit = 0): Promise<Blog[]> {
 }
 
 /** The three newest live posts, for the homepage. */
-export const getFeaturedBlogs = cache(cached((lang: Locale) => findPublishedBlogs(lang, 3), 'getFeaturedBlogs', ['blogs', 'translations'], CLOCK_TTL));
+export const getFeaturedBlogs = cache(cached((lang: Locale) => findPublishedBlogs(lang, 3), 'getFeaturedBlogs', CLOCK_TTL));
 
-export const getPublishedBlogs = cache(cached((lang: Locale) => findPublishedBlogs(lang), 'getPublishedBlogs', ['blogs', 'translations'], CLOCK_TTL));
+export const getPublishedBlogs = cache(cached((lang: Locale) => findPublishedBlogs(lang), 'getPublishedBlogs', CLOCK_TTL));
 
 /** One live post by slug in `lang` (English until translated), or null for a draft, a post scheduled for later, or an unknown slug. */
 export const getBlogBySlug = cache(cached(async (slug: string, lang: Locale): Promise<Blog | null> => {
@@ -36,7 +36,7 @@ export const getBlogBySlug = cache(cached(async (slug: string, lang: Locale): Pr
   if (!doc) return null;
   const blog = toPlain(doc) as unknown as Blog;
   return localize(blog, await getTranslation('blog', blog._id, lang));
-}, 'getBlogBySlug', ['blogs', 'translations'], CLOCK_TTL));
+}, 'getBlogBySlug', CLOCK_TTL));
 
 /** Published posts about one IPO, oldest first. ponytail: filters the cached full list; query by ipo_id once posts number in the thousands. */
 export async function getIpoArticles(ipoId: string, lang: Locale): Promise<Blog[]> {

@@ -4,7 +4,7 @@ import { ArrowRight, Clock, FileText } from 'lucide-react';
 import { AllotmentOddsTiles } from '@/components/ipo-shared/AllotmentOddsTiles';
 import { ProgressLink } from '@/components/progress/ProgressLink';
 import { cn } from '@/lib/utils';
-import { formatIssueSize, formatTimes, gainColor, gainMotion, parseEstListingPercent, parseGainValue, signedPercent } from '@/lib/ipo/format';
+import { formatTimes, ipoIssueSize, gainColor, gainMotion, parseEstListingPercent, parseGainValue, signedPercent } from '@/lib/ipo/format';
 import { getQibColor, getQibSignal, scoreOf } from '@/lib/ipo/score';
 import { useT } from '@/lib/i18n/client';
 import { CardHeader, IpoCardProps, Stat } from './CardParts';
@@ -21,9 +21,6 @@ export function LiveIpoCard({ ipo, analysis }: IpoCardProps) {
   );
 }
 
-function issueSizeOf(ipo: IpoCardProps['ipo'], sizeTba: string) {
-  return formatIssueSize(ipo?.ipo_details?.issue_size) || formatIssueSize(ipo?.ipo_size) || sizeTba;
-}
 
 function GmpStat({ ipo }: { ipo: IpoCardProps['ipo'] }) {
   const c = useT().common;
@@ -50,7 +47,7 @@ function BidStats({ ipo }: { ipo: IpoCardProps['ipo'] }) {
 
       <div className="mt-auto flex items-baseline justify-between gap-3 border-t border-border pt-4">
         <span className="text-xs text-muted-foreground">{c.issueSize}</span>
-        <span className="text-right font-mono text-sm font-medium tabular-nums text-foreground">{issueSizeOf(ipo, c.sizeTba)}</span>
+        <span className="text-right font-mono text-sm font-medium tabular-nums text-foreground">{ipoIssueSize(ipo) ?? c.sizeTba}</span>
       </div>
     </>
   );
@@ -64,7 +61,7 @@ function PreBidStats({ ipo, hasAnalysis }: { ipo: IpoCardProps['ipo']; hasAnalys
     <>
       <div data-tour="demand" className="flex items-start justify-between gap-3">
         <GmpStat ipo={ipo} />
-        <Stat label={c.issueSize} value={issueSizeOf(ipo, c.sizeTba)} className="text-right" />
+        <Stat label={c.issueSize} value={ipoIssueSize(ipo) ?? c.sizeTba} className="text-right" />
       </div>
 
       <p className="text-xs text-muted-foreground">{d.oddsLater}</p>

@@ -11,7 +11,7 @@ if (!process.env.MONGODB_DB) {
 
 const dbName = process.env.MONGODB_DB;
 
-// Kept on `global` so dev hot reloads and warm lambdas reuse one client.
+// Kept on `global` so dev hot reloads reuse one client.
 const globalWithMongo = global as typeof globalThis & {
   _mongoClient?: MongoClient;
   _mongoConnectPromise?: Promise<Db>;
@@ -24,7 +24,6 @@ const client = globalWithMongo._mongoClient ?? new MongoClient(process.env.MONGO
     deprecationErrors: true,
   },
   maxPoolSize: 10,
-  // Warm sockets skip the Atlas TLS handshake after an idle period.
   minPoolSize: 2,
   maxIdleTimeMS: 60_000,
   serverSelectionTimeoutMS: 5000,

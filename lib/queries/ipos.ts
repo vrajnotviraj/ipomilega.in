@@ -7,7 +7,7 @@ import { Ipo, IpoIssue } from '@/types/ipo';
 import { IpoComprehensiveAnalysis } from '@/types/ipo-comprehensive-analysis';
 import { HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { stripCitations } from '@/lib/queries/citations';
-import { daysFromToday, formatIssueSize, getIpoType, isPastFivePmIst, parseIpoDate } from '@/lib/ipo/format';
+import { daysFromToday, getIpoType, ipoIssueSize, isPastFivePmIst, parseIpoDate } from '@/lib/ipo/format';
 import { localize, type Locale } from '@/lib/i18n/locales';
 import { getTranslation } from '@/lib/queries/translations';
 
@@ -98,7 +98,7 @@ const readCardIpoDocs = cached(async () => {
     db.collection('ipo_comprehensive_analysis').find({}, { projection: ANALYSIS_CARD_PROJECTION }).toArray(),
   ]);
   return toPlain({ ipos, analyses });
-}, 'ipo-card-docs', ['ipos']);
+}, 'ipo-card-docs');
 
 /** Buckets the card documents and attaches each IPO's analysis. */
 async function loadIpoBuckets() {
@@ -151,8 +151,7 @@ export const getAnalysisBySlug = cache(cached(
     ]);
     return { ipos_analysis: stripCitations(localize(plain.analysis, translation)), ipo: localize(plain.ipo, ipoTranslation) } as unknown as AnalysisPage;
   },
-  'analysis-by-slug',
-  ['ipos', 'translations']
+  'analysis-by-slug'
 ));
 
 /** The IPO's name for a slug, or null when no IPO has it. Tells "analysis pending" apart from "no such IPO". */
@@ -160,7 +159,7 @@ export const getIpoNameBySlug = cache(cached(async (slug: string): Promise<strin
   const db = await getDb();
   const ipo = await db.collection('ipos').findOne({ slug }, { projection: { upcoming_ipo_2025: 1 } });
   return ipo ? ipo.upcoming_ipo_2025 || '' : null;
-}, 'ipo-name-by-slug', ['ipos']));
+}, 'ipo-name-by-slug'));
 
 type AnalysisSlug = { _id: string; slug: string; updated_at?: string };
 
@@ -172,7 +171,7 @@ export const getAnalysisSlugs = cache(cached(async (): Promise<AnalysisSlug[]> =
     .find({ slug: { $nin: [null, ''] } }, { projection: { slug: 1, updated_at: 1 } })
     .toArray();
   return toPlain(docs) as unknown as AnalysisSlug[];
-}, 'analysis-slugs', ['ipos']));
+}, 'analysis-slugs'));
 
 /** An IPO's name, its entity-page slug (null until the IPO has an analysis page) and the facts its summary card shows. */
 export type IpoLink = { name: string; slug: string | null; logo: string | null; board: string | null; issueSize: string | null };
@@ -184,7 +183,7 @@ export const getIpoLink = cache(cached(async (ipoId: string): Promise<IpoLink | 
     ObjectId.isValid(ipoId)
       ? db.collection('ipos').findOne(
           { _id: new ObjectId(ipoId) },
-          { projection: { upcoming_ipo_2025: 1, slug: 1, image_url: 1, ipo_type: 1, subscription_date_range: 1, 'ipo_details.ipo_listing': 1, 'ipo_details.issue_size': 1 } }
+          { projection: { upcoming_ipo_2025: 1, slug: 1, image_url: 1, ipo_type: 1, subscription_date_range: 1, 'ipo_details.ipo_listing': 1, 'ipo_details.issue_size': 1, ipo_size: 1 } }
         )
       : null,
   ]);
@@ -197,6 +196,6 @@ export const getIpoLink = cache(cached(async (ipoId: string): Promise<IpoLink | 
     slug,
     logo: ipo?.image_url || null,
     board: ipo ? getIpoType(ipo as unknown as Ipo) : null,
-    issueSize: formatIssueSize(ipo?.ipo_details?.issue_size),
+    issueSize: ipoIssueSize(ipo as unknown as Ipo),
   };
-}, 'ipo-link', ['ipos']));
+}, 'ipo-link'));

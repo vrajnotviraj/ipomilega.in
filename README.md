@@ -63,4 +63,4 @@ public/       Static assets
 
 ## Deploying
 
-Any Node host that runs Next.js works (Vercel is the easy one). Set the same variables there.
+Railway runs the site as one service in Singapore; its settings live in `.railway/railway.ts`. `next build` runs at start, because Railway builds cannot reach MongoDB on the private network. Set the same variables there.
