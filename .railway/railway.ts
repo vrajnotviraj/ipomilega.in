@@ -5,7 +5,7 @@ export const partial = "ipomilega.in";
 
 export default defineRailway(() => {
   const site = service("ipomilega.in", {
-    source: github("vrajnotviraj/ipomilega.in"),
+    source: github("vrajnotviraj/ipomilega.in", { branch: "master" }),
     // The build reads no database (pages render on first visit), so it runs in Railway's build step.
     build: { buildCommand: "npm run build", buildEnvironment: "V3", builder: "RAILPACK" },
     // next runs without npm in front, so it gets Railway's SIGTERM directly and npm holds no memory.
