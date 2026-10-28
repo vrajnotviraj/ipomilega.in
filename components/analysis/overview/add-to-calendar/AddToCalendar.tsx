@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CalendarPlus } from "lucide-react";
 import { issueEvents, type CalendarEvent, type IssueDates } from "@/lib/ipo/calendar/events";
 import { GoogleCalendarMenu } from "@/components/analysis/overview/add-to-calendar/GoogleCalendarMenu";
@@ -7,6 +7,7 @@ import { isPhone, openIcsFile } from "@/components/analysis/overview/add-to-cale
 import { trackCalendarClick } from "@/components/analysis/overview/add-to-calendar/track";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
+import { useBrowserValue } from "@/lib/useBrowserValue";
 
 /**
  * Adds the IPO's upcoming dates to the visitor's calendar.
@@ -55,19 +56,19 @@ export function AddToCalendar({ company, dates, className }: { company: string; 
   );
 }
 
-/** The IPO's events from today on, plus its slug from the page URL. Built after mount, since the page is cached. */
-function useUpcomingEvents(company: string, dates: IssueDates) {
-  const [state, setState] = useState<{ slug: string; events: CalendarEvent[] }>({ slug: "", events: [] });
+const pageUrl = () => window.location.origin + window.location.pathname;
+const startOfToday = () => new Date().setHours(0, 0, 0, 0);
+
+/** The IPO's events from today on, plus its slug from the page URL. Read in the browser, since the page is cached. */
+function useUpcomingEvents(company: string, dates: IssueDates): { slug: string; events: CalendarEvent[] } {
   const words = useT().analysis.calendar;
+  const url = useBrowserValue(pageUrl);
+  const today = useBrowserValue(startOfToday);
 
-  useEffect(() => {
-    const url = window.location.origin + window.location.pathname;
-    const slug = window.location.pathname.split("/").pop() || "ipo";
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const events = issueEvents({ company, slug, url, dates }, words).filter((event) => event.date >= today);
-    setState({ slug, events });
-  }, [company, dates, words]);
-
-  return state;
+  return useMemo(() => {
+    if (url === null || today === null) return { slug: "", events: [] };
+    const slug = url.split("/").pop() || "ipo";
+    const events = issueEvents({ company, slug, url, dates }, words).filter((event) => event.date.getTime() >= today);
+    return { slug, events };
+  }, [company, dates, words, url, today]);
 }

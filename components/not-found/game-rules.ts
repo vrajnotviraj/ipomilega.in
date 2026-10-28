@@ -106,9 +106,18 @@ export function rankFor(pnl: number): keyof GameWords["ranks"] {
 }
 
 // localStorage throws in private mode and some embeds; stats are a nicety, so failures are ignored.
-export function loadStats(): Stats {
+export function storedStats(): string | null {
   try {
-    return { ...EMPTY_STATS, ...JSON.parse(localStorage.getItem(STATS_KEY) ?? "{}") };
+    return localStorage.getItem(STATS_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/** The stats saved as `stored`, or empty ones when there are none or they don't parse. */
+export function parseStats(stored: string | null): Stats {
+  try {
+    return { ...EMPTY_STATS, ...JSON.parse(stored ?? "{}") };
   } catch {
     return EMPTY_STATS;
   }

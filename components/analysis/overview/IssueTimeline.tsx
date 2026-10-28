@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
 import { dayNumberInIndia, daysFromToday, formatShortDate, parseIpoDate } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import type { Dictionary } from "@/messages";
 import { useT } from "@/lib/i18n/client";
 import { fill } from "@/lib/i18n/locales";
+import { useBrowserValue } from "@/lib/useBrowserValue";
 
 type Align = "left" | "center" | "right";
 
@@ -73,13 +73,16 @@ function railLayout(closing: string, allotment: string, openDate: Date, listDate
   return { percentThrough, truePositions, railPositions: spreadApart(truePositions) };
 }
 
+/** Now, to the minute, so repeat reads in one render agree. */
+const thisMinute = () => Math.floor(Date.now() / 60_000) * 60_000;
+
 type Station = { label: string; date: string; pos: number; align: Align; reached: boolean; isToday: boolean };
 
 /** Open, close, allotment and listing on a rail spaced by date, with a marker for today. */
 export function IssueTimeline({ opening, closing, allotment, listing }: Record<"opening" | "closing" | "allotment" | "listing", string>) {
-  // Read after mount: the page is ISR-cached, so a server-side date would be stale and break hydration.
-  const [today, setToday] = useState<Date | null>(null);
-  useEffect(() => setToday(new Date()), []);
+  // Read in the browser: the page is cached, so a server-side date would be stale and break hydration.
+  const now = useBrowserValue(thisMinute);
+  const today = now === null ? null : new Date(now);
   const words = useT().analysis.timeline;
 
   const openDate = parseIpoDate(opening);

@@ -13,16 +13,11 @@ const TYPING_PAUSE_MS = 600;
  * `working` is true from the first change until the plan arrives.
  */
 export function usePlan(request: PlanRequest): { plan: Plan | null; working: boolean } {
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [working, setWorking] = useState(true);
+  const [answer, setAnswer] = useState<{ plan: Plan; request: PlanRequest } | null>(null);
 
   useEffect(() => {
-    setWorking(true);
     const controller = new AbortController();
-    const finish = (found: Plan) => {
-      setPlan(found);
-      setWorking(false);
-    };
+    const finish = (plan: Plan) => setAnswer({ plan, request });
 
     const timer = setTimeout(
       async () => {
@@ -36,15 +31,15 @@ export function usePlan(request: PlanRequest): { plan: Plan | null; working: boo
           if (!controller.signal.aborted) finish(planIpos(ipos, request.funds, request.accounts, request.goal, request.holders));
         }
       },
-      plan ? TYPING_PAUSE_MS : 0
+      answer ? TYPING_PAUSE_MS : 0
     );
     return () => {
       clearTimeout(timer);
       controller.abort();
     };
-    // `plan` only decides the first delay; a result arriving must not restart the search.
+    // `answer` only decides the first delay; a result arriving must not restart the search.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request]);
 
-  return { plan, working };
+  return { plan: answer?.plan ?? null, working: answer?.request !== request };
 }

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import {
   CIRCUIT, EMPTY_STATS, ISSUE_PRICE, NEWS_TICKS, TICKS, TICK_MS,
-  isAllotted, loadStats, maybeBreakingNews, nextPrice, openingPrice, recordTrade, saveStats,
+  isAllotted, maybeBreakingNews, nextPrice, openingPrice, parseStats, recordTrade, saveStats, storedStats,
   type News, type Phase, type Stats,
 } from "@/components/not-found/game-rules";
+import { useBrowserValue } from "@/lib/useBrowserValue";
 
 const DRAW_MS = 900;
 
@@ -13,17 +14,19 @@ export function useListingDay() {
   const [prices, setPrices] = useState<number[]>([ISSUE_PRICE]);
   const [news, setNews] = useState<News | null>(null);
   const [soldAt, setSoldAt] = useState<number | null>(null);
-  const [stats, setStats] = useState<Stats>(EMPTY_STATS);
+  // Saved stats are read in the browser; once a round ends or stats reset, this visit's stats take over.
+  const saved = useBrowserValue(storedStats);
+  const [played, setPlayed] = useState<Stats | null>(null);
+  const stats = played ?? parseStats(saved);
+  const [open, setOpen] = useState(ISSUE_PRICE);
   const market = useRef({ prices: [ISSUE_PRICE], open: ISSUE_PRICE, newsTicksLeft: 0 });
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const stopTimer = () => clearTimeout(timer.current);
 
-  useEffect(() => setStats(loadStats()), []);
   useEffect(() => stopTimer, []);
 
   const last = prices[prices.length - 1];
-  const open = market.current.open;
   const lower = open * (1 - CIRCUIT);
   const upper = open * (1 + CIRCUIT);
   // At the lower circuit there are only sellers, so a sell order can't fill.
@@ -35,8 +38,8 @@ export function useListingDay() {
     setSoldAt(price);
     setPhase("sold");
     setNews(null);
-    setStats((current) => {
-      const next = recordTrade(current, price);
+    setPlayed((current) => {
+      const next = recordTrade(current ?? parseStats(saved), price);
       saveStats(next);
       return next;
     });
@@ -66,6 +69,7 @@ export function useListingDay() {
   function startTrading() {
     const openPrice = openingPrice();
     market.current = { prices: [ISSUE_PRICE, openPrice], open: openPrice, newsTicksLeft: 0 };
+    setOpen(openPrice);
     setPrices(market.current.prices);
     setPhase("live");
     timer.current = setInterval(tick, TICK_MS);
@@ -80,7 +84,7 @@ export function useListingDay() {
   }
 
   function resetStats() {
-    setStats(EMPTY_STATS);
+    setPlayed(EMPTY_STATS);
     saveStats(null);
   }
 
@@ -92,15 +96,14 @@ export function useListingDay() {
     if (phase !== "drawing") apply();
   }
 
-  const mainActionRef = useRef(mainAction);
-  mainActionRef.current = mainAction;
+  const onSpace = useEffectEvent(mainAction);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isOnControl = e.target instanceof HTMLButtonElement || e.target instanceof HTMLAnchorElement;
       if (e.code !== "Space" || isOnControl) return;
       e.preventDefault();
-      mainActionRef.current();
+      onSpace();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

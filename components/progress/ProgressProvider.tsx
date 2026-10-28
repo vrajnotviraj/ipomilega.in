@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useRef, Suspense, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useEffectEvent, useRef, Suspense, type ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const PARKED_AT = 85;
@@ -20,11 +20,10 @@ export const useProgress = () => {
 const RouteChangeWatcher = ({ onRouteChange }: { onRouteChange: () => void }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const handler = useRef(onRouteChange);
-  handler.current = onRouteChange;
+  const onChange = useEffectEvent(onRouteChange);
 
   useEffect(() => {
-    handler.current();
+    onChange();
   }, [pathname, searchParams]);
 
   return null;

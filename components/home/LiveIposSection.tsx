@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Clock } from 'lucide-react';
 import { IpoSectionProps, HomePageIpoProps } from '@/types/ipo-with-analysis';
 import { LiveIpoCard } from '@/components/home/ipo-card/LiveIpoCard';
@@ -37,10 +37,13 @@ export function LiveIposSection({ ipos, upcoming, closed }: IpoSectionProps & { 
   const d = dict.home.live;
   const { board, setBoard } = useBoard();
   // Fades only on board switches, never on first paint.
-  const mounted = useRef(false);
-  useEffect(() => {
-    mounted.current = true;
-  }, []);
+  // Fades the list in when the board changes, not on first render.
+  const [shownBoard, setShownBoard] = useState(board);
+  const [switched, setSwitched] = useState(false);
+  if (board !== shownBoard) {
+    setShownBoard(board);
+    setSwitched(true);
+  }
 
   const onBoard = (list: HomePageIpoProps[]) => list.filter((item) => getIpoType(item.ipo) === board);
   const boardIpos = onBoard(ipos);
@@ -63,7 +66,7 @@ export function LiveIposSection({ ipos, upcoming, closed }: IpoSectionProps & { 
         data-tour="board-tabs"
       />
 
-      <div key={board} className={cn('mt-8', mounted.current && 'animate-in fade-in duration-150')}>
+      <div key={board} className={cn('mt-8', switched && 'animate-in fade-in duration-150')}>
         {boardIpos.length === 0 ? (
           <NothingOpen board={boardLabel(c.board, board)} upcoming={onBoard(upcoming)} closed={onBoard(closed)} />
         ) : (
