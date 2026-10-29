@@ -15,7 +15,7 @@ import { FileSearch } from 'lucide-react';
 import { ArrowLink } from '@/components/ui/ArrowLink';
 import { EmptyState } from '@/components/ui/EmptyState';
 
-export const revalidate = 60
+export const revalidate = 300
 
 type Params = { params: Promise<{ lang: string; id: string }> }
 

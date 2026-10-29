@@ -9,7 +9,7 @@ import IposClient from "@/components/ipos/IposClient";
 import { PAGE_SIZE, ipoPagePath, toRows } from "@/components/ipos/model/query";
 import { pageFromSegments } from "@/components/ui/pager";
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 // Builds no pages ahead; each renders on its first visit and is then cached.
 export function generateStaticParams() {

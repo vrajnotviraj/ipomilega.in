@@ -17,7 +17,7 @@ import { setLocale, t } from '@/lib/i18n/server';
 import { localePath } from '@/lib/i18n/locales';
 
 // Served from the ISR cache; /api/revalidate purges it sooner.
-export const revalidate = 60;
+export const revalidate = 300;
 
 type Params = { params: Promise<{ lang: string }> };
 
