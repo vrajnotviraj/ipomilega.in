@@ -15,7 +15,9 @@ const nextConfig: NextConfig = {
   // the description and canonical. The pages await the same cached reads anyway.
   htmlLimitedBots: /.*/,
   // The whole stylesheet is ~12 KB gzipped, so it ships inside the HTML instead of as a render-blocking request.
-  experimental: { inlineCss: true },
+  // isrFlushToDisk: keeps regenerated pages and cached reads in the 50 MB in-memory cache. Written to disk, they piled up
+  // as ~370 MB of page cache that Railway bills as memory.
+  experimental: { inlineCss: true, isrFlushToDisk: false },
   async headers() {
     return [
       {
