@@ -60,6 +60,11 @@
       "title": "Closed",
       "hint": "Bidding has shut for these. Buying the parent now will not get you the quota.",
       "empty": ""
+    },
+    "listed": {
+      "title": "Recently listed",
+      "hint": "Quota IPOs that listed in the last six months. The quota is over for these.",
+      "empty": ""
     }
   },
   "lastChecked": "Updated daily. Last checked",
@@ -80,7 +85,7 @@
       },
       {
         "q": "How is this list made?",
-        "a": "We check offer documents filed with SEBI, NSE and BSE every day for a shareholder reservation and the parent it names. IPOs drop off once they list, or when a SEBI approval lapses without dates."
+        "a": "We check offer documents filed with SEBI, NSE and BSE every day for a shareholder reservation and the parent it names. Once an IPO lists it moves to Recently listed for six months. It drops off sooner when a SEBI approval lapses without dates."
       }
     ]
   },
@@ -110,7 +115,8 @@
       "approved": "SEBI has cleared the draft. Dates usually follow within months. Hold the parent before the RHP date.",
       "filed": "The draft offer document has a shareholder quota. It is waiting for SEBI's approval.",
       "announced": "The quota comes from the company's announcement. There is no offer document yet, so it could still change."
-    }
+    },
+    "listedOn": "Listed on"
   },
   "teaser": {
     "reserves": {

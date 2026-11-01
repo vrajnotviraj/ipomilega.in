@@ -18,6 +18,7 @@ export interface QuotaIpo {
   closeDate: string | null;
   /** Last day to buy the parent and still hold it on the record date. */
   lastBuyDate: string | null;
+  listingDate: string | null;
   priceBand: string;
   documentUrl: string;
   slug: string;
@@ -26,12 +27,13 @@ export interface QuotaIpo {
 type QuotaDoc = {
   _id: number;
   name: string;
-  stage: QuotaStage;
+  stage: QuotaStage | null;
   parents: string[];
   drhp_date: Date | null;
   open_date: Date | null;
   close_date: Date | null;
   last_buy_date?: Date | null;
+  listing_date?: Date | null;
   price_band: string;
   drhp_url: string;
   ipo_slug: string;
@@ -39,42 +41,50 @@ type QuotaDoc = {
 };
 
 // Only these fields leave the database; where the engine read them stays private.
-const PUBLIC_FIELDS = { name: 1, stage: 1, parents: 1, drhp_date: 1, open_date: 1, close_date: 1, last_buy_date: 1, price_band: 1, drhp_url: 1, ipo_slug: 1, checked_at: 1 };
+const PUBLIC_FIELDS = { name: 1, stage: 1, parents: 1, drhp_date: 1, open_date: 1, close_date: 1, last_buy_date: 1, listing_date: 1, price_band: 1, drhp_url: 1, ipo_slug: 1, checked_at: 1 };
 
 const dayOf = (date: Date | null) => date?.toISOString().slice(0, 10) ?? null;
 const time = (date: Date | null, missing: number) => date?.getTime() ?? missing;
+const LISTED_WINDOW_DAYS = 183; // quota IPOs stay under Recently listed for six months
 
-/** The IPOs on the list: strongest stage first, then nearest open date, then latest DRHP news. */
+const toIpo = (doc: QuotaDoc): QuotaIpo => ({
+  id: String(doc._id),
+  name: doc.name,
+  stage: doc.stage ?? 'dates', // a listed IPO has no stage left; it had dates
+  parents: doc.parents,
+  drhpDate: dayOf(doc.drhp_date),
+  openDate: dayOf(doc.open_date),
+  closeDate: dayOf(doc.close_date),
+  lastBuyDate: dayOf(doc.last_buy_date ?? null),
+  listingDate: dayOf(doc.listing_date ?? null),
+  priceBand: doc.price_band,
+  documentUrl: doc.drhp_url,
+  slug: doc.ipo_slug,
+});
+
+/** The IPOs on the list (strongest stage first, then nearest open date, then latest DRHP news), and the ones listed lately. */
 const getQuotaRows = cached(async () => {
   const db = await getDb();
-  const docs = await db.collection<QuotaDoc>('shareholder_quota').find({ active: true }, { projection: PUBLIC_FIELDS }).toArray();
-  const rank = (doc: QuotaDoc) => QUOTA_STAGES.indexOf(doc.stage);
+  const quota = db.collection<QuotaDoc>('shareholder_quota');
+  const since = new Date(Date.now() - LISTED_WINDOW_DAYS * 86400000);
+  const [docs, listedDocs] = await Promise.all([
+    quota.find({ active: true }, { projection: PUBLIC_FIELDS }).toArray(),
+    quota.find({ has_quota: true, listing_date: { $gte: since, $lte: new Date() } }, { projection: PUBLIC_FIELDS }).sort({ listing_date: -1 }).toArray(),
+  ]);
+  const rank = (doc: QuotaDoc) => QUOTA_STAGES.indexOf(doc.stage ?? 'dates');
   docs.sort((a, b) =>
     rank(a) - rank(b) ||
     time(a.open_date, Infinity) - time(b.open_date, Infinity) ||
     time(b.drhp_date, 0) - time(a.drhp_date, 0)
   );
 
-  const ipos: QuotaIpo[] = docs.map((doc) => ({
-    id: String(doc._id),
-    name: doc.name,
-    stage: doc.stage,
-    parents: doc.parents,
-    drhpDate: dayOf(doc.drhp_date),
-    openDate: dayOf(doc.open_date),
-    closeDate: dayOf(doc.close_date),
-    lastBuyDate: dayOf(doc.last_buy_date ?? null),
-    priceBand: doc.price_band,
-    documentUrl: doc.drhp_url,
-    slug: doc.ipo_slug,
-  }));
   const checkedAt = docs.length ? new Date(Math.max(...docs.map((doc) => doc.checked_at.getTime()))).toISOString() : null;
-  return { ipos, checkedAt };
+  return { ipos: docs.map(toIpo), listed: listedDocs.map(toIpo), checkedAt };
 }, 'shareholder-quota');
 
 /** Open IPOs plus the ones whose bidding has shut (5 PM IST on the close date). Split per request, not inside the cache. */
 export async function getShareholderQuotaIpos() {
-  const { ipos: all, checkedAt } = await getQuotaRows();
+  const { ipos: all, listed, checkedAt } = await getQuotaRows();
   const closed = all.filter((ipo) => isPastFivePmIst(ipo.closeDate));
-  return { ipos: all.filter((ipo) => !closed.includes(ipo)), closed, checkedAt };
+  return { ipos: all.filter((ipo) => !closed.includes(ipo)), closed, listed, checkedAt };
 }

@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ShareholderQuotaPage({ params }: Params) {
   const lang = setLocale((await params).lang);
   const { common: c, quota: d } = t();
-  const { ipos, closed, checkedAt } = await getShareholderQuotaIpos();
+  const { ipos, closed, listed, checkedAt } = await getShareholderQuotaIpos();
   const closeToLaunch = ipos.filter((ipo) => ipo.stage === "dates" || ipo.stage === "approved");
   const furtherOut = ipos.filter((ipo) => ipo.stage === "filed" || ipo.stage === "announced");
   const lastChecked = formatIstTimestamp(checkedAt);
@@ -54,6 +54,7 @@ export default async function ShareholderQuotaPage({ params }: Params) {
       <QuotaSection id="soon" {...d.sections.soon} ipos={closeToLaunch} highlighted />
       <QuotaSection id="later" {...d.sections.later} ipos={furtherOut} highlighted={false} />
       {closed.length > 0 && <QuotaSection id="closed" {...d.sections.closed} ipos={closed} highlighted={false} />}
+      {listed.length > 0 && <QuotaSection id="listed" {...d.sections.listed} ipos={listed} highlighted={false} />}
       {lastChecked && (
         <p className="mt-6 text-sm text-muted-foreground">
           {d.lastChecked} <span className="font-mono tabular-nums">{lastChecked}</span>.

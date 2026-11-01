@@ -64,6 +64,7 @@ export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: bo
           {ipo.lastBuyDate && <Figure label={d.lastDayWas}>{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
           {date && <Figure label={date.label}>{date.value}</Figure>}
           {ipo.priceBand && <Figure label={common.priceBand}>{ipo.priceBand}</Figure>}
+          {ipo.listingDate && <Figure label={d.listedOn}>{formatIpoDate(ipo.listingDate, true)}</Figure>}
         </dl>
       ) : (
         <StageTrack stage={ipo.stage} className={cn("mt-4 border-t pt-4", divider)} />
