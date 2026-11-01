@@ -11,7 +11,7 @@ import { Hero, HowItWorks } from "@/components/shareholder-quota/Intro";
 import { QuotaSection } from "@/components/shareholder-quota/QuotaSection";
 import { Faq } from "@/components/shareholder-quota/Faq";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 
 const path = "/ipos/shareholder-quota";
 const titleOf = (template: string) => fill(template, { year: new Date().getFullYear() });
