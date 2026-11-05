@@ -51,7 +51,13 @@ export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: bo
       <div>
         <p className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{d.hold}</p>
         <h3 className="mt-1 font-display text-lg font-bold leading-tight tracking-[-0.015em] text-balance text-foreground sm:text-xl">
-          {ipo.parents.join(` ${common.or} `)}
+          {/* Marigold underline, not marigold text: the brand's emphasis style, as marigold text fails contrast on white. */}
+          {ipo.parents.map((parent, index) => (
+            <span key={parent}>
+              {index > 0 && ` ${common.or} `}
+              <span className="highlight">{parent}</span>
+            </span>
+          ))}
         </h3>
         <p className="mt-2 text-sm text-muted-foreground">
           {d.forQuotaIn} <IpoName ipo={ipo} />
