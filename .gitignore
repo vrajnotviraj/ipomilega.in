@@ -41,7 +41,22 @@ yarn-error.log*
 next-env.d.ts
 scripts/make-ipos-live.mongo.js
 
-# Claude Code and agent skills (local tooling)
+# AI coding tools (local config, sessions and agent instructions; CLAUDE.md stays tracked)
+AGENTS.md
+CLAUDE.local.md
+GEMINI.md
 .claude/
 .agents/
+.cursor/
+.cursorrules
+.windsurf/
+.windsurfrules
+.codex/
+.gemini/
+.continue/
+.aider*
+.codeium/
+.roo/
+.clinerules
+.mcp.json
 skills-lock.json
