@@ -1,3 +1,13 @@
+/* Hallmark · shape: index-first, a deadline board (/ipos/shareholder-quota) · genre: editorial · theme: brand · redesign: full · hero: counter · nav: kept · footer: kept · signature: the Buy before countdown set at display size in DM Mono
+ * axes: light/grotesk-heavy/chromatic-marigold · posture: restrained · surface: absolute (the locked white card) · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: P, a list page argues little; it leads with the one deadline that matters so the order makes the case */
+/* Hallmark · system: design-system/DESIGN.md is locked; its tokens below are the system, so no tokens.css or base.css (base.css would restyle every page's headings) */
+/* Hallmark · waive 7b · --card: #FFFFFF in :root, named in design-system/DESIGN.md · the card colour is locked by the brand system and tinting it changes every card on the site */
+/* Hallmark · departs DESIGN.md on purpose, on this page only: the Buy before countdown is mono at 36 to 60px (§4 sets figures at 14 to 18px) and the rules figures at 24 to 30px, because the deadline is the page's signature; the hero keeps the side panel and chip counts the old page had (§6 describes the home hero) */
+/* Hallmark · reworded "8.27%" (joined to the quota amount by a middle dot) to "8.27% of issue" set beside the amount as a quiet note · 63 names middle-dot joined figures */
+/* Hallmark · reworded "Hold one share of the listed parent before the RHP date to apply in the shareholder category, a second shot at allotment on top of retail." to "Hold one parent share by the RHP date for a second shot at allotment." · 58 caps the hero line; the category and retail facts stay in How it works */
+/* Hallmark · reworded "HOLD 1 SHARE OF" over the parent to "Hold 1 share for the shareholder quota in" under it · 54 names the eyebrow; the parent name is now the heading */
+/* Hallmark · dropped the visible hero summary sentence (every IPO and parent it lists) · 58 and the run-on hero; it stays as the meta and JSON-LD description and every name is in the quota cards */
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -466,4 +476,10 @@
 :lang(gu) :is(h1, h2, h3, .type-hero, .type-h2) {
   letter-spacing: 0;
   line-height: 1.2;
+}
+
+/* Hallmark floor 34: clip sideways overflow without breaking sticky (hidden would). */
+html,
+body {
+  overflow-x: clip;
 }

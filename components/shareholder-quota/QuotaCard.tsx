@@ -29,72 +29,105 @@ function noteOf(ipo: QuotaIpo, buy: BuyBeforeIpo | null, d: Words) {
   return d.stageNote[ipo.stage];
 }
 
-/**
- * A parent to hold and the IPO it makes you eligible for. Buy before cards lead with the countdown; the rest with the
- * parent and the stage track. Highlighted cards are white with lift; the rest are flat.
- */
-export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo | BuyBeforeIpo; highlighted: boolean }) {
+/** The parent to hold, set as the heading, and the IPO it qualifies you for beneath it. */
+function Heading({ ipo, accent }: { ipo: QuotaIpo; accent?: boolean }) {
   const { quota: { card: d }, common } = t();
-  const buy = "daysToLastBuy" in ipo ? ipo : null;
-  const date = stageDate(ipo, d);
-  const closed = isPastFivePmIst(ipo.closeDate);
-  const divider = highlighted ? "border-border" : "border-primary/15";
-  const heading = (
-    <div className={cn(buy && cn("mt-4 border-t pt-4", divider))}>
-      <p className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{d.hold}</p>
-      <h3 className="mt-1 font-display text-lg font-bold leading-tight tracking-[-0.015em] text-balance text-foreground sm:text-xl">
-        {/* Marigold underline, not marigold text: the brand's emphasis style, as marigold text fails contrast on white. */}
+  return (
+    <div>
+      <h3 className="font-display text-lg font-bold leading-tight tracking-[-0.015em] text-balance break-words text-foreground sm:text-xl">
+        {/* Marigold underline only on the Buy before card: one marigold mark per region (DESIGN.md), and rows already carry the stage dot. */}
         {ipo.parents.map((parent, index) => (
           <span key={parent}>
             {index > 0 && ` ${common.or} `}
-            <span className="highlight">{parent}</span>
+            <span className={cn(accent && "highlight")}>{parent}</span>
           </span>
         ))}
       </h3>
-      <p className="mt-2 text-sm text-muted-foreground">
+      <p className="mt-2 text-sm text-pretty text-muted-foreground">
         {d.forQuotaIn} <IpoName ipo={ipo} />
       </p>
     </div>
   );
-  return (
-    // Five rows (lead, heading or track, note, figures, footer) on the list's subgrid, so they line up across a row.
-    <article
-      className={cn(
-        "row-span-5 grid grid-rows-subgrid gap-y-0 rounded-xl p-4 sm:p-5",
-        highlighted ? "card-lift border border-border bg-card" : "bg-secondary"
-      )}
-    >
-      {buy ? <Countdown ipo={buy} /> : heading}
-      {buy ? heading : closed ? (
-        // Bidding is over, so the stage track says nothing; the dates that decided eligibility take its place.
-        <dl className={cn("mt-4 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4", divider)}>
-          {ipo.lastBuyDate && <Figure label={d.lastDayWas}>{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
-          {date && <Figure label={date.label}>{date.value}</Figure>}
-          {ipo.priceBand && <Figure label={common.priceBand}>{ipo.priceBand}</Figure>}
-          {ipo.listingDate && <Figure label={d.listedOn}>{formatIpoDate(ipo.listingDate, true)}</Figure>}
-        </dl>
-      ) : (
-        <StageTrack stage={ipo.stage} className={cn("mt-4 border-t pt-4", divider)} />
-      )}
-      <div className="mt-4 text-sm text-pretty">
-        <p className="text-muted-foreground">{noteOf(ipo, buy, d)}</p>
-        {ipo.note && <p className="mt-2 text-foreground">{ipo.note}</p>}
-      </div>
+}
 
-      {/* Always rendered, empty when nothing is published, so the row stays aligned across the cards. */}
-      <div>
+/** The stage note, plus our own note when an admin left one. */
+function Notes({ ipo, buy }: { ipo: QuotaIpo; buy: BuyBeforeIpo | null }) {
+  const d = t().quota.card;
+  return (
+    <div className="text-sm text-pretty">
+      <p className="text-muted-foreground">{noteOf(ipo, buy, d)}</p>
+      {ipo.note && <p className="mt-2 text-foreground">{ipo.note}</p>}
+    </div>
+  );
+}
+
+/** The dates that go with the stage, and the offer document. */
+function Footer({ ipo, className }: { ipo: QuotaIpo; className?: string }) {
+  const { quota: { card: d }, common } = t();
+  const date = stageDate(ipo, d);
+  const closed = isPastFivePmIst(ipo.closeDate);
+  if (closed && !ipo.documentUrl) return null;
+  return (
+    <div className={cn("flex flex-wrap items-end gap-x-6 gap-y-2", className)}>
+      {!closed && (
+        <dl className="flex flex-wrap gap-x-6 gap-y-2">
+          {date && <Figure label={date.label}>{date.value}</Figure>}
+          {ipo.stage === "dates" && ipo.priceBand && <Figure label={common.priceBand}>{ipo.priceBand}</Figure>}
+        </dl>
+      )}
+      {ipo.documentUrl && <DocumentLink href={ipo.documentUrl} name={ipo.name} />}
+    </div>
+  );
+}
+
+/** A Buy before deadline: the countdown set large, then the parent, the note, the figures and the dates. */
+export function QuotaCard({ ipo }: { ipo: BuyBeforeIpo }) {
+  return (
+    <article className="card-lift rounded-[18px] border border-border bg-card p-5 sm:p-8">
+      <Countdown ipo={ipo} />
+      <div className="mt-8 border-t border-border pt-8">
+        <Heading ipo={ipo} accent />
+      </div>
+      <div className="mt-4">
+        <Notes ipo={ipo} buy={ipo} />
+      </div>
+      <QuotaFigures ipo={ipo} />
+      <Footer ipo={ipo} className="mt-4 border-t border-border pt-3" />
+    </article>
+  );
+}
+
+/**
+ * Every other stage, as one full-width row: the parent and the note on the left; the stage track (or, once bidding has
+ * shut, the dates that decided eligibility), the figures and the dates on the right.
+ */
+export function QuotaRow({ ipo }: { ipo: QuotaIpo }) {
+  const { quota: { card: d }, common } = t();
+  const date = stageDate(ipo, d);
+  const closed = isPastFivePmIst(ipo.closeDate);
+  return (
+    <article className="grid gap-x-8 gap-y-5 py-6 sm:grid-cols-2 sm:py-8 lg:grid-cols-[minmax(0,4fr)_minmax(0,5fr)_auto]">
+      <div className="min-w-0">
+        <Heading ipo={ipo} />
+        <div className="mt-3">
+          <Notes ipo={ipo} buy={null} />
+        </div>
+      </div>
+      <div className="min-w-0">
+        {closed ? (
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-2">
+            {ipo.lastBuyDate && <Figure label={d.lastDayWas}>{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
+            {date && <Figure label={date.label}>{date.value}</Figure>}
+            {ipo.priceBand && <Figure label={common.priceBand}>{ipo.priceBand}</Figure>}
+            {ipo.listingDate && <Figure label={d.listedOn}>{formatIpoDate(ipo.listingDate, true)}</Figure>}
+          </dl>
+        ) : (
+          <StageTrack stage={ipo.stage} />
+        )}
         <QuotaFigures ipo={ipo} />
       </div>
-
-      <div className={cn("mt-4 flex flex-wrap items-end gap-x-6 gap-y-2 self-end border-t pt-3", divider)}>
-        {!closed && (
-          <dl className="flex flex-wrap gap-x-6 gap-y-2">
-            {date && <Figure label={date.label}>{date.value}</Figure>}
-            {ipo.stage === "dates" && ipo.priceBand && <Figure label={common.priceBand}>{ipo.priceBand}</Figure>}
-          </dl>
-        )}
-        {ipo.documentUrl && <DocumentLink href={ipo.documentUrl} name={ipo.name} />}
-      </div>
+      {/* Dates and the document in their own column, so a short row still reaches the right edge. */}
+      <Footer ipo={ipo} className="min-w-0 sm:col-span-2 lg:col-span-1 lg:flex-col lg:items-end lg:text-right" />
     </article>
   );
 }
@@ -105,18 +138,23 @@ const rupees = (value: number) => `₹${value.toLocaleString("en-IN", { minimumF
 export function QuotaFigures({ ipo }: { ipo: QuotaIpo }) {
   const { quota: { card: d }, common } = t();
   const { issueSizeCr, quotaSizeCr, quotaPercent } = ipo;
-  const quota = [quotaSizeCr !== null && `${formatRupees(quotaSizeCr)} Cr`, quotaPercent !== null && fill(d.quotaOfIssue, { percent: quotaPercent })].filter(Boolean).join(" · ");
-  if (!ipo.parentQuotes.length && issueSizeCr === null && !quota) return null;
+  const share = quotaPercent !== null ? fill(d.quotaOfIssue, { percent: quotaPercent }) : null;
+  if (!ipo.parentQuotes.length && issueSizeCr === null && quotaSizeCr === null && !share) return null;
   return (
     <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
       {ipo.parentQuotes.map((quote) => (
         <Figure key={quote.name} label={ipo.parentQuotes.length > 1 ? fill(d.oneShareOf, { name: quote.name }) : d.oneShare}>
           {rupees(quote.price)}
-          <span className="ml-1.5 font-sans text-xs font-normal text-muted-foreground">{fill(d.priceOn, { date: formatIpoDate(quote.asOf) ?? "" })}</span>
+          <Note>{fill(d.priceOn, { date: formatIpoDate(quote.asOf) ?? "" })}</Note>
         </Figure>
       ))}
       {issueSizeCr !== null && <Figure label={common.issueSize}>{formatRupees(issueSizeCr)} Cr</Figure>}
-      {quota && <Figure label={d.shareholderQuota}>{quota}</Figure>}
+      {(quotaSizeCr !== null || share) && (
+        <Figure label={d.shareholderQuota}>
+          {quotaSizeCr !== null ? `${formatRupees(quotaSizeCr)} Cr` : share}
+          {quotaSizeCr !== null && share && <Note>{share}</Note>}
+        </Figure>
+      )}
     </dl>
   );
 }
@@ -149,6 +187,11 @@ function DocumentLink({ href, name }: { href: string; name: string }) {
       <span className="sr-only"> {fill(d.documentFor, { name })}</span>
     </a>
   );
+}
+
+/** A quiet aside after a figure: the close a price comes from, or the quota's share of the issue. */
+function Note({ children }: { children: React.ReactNode }) {
+  return <span className="ml-1.5 font-sans text-xs font-normal text-muted-foreground">{children}</span>;
 }
 
 function Figure({ label, children }: { label: string; children: React.ReactNode }) {

@@ -10,7 +10,7 @@ export function Faq() {
     mainEntity: d.items.map((faq) => ({ "@type": "Question", name: faq.q, acceptedAnswer: { "@type": "Answer", text: faq.a } })),
   };
   return (
-    <section aria-labelledby="faq-title" className="mt-16">
+    <section aria-labelledby="faq-title" className="mt-24 sm:mt-32">
       <h2 id="faq-title" className="type-h2">{d.title}</h2>
       <dl className="mt-6 grid gap-x-12 border-b border-border lg:grid-cols-2">
         {d.items.map((faq) => (

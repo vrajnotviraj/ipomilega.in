@@ -14,7 +14,7 @@
     "before": "Upcoming",
     "highlight": "shareholder quota",
     "after": "IPOs",
-    "lede": "Hold one share of the listed parent before the RHP date to apply in the shareholder category, a second shot at allotment on top of retail.",
+    "lede": "Hold one parent share by the RHP date for a second shot at allotment.",
     "rulesTitle": "The rules in numbers",
     "rules": [
       { "label": "Parent shares you need", "value": "1" },
@@ -104,8 +104,7 @@
   },
   "stageLabel": "Stage: {name}, step {step} of {total}",
   "card": {
-    "hold": "Hold 1 share of",
-    "forQuotaIn": "for the shareholder quota in",
+    "forQuotaIn": "Hold 1 share for the shareholder quota in",
     "bidding": "Bidding",
     "approvedOn": "Approved on",
     "filedOn": "Filed on",

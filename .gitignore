@@ -60,3 +60,6 @@ GEMINI.md
 .clinerules
 .mcp.json
 skills-lock.json
+
+# Hallmark design runs (screenshots, before/after records)
+.hallmark/

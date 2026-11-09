@@ -1,49 +1,64 @@
-import { t } from "@/lib/i18n/server";
+import { locale, t } from "@/lib/i18n/server";
+import { cn } from "@/lib/utils";
 
-/** Page title and the answer in one paragraph (which IPOs, which parents), with the rules in numbers beside them. */
-export function Hero({ summary }: { summary: string }) {
+/**
+ * The title and its line, the section chips and the rules on the left; the Buy before deadlines, when there are any, on
+ * the right as the hero's visual, since they are what a visitor came for. On a phone the deadlines come straight after
+ * the title, ahead of the chips and the rules.
+ */
+export function Hero({ aside, children }: { aside: React.ReactNode; children: React.ReactNode }) {
   const d = t().quota.hero;
+  const left = aside ? "lg:col-span-7 lg:col-start-1" : "lg:col-span-9";
   return (
-    <header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end lg:gap-12">
-      <div>
-        <h1 className="type-hero text-[44px] text-balance text-foreground sm:text-[60px]">
+    <header className="grid gap-x-8 gap-y-10 lg:grid-cols-12 lg:grid-rows-[auto_auto_1fr] lg:gap-y-8">
+      <div className={cn("min-w-0 lg:row-start-1", left)}>
+        <h1 className="font-display text-[44px] font-black leading-[0.95] tracking-[-0.035em] text-balance break-words text-foreground sm:text-[60px]">
           {d.before} <span className="highlight">{d.highlight}</span> {d.after}
         </h1>
-        <p className="mt-5 max-w-[65ch] text-lg text-pretty text-muted-foreground">
-          {summary} {d.lede}
-        </p>
+        <p className="mt-5 max-w-[40ch] text-lg text-pretty text-muted-foreground">{d.lede}</p>
       </div>
-      <section aria-labelledby="rules-title" className="rounded-[18px] border border-border bg-card p-5">
-        <h2 id="rules-title" className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{d.rulesTitle}</h2>
-        <dl className="mt-3 divide-y divide-border">
-          {d.rules.map((rule) => (
-            <div key={rule.label} className="flex items-baseline justify-between gap-4 py-3 first:pt-0 last:pb-0">
-              <dt className="text-sm text-muted-foreground">{rule.label}</dt>
-              <dd className="whitespace-nowrap font-mono text-xl font-medium tabular-nums text-foreground">{rule.value}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+      {aside && <div className="min-w-0 lg:col-span-5 lg:col-start-8 lg:row-span-3 lg:row-start-1">{aside}</div>}
+      <div className={cn("min-w-0 lg:row-start-2", left)}>{children}</div>
+      <div className={cn("min-w-0 self-start lg:row-start-3", left)}>
+        <Rules />
+      </div>
     </header>
   );
 }
 
-/** The four steps from holding the parent to being allotted. */
+/** The four rules as figures, two by two, on the ink panel. */
+function Rules() {
+  const d = t().quota.hero;
+  return (
+    <section aria-labelledby="rules-title" className="rounded-[18px] bg-primary p-6 text-primary-foreground sm:p-8">
+      <h2 id="rules-title" className="font-display text-xl font-bold tracking-[-0.015em] sm:text-2xl">{d.rulesTitle}</h2>
+      <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        {d.rules.map((rule) => (
+          <div key={rule.label} className="flex min-w-0 flex-col-reverse justify-end gap-1.5 border-t border-primary-foreground/20 pt-4">
+            <dt className="text-sm text-primary-foreground/80">{rule.label}</dt>
+            {/* DM Mono has no Devanagari or Gujarati, so on hi and gu the values take the display face. */}
+            <dd className={cn("whitespace-nowrap text-2xl tabular-nums sm:text-3xl", locale() === "en" ? "font-mono font-medium" : "font-display font-bold")}>
+              {rule.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+/** The four steps from holding the parent to being allotted, as a numbered run across the page. */
 export function HowItWorks() {
   const d = t().quota.how;
   return (
-    <section aria-labelledby="how-title" className="mt-10 rounded-[18px] bg-secondary p-4 sm:p-6">
-      <h2 id="how-title" className="font-display text-xl font-bold tracking-[-0.015em] text-foreground">{d.title}</h2>
-      <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <section aria-labelledby="how-title" className="mt-24 sm:mt-32">
+      <h2 id="how-title" className="type-h2 text-balance">{d.title}</h2>
+      <ol className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
         {d.steps.map((step, index) => (
-          <li key={step.title} className="flex gap-3 sm:block">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary font-mono text-sm font-medium tabular-nums text-primary-foreground">
-              {index + 1}
-            </span>
-            <div className="min-w-0 sm:mt-3">
-              <h3 className="font-display font-bold leading-tight tracking-[-0.015em] text-foreground">{step.title}</h3>
-              <p className="mt-1 text-sm text-pretty text-muted-foreground">{step.body}</p>
-            </div>
+          <li key={step.title} className="min-w-0 border-t-2 border-primary pt-5">
+            <span aria-hidden className="font-mono text-3xl font-medium tabular-nums text-foreground">{index + 1}</span>
+            <h3 className="mt-4 font-display text-lg font-bold leading-tight tracking-[-0.015em] text-foreground sm:text-xl">{step.title}</h3>
+            <p className="mt-2 text-pretty text-muted-foreground">{step.body}</p>
           </li>
         ))}
       </ol>

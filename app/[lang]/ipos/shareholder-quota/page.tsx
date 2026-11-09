@@ -8,7 +8,7 @@ import { collectionJsonLd, JsonLd } from "@/lib/seo/json-ld";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { listSummary } from "@/components/shareholder-quota/summary";
 import { Hero, HowItWorks } from "@/components/shareholder-quota/Intro";
-import { QuotaGrid, QuotaSection } from "@/components/shareholder-quota/QuotaSection";
+import { BuySection, QuotaRows, QuotaSection } from "@/components/shareholder-quota/QuotaSection";
 import { RumourList } from "@/components/shareholder-quota/RumourCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CalendarClock } from "lucide-react";
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-/** /ipos/shareholder-quota: how the quota works, then what to buy by when (Buy before first), what is coming, then questions. */
+/** /ipos/shareholder-quota: what to buy by when (Buy before) and the rules in the hero, how it works, what is coming, then questions. */
 export default async function ShareholderQuotaPage({ params }: Params) {
   const lang = setLocale((await params).lang);
   const { common: c, quota: d } = t();
@@ -53,47 +53,50 @@ export default async function ShareholderQuotaPage({ params }: Params) {
     <div className="app-container pt-24 sm:pt-28">
       <JsonLd data={collectionJsonLd({ lang, path, name: titleOf(d.meta.title), description: summary, items: ipos.map((ipo) => ({ name: `${ipo.name} IPO`, href: ipo.slug ? `/analysis/${ipo.slug}` : path })) })} />
       <Breadcrumbs crumbs={[{ name: c.nav.home, href: "/" }, { name: c.nav.ipos, href: "/ipos" }, { name: c.nav.quota, href: path }]} />
-      <div className="mt-6">
-        <Hero summary={summary} />
+      <div className="mt-10">
+        <Hero aside={buyBefore.length > 0 && <BuySection {...d.sections.buy} ipos={buyBefore} />}>
+          {shown.length > 0 && (
+            <nav aria-label={d.sections.nav}>
+              <ul className="flex flex-wrap gap-2">
+                {shown.map(({ id, ipos: list }) => (
+                  <li key={id}>
+                    <a
+                      href={`#${id}`}
+                      className="press inline-flex min-h-11 whitespace-nowrap items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary active:bg-secondary"
+                    >
+                      {d.sections[id].title}
+                      <span className="font-mono tabular-nums text-muted-foreground">{list.length}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
+        </Hero>
       </div>
-      {shown.length > 0 && (
-        <nav aria-label={d.sections.nav} className="mt-6">
-          <ul className="flex flex-wrap gap-2">
-            {shown.map(({ id, ipos: list }) => (
-              <li key={id}>
-                <a
-                  href={`#${id}`}
-                  className="press inline-flex min-h-11 whitespace-nowrap items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary"
-                >
-                  {d.sections[id].title}
-                  <span className="font-mono tabular-nums text-muted-foreground">{list.length}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
-      <HowItWorks />
 
       {ipos.length + rumoured.length === 0 && (
         <div className="mt-12">
           <EmptyState icon={CalendarClock} title={d.sections.nothingYet} hint={d.sections.empty} />
         </div>
       )}
-      {shown.map(({ id, ipos: list }) => (
-        <QuotaSection key={id} id={id} {...d.sections[id]}>
-          {id === "rumoured" ? <RumourList ipos={list} /> : <QuotaGrid ipos={list} highlighted={id === "buy" || id === "approved"} />}
+      <HowItWorks />
+
+      {shown.filter(({ id }) => id !== "buy").map(({ id, ipos: list }) => (
+        <QuotaSection key={id} id={id} {...d.sections[id]} quiet={id === "rumoured"}>
+          {id === "rumoured" ? <RumourList ipos={list} /> : <QuotaRows ipos={list} />}
         </QuotaSection>
       ))}
       {lastChecked && (
-        <p className="mt-6 text-sm text-muted-foreground">
+        // Under the list column, at the foot of the last list.
+        <p className="mt-8 text-sm text-muted-foreground lg:ml-[calc(4/12*100%+0.667rem)]">
           {d.lastChecked} <span className="font-mono tabular-nums">{lastChecked}</span>.
         </p>
       )}
 
       <Faq />
 
-      <p className="mt-8 text-xs text-pretty text-muted-foreground">{d.disclaimer}</p>
+      <p className="mt-16 max-w-[55ch] text-xs text-pretty text-muted-foreground">{d.disclaimer}</p>
     </div>
   );
 }
