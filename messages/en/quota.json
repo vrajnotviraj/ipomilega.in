@@ -46,25 +46,31 @@
   },
   "sections": {
     "nothingYet": "Nothing here yet",
-    "soon": {
-      "title": "Closest to launch",
-      "hint": "SEBI has approved these, or their dates are set. Highest chance of opening soon.",
-      "empty": "No shareholder-quota IPO has SEBI approval or dates right now."
+    "empty": "No upcoming IPO has a shareholder quota right now. We check every day.",
+    "nav": "On this page",
+    "buy": {
+      "title": "Buy before",
+      "hint": "Dates are set, or the last day to buy the parent is known. Buy one parent share before that day to bid in the quota."
     },
-    "later": {
-      "title": "Further out",
-      "hint": "Draft filed with SEBI, or announced by the company. These can take months, and the quota can still change.",
-      "empty": "No other upcoming IPO with a shareholder quota right now."
+    "approved": {
+      "title": "SEBI approved",
+      "hint": "SEBI has cleared the draft. Dates usually follow within months, so these are next in line."
+    },
+    "filed": {
+      "title": "DRHP filed",
+      "hint": "The draft offer document has a shareholder quota and waits for SEBI. This can take months, and the quota can still change."
+    },
+    "rumoured": {
+      "title": "Rumoured",
+      "hint": "A listed company's board has approved taking a group company public, but no draft is filed yet. Plans like these can change or take years."
     },
     "closed": {
-      "title": "Closed",
-      "hint": "Bidding has shut for these. Buying the parent now will not get you the quota.",
-      "empty": ""
+      "title": "Bidding closed",
+      "hint": "Bidding has shut for these. Buying the parent now will not get you the quota."
     },
     "listed": {
       "title": "Recently listed",
-      "hint": "Quota IPOs that listed in the last six months. The quota is over for these.",
-      "empty": ""
+      "hint": "Quota IPOs that listed in the last six months. The quota is over for these."
     }
   },
   "lastChecked": "Updated daily. Last checked",
@@ -85,11 +91,11 @@
       },
       {
         "q": "How is this list made?",
-        "a": "We check offer documents filed with SEBI, NSE and BSE every day for a shareholder reservation and the parent it names. Once an IPO lists it moves to Recently listed for six months. It drops off sooner when a SEBI approval lapses without dates."
+        "a": "We check offer documents filed with SEBI, NSE and BSE every day for a shareholder reservation and the parent it names. We also read BSE announcements from listed companies whose board has approved taking a subsidiary public; our team reviews each one before it shows here as rumoured. Once an IPO lists it moves to Recently listed for six months. It drops off sooner when a SEBI approval lapses without dates, or when a rumour has no draft after a year."
       }
     ]
   },
-  "disclaimer": "This list is gathered automatically from offer documents and exchange filings and is not reviewed by hand. It is not a recommendation to buy any share, and IPO Milega accepts no responsibility for losses arising from any investment decision. A shareholder quota is only final once it appears in the RHP. Investments in the securities market are subject to market risks. Read the offer document carefully before investing.",
+  "disclaimer": "This list is gathered from offer documents, exchange filings and exchange announcements. Our team reviews every board-stage rumour before it appears; the rest is gathered automatically and not checked by hand. It is not a recommendation to buy any share, and IPO Milega accepts no responsibility for losses arising from any investment decision. A shareholder quota is only final once it appears in the RHP. Investments in the securities market are subject to market risks. Read the offer document carefully before investing.",
   "stages": {
     "announced": "Announced",
     "filed": "DRHP filed",
@@ -108,15 +114,28 @@
     "offerDocument": "Offer document",
     "documentFor": "for {name} (opens in a new tab)",
     "closedNote": "Bidding has closed, so the quota is no longer open.",
-    "eligibilityClosedNote": "The last day to buy the parent has passed. Buying it now will not make you eligible. Only holders from before that day can use the quota.",
-    "buyByNote": "Buy the parent by the last day shown below. Shares settle the next trading day, so a later purchase misses the record date.",
+    "buyByNote": "Buy the parent before 3:30 PM IST on the last day. Shares settle the next trading day, so a later trade misses the record date.",
     "stageNote": {
       "dates": "The RHP is out, so the eligibility date may already have passed. Check the RHP before you buy the parent.",
       "approved": "SEBI has cleared the draft. Dates usually follow within months. Hold the parent before the RHP date.",
       "filed": "The draft offer document has a shareholder quota. It is waiting for SEBI's approval.",
       "announced": "The quota comes from the company's announcement. There is no offer document yet, so it could still change."
     },
-    "listedOn": "Listed on"
+    "listedOn": "Listed on",
+    "buyingClosedNote": "The market closed at 3:30 PM IST on the last day, so buying the parent no longer qualifies. Only earlier holders can bid in the quota.",
+    "countdown": {
+      "notAnnounced": "Not announced yet",
+      "tooLate": "Too late to buy",
+      "daysLeft": {
+        "one": "{count} day left",
+        "other": "{count} days left"
+      }
+    },
+    "oneShare": "1 share ≈",
+    "oneShareOf": "1 share of {name} ≈",
+    "priceOn": "close on {date}",
+    "shareholderQuota": "Shareholder quota",
+    "quotaOfIssue": "{percent}% of issue"
   },
   "teaser": {
     "reserves": {
@@ -124,5 +143,12 @@
       "other": "{count} upcoming IPOs reserve shares for the parent's shareholders."
     },
     "seeWhich": "See which shares to hold."
+  },
+  "rumour": {
+    "boardApproved": "Board approved on",
+    "announcement": "BSE announcement",
+    "announcementFor": "from {name} (opens in a new tab)",
+    "fromAdmin": "Added by our team from the company's news. No draft filed yet.",
+    "fromCompany": "From the company's announcement. No draft filed yet."
   }
 }

@@ -1,11 +1,12 @@
 import { ArrowUpRight, FileText } from "lucide-react";
 import { ProgressLink } from "@/components/progress/ProgressLink";
+import { Countdown } from "@/components/shareholder-quota/BuyBefore";
 import { StageTrack } from "@/components/shareholder-quota/StageTrack";
 import { t } from "@/lib/i18n/server";
 import { fill } from "@/lib/i18n/locales";
-import { daysFromToday, formatIpoDate, isPastFivePmIst } from "@/lib/ipo/format";
+import { formatIpoDate, formatRupees, isPastFivePmIst } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
-import type { QuotaIpo } from "@/lib/queries/shareholder-quota";
+import type { BuyBeforeIpo, QuotaIpo } from "@/lib/queries/shareholder-quota";
 import type { Dictionary } from "@/messages";
 
 type Words = Dictionary["quota"]["card"];
@@ -20,51 +21,51 @@ function stageDate(ipo: QuotaIpo, d: Words) {
   return { label: ipo.stage === "approved" ? d.approvedOn : d.filedOn, value: formatIpoDate(ipo.drhpDate, true) };
 }
 
-/** Whether the last day to buy the parent has passed (null when unknown): after it, buying no longer makes you eligible. */
-const eligibilityClosed = (ipo: QuotaIpo) => {
-  const days = daysFromToday(ipo.lastBuyDate);
-  return days === null ? null : days < 0;
-};
-
-/** The note under the stage track: bidding shut, or the buying deadline passed, else what the stage means. */
-function noteOf(ipo: QuotaIpo, d: Words) {
+/** The note under the track: bidding shut, the buying deadline (Buy before), or what the stage means. */
+function noteOf(ipo: QuotaIpo, buy: BuyBeforeIpo | null, d: Words) {
   if (isPastFivePmIst(ipo.closeDate)) return d.closedNote;
-  if (eligibilityClosed(ipo)) return d.eligibilityClosedNote;
-  if (ipo.lastBuyDate) return d.buyByNote;
+  if (buy?.lastBuyClosed) return d.buyingClosedNote;
+  if (buy?.lastBuyDate) return d.buyByNote;
   return d.stageNote[ipo.stage];
 }
 
-/** A parent to hold and the IPO it makes you eligible for. Highlighted cards are white with lift; the rest are flat. */
-export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: boolean }) {
+/**
+ * A parent to hold and the IPO it makes you eligible for. Buy before cards lead with the countdown; the rest with the
+ * parent and the stage track. Highlighted cards are white with lift; the rest are flat.
+ */
+export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo | BuyBeforeIpo; highlighted: boolean }) {
   const { quota: { card: d }, common } = t();
+  const buy = "daysToLastBuy" in ipo ? ipo : null;
   const date = stageDate(ipo, d);
   const closed = isPastFivePmIst(ipo.closeDate);
   const divider = highlighted ? "border-border" : "border-primary/15";
+  const heading = (
+    <div className={cn(buy && cn("mt-4 border-t pt-4", divider))}>
+      <p className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{d.hold}</p>
+      <h3 className="mt-1 font-display text-lg font-bold leading-tight tracking-[-0.015em] text-balance text-foreground sm:text-xl">
+        {/* Marigold underline, not marigold text: the brand's emphasis style, as marigold text fails contrast on white. */}
+        {ipo.parents.map((parent, index) => (
+          <span key={parent}>
+            {index > 0 && ` ${common.or} `}
+            <span className="highlight">{parent}</span>
+          </span>
+        ))}
+      </h3>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {d.forQuotaIn} <IpoName ipo={ipo} />
+      </p>
+    </div>
+  );
   return (
-    // Four rows (heading, track, note, footer) on the list's subgrid, so they line up across the cards in a row.
+    // Five rows (lead, heading or track, note, figures, footer) on the list's subgrid, so they line up across a row.
     <article
       className={cn(
-        "row-span-4 grid grid-rows-subgrid gap-y-0 rounded-xl p-4 sm:p-5",
+        "row-span-5 grid grid-rows-subgrid gap-y-0 rounded-xl p-4 sm:p-5",
         highlighted ? "card-lift border border-border bg-card" : "bg-secondary"
       )}
     >
-      <div>
-        <p className="text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">{d.hold}</p>
-        <h3 className="mt-1 font-display text-lg font-bold leading-tight tracking-[-0.015em] text-balance text-foreground sm:text-xl">
-          {/* Marigold underline, not marigold text: the brand's emphasis style, as marigold text fails contrast on white. */}
-          {ipo.parents.map((parent, index) => (
-            <span key={parent}>
-              {index > 0 && ` ${common.or} `}
-              <span className="highlight">{parent}</span>
-            </span>
-          ))}
-        </h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {d.forQuotaIn} <IpoName ipo={ipo} />
-        </p>
-      </div>
-
-      {closed ? (
+      {buy ? <Countdown ipo={buy} /> : heading}
+      {buy ? heading : closed ? (
         // Bidding is over, so the stage track says nothing; the dates that decided eligibility take its place.
         <dl className={cn("mt-4 flex flex-wrap gap-x-6 gap-y-2 border-t pt-4", divider)}>
           {ipo.lastBuyDate && <Figure label={d.lastDayWas}>{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
@@ -75,12 +76,19 @@ export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: bo
       ) : (
         <StageTrack stage={ipo.stage} className={cn("mt-4 border-t pt-4", divider)} />
       )}
-      <p className="mt-4 text-sm text-pretty text-muted-foreground">{noteOf(ipo, d)}</p>
+      <div className="mt-4 text-sm text-pretty">
+        <p className="text-muted-foreground">{noteOf(ipo, buy, d)}</p>
+        {ipo.note && <p className="mt-2 text-foreground">{ipo.note}</p>}
+      </div>
+
+      {/* Always rendered, empty when nothing is published, so the row stays aligned across the cards. */}
+      <div>
+        <QuotaFigures ipo={ipo} />
+      </div>
 
       <div className={cn("mt-4 flex flex-wrap items-end gap-x-6 gap-y-2 self-end border-t pt-3", divider)}>
         {!closed && (
           <dl className="flex flex-wrap gap-x-6 gap-y-2">
-            {ipo.lastBuyDate && <Figure label={eligibilityClosed(ipo) ? d.lastDayWas : d.lastDay}>{formatIpoDate(ipo.lastBuyDate, true)}</Figure>}
             {date && <Figure label={date.label}>{date.value}</Figure>}
             {ipo.stage === "dates" && ipo.priceBand && <Figure label={common.priceBand}>{ipo.priceBand}</Figure>}
           </dl>
@@ -88,6 +96,28 @@ export function QuotaCard({ ipo, highlighted }: { ipo: QuotaIpo; highlighted: bo
         {ipo.documentUrl && <DocumentLink href={ipo.documentUrl} name={ipo.name} />}
       </div>
     </article>
+  );
+}
+
+const rupees = (value: number) => `₹${value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/** "1 share ≈ ₹X" per parent with the close it comes from, then issue size and shareholder allocation once published. */
+export function QuotaFigures({ ipo }: { ipo: QuotaIpo }) {
+  const { quota: { card: d }, common } = t();
+  const { issueSizeCr, quotaSizeCr, quotaPercent } = ipo;
+  const quota = [quotaSizeCr !== null && `${formatRupees(quotaSizeCr)} Cr`, quotaPercent !== null && fill(d.quotaOfIssue, { percent: quotaPercent })].filter(Boolean).join(" · ");
+  if (!ipo.parentQuotes.length && issueSizeCr === null && !quota) return null;
+  return (
+    <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
+      {ipo.parentQuotes.map((quote) => (
+        <Figure key={quote.name} label={ipo.parentQuotes.length > 1 ? fill(d.oneShareOf, { name: quote.name }) : d.oneShare}>
+          {rupees(quote.price)}
+          <span className="ml-1.5 font-sans text-xs font-normal text-muted-foreground">{fill(d.priceOn, { date: formatIpoDate(quote.asOf) ?? "" })}</span>
+        </Figure>
+      ))}
+      {issueSizeCr !== null && <Figure label={common.issueSize}>{formatRupees(issueSizeCr)} Cr</Figure>}
+      {quota && <Figure label={d.shareholderQuota}>{quota}</Figure>}
+    </dl>
   );
 }
 

@@ -8,7 +8,10 @@ import { collectionJsonLd, JsonLd } from "@/lib/seo/json-ld";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { listSummary } from "@/components/shareholder-quota/summary";
 import { Hero, HowItWorks } from "@/components/shareholder-quota/Intro";
-import { QuotaSection } from "@/components/shareholder-quota/QuotaSection";
+import { QuotaGrid, QuotaSection } from "@/components/shareholder-quota/QuotaSection";
+import { RumourList } from "@/components/shareholder-quota/RumourCard";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { CalendarClock } from "lucide-react";
 import { Faq } from "@/components/shareholder-quota/Faq";
 
 export const revalidate = 300;
@@ -32,13 +35,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
-/** /ipos/shareholder-quota: how the quota works, the parents to hold (closest to launch first), then questions. */
+/** /ipos/shareholder-quota: how the quota works, then what to buy by when (Buy before first), what is coming, then questions. */
 export default async function ShareholderQuotaPage({ params }: Params) {
   const lang = setLocale((await params).lang);
   const { common: c, quota: d } = t();
   const { ipos, buyBefore, approved, filed, rumoured, closed, listed, checkedAt } = await getShareholderQuotaIpos();
-  const closeToLaunch = [...buyBefore, ...approved];
-  const furtherOut = [...filed, ...rumoured];
+  // R9 order; empty sections are left out of the page and the chips.
+  const sections = [
+    { id: "buy", ipos: buyBefore }, { id: "approved", ipos: approved }, { id: "filed", ipos: filed },
+    { id: "rumoured", ipos: rumoured }, { id: "closed", ipos: closed }, { id: "listed", ipos: listed },
+  ] as const;
+  const shown = sections.filter((section) => section.ipos.length > 0);
   const lastChecked = formatIstTimestamp(checkedAt);
   const summary = listSummary(ipos, t(), lang);
 
@@ -49,12 +56,35 @@ export default async function ShareholderQuotaPage({ params }: Params) {
       <div className="mt-6">
         <Hero summary={summary} />
       </div>
+      {shown.length > 0 && (
+        <nav aria-label={d.sections.nav} className="mt-6">
+          <ul className="flex flex-wrap gap-2">
+            {shown.map(({ id, ipos: list }) => (
+              <li key={id}>
+                <a
+                  href={`#${id}`}
+                  className="press inline-flex min-h-11 whitespace-nowrap items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium text-foreground hover:bg-secondary"
+                >
+                  {d.sections[id].title}
+                  <span className="font-mono tabular-nums text-muted-foreground">{list.length}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
       <HowItWorks />
 
-      <QuotaSection id="soon" {...d.sections.soon} ipos={closeToLaunch} highlighted />
-      <QuotaSection id="later" {...d.sections.later} ipos={furtherOut} highlighted={false} />
-      {closed.length > 0 && <QuotaSection id="closed" {...d.sections.closed} ipos={closed} highlighted={false} />}
-      {listed.length > 0 && <QuotaSection id="listed" {...d.sections.listed} ipos={listed} highlighted={false} />}
+      {buyBefore.length + approved.length + filed.length + rumoured.length === 0 && (
+        <div className="mt-12">
+          <EmptyState icon={CalendarClock} title={d.sections.nothingYet} hint={d.sections.empty} />
+        </div>
+      )}
+      {shown.map(({ id, ipos: list }) => (
+        <QuotaSection key={id} id={id} {...d.sections[id]}>
+          {id === "rumoured" ? <RumourList ipos={list} /> : <QuotaGrid ipos={list} highlighted={id === "buy" || id === "approved"} />}
+        </QuotaSection>
+      ))}
       {lastChecked && (
         <p className="mt-6 text-sm text-muted-foreground">
           {d.lastChecked} <span className="font-mono tabular-nums">{lastChecked}</span>.
