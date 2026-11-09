@@ -127,11 +127,12 @@ export function splitQuota({ ipos: all, rumoured, listed, checkedAt }: ReturnTyp
   });
   const withQuotes = all.map(freshQuotes);
   const closed = withQuotes.filter((ipo) => isPastFivePmIst(ipo.closeDate, now));
-  const ipos = withQuotes.filter((ipo) => !closed.includes(ipo));
+  const ipos = withQuotes.filter((ipo) => !isPastFivePmIst(ipo.closeDate, now));
   const buyBefore: BuyBeforeIpo[] = ipos
     .filter((ipo) => ipo.stage === 'dates' || ipo.lastBuyDate)
     .map((ipo) => ({ ...ipo, daysToLastBuy: daysFromToday(ipo.lastBuyDate, now), lastBuyClosed: isPastLastBuyIst(ipo.lastBuyDate, now) ?? false }));
-  const rest = ipos.filter((ipo) => !buyBefore.some((buy) => buy.id === ipo.id));
+  const inBuyBefore = new Set(buyBefore.map((ipo) => ipo.id));
+  const rest = ipos.filter((ipo) => !inBuyBefore.has(ipo.id));
   return {
     ipos,
     buyBefore,
