@@ -98,7 +98,7 @@ Load them with `next/font/google` in `app/[lang]/layout.tsx`. Preload only Figtr
 | Label | 12px | 500 | +0.04em, uppercase allowed | 1.3 |
 | Figure | 14–18px mono | 500 | 0, `tabular-nums` | 1.2 |
 
-Exception, /ipos/shareholder-quota only: the Buy before countdown is mono at 36–60px and the rules figures 24–30px, because the deadline is that page's point. Hindi and Gujarati set both in the display face, since DM Mono has no Devanagari or Gujarati glyphs.
+Exception, /ipos/shareholder-quota only: the page reads as a compact reference, so its title is 32 → 40px, the stage headings 18 → 20px and the How it works and Questions titles 20px. The Buy before countdown is mono at 24 → 28px and the rules values 18 → 20px. Hindi and Gujarati set both in the display face, since DM Mono has no Devanagari or Gujarati glyphs.
 
 **Rules**
 - Every number (prices, GMP, subscription, odds, dates, counts) is `font-mono tabular-nums`.
@@ -120,7 +120,7 @@ Exception, /ipos/shareholder-quota only: the Buy before countdown is mono at 36�
 
 These are the site's existing patterns, restyled with the tokens above.
 
-- **Hero:** compact band, not a full-screen opener. Tagline h1 with one highlighted phrase and a subline. No counts, no CTA, no side panel and no announcement banner. Exception: /ipos/shareholder-quota puts its Buy before cards in a side panel and shows section chips with counts, because what to buy and by when is the page's job.
+- **Hero:** compact band, not a full-screen opener. Tagline h1 with one highlighted phrase and a subline. No counts, no CTA, no side panel and no announcement banner. Exception: /ipos/shareholder-quota sets the rules as a slim ink strip beside the title (two by two on phones), the last-checked line under the subline, and section chips with counts. Below it, each non-empty stage (Buy before, SEBI approved, DRHP filed, Rumoured, Bidding closed, Recently listed) is a group: an h2 with its count, a one-line hint, then white tiles. All groups share one grid (1 column on phones, 2 on tablets, 3 from lg, 3 or 4 from xl, whichever leaves fewer empty slots); a group spans as many columns as it has tiles, so small groups share a row. Every tile has the same five parts on rows shared through CSS subgrid: name and "Hold 1 share of" the parent; a hairline date row (label left, mono date right); the stage track; the stage note held to two lines; the figures (each parent's price, issue size, quota) and links, pinned to the foot. So tiles in a row are equal height and line up. The Buy before tile has a 2px ink border, the marigold underline on the parent and the countdown under the parent. Bidding closed and Recently listed tiles are flat surface tiles. How it works and Questions sit side by side under the grid.
 - **Header:** logo left and nav right. The active link uses `aria-current="page"` and the `underline-grow` utility.
 - **Ticker:** full-bleed band on ink green. Company names in chalk, scores in data colours, and the reversed mark if a logo is needed. Pauses on hover; respects reduced motion.
 - **Section heading:** display h2 on the left, "View all" link on the right as a pill or text link in `--primary`. The live badge is a rippling dot (`pulse-ring`) plus the `LIVE` label in `--score-bad`.

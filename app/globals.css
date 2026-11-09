@@ -1,13 +1,19 @@
-/* Hallmark · shape: index-first, a deadline board (/ipos/shareholder-quota) · genre: editorial · theme: brand · redesign: full · hero: counter · nav: kept · footer: kept · signature: the Buy before countdown set at display size in DM Mono
- * axes: light/grotesk-heavy/chromatic-marigold · posture: restrained · surface: absolute (the locked white card) · contrast: pass · fold: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: P, a list page argues little; it leads with the one deadline that matters so the order makes the case */
+/* Hallmark · shape: index-first, quota tiles by stage (/ipos/shareholder-quota) · genre: editorial · theme: brand · redesign: full · hero: title left, the rules as a slim ink strip right · nav: kept · footer: kept · signature: the Buy before tile, 2px ink border and the countdown in mono
+ * axes: light/grotesk-heavy/chromatic-marigold · posture: dense · surface: absolute (the locked white card) · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 · weakest: P, a reference list argues little; Buy before leads and every tile shares one anatomy so stages compare at a glance */
 /* Hallmark · system: design-system/DESIGN.md is locked; its tokens below are the system, so no tokens.css or base.css (base.css would restyle every page's headings) */
 /* Hallmark · waive 7b · --card: #FFFFFF in :root, named in design-system/DESIGN.md · the card colour is locked by the brand system and tinting it changes every card on the site */
-/* Hallmark · departs DESIGN.md on purpose, on this page only: the Buy before countdown is mono at 36 to 60px (§4 sets figures at 14 to 18px) and the rules figures at 24 to 30px, because the deadline is the page's signature; the hero keeps the side panel and chip counts the old page had (§6 describes the home hero) */
-/* Hallmark · reworded "8.27%" (joined to the quota amount by a middle dot) to "8.27% of issue" set beside the amount as a quiet note · 63 names middle-dot joined figures */
-/* Hallmark · reworded "Hold one share of the listed parent before the RHP date to apply in the shareholder category, a second shot at allotment on top of retail." to "Hold one parent share by the RHP date for a second shot at allotment." · 58 caps the hero line; the category and retail facts stay in How it works */
-/* Hallmark · reworded "HOLD 1 SHARE OF" over the parent to "Hold 1 share for the shareholder quota in" under it · 54 names the eyebrow; the parent name is now the heading */
-/* Hallmark · dropped the visible hero summary sentence (every IPO and parent it lists) · 58 and the run-on hero; it stays as the meta and JSON-LD description and every name is in the quota cards */
+/* Hallmark · departs DESIGN.md on purpose, on this page only: title 32 to 40px, stage headings 18 to 20px, How it works and Questions 20px, the Buy before countdown mono 24 to 28px; see its §4 exception */
+/* Hallmark · waive 44c · hero ends near 230px at 1440 · the user asked for a compact reference page, so the tiles start right under the title */
+/* Hallmark · waive 79 · the tiles fill the first screen under the title · the space the linter counts is the stage grid */
+/* Hallmark · waive 78 · stage, How it works and Questions headings at 18 to 20px · the user asked for no oversized headings on this page */
+/* Hallmark · dismissed 77 · one stage grid holds all six stages as groups, then how it works and the questions */
+/* Hallmark · answered F19 · 900 title, 700 heads, 500 and 400 body are the locked brand weights in design-system/DESIGN.md */
+/* Hallmark · answered F8 · reveal, bloom, dot-in and gain-rise live in the shared stylesheet for other pages; the quota page uses none of them */
+/* Hallmark · dismissed 18 · the ticker is site chrome and pauses on hover in its own component; the quota page has no infinite animation */
+/* Hallmark · note: the 375 overflow (34) is the site's off-canvas mobile menu (div.flex.h-16, components/layout/MobileMenu.tsx), outside this page's files */
+/* Hallmark · reworded "Hold 1 share of <parent> for the quota" to "Hold 1 share of <parent>" (hi and gu the same) · the parent's price now sits in the tile's figures, and the line reads as the instruction */
+/* Hallmark · stage hints held to one line and stage notes to two, full text in the title tooltip and the DOM · the user asked for uniform tiles whose rows line up */
 @import "tailwindcss";
 @import "tw-animate-css";
 

@@ -1,69 +1,72 @@
 import { BuyBeforeCard } from "@/components/shareholder-quota/cards/BuyBeforeCard";
-import { QuotaRow } from "@/components/shareholder-quota/cards/QuotaRow";
-import { RumourRow } from "@/components/shareholder-quota/cards/RumourRow";
+import { QuotaTile } from "@/components/shareholder-quota/cards/QuotaTile";
+import { RumourTile } from "@/components/shareholder-quota/cards/RumourTile";
+import { Clamped } from "@/components/shareholder-quota/cards/parts";
+import { desktopColumns } from "@/components/shareholder-quota/columns";
+import { t } from "@/lib/i18n/server";
 import { cn } from "@/lib/utils";
 import type { BuyBeforeIpo, QuotaIpo } from "@/lib/queries/shareholder-quota";
 
-type Props = { id: string; title: string; hint: string; quiet?: boolean; children: React.ReactNode };
+export type Group = { id: "buy"; ipos: BuyBeforeIpo[] } | { id: "approved" | "filed" | "rumoured" | "closed" | "listed"; ipos: QuotaIpo[] };
 
-/** One stage of the list: title and hint on the left, rows on the right. `quiet` puts it on the grey panel. */
-export function QuotaSection({ id, title, hint, quiet, children }: Props) {
+// Tailwind needs whole class names, so each span is spelled out.
+const MD_SPAN = ["", "md:col-span-1", "md:col-span-2"];
+const LG_SPAN = ["", "lg:col-span-1", "lg:col-span-2", "lg:col-span-3"];
+const XL_SPAN = ["", "xl:col-span-1", "xl:col-span-2", "xl:col-span-3", "xl:col-span-4"];
+// Rows a tile takes on the shared grid: head, date row, track, note, foot.
+const TILE_ROWS = 5;
+
+/** Every non-empty stage on one grid. Each stage spans as many columns as it has tiles, so small stages share a row, and every tile part sits on a shared row, so tiles line up across stages. */
+export function StageGroups({ groups }: { groups: Group[] }) {
+  const cols = desktopColumns(groups.map((group) => group.ipos.length));
+  return (
+    <div className={cn("grid gap-x-4 gap-y-10 md:grid-cols-2 lg:grid-cols-3", cols === 4 && "xl:grid-cols-4")}>
+      {groups.map((group) => (
+        <StageGroup key={group.id} group={group} xlCols={cols} />
+      ))}
+    </div>
+  );
+}
+
+/** One stage: a heading with its count and a one-line hint, then its tiles on the parent grid's columns and rows. */
+function StageGroup({ group, xlCols }: { group: Group; xlCols: number }) {
+  const { id, ipos } = group;
+  const d = t().quota.sections[id];
+  const span = (cols: number) => Math.min(ipos.length, cols);
+  // Rows the tiles take at a column count; the stage adds one for its heading. Set as variables because they depend on the data.
+  const rows = (cols: number) => Math.ceil(ipos.length / cols) * TILE_ROWS;
+  const style = {
+    "--t": rows(1), "--t-md": rows(2), "--t-lg": rows(3), "--t-xl": rows(xlCols),
+    "--g": rows(1) + 1, "--g-md": rows(2) + 1, "--g-lg": rows(3) + 1, "--g-xl": rows(xlCols) + 1,
+  } as React.CSSProperties;
   return (
     <section
       id={id}
       aria-labelledby={`${id}-title`}
-      className={cn("mt-24 grid scroll-mt-24 gap-6 sm:mt-32 lg:grid-cols-12 lg:gap-8", quiet && "rounded-[18px] bg-secondary p-5 sm:p-10")}
+      style={style}
+      className={cn(
+        "row-span-(--g) grid scroll-mt-24 grid-cols-subgrid grid-rows-subgrid gap-y-3 md:row-span-(--g-md) lg:row-span-(--g-lg) xl:row-span-(--g-xl)",
+        MD_SPAN[span(2)], LG_SPAN[span(3)], XL_SPAN[span(xlCols)]
+      )}
     >
-      <div className="min-w-0 lg:col-span-4">
-        <div className="lg:sticky lg:top-28">
-          <h2 id={`${id}-title`} className="type-h2 text-balance break-words">{title}</h2>
-          <p className="mt-4 max-w-[40ch] text-muted-foreground">{hint}</p>
-        </div>
+      <div className="col-span-full min-w-0 self-end">
+        <h2 id={`${id}-title`} className="flex items-baseline gap-2 font-display text-lg font-bold tracking-[-0.015em] text-foreground sm:text-xl">
+          {d.title}
+          <span className="font-mono text-sm font-medium tabular-nums text-muted-foreground">{ipos.length}</span>
+        </h2>
+        {/* One line, so every stage heading takes the same room. */}
+        <Clamped text={d.hint} lines="line-clamp-1" className="mt-1 text-sm text-muted-foreground" />
       </div>
-      <div className="min-w-0 lg:col-span-8">{children}</div>
-    </section>
-  );
-}
-
-/** The Buy before section in the hero: its title, the deadline cards, then its hint as a caption. */
-export function BuySection({ title, hint, ipos }: { title: string; hint: string; ipos: BuyBeforeIpo[] }) {
-  return (
-    <section id="buy" aria-labelledby="buy-title" className="scroll-mt-24">
-      <h2 id="buy-title" className="font-display text-2xl font-bold tracking-[-0.015em] text-foreground">{title}</h2>
-      <ul className="mt-4 grid gap-4">
-        {ipos.map((ipo) => (
-          <li key={ipo.id}>
-            <BuyBeforeCard ipo={ipo} />
-          </li>
-        ))}
+      <ul className="col-span-full row-span-(--t) grid grid-cols-subgrid grid-rows-subgrid gap-y-4 md:row-span-(--t-md) lg:row-span-(--t-lg) xl:row-span-(--t-xl)">
+        <Tiles group={group} />
       </ul>
-      <p className="mt-4 max-w-[52ch] text-sm text-pretty text-muted-foreground">{hint}</p>
     </section>
   );
 }
 
-/** Stage rows parted by hairlines. */
-export function QuotaRows({ ipos }: { ipos: QuotaIpo[] }) {
-  return (
-    <ul className="divide-y divide-border border-y border-border">
-      {ipos.map((ipo) => (
-        <li key={ipo.id}>
-          <QuotaRow ipo={ipo} />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/** Rumour rows, parted by darker hairlines that show on the grey panel. */
-export function RumourList({ ipos }: { ipos: QuotaIpo[] }) {
-  return (
-    <ul className="divide-y divide-primary/15 border-y border-primary/15">
-      {ipos.map((ipo) => (
-        <li key={ipo.id}>
-          <RumourRow ipo={ipo} />
-        </li>
-      ))}
-    </ul>
-  );
+/** The stage's tiles. */
+function Tiles({ group }: { group: Group }) {
+  if (group.id === "buy") return group.ipos.map((ipo) => <BuyBeforeCard key={ipo.id} ipo={ipo} />);
+  const Tile = group.id === "rumoured" ? RumourTile : QuotaTile;
+  return group.ipos.map((ipo) => <Tile key={ipo.id} ipo={ipo} />);
 }

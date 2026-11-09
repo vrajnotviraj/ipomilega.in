@@ -104,7 +104,7 @@
   },
   "stageLabel": "સ્ટેજ: {name}, {total}માંથી સ્ટેપ {step}",
   "card": {
-    "forQuotaIn": "આનો 1 શેર રાખો, આ IPO ના શેરહોલ્ડર ક્વોટા માટે:",
+    "holdShareOf": "{parents} નો 1 શેર રાખો",
     "bidding": "બિડિંગ",
     "approvedOn": "મંજૂર થયો",
     "filedOn": "ફાઇલ થયો",

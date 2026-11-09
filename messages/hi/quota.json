@@ -104,7 +104,7 @@
   },
   "stageLabel": "स्टेज: {name}, {total} में से स्टेप {step}",
   "card": {
-    "forQuotaIn": "इसका 1 शेयर रखें, इस IPO के शेयरहोल्डर कोटा के लिए:",
+    "holdShareOf": "{parents} का 1 शेयर रखें",
     "bidding": "बोली",
     "approvedOn": "मंज़ूरी मिली",
     "filedOn": "फाइल हुआ",

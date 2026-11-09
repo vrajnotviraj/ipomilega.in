@@ -1,55 +1,59 @@
-import { Footer, Heading, Notes, QuotaFigures } from "@/components/shareholder-quota/cards/parts";
+import { FileText } from "lucide-react";
+import { DateRow, Fact, Foot, Note, noteOf, OutLink, QuotaFacts, stageDate, Tile, TileHead } from "@/components/shareholder-quota/cards/parts";
+import { StageTrack } from "@/components/shareholder-quota/cards/StageTrack";
 import { locale, t } from "@/lib/i18n/server";
-import { plural } from "@/lib/i18n/locales";
+import { fill, plural } from "@/lib/i18n/locales";
 import { formatIpoDate } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
 import type { BuyBeforeIpo } from "@/lib/queries/shareholder-quota";
 
-/** A Buy before card: the countdown, then the parent, the note, the figures and the dates. */
+/** The Buy before tile: the countdown under the parent, the last day to buy, then bidding, price band, prices, issue and quota. */
 export function BuyBeforeCard({ ipo }: { ipo: BuyBeforeIpo }) {
+  const { quota: { card: d }, common } = t();
+  const lastDay = formatIpoDate(ipo.lastBuyDate, true);
+  const bidding = stageDate(ipo, d);
   return (
-    <article className="card-lift rounded-[18px] border border-border bg-card p-5 sm:p-8">
-      <Countdown ipo={ipo} />
-      <div className="mt-8 border-t border-border pt-8">
-        <Heading ipo={ipo} accent />
-      </div>
-      <div className="mt-4">
-        <Notes ipo={ipo} buy={ipo} />
-      </div>
-      <QuotaFigures ipo={ipo} />
-      <Footer ipo={ipo} className="mt-4 border-t border-border pt-3" />
-    </article>
+    <Tile tone="go">
+      <TileHead ipo={ipo} accent>
+        <Countdown ipo={ipo} />
+      </TileHead>
+      <DateRow date={lastDay ? { label: ipo.lastBuyClosed ? d.lastDayWas : d.lastDay, value: lastDay } : null} />
+      <StageTrack stage={ipo.stage} />
+      <Note>{noteOf(ipo, ipo, d)}</Note>
+      <Foot
+        adminNote={ipo.note}
+        links={ipo.documentUrl && <OutLink href={ipo.documentUrl} icon={FileText} label={d.offerDocument} srText={fill(d.documentFor, { name: ipo.name })} />}
+      >
+        {bidding && <Fact label={bidding.label}>{bidding.value}</Fact>}
+        {ipo.priceBand && <Fact label={common.priceBand}>{ipo.priceBand}</Fact>}
+        <QuotaFacts ipo={ipo} />
+      </Foot>
+    </Tile>
   );
 }
 
-/** Days left to buy the parent and the last day; "not announced yet" without a date. Red once today or gone. */
+/** Days left to buy the parent; "not announced yet" without a date. Red once today or gone. */
 function Countdown({ ipo }: { ipo: BuyBeforeIpo }) {
   const { quota: { card: d }, common } = t();
-  const date = formatIpoDate(ipo.lastBuyDate, true);
   const days = ipo.daysToLastBuy;
+  const known = Boolean(ipo.lastBuyDate) && days !== null;
   // DM Mono has no Devanagari or Gujarati glyphs, so hi and gu use the display face.
-  const big = locale() === "en"
-    ? "font-mono text-4xl font-medium tracking-[-0.05em] tabular-nums sm:text-6xl"
-    : "font-display text-4xl font-bold tabular-nums sm:text-6xl";
-  const value = !date || days === null
+  const face = locale() === "en" ? "font-mono font-medium tracking-[-0.03em]" : "font-display font-bold";
+  const value = !known
     ? d.countdown.notAnnounced
     : ipo.lastBuyClosed ? d.countdown.tooLate
     : days === 0 ? common.today
     : days === 1 ? common.tomorrow
-    : plural(d.countdown.daysLeft, days);
+    : plural(d.countdown.daysLeft, days!);
   return (
-    <div>
-      <p className="text-sm text-muted-foreground">{ipo.lastBuyClosed ? d.lastDayWas : d.lastDay}</p>
-      <p
-        className={cn(
-          "mt-2 leading-none",
-          date ? big : "font-display text-2xl font-bold tracking-[-0.015em]",
-          date && (ipo.lastBuyClosed || days === 0) ? "text-score-bad" : "text-foreground"
-        )}
-      >
-        {value}
-      </p>
-      {date && <p className="mt-3 font-mono text-base tabular-nums text-muted-foreground">{date}</p>}
-    </div>
+    <p
+      className={cn(
+        "mt-3 leading-tight tabular-nums",
+        known ? `${face} text-2xl sm:text-[28px]` : "font-display text-lg font-bold",
+        known && (ipo.lastBuyClosed || days === 0) ? "text-score-bad" : "text-foreground"
+      )}
+    >
+      {value}
+    </p>
   );
 }

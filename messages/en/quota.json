@@ -104,7 +104,7 @@
   },
   "stageLabel": "Stage: {name}, step {step} of {total}",
   "card": {
-    "forQuotaIn": "Hold 1 share for the shareholder quota in",
+    "holdShareOf": "Hold 1 share of {parents}",
     "bidding": "Bidding",
     "approvedOn": "Approved on",
     "filedOn": "Filed on",
