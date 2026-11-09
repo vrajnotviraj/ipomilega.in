@@ -139,7 +139,7 @@ export function OutLink({ href, icon: Icon, label, srText }: { href: string; ico
 
 /** A small grey aside after a figure. */
 function Note({ children }: { children: React.ReactNode }) {
-  return <span className="ml-1.5 font-sans text-xs font-normal text-muted-foreground">{children}</span>;
+  return <span className="ml-1.5 text-xs font-normal text-muted-foreground">{children}</span>;
 }
 
 /** A labelled number. */

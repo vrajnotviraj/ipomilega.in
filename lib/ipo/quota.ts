@@ -66,7 +66,9 @@ export type QuotaDoc = {
   admin?: { hidden?: boolean; overrides?: Overrides };
 };
 
-const dayOfDate = (date: Date | null | undefined) => date?.toISOString().slice(0, 10) ?? null;
+const IST_OFFSET_MS = 5.5 * 3600 * 1000;
+// The calendar day in India; scraped dates are UTC midnight, but BSE stamps announcements with an IST time of day.
+const dayOfDate = (date: Date | null | undefined) => (date ? new Date(date.getTime() + IST_OFFSET_MS).toISOString().slice(0, 10) : null);
 
 /** The doc as the site shows it: the admin's overrides laid over the scraped fields. */
 const toIpo = (scraped: QuotaDoc): QuotaIpo => {
@@ -78,7 +80,10 @@ const toIpo = (scraped: QuotaDoc): QuotaIpo => {
     stage: doc.stage ?? 'dates', // a listed IPO has no stage left; it had dates
     source: doc.source ?? 'chittorgarh', // legacy chittorgarh docs carry no source
     parents: doc.parents,
-    parentQuotes: (doc.parent_quotes ?? []).map((quote) => ({ name: quote.name, price: quote.price, asOf: dayOfDate(quote.as_of)! })),
+    // Only the parents shown: an admin's parent change takes effect before the engine re-prices.
+    parentQuotes: (doc.parent_quotes ?? [])
+      .filter((quote) => doc.parents.includes(quote.name))
+      .map((quote) => ({ name: quote.name, price: quote.price, asOf: dayOfDate(quote.as_of)! })),
     drhpDate: dayOfDate(doc.drhp_date),
     openDate: dayOfDate(doc.open_date),
     closeDate: dayOfDate(doc.close_date),
