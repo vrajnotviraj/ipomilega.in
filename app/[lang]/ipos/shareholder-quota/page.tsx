@@ -36,9 +36,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ShareholderQuotaPage({ params }: Params) {
   const lang = setLocale((await params).lang);
   const { common: c, quota: d } = t();
-  const { ipos, closed, listed, checkedAt } = await getShareholderQuotaIpos();
-  const closeToLaunch = ipos.filter((ipo) => ipo.stage === "dates" || ipo.stage === "approved");
-  const furtherOut = ipos.filter((ipo) => ipo.stage === "filed" || ipo.stage === "announced");
+  const { ipos, buyBefore, approved, filed, rumoured, closed, listed, checkedAt } = await getShareholderQuotaIpos();
+  const closeToLaunch = [...buyBefore, ...approved];
+  const furtherOut = [...filed, ...rumoured];
   const lastChecked = formatIstTimestamp(checkedAt);
   const summary = listSummary(ipos, t(), lang);
 

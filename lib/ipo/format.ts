@@ -148,9 +148,9 @@ export const dayNumberInIndia = (date: Date): number =>
   Date.parse(date.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })) / DAY_MS;
 
 /** Whole days from today in India to the date: 0 is today, negative once passed. Null when the date is unknown. */
-export const daysFromToday = (raw: string | null | undefined): number | null => {
+export const daysFromToday = (raw: string | null | undefined, now = new Date()): number | null => {
   const date = parseIpoDate(raw);
-  return date ? dayNumberInIndia(date) - dayNumberInIndia(new Date()) : null;
+  return date ? dayNumberInIndia(date) - dayNumberInIndia(now) : null;
 };
 
 /** Days until bidding closes (0 is today), or null without a usable close date. */
@@ -161,13 +161,20 @@ export const getDaysUntilClosing = (ipo: { ipo_dates?: { ipo_close_date?: string
  * Whether the date has passed, counting from 5 PM IST on the day itself: when bidding shuts and allotment comes out.
  * Null when the date is unknown.
  */
-export const isPastFivePmIst = (raw: string | null | undefined, now = new Date()): boolean | null => {
+export const isPastFivePmIst = (raw: string | null | undefined, now = new Date()): boolean | null => isPastIstTime(raw, 17 * 60, now);
+
+/** Whether the last day to buy the parent has passed, counting from 3:30 PM IST (market close) on the day. Null when unknown. */
+export const isPastLastBuyIst = (raw: string | null | undefined, now = new Date()): boolean | null => isPastIstTime(raw, 15 * 60 + 30, now);
+
+const IST_OFFSET_MS = 330 * 60 * 1000; // India has no daylight saving
+
+function isPastIstTime(raw: string | null | undefined, minuteOfDay: number, now: Date): boolean | null {
   const date = parseIpoDate(raw);
   if (!date) return null;
   const days = dayNumberInIndia(date) - dayNumberInIndia(now);
-  const hourInIndia = Number(now.toLocaleString('en-GB', { hour: 'numeric', hourCycle: 'h23', timeZone: 'Asia/Kolkata' }));
-  return days < 0 || (days === 0 && hourInIndia >= 17);
-};
+  const minuteInIndia = ((now.getTime() + IST_OFFSET_MS) % DAY_MS) / 60000;
+  return days < 0 || (days === 0 && minuteInIndia >= minuteOfDay);
+}
 
 export type IssueStage = 'upcoming' | 'live' | 'past';
 
