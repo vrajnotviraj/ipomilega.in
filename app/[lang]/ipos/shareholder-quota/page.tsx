@@ -40,7 +40,7 @@ export default async function ShareholderQuotaPage({ params }: Params) {
   const lang = setLocale((await params).lang);
   const { common: c, quota: d } = t();
   const { ipos, buyBefore, approved, filed, rumoured, closed, listed, checkedAt } = await getShareholderQuotaIpos();
-  // R9 order; empty sections are left out of the page and the chips.
+  // Empty sections are left out of the page and the chips.
   const sections = [
     { id: "buy", ipos: buyBefore }, { id: "approved", ipos: approved }, { id: "filed", ipos: filed },
     { id: "rumoured", ipos: rumoured }, { id: "closed", ipos: closed }, { id: "listed", ipos: listed },
@@ -75,7 +75,7 @@ export default async function ShareholderQuotaPage({ params }: Params) {
       )}
       <HowItWorks />
 
-      {buyBefore.length + approved.length + filed.length + rumoured.length === 0 && (
+      {ipos.length + rumoured.length === 0 && (
         <div className="mt-12">
           <EmptyState icon={CalendarClock} title={d.sections.nothingYet} hint={d.sections.empty} />
         </div>

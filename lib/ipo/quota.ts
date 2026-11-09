@@ -117,7 +117,7 @@ export function quotaRows(docs: QuotaDoc[], listedDocs: QuotaDoc[]) {
 
 const QUOTE_FRESH_TRADING_DAYS = 5;
 
-/** The per-request split: Buy before (R10), SEBI approved, DRHP filed, rumoured, bidding closed (5 PM IST on the close date), listed. */
+/** The per-request split: Buy before, SEBI approved, DRHP filed, rumoured, bidding closed (5 PM IST on the close date), listed. */
 export function splitQuota({ ipos: all, rumoured, listed, checkedAt }: ReturnType<typeof quotaRows>, now = new Date()) {
   const today = dayNumberInIndia(now);
   // shortcut: counts weekdays, not exchange holidays; upgrade if a holiday calendar lands.

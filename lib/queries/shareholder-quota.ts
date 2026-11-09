@@ -3,7 +3,7 @@ import { cached } from '@/lib/db/cache';
 import { getDb } from '@/lib/db/mongo';
 import { quotaRows, splitQuota, type QuotaDoc } from '@/lib/ipo/quota';
 
-export { QUOTA_STAGES, type BuyBeforeIpo, type ParentQuote, type QuotaIpo, type QuotaStage } from '@/lib/ipo/quota';
+export type { BuyBeforeIpo, QuotaIpo, QuotaStage } from '@/lib/ipo/quota';
 
 // Only these fields leave the database; where the engine read them stays private.
 const PUBLIC_FIELDS = {
