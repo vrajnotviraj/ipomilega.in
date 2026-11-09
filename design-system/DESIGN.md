@@ -98,6 +98,8 @@ Load them with `next/font/google` in `app/[lang]/layout.tsx`. Preload only Figtr
 | Label | 12px | 500 | +0.04em, uppercase allowed | 1.3 |
 | Figure | 14–18px mono | 500 | 0, `tabular-nums` | 1.2 |
 
+Exception, /ipos/shareholder-quota only: the Buy before countdown is mono at 36–60px and the rules figures 24–30px, because the deadline is that page's point. Hindi and Gujarati set both in the display face, since DM Mono has no Devanagari or Gujarati glyphs.
+
 **Rules**
 - Every number (prices, GMP, subscription, odds, dates, counts) is `font-mono tabular-nums`.
 - Sentence case for headings and buttons. Uppercase only for short labels such as `MAINBOARD` and `LIVE`.
@@ -118,7 +120,7 @@ Load them with `next/font/google` in `app/[lang]/layout.tsx`. Preload only Figtr
 
 These are the site's existing patterns, restyled with the tokens above.
 
-- **Hero:** compact band, not a full-screen opener. Tagline h1 with one highlighted phrase and a subline. No counts, no CTA, no side panel and no announcement banner.
+- **Hero:** compact band, not a full-screen opener. Tagline h1 with one highlighted phrase and a subline. No counts, no CTA, no side panel and no announcement banner. Exception: /ipos/shareholder-quota puts its Buy before cards in a side panel and shows section chips with counts, because what to buy and by when is the page's job.
 - **Header:** logo left and nav right. The active link uses `aria-current="page"` and the `underline-grow` utility.
 - **Ticker:** full-bleed band on ink green. Company names in chalk, scores in data colours, and the reversed mark if a logo is needed. Pauses on hover; respects reduced motion.
 - **Section heading:** display h2 on the left, "View all" link on the right as a pill or text link in `--primary`. The live badge is a rippling dot (`pulse-ring`) plus the `LIVE` label in `--score-bad`.

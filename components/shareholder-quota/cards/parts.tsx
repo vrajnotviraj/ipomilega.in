@@ -1,7 +1,7 @@
 import { ArrowUpRight, FileText } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ProgressLink } from "@/components/progress/ProgressLink";
-import { t } from "@/lib/i18n/server";
+import { locale, t } from "@/lib/i18n/server";
 import { fill } from "@/lib/i18n/locales";
 import { formatIpoDate, formatRupees, isPastFivePmIst } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
@@ -139,7 +139,8 @@ export function OutLink({ href, icon: Icon, label, srText }: { href: string; ico
 
 /** A small grey aside after a figure. */
 function Note({ children }: { children: React.ReactNode }) {
-  return <span className="ml-1.5 text-xs font-normal text-muted-foreground">{children}</span>;
+  // Mono like every figure; hi and gu need the sans face, since DM Mono has no Devanagari or Gujarati glyphs.
+  return <span className={cn("ml-1.5 text-xs font-normal text-muted-foreground", locale() !== "en" && "font-sans")}>{children}</span>;
 }
 
 /** A labelled number. */
