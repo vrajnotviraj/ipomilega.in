@@ -1,6 +1,5 @@
 import { FileText } from "lucide-react";
-import { DateRow, Fact, Foot, Note, noteOf, OutLink, QuotaFacts, stageDate, Tile, TileHead } from "@/components/shareholder-quota/cards/parts";
-import { StageTrack } from "@/components/shareholder-quota/cards/StageTrack";
+import { DateRow, Fact, Foot, OutLink, QuotaFacts, stageDate, Tile, TileHead } from "@/components/shareholder-quota/cards/parts";
 import { t } from "@/lib/i18n/server";
 import { fill } from "@/lib/i18n/locales";
 import { formatIpoDate, isPastFivePmIst } from "@/lib/ipo/format";
@@ -16,8 +15,6 @@ export function QuotaTile({ ipo }: { ipo: QuotaIpo }) {
     <Tile tone={closed ? "quiet" : undefined}>
       <TileHead ipo={ipo} />
       <DateRow date={listed ?? stage} />
-      <StageTrack stage={ipo.stage} />
-      <Note>{noteOf(ipo, null, d)}</Note>
       <Foot
         adminNote={ipo.note}
         links={ipo.documentUrl && <OutLink href={ipo.documentUrl} icon={FileText} label={d.offerDocument} srText={fill(d.documentFor, { name: ipo.name })} />}

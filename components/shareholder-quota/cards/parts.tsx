@@ -23,16 +23,16 @@ export function stageDate(ipo: QuotaIpo, d: Words): DateLine {
   return { label: ipo.stage === "approved" ? d.approvedOn : d.filedOn, value: formatIpoDate(ipo.drhpDate, true) ?? "" };
 }
 
-/** The note for a tile: bidding shut, the buying deadline, or what the stage means. */
-export function noteOf(ipo: QuotaIpo, buy: BuyBeforeIpo | null, d: Words) {
+/** The Buy before tile's note: bidding shut, the buying deadline, or what the stage means. Other tiles skip it: their stage heading says it. */
+export function noteOf(ipo: BuyBeforeIpo, d: Words) {
   if (isPastFivePmIst(ipo.closeDate)) return d.closedNote;
-  if (buy?.lastBuyClosed) return d.buyingClosedNote;
-  if (buy?.lastBuyDate) return d.buyByNote;
+  if (ipo.lastBuyClosed) return d.buyingClosedNote;
+  if (ipo.lastBuyDate) return d.buyByNote;
   return d.stageNote[ipo.stage];
 }
 
 /**
- * One tile on the stage grid. It takes exactly five parts (head, date row, track, note, foot) and lays them on
+ * One tile on the stage grid. It takes exactly three parts (head, date row, foot) and lays them on
  * rows it shares with the tiles beside it, so every tile in a row has the same height and its parts line up.
  * "go" is the Buy before tile, "quiet" the closed and listed ones.
  */
@@ -40,7 +40,7 @@ export function Tile({ tone, children }: { tone?: "go" | "quiet"; children: Reac
   return (
     <li
       className={cn(
-        "row-span-5 grid min-w-0 grid-rows-subgrid gap-y-3 rounded-xl p-4",
+        "row-span-3 grid min-w-0 grid-rows-subgrid gap-y-3 rounded-xl p-4",
         tone === "quiet" ? "bg-secondary" : "border bg-card shadow-card",
         tone === "go" ? "border-2 border-primary" : "border-border"
       )}
@@ -107,15 +107,11 @@ export function Clamped({ text, lines, className }: { text: string; lines: "line
   );
 }
 
-/** The stage note, held to two lines so every tile's note takes the same room. */
-export function Note({ children }: { children: string }) {
-  return <Clamped text={children} lines="line-clamp-2" className="self-start text-sm text-muted-foreground" />;
-}
-
-/** The tile's last part, pinned to its foot: the admin's note, the figures, then any links. */
-export function Foot({ adminNote, children, links }: { adminNote: string | null; children: React.ReactNode; links?: React.ReactNode }) {
+/** The tile's last part, pinned to its foot: a muted note, the admin's note, the figures, then any links. */
+export function Foot({ note, adminNote, children, links }: { note?: string; adminNote: string | null; children: React.ReactNode; links?: React.ReactNode }) {
   return (
     <div className="grid min-w-0 content-end gap-3">
+      {note && <p className="text-sm text-pretty text-muted-foreground">{note}</p>}
       {adminNote && <p className="text-sm text-pretty text-foreground">{adminNote}</p>}
       <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-sm">{children}</dl>
       {links && <div className="flex flex-wrap gap-2">{links}</div>}
@@ -136,7 +132,7 @@ export function Fact({ label, children, aside }: { label: string; children: Reac
   );
 }
 
-/** Each parent's share price and the day it closed there, then the issue size and the shareholder quota when published. */
+/** Each parent's closing share price with its day on one line, then the issue size and the shareholder quota when published. */
 export function QuotaFacts({ ipo }: { ipo: QuotaIpo }) {
   const { quota: { card: d }, common } = t();
   const { issueSizeCr, quotaSizeCr, quotaPercent } = ipo;
@@ -146,8 +142,7 @@ export function QuotaFacts({ ipo }: { ipo: QuotaIpo }) {
       {ipo.parentQuotes.map((quote) => (
         <Fact
           key={quote.name}
-          label={ipo.parentQuotes.length > 1 ? fill(d.oneShareOf, { name: quote.name }) : d.oneShare}
-          aside={fill(d.priceOn, { date: formatIpoDate(quote.asOf) ?? "" })}
+          label={fill(ipo.parentQuotes.length > 1 ? d.oneShareOf : d.oneShare, { name: quote.name, date: formatIpoDate(quote.asOf) ?? "" })}
         >
           {rupees(quote.price)}
         </Fact>

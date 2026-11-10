@@ -96,13 +96,6 @@
     ]
   },
   "disclaimer": "This list is gathered from offer documents, exchange filings and exchange announcements. Our team reviews every board-stage rumour before it appears; the rest is gathered automatically and not checked by hand. It is not a recommendation to buy any share, and IPO Milega accepts no responsibility for losses arising from any investment decision. A shareholder quota is only final once it appears in the RHP. Investments in the securities market are subject to market risks. Read the offer document carefully before investing.",
-  "stages": {
-    "announced": "Announced",
-    "filed": "DRHP filed",
-    "approved": "SEBI approved",
-    "dates": "Dates set"
-  },
-  "stageLabel": "Stage: {name}, step {step} of {total}",
   "card": {
     "holdShareOf": "Hold 1 share of {parents}",
     "bidding": "Bidding",
@@ -130,9 +123,8 @@
         "other": "{count} days left"
       }
     },
-    "oneShare": "1 share ≈",
-    "oneShareOf": "1 share of {name} ≈",
-    "priceOn": "close on {date}",
+    "oneShare": "1 share on {date}",
+    "oneShareOf": "1 share of {name} on {date}",
     "shareholderQuota": "Shareholder quota",
     "quotaOfIssue": "{percent}% of issue"
   },
