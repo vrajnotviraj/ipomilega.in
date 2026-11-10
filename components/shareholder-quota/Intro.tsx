@@ -1,11 +1,11 @@
 import { locale, t } from "@/lib/i18n/server";
 
-/** The title, its line and the last-checked time on the left, the rules strip on the right, the section chips under both. */
+/** The title, its line and the last-checked time on the left, the rules panel on the right (as tall as the title block from lg), the section chips under both. */
 export function Hero({ lastChecked, children }: { lastChecked: string | null; children: React.ReactNode }) {
   const d = t().quota;
   return (
     <header>
-      <div className="grid gap-x-10 gap-y-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+      <div className="grid gap-x-10 gap-y-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)]">
         <div className="min-w-0">
           <h1 className="type-hero text-[32px] text-balance break-words text-foreground sm:text-[40px]">
             {d.hero.before} <span className="highlight">{d.hero.highlight}</span> {d.hero.after}
@@ -24,19 +24,20 @@ export function Hero({ lastChecked, children }: { lastChecked: string | null; ch
   );
 }
 
-/** The four rules as one slim ink strip: two by two on phones, one row from sm. */
+/** The four rules on one ink panel: two by two on phones, one row from sm, two by two again from lg, where it fills the title's height. */
 function Rules() {
   const d = t().quota.hero;
-  // DM Mono has no Devanagari or Gujarati glyphs, so hi and gu set the values in the display face.
-  const face = locale() === "en" ? "font-mono font-medium" : "font-display font-bold";
+  // Mono is for figures only, and DM Mono has no Devanagari or Gujarati glyphs, so words and hi and gu use the display face.
+  const face = (value: string) => (locale() === "en" && /^[\d₹]/.test(value) ? "font-mono font-medium tracking-[-0.03em]" : "font-display font-bold tracking-[-0.015em]");
   return (
-    <section aria-labelledby="rules-title" className="min-w-0">
+    <section aria-labelledby="rules-title" className="flex min-w-0">
       <h2 id="rules-title" className="sr-only">{d.rulesTitle}</h2>
-      <dl className="grid grid-cols-2 overflow-hidden rounded-xl bg-primary text-primary-foreground sm:grid-cols-4">
+      {/* The 1px gaps show the panel's lighter fill, drawing the dividers at any column count. */}
+      <dl className="grid flex-1 grid-cols-2 gap-px overflow-hidden rounded-xl bg-primary-foreground/20 text-primary-foreground ring-1 ring-primary sm:grid-cols-4 lg:grid-cols-2">
         {d.rules.map((rule) => (
-          <div key={rule.label} className="flex min-w-0 flex-col-reverse justify-end gap-0.5 border-primary-foreground/20 px-4 py-3 not-last:border-r max-sm:nth-[-n+2]:border-b max-sm:even:border-r-0">
-            <dt className="text-[13px] text-primary-foreground/80">{rule.label}</dt>
-            <dd className={`${face} text-lg leading-tight tabular-nums sm:text-xl`}>{rule.value}</dd>
+          <div key={rule.label} className="flex min-w-0 flex-col-reverse justify-end gap-1 bg-primary px-4 py-3 lg:justify-center lg:px-5">
+            <dt className="text-[13px] text-pretty text-primary-foreground/80">{rule.label}</dt>
+            <dd className={`${face(rule.value)} text-lg leading-tight tabular-nums sm:text-xl lg:text-2xl`}>{rule.value}</dd>
           </div>
         ))}
       </dl>
@@ -44,21 +45,23 @@ function Rules() {
   );
 }
 
-/** The four steps from holding the parent to being allotted, as a numbered list. */
+/** The four steps from holding the parent to being allotted, as numbered dots on a rail. */
 export function HowItWorks() {
   const d = t().quota.how;
   return (
     <section aria-labelledby="how-title" className="min-w-0">
       <h2 id="how-title" className="font-display text-xl font-bold tracking-[-0.015em] text-foreground">{d.title}</h2>
-      <ol className="mt-3 grid gap-4">
+      <ol className="mt-4 grid">
         {d.steps.map((step, index) => (
-          <li key={step.title} className="grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-3">
-            <span aria-hidden className="grid size-7 place-items-center rounded-full bg-secondary font-mono text-sm font-medium tabular-nums text-foreground">
+          <li key={step.title} className="relative grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-4 pb-5 last:pb-0">
+            {/* The rail runs from under this number to the next one. */}
+            {index < d.steps.length - 1 && <span aria-hidden className="absolute bottom-0 left-[calc(0.875rem-0.5px)] top-8 w-px bg-border" />}
+            <span aria-hidden className="relative grid size-7 place-items-center rounded-full bg-primary font-mono text-sm font-medium tabular-nums text-primary-foreground">
               {index + 1}
             </span>
-            <div className="min-w-0">
+            <div className="min-w-0 pt-0.5">
               <h3 className="font-display text-base font-bold leading-snug tracking-[-0.01em] text-foreground">{step.title}</h3>
-              <p className="mt-0.5 text-pretty text-muted-foreground">{step.body}</p>
+              <p className="mt-1 max-w-[60ch] text-pretty text-muted-foreground">{step.body}</p>
             </div>
           </li>
         ))}

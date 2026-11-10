@@ -19,7 +19,7 @@
     "rules": [
       { "label": "Parent shares you need", "value": "1" },
       { "label": "Shareholder bid at cut-off", "value": "₹2 lakh" },
-      { "label": "Quota, at most", "value": "10% of issue" },
+      { "label": "Of the issue, at most", "value": "10%" },
       { "label": "Eligibility date", "value": "RHP date" }
     ]
   },
