@@ -1,5 +1,6 @@
 import { FileText } from "lucide-react";
 import { DateRow, Fact, Foot, noteOf, OutLink, QuotaFacts, stageDate, Tile, TileHead } from "@/components/shareholder-quota/cards/parts";
+import { StageTrack } from "@/components/shareholder-quota/cards/StageTrack";
 import { locale, t } from "@/lib/i18n/server";
 import { fill, plural } from "@/lib/i18n/locales";
 import { formatIpoDate } from "@/lib/ipo/format";
@@ -17,6 +18,7 @@ export function BuyBeforeCard({ ipo }: { ipo: BuyBeforeIpo }) {
         <Countdown ipo={ipo} />
       </TileHead>
       <DateRow date={lastDay ? { label: ipo.lastBuyClosed ? d.lastDayWas : d.lastDay, value: lastDay } : null} />
+      <StageTrack stage={ipo.stage} />
       <Foot
         note={noteOf(ipo, d)}
         adminNote={ipo.note}

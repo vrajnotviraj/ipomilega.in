@@ -1,5 +1,6 @@
 import { ExternalLink } from "lucide-react";
 import { DateRow, Foot, OutLink, QuotaFacts, Tile, TileHead } from "@/components/shareholder-quota/cards/parts";
+import { StageTrack } from "@/components/shareholder-quota/cards/StageTrack";
 import { t } from "@/lib/i18n/server";
 import { fill } from "@/lib/i18n/locales";
 import { formatIpoDate } from "@/lib/ipo/format";
@@ -13,6 +14,7 @@ export function RumourTile({ ipo }: { ipo: QuotaIpo }) {
     <Tile>
       <TileHead ipo={ipo} />
       <DateRow date={announced ? { label: r.boardApproved, value: announced } : null} text={ipo.source === "admin" ? r.fromAdmin : r.fromCompany} />
+      <StageTrack stage={ipo.stage} />
       <Foot
         adminNote={ipo.note}
         links={ipo.announcementUrl && (

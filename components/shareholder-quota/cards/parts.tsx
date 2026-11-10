@@ -32,7 +32,7 @@ export function noteOf(ipo: BuyBeforeIpo, d: Words) {
 }
 
 /**
- * One tile on the stage grid. It takes exactly three parts (head, date row, foot) and lays them on
+ * One tile on the stage grid. It takes exactly four parts (head, date row, stage track, foot) and lays them on
  * rows it shares with the tiles beside it, so every tile in a row has the same height and its parts line up.
  * "go" is the Buy before tile, "quiet" the closed and listed ones.
  */
@@ -40,7 +40,7 @@ export function Tile({ tone, children }: { tone?: "go" | "quiet"; children: Reac
   return (
     <li
       className={cn(
-        "row-span-3 grid min-w-0 grid-rows-subgrid gap-y-3 rounded-xl p-4",
+        "row-span-4 grid min-w-0 grid-rows-subgrid gap-y-3 rounded-xl p-4",
         tone === "quiet" ? "bg-secondary" : "border bg-card shadow-card",
         tone === "go" ? "border-2 border-primary" : "border-border"
       )}

@@ -13,8 +13,8 @@ export type Group = { id: "buy"; ipos: BuyBeforeIpo[] } | { id: "approved" | "fi
 const MD_SPAN = ["", "md:col-span-1", "md:col-span-2"];
 const LG_SPAN = ["", "lg:col-span-1", "lg:col-span-2", "lg:col-span-3"];
 const XL_SPAN = ["", "xl:col-span-1", "xl:col-span-2", "xl:col-span-3", "xl:col-span-4"];
-// Rows a tile takes on the shared grid: head, date row, foot.
-const TILE_ROWS = 3;
+// Rows a tile takes on the shared grid: head, date row, stage track, foot.
+const TILE_ROWS = 4;
 
 /** Every non-empty stage on one grid. Each stage spans as many columns as it has tiles, so small stages share a row, and every tile part sits on a shared row, so tiles line up across stages. */
 export function StageGroups({ groups }: { groups: Group[] }) {
