@@ -12,14 +12,13 @@ export function RumourTile({ ipo }: { ipo: QuotaIpo }) {
   const announced = ipo.source === "bse" ? formatIpoDate(ipo.announcedOn, true) : null;
   return (
     <Tile>
-      <TileHead ipo={ipo} />
+      <TileHead ipo={ipo} link={ipo.announcementUrl && (
+        <OutLink href={ipo.announcementUrl} icon={ExternalLink} label={r.announcement} srText={fill(r.announcementFor, { name: ipo.parents.join(", ") })} />
+      )} />
       <DateRow date={announced ? { label: r.boardApproved, value: announced } : null} text={ipo.source === "admin" ? r.fromAdmin : r.fromCompany} />
       <StageTrack stage={ipo.stage} />
       <Foot
         adminNote={ipo.note}
-        links={ipo.announcementUrl && (
-          <OutLink href={ipo.announcementUrl} icon={ExternalLink} label={r.announcement} srText={fill(r.announcementFor, { name: ipo.parents.join(", ") })} />
-        )}
       >
         <QuotaFacts ipo={ipo} />
       </Foot>

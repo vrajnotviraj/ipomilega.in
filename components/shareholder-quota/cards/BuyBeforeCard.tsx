@@ -14,7 +14,7 @@ export function BuyBeforeCard({ ipo }: { ipo: BuyBeforeIpo }) {
   const bidding = stageDate(ipo, d);
   return (
     <Tile tone="go">
-      <TileHead ipo={ipo} accent>
+      <TileHead ipo={ipo} accent link={ipo.documentUrl && <OutLink href={ipo.documentUrl} icon={FileText} label={d.offerDocument} srText={fill(d.documentFor, { name: ipo.name })} />}>
         <Countdown ipo={ipo} />
       </TileHead>
       <DateRow date={lastDay ? { label: ipo.lastBuyClosed ? d.lastDayWas : d.lastDay, value: lastDay } : null} />
@@ -22,7 +22,6 @@ export function BuyBeforeCard({ ipo }: { ipo: BuyBeforeIpo }) {
       <Foot
         note={noteOf(ipo, d)}
         adminNote={ipo.note}
-        links={ipo.documentUrl && <OutLink href={ipo.documentUrl} icon={FileText} label={d.offerDocument} srText={fill(d.documentFor, { name: ipo.name })} />}
       >
         {bidding && <Fact label={bidding.label}>{bidding.value}</Fact>}
         {ipo.priceBand && <Fact label={common.priceBand}>{ipo.priceBand}</Fact>}

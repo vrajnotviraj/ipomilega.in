@@ -50,22 +50,25 @@ export function Tile({ tone, children }: { tone?: "go" | "quiet"; children: Reac
   );
 }
 
-/** The IPO's name, linked to its page here when we track it, and "Hold 1 share of <parent>" under it. `accent` underlines the parent in marigold. */
-export function TileHead({ ipo, accent, children }: { ipo: QuotaIpo; accent?: boolean; children?: React.ReactNode }) {
+/** The IPO's name, linked to its page here when we track it, with its document link top right, and "Hold 1 share of <parent>" under it. `accent` underlines the parent in marigold. */
+export function TileHead({ ipo, accent, link, children }: { ipo: QuotaIpo; accent?: boolean; link?: React.ReactNode; children?: React.ReactNode }) {
   const { quota: { card: d }, common } = t();
   const [before, after] = d.holdShareOf.split("{parents}");
   return (
     <div className="min-w-0">
-      <h3 className="font-display text-[17px] font-bold leading-snug tracking-[-0.015em] text-balance break-words text-foreground">
-        {ipo.slug ? (
-          <ProgressLink href={`/analysis/${ipo.slug}`} className="underline decoration-dotted decoration-primary/50 underline-offset-4 hover:decoration-solid">
-            {ipo.name}
-            <ArrowUpRight aria-hidden className="ml-0.5 -mt-0.5 inline-block size-[0.9em] align-middle text-primary/70" />
-          </ProgressLink>
-        ) : (
-          ipo.name
-        )}
-      </h3>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="min-w-0 font-display text-[17px] font-bold leading-snug tracking-[-0.015em] text-balance break-words text-foreground">
+          {ipo.slug ? (
+            <ProgressLink href={`/analysis/${ipo.slug}`} className="underline decoration-dotted decoration-primary/50 underline-offset-4 hover:decoration-solid">
+              {ipo.name}
+              <ArrowUpRight aria-hidden className="ml-0.5 -mt-0.5 inline-block size-[0.9em] align-middle text-primary/70" />
+            </ProgressLink>
+          ) : (
+            ipo.name
+          )}
+        </h3>
+        {link && <div className="-mr-2 -mt-2.5 shrink-0">{link}</div>}
+      </div>
       <p className="mt-1 text-[15px] text-pretty text-muted-foreground">
         {before}
         {ipo.parents.map((parent, index) => (
@@ -107,14 +110,13 @@ export function Clamped({ text, lines, className }: { text: string; lines: "line
   );
 }
 
-/** The tile's last part, pinned to its foot: a muted note, the admin's note, the figures, then any links. */
-export function Foot({ note, adminNote, children, links }: { note?: string; adminNote: string | null; children: React.ReactNode; links?: React.ReactNode }) {
+/** The tile's last part, pinned to its foot: a muted note, the admin's note, then the figures. */
+export function Foot({ note, adminNote, children }: { note?: string; adminNote: string | null; children: React.ReactNode }) {
   return (
     <div className="grid min-w-0 content-end gap-3">
       {note && <p className="text-sm text-pretty text-muted-foreground">{note}</p>}
       {adminNote && <p className="text-sm text-pretty text-foreground">{adminNote}</p>}
       <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-sm">{children}</dl>
-      {links && <div className="flex flex-wrap gap-2">{links}</div>}
     </div>
   );
 }
@@ -157,18 +159,18 @@ export function QuotaFacts({ ipo }: { ipo: QuotaIpo }) {
   );
 }
 
-/** A link to a document on another site, opening in a new tab. */
+/** A round icon link to a document on another site, opening in a new tab. The label shows as a tooltip and is read out in full. */
 export function OutLink({ href, icon: Icon, label, srText }: { href: string; icon: LucideIcon; label: string; srText: string }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer nofollow"
-      className="press inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-card px-4 text-sm font-medium text-primary hover:bg-secondary motion-reduce:active:transform-none"
+      title={label}
+      className="press inline-flex size-11 items-center justify-center rounded-full text-primary hover:bg-secondary motion-reduce:active:transform-none"
     >
-      <Icon aria-hidden className="size-4" strokeWidth={2} />
-      {label}
-      <span className="sr-only"> {srText}</span>
+      <Icon aria-hidden className="size-[18px]" strokeWidth={2} />
+      <span className="sr-only">{label} {srText}</span>
     </a>
   );
 }

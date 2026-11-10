@@ -14,12 +14,11 @@ export function QuotaTile({ ipo }: { ipo: QuotaIpo }) {
   const listed = closed && ipo.listingDate ? { label: d.listedOn, value: formatIpoDate(ipo.listingDate, true) ?? "" } : null;
   return (
     <Tile tone={closed ? "quiet" : undefined}>
-      <TileHead ipo={ipo} />
+      <TileHead ipo={ipo} link={ipo.documentUrl && <OutLink href={ipo.documentUrl} icon={FileText} label={d.offerDocument} srText={fill(d.documentFor, { name: ipo.name })} />} />
       <DateRow date={listed ?? stage} />
       <StageTrack stage={ipo.stage} />
       <Foot
         adminNote={ipo.note}
-        links={ipo.documentUrl && <OutLink href={ipo.documentUrl} icon={FileText} label={d.offerDocument} srText={fill(d.documentFor, { name: ipo.name })} />}
       >
         {closed && ipo.lastBuyDate && <Fact label={d.lastDayWas}>{formatIpoDate(ipo.lastBuyDate, true)}</Fact>}
         {listed && stage && <Fact label={stage.label}>{stage.value}</Fact>}
