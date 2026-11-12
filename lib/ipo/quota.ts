@@ -13,7 +13,7 @@ export interface QuotaIpo {
   id: string;
   name: string;
   stage: QuotaStage;
-  source: 'chittorgarh' | 'nse' | 'bse' | 'admin';
+  source: 'chittorgarh' | 'nse' | 'bse' | 'watchlist' | 'admin';
   parents: string[];
   parentQuotes: ParentQuote[];
   drhpDate: string | null;
