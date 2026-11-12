@@ -3,13 +3,13 @@ import { cached } from '@/lib/db/cache';
 import { getDb } from '@/lib/db/mongo';
 import { quotaRows, splitQuota, type QuotaDoc } from '@/lib/ipo/quota';
 
-export type { BuyBeforeIpo, QuotaIpo, QuotaStage } from '@/lib/ipo/quota';
+export type { BuyBeforeIpo, LapsedStage, QuotaIpo, QuotaStage } from '@/lib/ipo/quota';
 
 // Only these fields leave the database; where the engine read them stays private.
 const PUBLIC_FIELDS = {
   name: 1, stage: 1, source: 1, parents: 1, parent_quotes: 1, drhp_date: 1, open_date: 1, close_date: 1, last_buy_date: 1, listing_date: 1,
   price_band: 1, drhp_url: 1, ipo_slug: 1, issue_size_cr: 1, quota_size_cr: 1, quota_percent: 1,
-  announced_on: 1, created_at: 1, announcement_url: 1, checked_at: 1, 'admin.hidden': 1, 'admin.overrides': 1,
+  announced_on: 1, created_at: 1, announcement_url: 1, lapsed: 1, checked_at: 1, 'admin.hidden': 1, 'admin.overrides': 1,
 };
 
 const LISTED_WINDOW_DAYS = 183; // quota IPOs stay under Recently listed for six months

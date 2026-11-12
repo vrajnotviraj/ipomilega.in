@@ -102,6 +102,11 @@
     "approved": "SEBI approved",
     "dates": "Dates set"
   },
+  "lapsed": {
+    "filed": "Draft lapsed",
+    "approved": "Approval lapsed"
+  },
+  "lapsedLabel": "Stage: {name} at step {step} of {total}",
   "stageLabel": "Stage: {name}, step {step} of {total}",
   "card": {
     "holdShareOf": "Hold 1 share of {parents}",
@@ -147,6 +152,7 @@
     "announcement": "BSE announcement",
     "announcementFor": "from {name} (opens in a new tab)",
     "fromAdmin": "Added by our team from the company's news. No draft filed yet.",
-    "fromCompany": "From the company's announcement. No draft filed yet."
+    "fromCompany": "From the company's announcement. No draft filed yet.",
+    "lapsedNote": "SEBI's approval lapsed before the IPO. A fresh draft is needed, so the quota could change."
   }
 }

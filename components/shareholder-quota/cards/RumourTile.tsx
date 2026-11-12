@@ -15,8 +15,8 @@ export function RumourTile({ ipo }: { ipo: QuotaIpo }) {
       <TileHead ipo={ipo} link={ipo.announcementUrl && (
         <OutLink href={ipo.announcementUrl} icon={ExternalLink} label={r.announcement} srText={fill(r.announcementFor, { name: ipo.parents.join(", ") })} />
       )} />
-      <DateRow date={announced ? { label: r.boardApproved, value: announced } : null} text={ipo.source === "bse" ? r.fromCompany : r.fromAdmin} />
-      <StageTrack stage={ipo.stage} />
+      <DateRow date={announced ? { label: r.boardApproved, value: announced } : null} text={ipo.lapsed ? r.lapsedNote : ipo.source === "bse" ? r.fromCompany : r.fromAdmin} />
+      <StageTrack stage={ipo.stage} lapsed={ipo.lapsed} />
       <Foot
         adminNote={ipo.note}
       >

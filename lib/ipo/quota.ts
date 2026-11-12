@@ -4,6 +4,7 @@ import { dayNumberInIndia, daysFromToday, isPastFivePmIst, isPastLastBuyIst } fr
 /** Strongest first: dates set (RHP filed), SEBI approved, DRHP filed, announced (a rumour). */
 export const QUOTA_STAGES = ['dates', 'approved', 'filed', 'announced'] as const;
 export type QuotaStage = (typeof QUOTA_STAGES)[number];
+export type LapsedStage = 'filed' | 'approved';
 
 /** The parent's last close, "YYYY-MM-DD". */
 export type ParentQuote = { name: string; price: number; asOf: string };
@@ -34,12 +35,14 @@ export interface QuotaIpo {
   announcedOn: string | null;
   /** BSE rumours: the announcement PDF. */
   announcementUrl: string | null;
+  /** The step a draft or approval lapsed at, so the IPO is back to a rumour. Set by an admin. */
+  lapsed: LapsedStage | null;
 }
 
 /** A Buy before card: the countdown to the last day to buy, and whether 3:30 PM IST on it has passed. */
 export type BuyBeforeIpo = QuotaIpo & { daysToLastBuy: number | null; lastBuyClosed: boolean };
 
-type Overrides = Partial<Pick<QuotaDoc, 'name' | 'parents' | 'drhp_url' | 'stage' | 'open_date' | 'close_date' | 'last_buy_date'>> & { note?: string };
+type Overrides = Partial<Pick<QuotaDoc, 'name' | 'parents' | 'drhp_url' | 'stage' | 'open_date' | 'close_date' | 'last_buy_date' | 'lapsed'>> & { note?: string };
 
 export type QuotaDoc = {
   _id: number | string;
@@ -63,6 +66,7 @@ export type QuotaDoc = {
   created_at?: Date;
   announcement_url?: string;
   checked_at?: Date;
+  lapsed?: LapsedStage;
   admin?: { hidden?: boolean; overrides?: Overrides };
 };
 
@@ -98,6 +102,7 @@ const toIpo = (scraped: QuotaDoc): QuotaIpo => {
     note: note || null,
     announcedOn: dayOfDate(doc.announced_on ?? doc.created_at),
     announcementUrl: doc.announcement_url || null,
+    lapsed: doc.lapsed ?? null,
   };
 };
 
