@@ -91,7 +91,7 @@
       },
       {
         "q": "How is this list made?",
-        "a": "We check offer documents filed with SEBI, NSE and BSE every day for a shareholder reservation and the parent it names. We also read BSE announcements from listed companies whose board has approved taking a subsidiary public; our team reviews each one before it shows here as rumoured. Once an IPO lists it moves to Recently listed for six months. It drops off sooner when a SEBI approval lapses without dates, or when a rumour has no draft after a year."
+        "a": "We check offer documents filed with SEBI, NSE and BSE every day for a shareholder reservation and the parent it names. We also read BSE announcements from listed companies whose board has approved taking a subsidiary public; our team reviews each one before it shows here as rumoured. Once an IPO lists it moves to Recently listed for six months. A SEBI approval that lapses without dates moves back to Rumoured, marked lapsed, for a year. A rumour with no draft after a year drops off."
       }
     ]
   },
