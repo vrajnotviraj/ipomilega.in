@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Upcoming IPOs with Shareholder Quota {year}"
+    "title": "Shareholder Quota IPOs {year}: Upcoming List, How to Apply"
   },
   "summary": {
     "none": "No upcoming IPO has a shareholder quota right now.",
@@ -17,29 +17,54 @@
     "lede": "Hold one parent share by the RHP date for a second shot at allotment.",
     "rulesTitle": "The rules in numbers",
     "rules": [
-      { "label": "Parent shares you need", "value": "1" },
-      { "label": "Shareholder bid at cut-off", "value": "₹2 lakh" },
-      { "label": "Of the issue, at most", "value": "10%" },
-      { "label": "Eligibility date", "value": "RHP date" }
-    ]
+      {
+        "label": "Parent shares you need",
+        "value": "1"
+      },
+      {
+        "label": "Shareholder bid at cut-off",
+        "value": "₹2 lakh"
+      },
+      {
+        "label": "Eligibility date",
+        "value": "RHP date"
+      }
+    ],
+    "split": {
+      "title": "Two shots at one IPO",
+      "everyone": "Retail, HNI and QIB",
+      "everyoneNote": "Anyone can bid here",
+      "quota": "Shareholder quota",
+      "quotaNote": "Up to 10%, only for parent holders",
+      "both": "Bid in both. They are not counted as multiple bids."
+    }
   },
   "how": {
-    "title": "How it works",
+    "title": "How to apply in the shareholder quota",
     "steps": [
       {
-        "title": "Hold one share of the parent",
-        "body": "A single share of the listed parent is usually enough. The RHP sets the exact rule, so check it for each IPO."
+        "when": "Last day to buy",
+        "title": "Buy one parent share",
+        "body": "Buy before 3:30 PM IST on the trading day before the RHP date. One share of the listed parent is usually enough; the RHP sets the exact rule."
       },
       {
-        "title": "Have it in demat by the RHP date",
-        "body": "Eligibility is fixed on the date of the red herring prospectus, often about a week before the IPO opens. Buy at least a day before so the trade settles."
+        "when": "Next trading day",
+        "title": "It lands in your demat",
+        "body": "Trades settle the next trading day, so a share bought on the RHP date itself arrives too late."
       },
       {
-        "title": "Apply in the shareholder category",
-        "body": "Bid up to ₹2 lakh as a shareholder. You can still apply as retail or HNI too, and the two are not counted as multiple bids."
+        "when": "RHP date",
+        "title": "Eligibility is fixed",
+        "body": "Everyone holding the parent in demat on this date can bid in the quota. It is often about a week before the IPO opens."
       },
       {
-        "title": "A separate pool to be allotted from",
+        "when": "IPO opens",
+        "title": "Bid in both categories",
+        "body": "Bid up to ₹2 lakh as a shareholder, and apply as retail or HNI too. The two are not counted as multiple bids."
+      },
+      {
+        "when": "Allotment",
+        "title": "Allotted from a separate pool",
         "body": "The quota, up to 10% of the issue, is allotted only among eligible shareholders. That pool is apart from retail, not instead of it."
       }
     ]
@@ -84,6 +109,18 @@
       {
         "q": "When do I need to own the parent's shares?",
         "a": "On the date of the red herring prospectus (RHP), or the record date the RHP names. The shares must be in your demat account by then, so a purchase on that day may be too late."
+      },
+      {
+        "q": "What is the last day to buy the parent share?",
+        "a": "The trading day before the RHP date, by 3:30 PM IST. Trades in India settle the next trading day (T+1), so a share bought on the RHP date reaches your demat too late. Each IPO under Buy before shows this day and a countdown."
+      },
+      {
+        "q": "Can I apply in both the shareholder and retail categories?",
+        "a": "Yes. You can bid up to ₹2 lakh in the shareholder category and also apply as retail or HNI from the same PAN. The two are not counted as multiple bids, so you have a chance in each pool."
+      },
+      {
+        "q": "How do I apply in the shareholder quota?",
+        "a": "Apply through your broker or bank as usual and pick the shareholder category as the investor type. Use the demat account that held the parent share on the RHP date, and bid up to ₹2 lakh at cut-off."
       },
       {
         "q": "Can the shareholder quota be dropped?",

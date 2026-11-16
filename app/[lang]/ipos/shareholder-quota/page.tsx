@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { alternatesFor, openGraphBase } from "@/lib/seo/share";
+import { alternatesFor, openGraphBase, titleFor } from "@/lib/seo/share";
 import { setLocale, t } from "@/lib/i18n/server";
 import { fill, localePath } from "@/lib/i18n/locales";
 import { formatIstTimestamp } from "@/lib/ipo/format";
@@ -25,16 +25,17 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const d = t().quota;
   const { ipos } = await getShareholderQuotaIpos();
   const title = titleOf(d.meta.title);
-  const description = listSummary(ipos, t(), lang);
+  // The list, then the rule in one line, so the snippet answers "which IPOs" and "what do I do".
+  const description = `${listSummary(ipos, t(), lang)} ${d.hero.lede}`;
   return {
-    title,
+    title: titleFor(title),
     description,
     alternates: alternatesFor(lang, path),
     openGraph: { ...openGraphBase(lang), title, description, url: localePath(lang, path) },
   };
 }
 
-/** /ipos/shareholder-quota: the title and rules, the quota IPOs as tiles grouped by stage (Buy before first), then how it works beside the questions. */
+/** /ipos/shareholder-quota: the title beside the two-pools explainer, the quota IPOs as tiles grouped by stage (Buy before first), then how to apply as a timeline, then the questions. */
 export default async function ShareholderQuotaPage({ params }: Params) {
   const lang = setLocale((await params).lang);
   const { common: c, quota: d } = t();
@@ -49,7 +50,12 @@ export default async function ShareholderQuotaPage({ params }: Params) {
 
   return (
     <div className="app-container pt-24 sm:pt-28">
-      <JsonLd data={collectionJsonLd({ lang, path, name: titleOf(d.meta.title), description: summary, items: ipos.map((ipo) => ({ name: `${ipo.name} IPO`, href: ipo.slug ? `/analysis/${ipo.slug}` : path })) })} />
+      <JsonLd
+        data={{
+          ...collectionJsonLd({ lang, path, name: titleOf(d.meta.title), description: summary, items: ipos.map((ipo) => ({ name: `${ipo.name} IPO`, href: ipo.slug ? `/analysis/${ipo.slug}` : path })) }),
+          ...(checkedAt && { dateModified: checkedAt }),
+        }}
+      />
       <Breadcrumbs crumbs={[{ name: c.nav.home, href: "/" }, { name: c.nav.ipos, href: "/ipos" }, { name: c.nav.quota, href: path }]} />
       <div className="mt-5">
         <Hero lastChecked={formatIstTimestamp(checkedAt)}>
@@ -62,7 +68,7 @@ export default async function ShareholderQuotaPage({ params }: Params) {
       </div>
       <p className="mt-8 max-w-[75ch] text-xs text-pretty text-muted-foreground">{d.disclaimer}</p>
 
-      <div className="mt-12 grid gap-x-12 gap-y-10 lg:grid-cols-2">
+      <div className="mt-14 grid gap-y-14 border-t border-border pt-12">
         <HowItWorks />
         <Faq />
       </div>

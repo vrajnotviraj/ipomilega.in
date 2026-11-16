@@ -387,6 +387,13 @@
   }
 }
 
+/* Fills from its start edge to its full length. */
+@keyframes grow-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 /* Drifts into place from --drift below (positive) or above (negative). */
 @keyframes drift {
   from {
@@ -409,6 +416,13 @@
     }
     .reveal-stagger > :nth-child(3n) {
       animation-range: entry 16% entry 56%;
+    }
+    /* Bars and tracks fill from the left as they come into view; a track can set its own range to fill after the one before it. */
+    .grow-in {
+      transform-origin: left;
+      animation: grow-in linear both;
+      animation-timeline: view();
+      animation-range: entry 40% cover 45%;
     }
     /* The score radar opens from its centre. */
     .bloom {
