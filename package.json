@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/",
     "start": "node .next/standalone/server.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:e2e": "node --test e2e/*.e2e.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",

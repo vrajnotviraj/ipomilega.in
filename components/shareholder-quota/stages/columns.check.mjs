@@ -1,4 +1,4 @@
-// Self-check: the desktop column count for the stage groups. Run with: node components/shareholder-quota/columns.check.mjs
+// Self-check: the desktop column count for the stage groups. Run with: node components/shareholder-quota/stages/columns.check.mjs
 import assert from "node:assert/strict";
 
 const { desktopColumns } = await import("./columns.ts");

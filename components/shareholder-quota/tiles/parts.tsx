@@ -1,19 +1,21 @@
-import { ArrowUpRight } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowUpRight, FileText, type LucideIcon } from "lucide-react";
 import { ProgressLink } from "@/components/progress/ProgressLink";
 import { t } from "@/lib/i18n/server";
 import { fill } from "@/lib/i18n/locales";
-import { formatIpoDate, formatRupees, isPastFivePmIst } from "@/lib/ipo/format";
+import { formatIpoDate, formatRupees } from "@/lib/ipo/format";
 import { cn } from "@/lib/utils";
-import type { BuyBeforeIpo, QuotaIpo } from "@/lib/queries/shareholder-quota";
+import type { QuotaIpo } from "@/lib/queries/shareholder-quota";
 import type { Dictionary } from "@/messages";
 
 type Words = Dictionary["quota"]["card"];
-type DateLine = { label: string; value: string } | null;
+export type DateLine = { label: string; value: string } | null;
+
+/** Every tile has four rows: head, date row, stage track, foot. */
+export const TILE_ROWS = 4;
 
 const rupees = (value: number) => `₹${value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-/** The date that goes with the stage: the bidding window, or when the DRHP was filed or approved. */
+/** The date for the IPO's stage: the bidding window, or when the draft was filed or approved. */
 export function stageDate(ipo: QuotaIpo, d: Words): DateLine {
   if (ipo.stage === "dates" && ipo.openDate) {
     const close = formatIpoDate(ipo.closeDate);
@@ -23,19 +25,7 @@ export function stageDate(ipo: QuotaIpo, d: Words): DateLine {
   return { label: ipo.stage === "approved" ? d.approvedOn : d.filedOn, value: formatIpoDate(ipo.drhpDate, true) ?? "" };
 }
 
-/** The Buy before tile's note: bidding shut, the buying deadline, or what the stage means. Other tiles skip it: their stage heading says it. */
-export function noteOf(ipo: BuyBeforeIpo, d: Words) {
-  if (isPastFivePmIst(ipo.closeDate)) return d.closedNote;
-  if (ipo.lastBuyClosed) return d.buyingClosedNote;
-  if (ipo.lastBuyDate) return d.buyByNote;
-  return d.stageNote[ipo.stage];
-}
-
-/**
- * One tile on the stage grid. It takes exactly four parts (head, date row, stage track, foot) and lays them on
- * rows it shares with the tiles beside it, so every tile in a row has the same height and its parts line up.
- * "go" is the Buy before tile, "quiet" the closed and listed ones.
- */
+/** A tile on the stage grid. Its four rows are shared with the tiles beside it, so their parts line up. "go" is the Buy before tile, "quiet" a closed one. */
 export function Tile({ tone, children }: { tone?: "go" | "quiet"; children: React.ReactNode }) {
   return (
     <li
@@ -50,7 +40,7 @@ export function Tile({ tone, children }: { tone?: "go" | "quiet"; children: Reac
   );
 }
 
-/** The IPO's name, linked to its page here when we track it, with its document link top right, and "Hold 1 share of <parent>" under it. `accent` underlines the parent in marigold. */
+/** The IPO name, linked to its analysis page when there is one, a document link, and "Hold 1 share of <parent>". */
 export function TileHead({ ipo, accent, link, children }: { ipo: QuotaIpo; accent?: boolean; link?: React.ReactNode; children?: React.ReactNode }) {
   const { quota: { card: d }, common } = t();
   const [before, after] = d.holdShareOf.split("{parents}");
@@ -84,7 +74,7 @@ export function TileHead({ ipo, accent, link, children }: { ipo: QuotaIpo; accen
   );
 }
 
-/** The hairline row: a label left and the date in mono right, or a line of words when there is no date. Always drawn, so the hairlines line up. */
+/** A hairline row with a label and a date, or a line of text when there is no date. */
 export function DateRow({ date, text }: { date: DateLine; text?: string }) {
   return (
     <div className="flex min-w-0 justify-between gap-3 self-start border-t border-border pt-3 text-sm text-muted-foreground">
@@ -100,17 +90,7 @@ export function DateRow({ date, text }: { date: DateLine; text?: string }) {
   );
 }
 
-/** Text cut to a set number of lines on screen; the full text is in the tooltip, and screen readers get it once, uncut. */
-export function Clamped({ text, lines, className }: { text: string; lines: "line-clamp-1" | "line-clamp-2"; className?: string }) {
-  return (
-    <p title={text} className={className}>
-      <span aria-hidden className={lines}>{text}</span>
-      <span className="sr-only">{text}</span>
-    </p>
-  );
-}
-
-/** The tile's last part, pinned to its foot: a muted note, the admin's note, then the figures. */
+/** The bottom of a tile: an optional note, the admin's note, then the figures. */
 export function Foot({ note, adminNote, children }: { note?: string; adminNote: string | null; children: React.ReactNode }) {
   return (
     <div className="grid min-w-0 content-end gap-3">
@@ -121,7 +101,7 @@ export function Foot({ note, adminNote, children }: { note?: string; adminNote: 
   );
 }
 
-/** One label and its value in mono, with an optional aside under the value. */
+/** A label and its value in mono, with an optional line under the value. */
 export function Fact({ label, children, aside }: { label: string; children: React.ReactNode; aside?: string | null }) {
   return (
     <>
@@ -134,7 +114,7 @@ export function Fact({ label, children, aside }: { label: string; children: Reac
   );
 }
 
-/** Each parent's closing share price with its day on one line, then the issue size and the shareholder quota when published. */
+/** Each parent's last closing price, the issue size and the quota size. */
 export function QuotaFacts({ ipo }: { ipo: QuotaIpo }) {
   const { quota: { card: d }, common } = t();
   const { issueSizeCr, quotaSizeCr, quotaPercent } = ipo;
@@ -159,7 +139,7 @@ export function QuotaFacts({ ipo }: { ipo: QuotaIpo }) {
   );
 }
 
-/** A round icon link to a document on another site, opening in a new tab. The label shows as a tooltip and is read out in full. */
+/** A round icon link to a document on another site, opening in a new tab. */
 export function OutLink({ href, icon: Icon, label, srText }: { href: string; icon: LucideIcon; label: string; srText: string }) {
   return (
     <a
@@ -173,4 +153,11 @@ export function OutLink({ href, icon: Icon, label, srText }: { href: string; ico
       <span className="sr-only">{label} {srText}</span>
     </a>
   );
+}
+
+/** The link to the IPO's offer document, or nothing when there is none. */
+export function DocumentLink({ ipo }: { ipo: QuotaIpo }) {
+  const d = t().quota.card;
+  if (!ipo.documentUrl) return null;
+  return <OutLink href={ipo.documentUrl} icon={FileText} label={d.offerDocument} srText={fill(d.documentFor, { name: ipo.name })} />;
 }

@@ -1,7 +1,7 @@
 import { t } from "@/lib/i18n/server";
 import { JsonLd } from "@/lib/seo/json-ld";
 
-/** The questions, all open (they are what people search for), in two columns from lg, with FAQPage structured data. */
+/** Every question with its answer shown, in two columns from lg, plus the FAQPage structured data. */
 export function Faq() {
   const d = t().quota.faq;
   const faqSchema = {

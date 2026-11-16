@@ -1,4 +1,4 @@
-/** Empty tile slots left when groups of these sizes fill rows of `cols`, in order: a group that does not fit starts a new row, a group wider than a row wraps inside itself. */
+/** How many tile slots stay empty when stages of these sizes fill rows of `cols`. A stage that does not fit starts a new row. */
 function emptySlots(sizes: number[], cols: number) {
   let empty = 0;
   let used = 0;

@@ -4,21 +4,17 @@ import { t } from "@/lib/i18n/server";
 import { fill } from "@/lib/i18n/locales";
 import type { LapsedStage, QuotaStage } from "@/lib/queries/shareholder-quota";
 
-// Weakest stage first, the order the stage track runs in.
 const TRACK: QuotaStage[] = ["announced", "filed", "approved", "dates"];
 
-/**
- * The four stages as dots on a line: passed in ink, current in marigold, the rest hollow.
- * A lapsed draft or approval stops the track there with a red crossed ring and a "lapsed" label instead of a current dot.
- */
-export function StageTrack({ stage, lapsed, className }: { stage: QuotaStage; lapsed?: LapsedStage | null; className?: string }) {
+/** The four stages as dots on a line: passed in ink, current in marigold, the rest hollow. A lapsed step shows a red crossed ring. */
+export function StageTrack({ stage, lapsed }: { stage: QuotaStage; lapsed?: LapsedStage | null }) {
   const d = t().quota;
   const current = TRACK.indexOf(lapsed ?? stage);
   const label = lapsed
     ? fill(d.lapsedLabel, { name: d.lapsed[lapsed], step: current + 1, total: TRACK.length })
     : fill(d.stageLabel, { name: d.stages[stage], step: current + 1, total: TRACK.length });
   return (
-    <ol aria-label={label} className={cn("grid grid-cols-4", className)}>
+    <ol aria-label={label} className="grid grid-cols-4">
       {TRACK.map((step, index) => (
         <li key={step} className="relative flex flex-col items-center text-center">
           {index < TRACK.length - 1 && (
