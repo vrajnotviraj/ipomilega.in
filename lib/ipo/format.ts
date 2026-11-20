@@ -225,7 +225,7 @@ export const getAllotmentCheckUrl = (ipo: {
   const listing = ipo?.ipo_details?.ipo_listing || '';
   const isNseOnly = /nse/i.test(listing) && !/bse/i.test(listing);
   return isNseOnly
-    ? 'https://www.nseindia.com/invest/check-trades-bids-verify-ipo-bids'
+    ? 'https://www.nseindia.in/invest/check-trades-bids-verify-ipo-bids'
     : 'https://www.bseindia.com/investors/appli_check.aspx';
 };
 
